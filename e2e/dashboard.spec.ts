@@ -1,5 +1,17 @@
 import { expect, test } from "@playwright/test";
+import type { Page } from "@playwright/test";
 import { activeProfile, v1State, go } from "./helpers";
+
+/** Finished steps start folded; open them all so their checkboxes can be asserted on. */
+async function unfoldAll(page: Page) {
+  const folded = page.getByRole("button", { name: "Show step" });
+  // Folding happens right after hydration.
+  await folded
+    .first()
+    .waitFor({ timeout: 5000 })
+    .catch(() => {});
+  while ((await folded.count()) > 0) await folded.first().click();
+}
 
 test.describe("dashboard and progress", () => {
   test("ticking a collectable persists across reloads", async ({ page }) => {
@@ -10,6 +22,21 @@ test.describe("dashboard and progress", () => {
     await expect(linda).toBeChecked();
     expect((await activeProfile(page)).checks["c1-scoop-brave-little-linda"]).toBe(true);
     await page.reload();
+    await unfoldAll(page);
+    await expect(page.getByRole("checkbox", { name: /Brave Little Linda/ }).first()).toBeChecked();
+  });
+
+  test("a finished step starts folded and opens on tap", async ({ page }) => {
+    await go(page, "/");
+    await page
+      .getByRole("checkbox", { name: /Brave Little Linda/ })
+      .first()
+      .click();
+    // Ticking the last open item does not fold the step under the user.
+    await expect(page.getByRole("button", { name: "Hide step" }).first()).toBeVisible();
+    await page.reload();
+    await expect(page.getByRole("checkbox", { name: /Brave Little Linda/ })).toHaveCount(0);
+    await page.getByRole("button", { name: "Show step" }).first().click();
     await expect(page.getByRole("checkbox", { name: /Brave Little Linda/ }).first()).toBeChecked();
   });
 
@@ -32,6 +59,7 @@ test.describe("dashboard and progress", () => {
       .getByRole("switch")
       .click();
     await go(page, "/");
+    await page.getByRole("tab", { name: "Overview" }).click();
     await expect(page.getByRole("progressbar", { name: "Main walkthrough" })).toBeVisible();
   });
 
@@ -47,6 +75,32 @@ test.describe("dashboard and progress", () => {
     await expect(page.getByText("King Mardan").first()).toBeVisible();
   });
 
+  test("overview shows a chapter strip and opens a chapter from it", async ({ page }) => {
+    await go(page, "/");
+    await page.getByRole("tab", { name: "Overview" }).click();
+    await page.getByRole("button", { name: /Palace of Flowers/ }).click();
+    await page.getByRole("button", { name: /Open chapter/ }).click();
+    await expect(page.getByLabel("Chapter", { exact: true })).toHaveValue(/.+/);
+    await expect(page.getByRole("heading", { name: /Palace of Flowers/ })).toBeAttached();
+  });
+
+  test("by guide filters by chapter chip and folds a guide", async ({ page }) => {
+    await go(page, "/");
+    await page.getByRole("tab", { name: "By guide" }).click();
+    const linda = page.getByRole("checkbox", { name: /Brave Little Linda/ });
+    await expect(linda.first()).toBeVisible();
+
+    await page.getByRole("button", { name: "Hide guide" }).click();
+    await expect(linda).toHaveCount(0);
+    await page.getByRole("button", { name: "Show guide" }).click();
+    await expect(linda.first()).toBeVisible();
+
+    const chip = page.getByRole("button", { name: "2. Ressurection of the Great Elder" });
+    await chip.click();
+    await expect(chip).toHaveAttribute("aria-pressed", "true");
+    await expect(linda).toHaveCount(0);
+  });
+
   test("a profile saved by the first version of the app is migrated, keeping progress and walkthroughs", async ({
     page,
   }) => {
@@ -55,6 +109,7 @@ test.describe("dashboard and progress", () => {
         localStorage.setItem("dcc:state", JSON.stringify(state));
     }, v1State);
     await go(page, "/");
+    await unfoldAll(page);
     await expect(page.getByRole("checkbox", { name: /Brave Little Linda/ }).first()).toBeChecked();
     // Any change writes the migrated (version 2) state back.
     await page.getByRole("tab", { name: "Overview" }).click();
@@ -66,7 +121,8 @@ test.describe("dashboard and progress", () => {
 
   test("buyable-only is a dashboard toggle that starts on", async ({ page }) => {
     await go(page, "/");
-    const toggle = page.getByRole("switch", { name: "Only buyable items" });
+    await page.getByRole("button", { name: "View" }).click();
+    const toggle = page.getByRole("menuitemcheckbox", { name: "Only buyable items" });
     await expect(toggle).toBeChecked();
     await toggle.click();
     await expect(toggle).not.toBeChecked();

@@ -19,6 +19,7 @@ export function ItemRow({ item, checks }: { item: ChecklistItem; checks: Record<
     .join(" · ");
   return (
     <CheckRow
+      dense
       checked={!!checks[item.id]}
       onChange={(v) => setChecked(item.id, v)}
       label={item.name}

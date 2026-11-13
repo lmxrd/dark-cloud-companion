@@ -1,9 +1,14 @@
 import { useState } from "react";
 import { CheckRow } from "@/components/chapter/CheckRow";
 import type { StepFilters } from "@/components/guide/StepCard";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ChevronLeftIcon, ChevronRightIcon, MoreHorizontalIcon } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Input } from "@/components/ui/input";
 import { useTranslations } from "@/i18n";
@@ -73,33 +78,32 @@ export function ChapterView({
     .filter((b) => b.placed.length > 0);
 
   return (
-    <div className="flex flex-col gap-6">
-      <header className="flex flex-col gap-3">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <h2 className="text-2xl font-semibold">
+    <div className="flex flex-col gap-4">
+      <header className="flex flex-col gap-2">
+        <div className="flex items-center gap-1.5">
+          <Button
+            variant="outline"
+            size="icon-sm"
+            aria-label={t("dash.prev")}
+            disabled={!prev}
+            onClick={() => prev && onChapter(prev.id)}
+          >
+            <ChevronLeftIcon />
+          </Button>
+          <h2 className="sr-only">
             {chapter.phase === "main" ? `${chapter.number}. ` : ""}
             {chapter.title}
           </h2>
-          {mainProgress.total > 0 && (
-            <span className="text-muted-foreground text-sm tabular-nums">
-              {t("step.progress", { done: mainProgress.done, total: mainProgress.total })}
-            </span>
+          {chapterId === currentId && (
+            <span
+              role="img"
+              aria-label={t("dash.isCurrent")}
+              title={t("dash.isCurrent")}
+              className="bg-primary size-2 shrink-0 rounded-full"
+            />
           )}
-        </div>
-        {mainProgress.total > 0 && (
-          <div
-            className="bg-muted h-2 overflow-hidden rounded-full"
-            role="progressbar"
-            aria-valuenow={pct}
-            aria-valuemin={0}
-            aria-valuemax={100}
-          >
-            <div className="bg-primary h-full transition-all" style={{ width: `${pct}%` }} />
-          </div>
-        )}
-        <div className="flex flex-wrap items-center gap-2">
           <select
-            className="bg-background h-9 rounded-md border px-2 text-sm"
+            className="min-w-0 flex-1 truncate rounded-md bg-transparent py-1 text-lg font-semibold"
             value={chapterId}
             onChange={(e) => onChapter(e.target.value)}
             aria-label={t("dash.chapter")}
@@ -111,39 +115,57 @@ export function ChapterView({
               </option>
             ))}
           </select>
+          {mainProgress.total > 0 && (
+            <span className="text-muted-foreground text-sm tabular-nums">
+              {t("step.progress", { done: mainProgress.done, total: mainProgress.total })}
+            </span>
+          )}
           <Button
             variant="outline"
-            size="sm"
-            aria-label={t("dash.prev")}
-            disabled={!prev}
-            onClick={() => prev && onChapter(prev.id)}
-          >
-            ←
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
+            size="icon-sm"
             aria-label={t("dash.next")}
             disabled={!next}
             onClick={() => next && onChapter(next.id)}
           >
-            →
+            <ChevronRightIcon />
           </Button>
-          {chapterId === currentId ? (
-            <Badge>{t("dash.isCurrent")}</Badge>
-          ) : (
-            <Button variant="outline" size="sm" onClick={() => setCurrentChapter(chapterId)}>
-              {t("dash.setCurrent")}
-            </Button>
-          )}
-          {profile.dashboard.currentChapter !== null && (
-            <Button variant="ghost" size="sm" onClick={() => setCurrentChapter(null)}>
-              {t("dash.followProgress")}
-            </Button>
+          {(chapterId !== currentId || profile.dashboard.currentChapter !== null) && (
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                render={<Button variant="outline" size="icon-sm" />}
+                aria-label={t("dash.moreActions")}
+              >
+                <MoreHorizontalIcon />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                {chapterId !== currentId && (
+                  <DropdownMenuItem onClick={() => setCurrentChapter(chapterId)}>
+                    {t("dash.setCurrent")}
+                  </DropdownMenuItem>
+                )}
+                {profile.dashboard.currentChapter !== null && (
+                  <DropdownMenuItem onClick={() => setCurrentChapter(null)}>
+                    {t("dash.followProgress")}
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           )}
         </div>
+        {mainProgress.total > 0 && (
+          <div
+            className="bg-muted h-1 overflow-hidden rounded-full"
+            role="progressbar"
+            aria-label={chapter.title}
+            aria-valuenow={pct}
+            aria-valuemin={0}
+            aria-valuemax={100}
+          >
+            <div className="bg-primary h-full transition-all" style={{ width: `${pct}%` }} />
+          </div>
+        )}
         {mainProgress.total > 0 && mainProgress.done === mainProgress.total && (
-          <div className="flex flex-wrap items-center gap-2 rounded-md border px-3 py-2 text-sm">
+          <div className="flex flex-wrap items-center gap-2 rounded-md border px-3 py-1.5 text-sm">
             <span>{t("dash.chapterDone")}</span>
             {next && (
               <Button
@@ -160,12 +182,15 @@ export function ChapterView({
         )}
       </header>
 
+      {guides.length === 0 && <p className="text-muted-foreground text-sm">{t("dash.noActive")}</p>}
+
       {missable.length > 0 && (
-        <Card className="border-destructive/50">
-          <CardHeader>
-            <CardTitle className="text-destructive">{t("dash.missableOpen")}</CardTitle>
-          </CardHeader>
-          <CardContent>
+        <Collapsible className="border-destructive/50 rounded-lg border">
+          <CollapsibleTrigger className="text-destructive flex w-full items-center justify-between px-3 py-2 text-left text-sm font-medium">
+            <span>{t("dash.missableOpen")}</span>
+            <span className="tabular-nums">{missable.length}</span>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="px-3 pb-2">
             {missable.map((i) => (
               <CheckRow
                 key={i.id}
@@ -175,8 +200,8 @@ export function ChapterView({
                 detail={chapterById.get(i.chapterId)?.title}
               />
             ))}
-          </CardContent>
-        </Card>
+          </CollapsibleContent>
+        </Collapsible>
       )}
 
       {guides.length > 0 && blocks.length === 0 && anytime.length === 0 && (

@@ -8,12 +8,19 @@ interface Props {
   label: ReactNode;
   badges?: ReactNode;
   detail?: ReactNode;
+  /** Shorter rows for long lists (tap target stays around 36px). */
+  dense?: boolean;
 }
 
 /** A single big-tap-target checklist row. */
-export function CheckRow({ checked, onChange, label, badges, detail }: Props) {
+export function CheckRow({ checked, onChange, label, badges, detail, dense }: Props) {
   return (
-    <label className="hover:bg-muted/50 flex min-h-11 cursor-pointer items-start gap-3 rounded-md px-2 py-2">
+    <label
+      className={cn(
+        "hover:bg-muted/50 flex cursor-pointer items-start rounded-md px-2",
+        dense ? "min-h-9 gap-2.5 py-1.5" : "min-h-11 gap-3 py-2",
+      )}
+    >
       <Checkbox
         checked={checked}
         onCheckedChange={(v) => onChange(v === true)}

@@ -53,6 +53,8 @@ test.describe("guides, planner and editor", () => {
       .click();
     await go(page, "/");
     await page.getByRole("tab", { name: "By guide" }).click();
+    // Only the first guide starts open.
+    await page.getByRole("button", { name: "Show guide" }).click();
     await page.getByRole("checkbox", { name: "Clock", exact: true }).click();
     expect(
       Object.keys((await activeProfile(page)).checks).some((k) =>

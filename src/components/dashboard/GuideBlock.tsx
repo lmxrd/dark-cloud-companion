@@ -40,6 +40,7 @@ export function GuideBlock({
           derived={derived.steps.get(step.id)}
           filters={filters}
           showWhere={false}
+          collapseDone
           carriedFrom={
             from !== undefined && chapterNumber !== undefined && from < chapterNumber
               ? from

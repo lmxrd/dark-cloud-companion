@@ -1,13 +1,17 @@
-import { useEffect, useMemo, useState } from "react";
-import { withBase } from "@/lib/base";
+import { useEffect, useState } from "react";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
+import { SearchIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import type { StepFilters } from "@/components/guide/StepCard";
 import { useTranslations } from "@/i18n";
 import { chapterById } from "@/lib/data";
 import { firstIncompleteChapter } from "@/lib/guide/dashboard";
-import { guideProgress } from "@/lib/guide/progress";
 import type { DashboardView } from "@/lib/profiles";
 import { setDashboardView, setView } from "@/lib/store";
 import { ByGuideView } from "./ByGuideView";
@@ -21,6 +25,7 @@ function DashboardInner() {
   const t = useTranslations();
   const { profile, checks, guides } = useActiveGuides();
   const [needle, setNeedle] = useState("");
+  const [searchOpen, setSearchOpen] = useState(false);
   const [viewChapter, setViewChapter] = useState<string | null>(null);
 
   // A chapter can be requested with ?chapter=c3 (e.g. from redirected old links).
@@ -31,12 +36,6 @@ function DashboardInner() {
 
   const currentId = profile.dashboard.currentChapter ?? firstIncompleteChapter(guides, checks);
   const chapterId = viewChapter ?? currentId;
-  // Each switched-on guide tracks its own progress; nothing is shown for guides that are off.
-  const perGuide = useMemo(
-    () => guides.map((g) => ({ guide: g, progress: guideProgress(g, checks) })),
-    [guides, checks],
-  );
-
   const filters: StepFilters = {
     hideDone: profile.view.hideDone,
     hidePostgame: profile.view.hidePostgame,
@@ -50,89 +49,66 @@ function DashboardInner() {
     setDashboardView("chapter");
   };
 
+  const toggles = [
+    { key: "showFacts", label: t("view.facts"), hint: undefined },
+    { key: "buyableOnly", label: t("view.buyableOnly"), hint: t("view.buyableOnlyHint") },
+    { key: "hideDone", label: t("view.hideDone"), hint: undefined },
+    { key: "hidePostgame", label: t("view.hidePostgame"), hint: undefined },
+  ] as const;
+  const activeToggles = toggles.filter((x) => profile.view[x.key]).length;
+  const canSearch = profile.dashboard.view !== "overview";
+
   return (
-    <div className="flex flex-col gap-5">
-      <section className="flex flex-col gap-3">
-        <h1 className="text-2xl font-semibold">{t("nav.dashboard")}</h1>
-        {perGuide.length === 0 ? (
-          <p className="text-muted-foreground text-sm">
-            {t("dash.noActive")}{" "}
-            <a className="underline" href={withBase("/guides")}>
-              {t("nav.guides")}
-            </a>
-          </p>
-        ) : (
-          <ul className="grid gap-3 sm:grid-cols-2">
-            {perGuide.map(({ guide, progress }) => {
-              const pct = progress.total ? Math.round((progress.done / progress.total) * 100) : 0;
-              return (
-                <li key={guide.id} className="flex flex-col gap-1">
-                  <div className="flex items-baseline justify-between gap-3 text-sm">
-                    <a
-                      className="truncate hover:underline"
-                      href={withBase(`/guides/view?id=${encodeURIComponent(guide.id)}`)}
-                    >
-                      {guide.title}
-                    </a>
-                    <span className="text-muted-foreground tabular-nums">
-                      {t("step.progress", { done: progress.done, total: progress.total })}
-                    </span>
-                  </div>
-                  <div
-                    className="bg-muted h-2 overflow-hidden rounded-full"
-                    role="progressbar"
-                    aria-label={guide.title}
-                    aria-valuenow={pct}
-                    aria-valuemin={0}
-                    aria-valuemax={100}
-                  >
-                    <div className="bg-primary h-full" style={{ width: `${pct}%` }} />
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-        )}
-      </section>
-
-      <div role="tablist" className="flex flex-wrap gap-1 border-b">
-        {views.map((v) => (
-          <button
-            key={v}
-            role="tab"
-            aria-selected={profile.dashboard.view === v}
-            onClick={() => setDashboardView(v)}
-            className={`-mb-px border-b-2 px-3 py-2 text-sm ${profile.dashboard.view === v ? "border-primary font-medium" : "text-muted-foreground border-transparent"}`}
+    <div className="flex flex-col gap-3">
+      <h1 className="sr-only">{t("nav.dashboard")}</h1>
+      <div className="flex items-center gap-1 border-b">
+        <div role="tablist" className="flex min-w-0 flex-1 gap-1">
+          {views.map((v) => (
+            <button
+              key={v}
+              role="tab"
+              aria-selected={profile.dashboard.view === v}
+              onClick={() => setDashboardView(v)}
+              className={`-mb-px border-b-2 px-2.5 py-2 text-sm whitespace-nowrap ${profile.dashboard.view === v ? "border-primary font-medium" : "text-muted-foreground border-transparent"}`}
+            >
+              {t(`dash.views.${v}` as const)}
+            </button>
+          ))}
+        </div>
+        {canSearch && (
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            aria-label={t("dash.search")}
+            aria-pressed={searchOpen || needle !== ""}
+            onClick={() => setSearchOpen((o) => !o)}
           >
-            {t(`dash.views.${v}` as const)}
-          </button>
-        ))}
+            <SearchIcon />
+          </Button>
+        )}
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            render={<Button variant="outline" size="sm" className="mb-1" />}
+            aria-label={t("dash.viewMenu")}
+          >
+            {t("dash.viewMenu")}
+            {activeToggles > 0 && <span className="tabular-nums"> · {activeToggles}</span>}
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-60">
+            {toggles.map((x) => (
+              <DropdownMenuCheckboxItem
+                key={x.key}
+                checked={profile.view[x.key]}
+                onCheckedChange={(v) => setView({ [x.key]: v })}
+                title={x.hint}
+              >
+                {x.label}
+              </DropdownMenuCheckboxItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
-
-      <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-        <Toggle
-          label={t("view.facts")}
-          checked={profile.view.showFacts}
-          onChange={(v) => setView({ showFacts: v })}
-        />
-        <Toggle
-          label={t("view.buyableOnly")}
-          hint={t("view.buyableOnlyHint")}
-          checked={profile.view.buyableOnly}
-          onChange={(v) => setView({ buyableOnly: v })}
-        />
-        <Toggle
-          label={t("view.hideDone")}
-          checked={profile.view.hideDone}
-          onChange={(v) => setView({ hideDone: v })}
-        />
-        <Toggle
-          label={t("view.hidePostgame")}
-          checked={profile.view.hidePostgame}
-          onChange={(v) => setView({ hidePostgame: v })}
-        />
-      </div>
-      {profile.dashboard.view !== "overview" && (
+      {canSearch && (searchOpen || needle !== "") && (
         <FilterBar filters={filters} needle={needle} onNeedle={setNeedle} />
       )}
 
@@ -159,25 +135,6 @@ function DashboardInner() {
         <ByGuideView guides={guides} checks={checks} filters={filters} />
       )}
     </div>
-  );
-}
-
-function Toggle({
-  label,
-  checked,
-  onChange,
-  hint,
-}: {
-  label: string;
-  checked: boolean;
-  onChange: (v: boolean) => void;
-  hint?: string;
-}) {
-  return (
-    <Label className="flex items-center gap-2 text-sm" title={hint}>
-      <Switch checked={checked} onCheckedChange={onChange} />
-      {label}
-    </Label>
   );
 }
 
