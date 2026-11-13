@@ -1,5 +1,4 @@
 import { BuildStepBody, acquireText } from "@/components/guide/BuildStepBody";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useTranslations } from "@/i18n";
 import { deriveBuild } from "@/lib/guide/derive";
@@ -16,15 +15,22 @@ export function PlanPreview({ guide }: { guide: Guide }) {
   const acquire = guide.build?.acquire;
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-wrap gap-2">
-        <Badge>
-          {t("planner.totalAbs", { n: Math.round(derived.total.abs).toLocaleString() })}
-        </Badge>
-        <Badge variant="secondary">
-          {t("planner.totalGilda", { n: Math.round(derived.total.gilda).toLocaleString() })}
-        </Badge>
-        <Badge variant="outline">{t("planner.totalSteps", { n: derived.total.steps })}</Badge>
-      </div>
+      <dl className="grid grid-cols-3 gap-2">
+        {[
+          { label: t("planner.bigAbs"), value: Math.round(derived.total.abs).toLocaleString() },
+          { label: t("planner.bigGilda"), value: Math.round(derived.total.gilda).toLocaleString() },
+          { label: t("planner.bigSteps"), value: derived.total.steps.toLocaleString() },
+        ].map((x) => (
+          <div key={x.label} className="bg-card flex flex-col rounded-lg border-2 px-3 py-2">
+            <dt className="text-muted-foreground text-[11px] font-bold tracking-wider uppercase">
+              {x.label}
+            </dt>
+            <dd className="font-heading truncate text-xl font-extrabold tabular-nums sm:text-2xl">
+              {x.value}
+            </dd>
+          </div>
+        ))}
+      </dl>
       <p className="text-sm">
         <span className="text-muted-foreground">{t("planner.route")}: </span>
         {route.map((id) => getWeapon(id).name).join(" → ")}

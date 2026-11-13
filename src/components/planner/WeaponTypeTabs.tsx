@@ -1,3 +1,4 @@
+import { cn } from "cn";
 import { CircleDashedIcon, CrosshairIcon, GemIcon, SwordIcon, WrenchIcon } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { WeaponType } from "@/lib/schemas";
@@ -12,10 +13,7 @@ const TYPE_TABS: { type: WeaponType; Icon: LucideIcon }[] = [
   { type: "club", Icon: CircleDashedIcon },
 ];
 
-/**
- * Weapon-type chooser for the generator: a vertical strip of icon-only tabs (a horizontal row on small
- * screens). The type name appears on hover and for keyboard users; it is always in the accessible name.
- */
+/** Weapon-type chooser for the generator: a scrollable row of labelled chips. */
 export function WeaponTypeTabs({
   value,
   onChange,
@@ -28,35 +26,27 @@ export function WeaponTypeTabs({
     <div
       role="tablist"
       aria-label={t("planner.weaponType")}
-      className="flex flex-row gap-1 sm:w-11 sm:shrink-0 sm:flex-col"
+      className="-mx-1 flex gap-1.5 overflow-x-auto px-1 pt-0.5 pb-1.5 [scrollbar-width:none]"
     >
       {TYPE_TABS.map(({ type, Icon }) => {
         const active = type === value;
-        const label = t(`weapon.type.${type}` as const);
         return (
-          <div key={type} className="group relative">
-            <button
-              type="button"
-              role="tab"
-              aria-selected={active}
-              title={label}
-              onClick={() => onChange(type)}
-              className={`flex size-9 items-center justify-center rounded-md border transition-colors ${
-                active
-                  ? "bg-primary text-primary-foreground border-primary"
-                  : "text-muted-foreground border-transparent hover:bg-muted"
-              }`}
-            >
-              <Icon className="size-4" aria-hidden />
-              <span className="sr-only">{label}</span>
-            </button>
-            <span
-              role="tooltip"
-              className="bg-primary text-primary-foreground pointer-events-none absolute left-1/2 top-full z-20 mt-1 -translate-x-1/2 rounded px-2 py-1 text-xs whitespace-nowrap opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100 sm:left-full sm:top-1/2 sm:mt-0 sm:ml-2 sm:-translate-x-0 sm:-translate-y-1/2"
-            >
-              {label}
-            </span>
-          </div>
+          <button
+            key={type}
+            type="button"
+            role="tab"
+            aria-selected={active}
+            onClick={() => onChange(type)}
+            className={cn(
+              "flex shrink-0 items-center gap-1.5 rounded-full border-2 px-3 py-1.5 text-xs font-semibold whitespace-nowrap",
+              active
+                ? "border-border bg-accent text-accent-foreground shadow-sticker-sm"
+                : "border-border/40 text-muted-foreground hover:border-border",
+            )}
+          >
+            <Icon className="size-3.5" aria-hidden />
+            {t(`weapon.type.${type}` as const)}
+          </button>
         );
       })}
     </div>

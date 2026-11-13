@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { cn } from "cn";
 import { withBase } from "@/lib/base";
 import { useStore } from "@nanostores/react";
 import { Button } from "@/components/ui/button";
@@ -6,14 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useTranslations } from "@/i18n";
-import {
-  STAT_KEYS,
-  abilityId,
-  type AbilityId,
-  type Stats,
-  type Weapon,
-  type WeaponType,
-} from "@/lib/schemas";
+import { STAT_KEYS, type AbilityId, type Stats, type Weapon, type WeaponType } from "@/lib/schemas";
 import { startToState } from "@/lib/guide/derive";
 import { $draft } from "@/lib/guide/draft";
 import { planResultToGuide, stateToBuildStart } from "@/lib/guide/fromPlan";
@@ -22,8 +16,9 @@ import { ancestorsOf, finalWeaponIds, rootWeaponIds } from "@/lib/planner/graph"
 import { earliestChapter, type PlanProgress, type PlanResult } from "@/lib/planner/plan";
 import type { Objective } from "@/lib/planner/solve";
 import { getWeapon, weaponById, weaponData } from "@/lib/planner/sources";
-import { OPPOSITES, freshState, type WeaponState } from "@/lib/weapons/mechanics";
+import { freshState, type WeaponState } from "@/lib/weapons/mechanics";
 import { $profile, saveGuide, setPlannerInputs, setView } from "@/lib/store";
+import { AbilityPicker } from "./AbilityPicker";
 import { PlanPreview } from "./PlanPreview";
 import { StartSpecs } from "./StartSpecs";
 import { selectClass, WeaponSelect } from "./WeaponSelect";
@@ -49,60 +44,6 @@ function defaultTargetOf(type: WeaponType): string {
 }
 
 const isZero = (s: Stats) => STAT_KEYS.every((k) => s[k] === 0);
-
-/** Ability checkboxes with the usual preset; opposites exclude each other. */
-function AbilityPicker({
-  abilities,
-  onChange,
-}: {
-  abilities: AbilityId[];
-  onChange: (a: AbilityId[]) => void;
-}) {
-  const t = useTranslations();
-  return (
-    <fieldset className="flex flex-col gap-2">
-      <legend className="text-muted-foreground mb-1 text-xs">{t("planner.wantAbilities")}</legend>
-      <div className="flex flex-wrap gap-x-4 gap-y-2">
-        {abilityId.options.map((a) => {
-          const opposite = OPPOSITES[a];
-          const blocked = !!opposite && abilities.includes(opposite);
-          return (
-            <Label
-              key={a}
-              className={`flex items-center gap-2 text-sm ${blocked ? "opacity-50" : ""}`}
-            >
-              <input
-                type="checkbox"
-                disabled={blocked}
-                checked={abilities.includes(a)}
-                onChange={(e) =>
-                  onChange(e.target.checked ? [...abilities, a] : abilities.filter((x) => x !== a))
-                }
-              />
-              {t(`ability.${a}` as const)}
-            </Label>
-          );
-        })}
-      </div>
-      <div className="flex flex-wrap items-center gap-2">
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() =>
-            onChange(["poison", "stop", "abs-up", "steal", "wealth", "dark", "durable", "absorb"])
-          }
-        >
-          {t("planner.abilitiesPreset")}
-        </Button>
-        <Button type="button" variant="ghost" size="sm" onClick={() => onChange([])}>
-          {t("planner.abilitiesClear")}
-        </Button>
-        <span className="text-muted-foreground text-xs">{t("planner.abilitiesHint")}</span>
-      </div>
-    </fieldset>
-  );
-}
 
 /**
  * Generates an optimal weapon build: pick a weapon type (left tabs), a target weapon with required
@@ -152,6 +93,8 @@ export function GeneratorSection({ onOpenEditor }: { onOpenEditor: () => void })
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+  // Phones and tablets show one step at a time; wide screens show all three.
+  const [step, setStep] = useState(0);
 
   // Remember the inputs whenever they change.
   useEffect(() => {
@@ -312,69 +255,96 @@ export function GeneratorSection({ onOpenEditor }: { onOpenEditor: () => void })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [result]);
 
+  const summary = [
+    target.name,
+    goalLabel,
+    customStart ? t("planner.startPoint.custom") : t("planner.startPoint.optimal"),
+    t(`planner.objShort.${objective}` as const),
+    t("planner.chapterOption", { n: maxChapter }),
+  ].join(" · ");
+  const steps = [t("planner.stepTarget"), t("planner.stepStart"), t("planner.stepOptions")];
+  const panel = (i: number) =>
+    cn(
+      "bg-card flex min-w-0 flex-col gap-4 rounded-xl border-2 p-4",
+      step !== i && "max-lg:hidden",
+    );
+
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-4">
       <p className="text-muted-foreground text-sm">{t("planner.intro")}</p>
 
-      <div className="flex flex-col gap-4 sm:flex-row sm:gap-5">
-        <WeaponTypeTabs value={typeTab} onChange={changeType} />
-        <div className="flex min-w-0 flex-1 flex-col gap-5">
-          <section
-            className="flex flex-col gap-3 rounded-md border p-3"
-            aria-label={t("planner.target")}
-          >
-            <h3 className="font-medium">{t("planner.target")}</h3>
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
-              <Label className="flex flex-1 flex-col items-start gap-1">
-                {t("planner.pickTarget")}
-                <select
-                  className={selectClass}
-                  value={targetId}
-                  onChange={(e) => selectTarget(e.target.value)}
-                >
-                  {typeWeapons.map((g) => (
-                    <optgroup
-                      key={g.sp}
-                      label={
-                        g.sp === "final" ? t("planner.finalTier") : t("planner.spTier", { n: g.sp })
-                      }
-                    >
-                      {g.weapons.map((w) => (
-                        <option key={w.id} value={w.id}>
-                          {w.name}
-                        </option>
-                      ))}
-                    </optgroup>
-                  ))}
-                </select>
-              </Label>
-              <div
-                aria-label={t("planner.minMaxSpecs")}
-                className="text-muted-foreground flex max-w-xs flex-wrap gap-x-3 gap-y-1 text-xs"
+      {/* Not a locked wizard: every step can be opened directly. */}
+      <nav aria-label={t("planner.steps")} className="lg:hidden">
+        <ol className="grid grid-cols-3 gap-1.5">
+          {steps.map((label, i) => (
+            <li key={label}>
+              <button
+                type="button"
+                aria-current={step === i ? "step" : undefined}
+                onClick={() => setStep(i)}
+                className={cn(
+                  "flex w-full items-center justify-center gap-1.5 rounded-md border-2 px-2 py-1.5 text-xs font-semibold",
+                  step === i
+                    ? "bg-accent text-accent-foreground shadow-sticker-sm"
+                    : "text-muted-foreground border-border/40",
+                )}
               >
-                {STAT_KEYS.map((k) => (
-                  <span key={k} className="whitespace-nowrap">
-                    {t(`stat.${k}` as const)} {target.baseStats[k]}–{target.maxStats[k]}
-                  </span>
-                ))}
-              </div>
-            </div>
-            <TargetSpecs
-              weaponId={targetId}
-              stats={endStats}
-              level={endLevel}
-              onStats={setEndStats}
-              onLevel={setEndLevel}
-            />
-            <AbilityPicker abilities={abilities} onChange={setAbilities} />
-          </section>
+                <span className="bg-background grid size-5 place-items-center rounded-full border-2 text-[10px]">
+                  {i + 1}
+                </span>
+                {label}
+              </button>
+            </li>
+          ))}
+        </ol>
+      </nav>
 
-          <section
-            className="flex flex-col gap-3 rounded-md border p-3"
-            aria-label={t("planner.startSection")}
-          >
-            <h3 className="font-medium">{t("planner.startSection")}</h3>
-            <Label className="flex w-full flex-col items-start gap-1 sm:w-72">
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:items-start">
+        <section className={panel(0)} aria-label={t("planner.target")}>
+          <h3 className="font-heading font-extrabold tracking-tight">{t("planner.target")}</h3>
+          <WeaponTypeTabs value={typeTab} onChange={changeType} />
+          <Label className="flex flex-col items-start gap-1">
+            {t("planner.pickTarget")}
+            <select
+              className={selectClass}
+              value={targetId}
+              onChange={(e) => selectTarget(e.target.value)}
+            >
+              {typeWeapons.map((g) => (
+                <optgroup
+                  key={g.sp}
+                  label={
+                    g.sp === "final" ? t("planner.finalTier") : t("planner.spTier", { n: g.sp })
+                  }
+                >
+                  {g.weapons.map((w) => (
+                    <option key={w.id} value={w.id}>
+                      {w.name}
+                    </option>
+                  ))}
+                </optgroup>
+              ))}
+            </select>
+            <span className="text-muted-foreground text-xs font-normal">
+              {t("planner.spTier", { n: target.spPerLevel })}
+            </span>
+          </Label>
+          <TargetSpecs
+            weaponId={targetId}
+            stats={endStats}
+            level={endLevel}
+            onStats={setEndStats}
+            onLevel={setEndLevel}
+          />
+          <AbilityPicker abilities={abilities} onChange={setAbilities} />
+        </section>
+
+        <div className="flex min-w-0 flex-col gap-4">
+          <section className={panel(1)} aria-label={t("planner.startSection")}>
+            <h3 className="font-heading font-extrabold tracking-tight">
+              {t("planner.startSection")}
+            </h3>
+            <Label className="flex w-full flex-col items-start gap-1">
               {t("planner.startPoint")}
               <select
                 className={selectClass}
@@ -387,7 +357,7 @@ export function GeneratorSection({ onOpenEditor }: { onOpenEditor: () => void })
             </Label>
             {customStart ? (
               <div className="flex flex-col gap-3">
-                <Label className="flex w-full flex-col items-start gap-1 sm:w-72">
+                <Label className="flex w-full flex-col items-start gap-1">
                   {t("planner.pickStart")}
                   <WeaponSelect
                     value={start.weaponId}
@@ -407,7 +377,10 @@ export function GeneratorSection({ onOpenEditor }: { onOpenEditor: () => void })
             </Label>
           </section>
 
-          <div className="grid gap-4 sm:grid-cols-2">
+          <section className={panel(2)} aria-label={t("planner.optionsSection")}>
+            <h3 className="font-heading font-extrabold tracking-tight">
+              {t("planner.optionsSection")}
+            </h3>
             <Label className="flex flex-col items-start gap-1">
               {t("planner.objective")}
               <select
@@ -447,21 +420,24 @@ export function GeneratorSection({ onOpenEditor }: { onOpenEditor: () => void })
                 onChange={(e) => setBudget(e.target.value)}
               />
             </Label>
-            <div className="flex flex-col justify-end gap-3">
-              <Label className="flex items-center gap-2 text-sm">
-                <Switch
-                  checked={view.buyableOnly}
-                  onCheckedChange={(v) => setView({ buyableOnly: v })}
-                />
-                {t("planner.found")}
-              </Label>
-            </div>
-          </div>
+            <Label className="flex items-center gap-2 text-sm">
+              <Switch
+                checked={view.buyableOnly}
+                onCheckedChange={(v) => setView({ buyableOnly: v })}
+              />
+              {t("planner.found")}
+            </Label>
+          </section>
+        </div>
+      </div>
 
-          <div className="flex gap-2">
-            <Button onClick={generate} disabled={running}>
-              {running ? t("planner.running") : t("planner.generate")}
-            </Button>
+      {/* Generate stays one tap away: pinned above the phone tab bar, at the bottom on desktop. */}
+      <div className="sticky bottom-[calc(4.5rem+env(safe-area-inset-bottom))] z-30 md:bottom-4">
+        <div className="bg-card shadow-sticker flex flex-col gap-2 rounded-xl border-2 p-2 pl-3">
+          <div className="flex items-center gap-2">
+            <p className="text-muted-foreground min-w-0 flex-1 truncate text-xs" title={summary}>
+              {summary}
+            </p>
             {running && (
               <Button
                 variant="outline"
@@ -473,11 +449,13 @@ export function GeneratorSection({ onOpenEditor }: { onOpenEditor: () => void })
                 {t("planner.cancel")}
               </Button>
             )}
+            <Button onClick={generate} disabled={running} className="shrink-0">
+              {running ? t("planner.running") : t("planner.generate")}
+            </Button>
           </div>
-
           {running && (
-            <div className="flex flex-col gap-1" role="status" aria-live="polite">
-              <p className="text-sm">
+            <div className="flex flex-col gap-1 pr-1" role="status" aria-live="polite">
+              <p className="text-xs">
                 {t(`planner.progress.${progress?.phase ?? "templates"}` as const, {
                   done: (progress?.done ?? 0) + 1,
                   total: progress?.total ?? 1,
@@ -496,17 +474,20 @@ export function GeneratorSection({ onOpenEditor }: { onOpenEditor: () => void })
               </div>
             </div>
           )}
-
-          {error && (
-            <p className="text-destructive text-sm">{t("planner.error", { message: error })}</p>
-          )}
-          {result?.status === "no-path" && <p className="text-sm">{t("planner.noPath")}</p>}
-          {result?.status === "infeasible" && <p className="text-sm">{t("planner.infeasible")}</p>}
         </div>
       </div>
 
+      {error && (
+        <p className="text-destructive text-sm">{t("planner.error", { message: error })}</p>
+      )}
+      {result?.status === "no-path" && <p className="text-sm">{t("planner.noPath")}</p>}
+      {result?.status === "infeasible" && <p className="text-sm">{t("planner.infeasible")}</p>}
+
       {draft && (
-        <>
+        <section aria-label={t("planner.result")} className="flex flex-col gap-4">
+          <h3 className="font-heading text-xl font-extrabold tracking-tight">
+            {t("planner.result")}
+          </h3>
           {result?.abilitiesMissing && (
             <p className="text-sm">
               {t("planner.abilitiesMissing", {
@@ -517,15 +498,6 @@ export function GeneratorSection({ onOpenEditor }: { onOpenEditor: () => void })
           <PlanPreview guide={draft} />
           <div className="flex flex-wrap items-center gap-2">
             <Button
-              onClick={() => {
-                $draft.set({ guide: draft, persisted: false });
-                onOpenEditor();
-              }}
-            >
-              {t("planner.openInEditor")}
-            </Button>
-            <Button
-              variant="outline"
               disabled={saved}
               onClick={() => {
                 saveGuide(draft, { activate: true });
@@ -533,6 +505,15 @@ export function GeneratorSection({ onOpenEditor }: { onOpenEditor: () => void })
               }}
             >
               {t("planner.saveAsGuide")}
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => {
+                $draft.set({ guide: draft, persisted: false });
+                onOpenEditor();
+              }}
+            >
+              {t("planner.openInEditor")}
             </Button>
             {saved && (
               <span className="text-sm" role="status">
@@ -543,7 +524,7 @@ export function GeneratorSection({ onOpenEditor }: { onOpenEditor: () => void })
               </span>
             )}
           </div>
-        </>
+        </section>
       )}
     </div>
   );

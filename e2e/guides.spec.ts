@@ -225,4 +225,20 @@ test.describe("custom start and end weapons, one tab per weapon type", () => {
     // The plan starts from the custom weapon, so its first stage doesn't level a fresh weapon from +0.
     await expect(page.getByText("Dark Coin").first()).toBeVisible();
   });
+
+  test("opposing abilities are one three-way switch per pair", async ({ page }) => {
+    await go(page, "/planner");
+    const target = page.getByRole("region", { name: "Target weapon" });
+    const pair = target.getByRole("radiogroup", { name: "Critical / Dark" });
+    await expect(pair.getByLabel("Neither Critical nor Dark")).toBeChecked();
+    await pair.getByLabel("Dark", { exact: true }).check();
+    await pair.getByLabel("Critical", { exact: true }).check();
+    await expect(pair.getByLabel("Dark", { exact: true })).not.toBeChecked();
+    await target.getByLabel("Steal", { exact: true }).check();
+    await expect
+      .poll(async () => (await activeProfile(page)).planner.abilities)
+      .toEqual(["critical", "steal"]);
+    await target.getByRole("button", { name: "Clear" }).click();
+    await expect(pair.getByLabel("Neither Critical nor Dark")).toBeChecked();
+  });
 });

@@ -70,4 +70,24 @@ test.describe("phone layout", () => {
     await page.getByRole("menuitem", { name: "Settings" }).click();
     await expect(page.getByRole("heading", { name: "Settings", level: 1 })).toBeVisible();
   });
+
+  test("the planner shows one step at a time with Generate always in reach", async ({
+    page,
+    isMobile,
+  }) => {
+    test.skip(!isMobile, "phone layout only");
+    await go(page, "/planner");
+    const steps = page.getByRole("navigation", { name: "Planner steps" });
+    const generate = page.getByRole("button", { name: "Generate plan" });
+    await expect(page.getByRole("region", { name: "Target weapon" })).toBeVisible();
+    await expect(page.getByRole("region", { name: "Options" })).toBeHidden();
+    await expect(generate).toBeInViewport();
+    await steps.getByRole("button", { name: /Options/ }).click();
+    await expect(page.getByRole("region", { name: "Options" })).toBeVisible();
+    await expect(page.getByRole("region", { name: "Target weapon" })).toBeHidden();
+    // The pinned bar sits above the tab bar, not under it.
+    const bar = await page.getByRole("navigation", { name: "Main sections" }).boundingBox();
+    const button = await generate.boundingBox();
+    expect(button!.y + button!.height).toBeLessThanOrEqual(bar!.y);
+  });
 });
