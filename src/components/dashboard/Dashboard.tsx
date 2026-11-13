@@ -3,14 +3,14 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { SearchIcon, SlidersHorizontalIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Switch } from "@/components/ui/switch";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useViewToggles, ViewToggles } from "./ViewToggles";
 import type { StepFilters } from "@/components/guide/StepCard";
 import { useTranslations } from "@/i18n";
 import { chapterById } from "@/lib/data";
 import { firstIncompleteChapter } from "@/lib/guide/dashboard";
 import type { DashboardView } from "@/lib/profiles";
-import { setDashboardView, setView } from "@/lib/store";
+import { setDashboardView } from "@/lib/store";
 import { ByGuideView } from "./ByGuideView";
 import { ChapterView, FilterBar } from "./ChapterView";
 import { OverviewView } from "./OverviewView";
@@ -47,13 +47,7 @@ function DashboardInner() {
     setDashboardView("chapter");
   };
 
-  const toggles = [
-    { key: "showFacts", label: t("view.facts"), hint: undefined },
-    { key: "buyableOnly", label: t("view.buyableOnly"), hint: t("view.buyableOnlyHint") },
-    { key: "hideDone", label: t("view.hideDone"), hint: undefined },
-    { key: "hidePostgame", label: t("view.hidePostgame"), hint: undefined },
-  ] as const;
-  const activeToggles = toggles.filter((x) => profile.view[x.key]).length;
+  const { activeCount: activeToggles } = useViewToggles();
   const canSearch = profile.dashboard.view !== "overview";
 
   return (
@@ -118,23 +112,7 @@ function DashboardInner() {
               <SheetHeader>
                 <SheetTitle>{t("dash.viewMenu")}</SheetTitle>
               </SheetHeader>
-              <div className="flex flex-col px-4 pb-4">
-                {toggles.map((x) => (
-                  <label
-                    key={x.key}
-                    className="flex min-h-12 cursor-pointer items-center justify-between gap-4 border-b py-2 last:border-b-0"
-                  >
-                    <span className="flex flex-col">
-                      <span className="text-sm font-medium">{x.label}</span>
-                      {x.hint && <span className="text-muted-foreground text-xs">{x.hint}</span>}
-                    </span>
-                    <Switch
-                      checked={profile.view[x.key]}
-                      onCheckedChange={(v) => setView({ [x.key]: v })}
-                    />
-                  </label>
-                ))}
-              </div>
+              <ViewToggles className="px-4 pb-4" />
             </SheetContent>
           </Sheet>
         </div>

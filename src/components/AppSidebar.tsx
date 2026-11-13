@@ -31,13 +31,9 @@ import {
 import { useTranslations } from "@/i18n";
 import { isActive, isSectionActive, mainNav, type NavItem } from "@/components/nav";
 import { $ready, $state, switchProfile } from "@/lib/store";
+import { setThemePref } from "@/lib/theme";
 
-function applyTheme(dark: boolean) {
-  document.documentElement.classList.toggle("dark", dark);
-  try {
-    localStorage.setItem("theme", dark ? "dark" : "light");
-  } catch {}
-}
+const applyTheme = (dark: boolean) => setThemePref(dark ? "dark" : "light");
 
 /** Top-level section link with its sub-items always visible while expanded (sidebar-03 structure). */
 function NavLink({

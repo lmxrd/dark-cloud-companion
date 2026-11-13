@@ -1,7 +1,7 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import { PageHeader } from "@/components/PageHeader";
-import { ProfileManager } from "@/components/settings/ProfileManager";
+import { SettingsPage } from "@/components/settings/SettingsPage";
 import { useTranslations } from "@/i18n";
 
 const t = useTranslations();
@@ -9,6 +9,5 @@ const t = useTranslations();
 
 <Layout title={`${t("settings.title")} · ${t("app.name")}`}>
   <PageHeader title={t("settings.title")} />
-  <h2 class="mb-3 text-lg font-semibold">{t("profiles.title")}</h2>
-  <ProfileManager client:load />
+  <SettingsPage client:load />
 </Layout>
