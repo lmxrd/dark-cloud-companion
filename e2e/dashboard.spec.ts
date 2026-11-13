@@ -78,8 +78,9 @@ test.describe("dashboard and progress", () => {
   test("overview shows a chapter strip and opens a chapter from it", async ({ page }) => {
     await go(page, "/");
     await page.getByRole("tab", { name: "Overview" }).click();
-    await page.getByRole("button", { name: /Palace of Flowers/ }).click();
-    await page.getByRole("button", { name: /Open chapter/ }).click();
+    const strip = page.getByRole("region", { name: "Chapters" });
+    await strip.getByRole("button", { name: /Palace of Flowers/ }).click();
+    await strip.getByRole("button", { name: /Open chapter/ }).click();
     await expect(page.getByLabel("Chapter", { exact: true })).toHaveValue(/.+/);
     await expect(page.getByRole("heading", { name: /Palace of Flowers/ })).toBeAttached();
   });
@@ -168,5 +169,23 @@ test.describe("dashboard and progress", () => {
     await page.getByRole("button", { name: "Set as current chapter" }).click();
     await expect(page.getByRole("button", { name: "Set as current chapter" })).toHaveCount(0);
     expect((await activeProfile(page)).dashboard.currentChapter).toBe("c2");
+  });
+
+  test("the collectable matrix shows progress per chapter and opens a chapter", async ({
+    page,
+  }) => {
+    await go(page, "/");
+    await page
+      .getByRole("checkbox", { name: /Brave Little Linda/ })
+      .first()
+      .click();
+    await page.getByRole("tab", { name: "Overview" }).click();
+    const matrix = page.getByRole("table");
+    await expect(matrix.getByRole("columnheader", { name: "Scp" })).toBeVisible();
+    // Chapter 1 has one scoop ticked.
+    const row = matrix.getByRole("row").nth(1);
+    await expect(row).toContainText(/1 \/ \d+/);
+    await row.getByRole("button").click();
+    await expect(page.getByLabel("Chapter", { exact: true })).toHaveValue("c1");
   });
 });

@@ -90,6 +90,9 @@ export function openMissable(
 /** A chapter filter chip: a collectable category, or the section medals and prizes. */
 export type ChapterCategory = ChecklistItem["category"] | "medal";
 
+/** Display order of the chapter categories: collectables in data order, then medals. */
+export const CATEGORY_ORDER: ChapterCategory[] = [...checklistCategory.options, "medal"];
+
 /**
  * Per-category progress of a chapter across the switched-on guides, in data order. Only collectables
  * and medals count; text and step ticks belong to no category.
@@ -113,7 +116,8 @@ export function chapterCategoryProgress(
     if (checks[id]) c.done++;
     counts.set(category, c);
   }
-  return [...checklistCategory.options, "medal" as const]
-    .filter((category) => counts.has(category))
-    .map((category) => ({ category, ...counts.get(category)! }));
+  return CATEGORY_ORDER.filter((category) => counts.has(category)).map((category) => ({
+    category,
+    ...counts.get(category)!,
+  }));
 }
