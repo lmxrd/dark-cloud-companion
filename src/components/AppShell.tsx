@@ -10,47 +10,16 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarProvider, SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/AppSidebar";
+import { AppSidebar, ProfileButton } from "@/components/AppSidebar";
+import { BottomNav } from "@/components/BottomNav";
+import { crumbsFor } from "@/components/nav";
+import { withBase } from "@/lib/base";
 import { useTranslations } from "@/i18n";
 
-type Crumb = { label: string; href?: string };
-
-/** Breadcrumb from the pathname: section pages get their parent section as the first crumb. */
-function useCrumbs(pathname: string): Crumb[] {
+function AppHeader({ pathname, page }: { pathname: string; page?: string }) {
   const t = useTranslations();
-  const [head, sub] = pathname.replace(/^\/|\/$/g, "").split("/");
-  if (!head) return [{ label: t("nav.dashboard") }];
-
-  const label =
-    {
-      guides: t("nav.guides"),
-      planner: t("nav.planner"),
-      weapons: t("nav.weapons"),
-      items: t("nav.items"),
-      ridepod: t("nav.ridepod"),
-      monsters: t("nav.monsters"),
-      spheda: t("nav.spheda"),
-      settings: t("nav.settings"),
-      about: t("nav.about"),
-    }[head] ?? head;
-
-  let section: Crumb | undefined;
-  let child: string | undefined;
-  if (head === "guides") {
-    section = { label: t("nav.guides"), href: "/guides" };
-    if (sub === "view") child = t("nav.guide");
-  } else if (["weapons", "items", "ridepod", "monsters", "spheda"].includes(head)) {
-    section = { label: t("nav.reference"), href: "/weapons" };
-    if (head === "weapons" && sub) child = t("nav.weapons");
-  }
-
-  if (!section) return [{ label }];
-  return child ? [section, { label: child }] : [section];
-}
-
-function AppHeader({ pathname }: { pathname: string }) {
   const { state } = useSidebar();
-  const crumbs = useCrumbs(pathname);
+  const crumbs = crumbsFor(t, pathname, page);
   return (
     <header
       className={cn(
@@ -58,16 +27,25 @@ function AppHeader({ pathname }: { pathname: string }) {
         state === "collapsed" ? "h-12" : "h-16",
       )}
     >
-      <SidebarTrigger />
-      <Separator orientation="vertical" className="h-4" />
-      <Breadcrumb>
+      {/* Phones navigate with the bottom tab bar instead of the sidebar sheet. */}
+      <SidebarTrigger className="hidden md:inline-flex" />
+      <Separator
+        orientation="vertical"
+        className="hidden data-vertical:h-4 data-vertical:self-center md:block"
+      />
+      <a href={withBase("/")} className="shrink-0 md:hidden" aria-label={t("app.name")}>
+        <img src={withBase("/logo.svg")} alt="" className="size-7" />
+      </a>
+      <Breadcrumb className="min-w-0">
         <BreadcrumbList>
           {crumbs.map((crumb, i) => (
             <Fragment key={`${crumb.label}-${i}`}>
               {i > 0 && <BreadcrumbSeparator />}
               <BreadcrumbItem>
                 {crumb.href && i < crumbs.length - 1 ? (
-                  <BreadcrumbLink render={<a href={crumb.href} />}>{crumb.label}</BreadcrumbLink>
+                  <BreadcrumbLink render={<a href={withBase(crumb.href)} />}>
+                    {crumb.label}
+                  </BreadcrumbLink>
                 ) : (
                   <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
                 )}
@@ -76,6 +54,7 @@ function AppHeader({ pathname }: { pathname: string }) {
           ))}
         </BreadcrumbList>
       </Breadcrumb>
+      <ProfileButton className="ml-auto md:hidden" />
     </header>
   );
 }
@@ -84,7 +63,16 @@ function AppHeader({ pathname }: { pathname: string }) {
  * Sidebar shell around every page: flat sidebar (icon rail when collapsed, sheet on mobile), a
  * slim header with a breadcrumb, and the plain page area.
  */
-export function AppShell({ pathname, children }: { pathname: string; children: ReactNode }) {
+export function AppShell({
+  pathname,
+  page,
+  children,
+}: {
+  pathname: string;
+  /** The current page's name for the breadcrumb, when the path doesn't say it (a weapon's id). */
+  page?: string;
+  children: ReactNode;
+}) {
   const [open, setOpen] = useState(true);
   useEffect(() => {
     // The sidebar persists its state in a cookie, but a static site can only read it on the client.
@@ -96,8 +84,12 @@ export function AppShell({ pathname, children }: { pathname: string; children: R
     <SidebarProvider open={open} onOpenChange={setOpen}>
       <AppSidebar pathname={pathname} />
       <SidebarInset>
-        <AppHeader pathname={pathname} />
-        <div className="mx-auto w-full max-w-5xl px-4 py-6">{children}</div>
+        <AppHeader pathname={pathname} page={page} />
+        {/* On phones, leave room for the fixed tab bar and the home indicator below it. */}
+        <div className="mx-auto w-full max-w-5xl px-4 pt-6 pb-[calc(6rem+env(safe-area-inset-bottom))] md:pb-6">
+          {children}
+        </div>
+        <BottomNav pathname={pathname} />
       </SidebarInset>
     </SidebarProvider>
   );

@@ -1,5 +1,6 @@
 ---
 import Layout from "@/layouts/Layout.astro";
+import { PageHeader } from "@/components/PageHeader";
 import { withBase } from "@/lib/base";
 import { STAT_KEYS } from "@/lib/schemas";
 import { useTranslations } from "@/i18n";
@@ -20,14 +21,13 @@ const from = buildsFrom(w.id);
 const into = buildsInto(w.id);
 ---
 
-<Layout title={`${w.name} · ${t("app.name")}`}>
+<Layout title={`${w.name} · ${t("app.name")}`} page={w.name}>
   <div class="flex flex-col gap-6">
-    <header class="flex flex-col gap-1">
-      <h1 class="text-2xl font-semibold">{w.name}</h1>
-      <p class="text-muted-foreground text-sm">
-        {t(`weapon.type.${w.type}` as const)} · {w.character === "max" ? "Max" : "Monica"}
-      </p>
-    </header>
+    <PageHeader
+      className="mb-0"
+      title={w.name}
+      description={`${t(`weapon.type.${w.type}` as const)} · ${w.character === "max" ? "Max" : "Monica"}`}
+    />
 
     {w.description && <p class="text-sm italic">{w.description}</p>}
 

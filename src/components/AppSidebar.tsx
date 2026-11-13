@@ -1,16 +1,7 @@
 import { useStore } from "@nanostores/react";
 import { withBase } from "@/lib/base";
 import { useEffect, useState } from "react";
-import {
-  BookOpenIcon,
-  ChevronsUpDownIcon,
-  DatabaseIcon,
-  LayoutDashboardIcon,
-  MoonIcon,
-  RouteIcon,
-  SunIcon,
-  type LucideIcon,
-} from "lucide-react";
+import { ChevronsUpDownIcon, MoonIcon, SunIcon } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -38,11 +29,8 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { useTranslations } from "@/i18n";
-import { MAIN_GUIDE_ID } from "@/lib/guide/main";
+import { isActive, isSectionActive, mainNav, type NavItem } from "@/components/nav";
 import { $ready, $state, switchProfile } from "@/lib/store";
-
-type NavChild = { title: string; href: string };
-type NavItem = { title: string; href: string; icon: LucideIcon; children?: NavChild[] };
 
 function applyTheme(dark: boolean) {
   document.documentElement.classList.toggle("dark", dark);
@@ -50,11 +38,6 @@ function applyTheme(dark: boolean) {
     localStorage.setItem("theme", dark ? "dark" : "light");
   } catch {}
 }
-
-const isActive = (href: string, pathname: string) => {
-  const path = href.split("?")[0];
-  return path === "/" ? pathname === "/" : pathname === path || pathname.startsWith(`${path}/`);
-};
 
 /** Top-level section link with its sub-items always visible while expanded (sidebar-03 structure). */
 function NavLink({
@@ -66,8 +49,7 @@ function NavLink({
   pathname: string;
   collapsed: boolean;
 }) {
-  const active =
-    isActive(item.href, pathname) || (item.children ?? []).some((c) => isActive(c.href, pathname));
+  const active = isSectionActive(item, pathname);
   const activeClasses =
     "data-active:border-2 data-active:border-sidebar-border data-active:shadow-sticker";
 
@@ -133,19 +115,13 @@ function NavLink({
   );
 }
 
-function NavUser() {
+/** The active profile's name and initials; a placeholder until mounted (matches the server render). */
+function useProfileName() {
   const t = useTranslations();
   const ready = useStore($ready);
   const state = useStore($state);
-  // Profile names come from localStorage: render a placeholder until mounted (matches the server).
   const [mounted, setMounted] = useState(false);
-  const [dark, setDark] = useState(false);
-  useEffect(() => {
-    setDark(document.documentElement.classList.contains("dark"));
-    setMounted(true);
-  }, []);
-
-  const profiles = Object.values(state.profiles);
+  useEffect(() => setMounted(true), []);
   const current = state.profiles[state.activeProfile];
   const name = mounted && ready && current ? current.name : t("nav.profile");
   const initials = name
@@ -155,14 +131,82 @@ function NavUser() {
     .map((word) => word[0])
     .join("")
     .toUpperCase();
-  const avatar = (
+  return { name, initials, mounted: mounted && ready };
+}
+
+function ProfileAvatar({ initials }: { initials: string }) {
+  return (
     <Avatar className="size-8 rounded-md border-2 border-border bg-secondary">
       <AvatarFallback className="rounded-md bg-transparent text-xs font-bold text-secondary-foreground">
         {initials || "?"}
       </AvatarFallback>
     </Avatar>
   );
+}
 
+/** Profile switcher, Settings, About and the theme toggle. */
+function ProfileMenuContent({
+  side,
+  align,
+  className,
+}: {
+  side: "top" | "bottom";
+  align: "start" | "end";
+  className?: string;
+}) {
+  const t = useTranslations();
+  const state = useStore($state);
+  const { name, initials, mounted } = useProfileName();
+  const [dark, setDark] = useState(false);
+  useEffect(() => setDark(document.documentElement.classList.contains("dark")), []);
+  const profiles = Object.values(state.profiles);
+
+  return (
+    <DropdownMenuContent side={side} align={align} className={className ?? "w-56"}>
+      {/* The label is a Menu.GroupLabel and must sit inside a group. */}
+      <DropdownMenuGroup>
+        <DropdownMenuLabel className="flex items-center gap-2">
+          <ProfileAvatar initials={initials} />
+          <span className="flex min-w-0 flex-col leading-tight">
+            <span className="truncate font-semibold">{name}</span>
+            <span className="truncate text-xs text-muted-foreground">{t("profiles.title")}</span>
+          </span>
+        </DropdownMenuLabel>
+      </DropdownMenuGroup>
+      {mounted && profiles.length > 1 && (
+        <>
+          <DropdownMenuSeparator />
+          <DropdownMenuGroup>
+            {profiles.map((p) => (
+              <DropdownMenuItem key={p.id} onClick={() => switchProfile(p.id)}>
+                {p.id === state.activeProfile ? "✓ " : ""}
+                {p.name}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuGroup>
+        </>
+      )}
+      <DropdownMenuSeparator />
+      <DropdownMenuItem render={<a href={withBase("/settings")} />}>
+        {t("nav.settings")}
+      </DropdownMenuItem>
+      <DropdownMenuItem render={<a href={withBase("/about")} />}>{t("nav.about")}</DropdownMenuItem>
+      <DropdownMenuItem
+        onClick={() => {
+          applyTheme(!dark);
+          setDark(!dark);
+        }}
+      >
+        {dark ? <SunIcon /> : <MoonIcon />}
+        {dark ? t("theme.light") : t("theme.dark")}
+      </DropdownMenuItem>
+    </DropdownMenuContent>
+  );
+}
+
+function NavUser() {
+  const t = useTranslations();
+  const { name, initials } = useProfileName();
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
@@ -174,54 +218,31 @@ function NavUser() {
           />
         }
       >
-        {avatar}
+        <ProfileAvatar initials={initials} />
         <span className="flex min-w-0 flex-col leading-tight">
           <span className="truncate font-semibold">{name}</span>
           <span className="truncate text-xs text-muted-foreground">{t("nav.profile")}</span>
         </span>
         <ChevronsUpDownIcon className="ml-auto size-4" />
       </DropdownMenuTrigger>
-      <DropdownMenuContent side="top" align="start" className="w-56">
-        {/* The label is a Menu.GroupLabel and must sit inside a group. */}
-        <DropdownMenuGroup>
-          <DropdownMenuLabel className="flex items-center gap-2">
-            {avatar}
-            <span className="flex min-w-0 flex-col leading-tight">
-              <span className="truncate font-semibold">{name}</span>
-              <span className="truncate text-xs text-muted-foreground">{t("profiles.title")}</span>
-            </span>
-          </DropdownMenuLabel>
-        </DropdownMenuGroup>
-        {mounted && ready && profiles.length > 1 && (
-          <>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              {profiles.map((p) => (
-                <DropdownMenuItem key={p.id} onClick={() => switchProfile(p.id)}>
-                  {p.id === state.activeProfile ? "✓ " : ""}
-                  {p.name}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuGroup>
-          </>
-        )}
-        <DropdownMenuSeparator />
-        <DropdownMenuItem render={<a href={withBase("/settings")} />}>
-          {t("nav.settings")}
-        </DropdownMenuItem>
-        <DropdownMenuItem render={<a href={withBase("/about")} />}>
-          {t("nav.about")}
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => {
-            applyTheme(!dark);
-            setDark(!dark);
-          }}
-        >
-          {dark ? <SunIcon /> : <MoonIcon />}
-          {dark ? t("theme.light") : t("theme.dark")}
-        </DropdownMenuItem>
-      </DropdownMenuContent>
+      <ProfileMenuContent side="top" align="start" />
+    </DropdownMenu>
+  );
+}
+
+/** Phone header: the avatar alone opens the same profile menu (the sidebar is hidden there). */
+export function ProfileButton({ className }: { className?: string }) {
+  const t = useTranslations();
+  const { name, initials } = useProfileName();
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        aria-label={`${t("nav.profile")}: ${name}`}
+        className={`rounded-md outline-none focus-visible:ring-2 focus-visible:ring-ring ${className ?? ""}`}
+      >
+        <ProfileAvatar initials={initials} />
+      </DropdownMenuTrigger>
+      <ProfileMenuContent side="bottom" align="end" />
     </DropdownMenu>
   );
 }
@@ -232,31 +253,7 @@ export function AppSidebar({ pathname }: { pathname: string }) {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
 
-  const items: NavItem[] = [
-    { title: t("nav.dashboard"), href: "/", icon: LayoutDashboardIcon },
-    {
-      title: t("nav.guides"),
-      href: "/guides",
-      icon: BookOpenIcon,
-      children: [
-        { title: t("nav.main"), href: `/guides/view?id=${MAIN_GUIDE_ID}` },
-        { title: t("guides.custom"), href: "/guides" },
-      ],
-    },
-    { title: t("nav.planner"), href: "/planner", icon: RouteIcon },
-    {
-      title: t("nav.reference"),
-      href: "/weapons",
-      icon: DatabaseIcon,
-      children: [
-        { title: t("nav.weapons"), href: "/weapons" },
-        { title: t("nav.items"), href: "/items" },
-        { title: t("nav.ridepod"), href: "/ridepod" },
-        { title: t("nav.monsters"), href: "/monsters" },
-        { title: t("nav.spheda"), href: "/spheda" },
-      ],
-    },
-  ];
+  const items: NavItem[] = mainNav(t);
 
   return (
     <Sidebar collapsible="icon" className="border-r-2">

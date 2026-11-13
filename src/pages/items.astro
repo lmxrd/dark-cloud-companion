@@ -1,5 +1,6 @@
 ---
 import Layout from "@/layouts/Layout.astro";
+import { PageHeader } from "@/components/PageHeader";
 import { ItemsList } from "@/components/items/ItemsList";
 import { useTranslations } from "@/i18n";
 
@@ -7,6 +8,6 @@ const t = useTranslations();
 ---
 
 <Layout title={`${t("items.title")} · ${t("app.name")}`}>
-  <h1 class="mb-4 text-2xl font-semibold">{t("items.title")}</h1>
+  <PageHeader title={t("items.title")} />
   <ItemsList client:load />
 </Layout>

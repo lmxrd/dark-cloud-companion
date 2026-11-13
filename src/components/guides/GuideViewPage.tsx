@@ -1,3 +1,4 @@
+import { PageHeader } from "@/components/PageHeader";
 import { useStore } from "@nanostores/react";
 import { withBase } from "@/lib/base";
 import { useEffect, useMemo, useState } from "react";
@@ -41,8 +42,7 @@ export function GuideViewPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="text-2xl font-semibold">{guide.title}</h1>
-      {guide.description && <p className="text-muted-foreground text-sm">{guide.description}</p>}
+      <PageHeader className="mb-0" title={guide.title} description={guide.description} />
       <div className="flex flex-wrap items-center gap-3">
         <Badge variant="outline">{t("step.progress", { done: p.done, total: p.total })}</Badge>
         {guide.build && (

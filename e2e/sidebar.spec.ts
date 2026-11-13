@@ -21,7 +21,9 @@ test.describe("sidebar shell", () => {
 
   test("the active sub-item is marked", async ({ page }) => {
     await go(page, "/items");
-    await expect(page.getByRole("link", { name: "Items" })).toHaveAttribute("data-active", "");
+    // Scoped to the sidebar: the breadcrumb names the current page too.
+    const sidebar = page.locator('[data-slot="sidebar"]');
+    await expect(sidebar.getByRole("link", { name: "Items" })).toHaveAttribute("data-active", "");
   });
 
   test("the profile menu opens and switches profiles", async ({ page }) => {
@@ -52,5 +54,19 @@ test.describe("sidebar shell", () => {
     await trigger.click();
     await page.getByRole("menuitem", { name: "Beta" }).click();
     await expect(trigger).toContainText("Beta");
+  });
+
+  test("the breadcrumb shows the full Reference path and leads to the hub", async ({ page }) => {
+    await go(page, "/weapons/poison-wrench");
+    const crumbs = page.getByRole("navigation", { name: "breadcrumb" });
+    await expect(crumbs).toContainText("Reference");
+    await expect(crumbs).toContainText("Poison Wrench");
+    await crumbs.getByRole("link", { name: "Weapons" }).click();
+    await expect(page.getByRole("heading", { name: "Weapons", level: 1 })).toBeVisible();
+    await crumbs.getByRole("link", { name: "Reference" }).click();
+    await expect(page.getByRole("heading", { name: "Reference", level: 1 })).toBeVisible();
+    // The hub's tracker tiles show progress; the phone tab bar stays hidden on desktop.
+    await expect(page.getByRole("progressbar", { name: "Spheda" })).toBeVisible();
+    await expect(page.getByRole("navigation", { name: "Main sections" })).toBeHidden();
   });
 });

@@ -2,17 +2,17 @@ import { useStore } from "@nanostores/react";
 import { CheckRow } from "@/components/chapter/CheckRow";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import ridepodRaw from "@/data/ridepod.json";
-import { ridepodData, type RidepodPart } from "@/lib/schemas";
+import { ridepod, ridepodCoreCheckId, ridepodPartCheckId } from "@/lib/reference";
+import type { RidepodPart } from "@/lib/schemas";
 import { useTranslations } from "@/i18n";
 import { ingredientIdByName } from "@/lib/data";
 import { $checks, setChecked } from "@/lib/store";
 
-const data = ridepodData.parse(ridepodRaw);
+const data = ridepod;
 const categories = ["short", "long", "armor", "legs", "pack"] as const;
 
-const partCheckId = (p: RidepodPart) => `ridepod:${p.id}`;
-const coreCheckId = (name: string) => `ridepod-core:${name}`;
+const partCheckId = ridepodPartCheckId;
+const coreCheckId = ridepodCoreCheckId;
 
 function ready(p: RidepodPart, checks: Record<string, true>) {
   const ok = (list: RidepodPart["invent"]) =>
