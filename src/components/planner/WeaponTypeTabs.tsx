@@ -13,6 +13,12 @@ const TYPE_TABS: { type: WeaponType; Icon: LucideIcon }[] = [
   { type: "club", Icon: CircleDashedIcon },
 ];
 
+/** The icon of each weapon type. */
+export const TYPE_ICON = Object.fromEntries(TYPE_TABS.map((x) => [x.type, x.Icon])) as Record<
+  WeaponType,
+  LucideIcon
+>;
+
 /** Weapon-type chooser for the generator: a scrollable row of labelled chips. */
 export function WeaponTypeTabs({
   value,

@@ -15,7 +15,11 @@ test.describe("guides, planner and editor", () => {
     ).toBeVisible();
     await page.getByRole("button", { name: "Save as guide" }).click();
     await go(page, "/guides");
-    await expect(page.getByRole("link", { name: "Smash Wrench — Least ABS" })).toBeVisible();
+    await expect(
+      page
+        .getByRole("region", { name: "My guides" })
+        .getByRole("link", { name: /Smash Wrench — Least ABS/ }),
+    ).toBeVisible();
   });
 
   test("the planner remembers its inputs", async ({ page }) => {
@@ -47,10 +51,7 @@ test.describe("guides, planner and editor", () => {
 
     // Switch it on and tick its text item from the dashboard.
     await go(page, "/guides");
-    await page
-      .locator('[data-slot="card"]', { hasText: "My e2e guide" })
-      .getByRole("switch")
-      .click();
+    await page.getByRole("switch", { name: "Show on dashboard: My e2e guide" }).click();
     await go(page, "/");
     await page.getByRole("tab", { name: "By guide" }).click();
     // Only the first guide starts open.
@@ -65,11 +66,9 @@ test.describe("guides, planner and editor", () => {
 
   test("a built-in guide can be duplicated into an editable copy", async ({ page }) => {
     await go(page, "/guides");
-    await page
-      .locator('[data-slot="card"]', { hasText: "Grade Zero — Least ABS" })
-      .first()
-      .getByRole("button", { name: "Duplicate to edit" })
-      .click();
+    await page.getByRole("link", { name: "Grade Zero — Least ABS" }).click();
+    await page.getByRole("button", { name: "More actions" }).click();
+    await page.getByRole("menuitem", { name: "Duplicate to edit" }).click();
     await expect(page.getByLabel("Guide title")).toHaveValue("Grade Zero — Least ABS (copy)");
     await expect(page.getByText("Weapon build", { exact: true }).first()).toBeVisible();
   });
@@ -84,7 +83,10 @@ test.describe("guides, planner and editor", () => {
     await go(page, "/guides");
     const [download] = await Promise.all([
       page.waitForEvent("download"),
-      page.getByRole("button", { name: "Export all my guides" }).click(),
+      page
+        .getByRole("button", { name: "More actions" })
+        .click()
+        .then(() => page.getByRole("menuitem", { name: "Export all my guides" }).click()),
     ]);
     const path = await download.path();
     const file = JSON.parse(readFileSync(path, "utf8"));
@@ -240,5 +242,29 @@ test.describe("custom start and end weapons, one tab per weapon type", () => {
       .toEqual(["critical", "steal"]);
     await target.getByRole("button", { name: "Clear" }).click();
     await expect(pair.getByLabel("Neither Critical nor Dark")).toBeChecked();
+  });
+
+  test("weapon builds are grouped per target and a guide resumes at its next stage", async ({
+    page,
+  }) => {
+    await go(page, "/guides");
+    const builds = page.getByRole("region", { name: "Weapon builds" });
+    const row = builds.getByRole("listitem").filter({ hasText: "Grade Zero" });
+    await expect(row.getByRole("link")).toHaveCount(2);
+    await row.getByRole("link", { name: /Fastest/ }).click();
+    await expect(
+      page.getByRole("heading", { name: "Grade Zero — Fastest", level: 1 }),
+    ).toBeVisible();
+    await expect(page.getByText(/^0 \/ \d+ stages$/)).toBeVisible();
+    await page.getByRole("button", { name: /Continue at stage 1/ }).click();
+    // Switching it on from the progress strip shows it under "On the dashboard".
+    await page.getByRole("switch", { name: "Show on dashboard" }).click();
+    await go(page, "/guides");
+    await expect(
+      page.getByRole("region", { name: "On the dashboard" }).getByRole("link", {
+        name: /Grade Zero — Fastest/,
+      }),
+    ).toBeVisible();
+    await expect(row.getByRole("link", { name: /Fastest \(on the dashboard\)/ })).toBeVisible();
   });
 });

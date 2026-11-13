@@ -3,7 +3,7 @@ import { useTranslations, type Translate } from "@/i18n";
 import type { DerivedStep } from "@/lib/guide/derive";
 import type { Step } from "@/lib/guide/types";
 import { getWeapon, itemAvailability } from "@/lib/planner/sources";
-import { Badge } from "@/components/ui/badge";
+import { cn } from "cn";
 import type { Acquire, Recipe, Stage } from "@/lib/planner/types";
 
 const name = (id: string) => getWeapon(id).name;
@@ -78,38 +78,53 @@ export function BuildStepBody({
     ),
   ];
   const last = (r: Recipe) => r.stages[r.stages.length - 1];
+  const items = groups.filter((g) => g.kind === "item");
+  const spheres = groups.filter((g) => g.kind === "sphere");
+  const weapon = getWeapon(stage.weaponId);
   return (
     <div className="flex flex-col gap-2 text-sm">
       {stage.levelTo > 0 && (
         <p>{t("planner.step.levelOnly", { weapon: name(stage.weaponId), to: stage.levelTo })}</p>
       )}
-      {groups.map((g, i) =>
-        g.kind === "item" ? (
-          <p key={i} className="flex flex-wrap items-center gap-2">
-            {t("planner.step.itemFree", { count: g.count, name: g.name })}
-            {itemAvailability(g.name).kind === "found" && (
-              <Badge variant="outline">{t("items.foundOnly")}</Badge>
-            )}
-          </p>
-        ) : (
-          <div key={i}>
-            <p>
-              {t(g.count > 1 ? "planner.step.sphereCount" : "planner.step.sphere", {
-                count: g.count,
-                weapon: name(last(g.recipe).weaponId),
-                level: last(g.recipe).levelTo,
-                sp: last(g.recipe).levelTo,
-              })}
-            </p>
-            <details>
-              <summary className="text-muted-foreground cursor-pointer text-xs">
-                {t("planner.step.prepare")}
-              </summary>
-              <RecipeView recipe={g.recipe} />
-            </details>
-          </div>
-        ),
+      {items.length > 0 && (
+        <ul className="flex flex-wrap gap-1.5" aria-label={t("planner.step.synths")}>
+          {items.map((g, i) => {
+            const found = itemAvailability(g.name).kind === "found";
+            return (
+              <li
+                key={i}
+                className={cn(
+                  "bg-card rounded-full border-2 px-2.5 py-0.5 text-xs font-medium",
+                  found && "border-dashed",
+                )}
+                title={found ? t("items.foundOnly") : undefined}
+              >
+                {g.count > 1 ? `${g.count}× ` : ""}
+                {g.name}
+                {found && <span className="sr-only"> ({t("items.foundOnly")})</span>}
+              </li>
+            );
+          })}
+        </ul>
       )}
+      {spheres.map((g, i) => (
+        <div key={i}>
+          <p>
+            {t(g.count > 1 ? "planner.step.sphereCount" : "planner.step.sphere", {
+              count: g.count,
+              weapon: name(last(g.recipe).weaponId),
+              level: last(g.recipe).levelTo,
+              sp: last(g.recipe).levelTo,
+            })}
+          </p>
+          <details>
+            <summary className="text-muted-foreground cursor-pointer text-xs">
+              {t("planner.step.prepare")}
+            </summary>
+            <RecipeView recipe={g.recipe} />
+          </details>
+        </div>
+      ))}
       {buyableOnly && foundItems.length > 0 && (
         <p className="text-destructive text-xs">
           {t("step.foundItems", { items: foundItems.join(", ") })}
@@ -124,17 +139,40 @@ export function BuildStepBody({
             })}{" "}
             · {t("planner.after", { level: derived.level, sp: derived.sp })}
           </p>
-          <div className="grid grid-cols-3 gap-x-4 gap-y-1 text-xs sm:grid-cols-5">
-            {STAT_KEYS.map((k) => {
-              const need = derived.requirements?.[k] ?? 0;
-              return (
-                <span key={k} className={need > derived.stats[k] ? "text-destructive" : ""}>
-                  {t(`stat.${k}` as const)} {derived.stats[k]}
-                  {need > 0 ? ` / ${need}` : ""}
-                </span>
-              );
-            })}
-          </div>
+          <details className="group">
+            <summary className="text-muted-foreground cursor-pointer text-xs">
+              {t("planner.step.stats")}
+            </summary>
+            <div className="mt-1.5 grid grid-cols-3 gap-x-3 gap-y-1.5 text-xs">
+              {STAT_KEYS.map((k) => {
+                const need = derived.requirements?.[k] ?? 0;
+                const max = weapon.maxStats[k] || 1;
+                return (
+                  <div
+                    key={k}
+                    className={cn(
+                      "flex flex-col gap-0.5",
+                      need > derived.stats[k] && "text-destructive",
+                    )}
+                  >
+                    <span className="flex justify-between gap-1">
+                      <span className="truncate">{t(`stat.${k}` as const)}</span>
+                      <span className="font-semibold tabular-nums">
+                        {derived.stats[k]}
+                        {need > 0 ? ` / ${need}` : ""}
+                      </span>
+                    </span>
+                    <span aria-hidden className="bg-muted h-1 overflow-hidden rounded-full">
+                      <span
+                        className="bg-primary block h-full"
+                        style={{ width: `${Math.min(100, (100 * derived.stats[k]) / max)}%` }}
+                      />
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </details>
           {derived.nextWeaponId && (
             <p className="font-medium">
               {t("planner.step.buildup", { weapon: name(derived.nextWeaponId) })}

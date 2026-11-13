@@ -42,8 +42,7 @@ test.describe("dashboard and progress", () => {
 
   test("progress is shown only for switched-on guides", async ({ page }) => {
     await go(page, "/guides");
-    const main = page.locator('[data-slot="card"]', { hasText: "Main walkthrough" });
-    await main.getByRole("switch").click();
+    await page.getByRole("switch", { name: "Show on dashboard: Main walkthrough" }).click();
     await go(page, "/");
     await expect(page.getByText("No guides are switched on")).toBeVisible();
     await expect(page.getByRole("progressbar")).toHaveCount(0);
@@ -54,10 +53,7 @@ test.describe("dashboard and progress", () => {
     await expect(page.getByRole("button", { name: /Palace of Flowers/ })).toBeVisible();
 
     await go(page, "/guides");
-    await page
-      .locator('[data-slot="card"]', { hasText: "Main walkthrough" })
-      .getByRole("switch")
-      .click();
+    await page.getByRole("switch", { name: "Show on dashboard: Main walkthrough" }).click();
     await go(page, "/");
     await page.getByRole("tab", { name: "Overview" }).click();
     await expect(page.getByRole("progressbar", { name: "Main walkthrough" })).toBeVisible();

@@ -1,6 +1,5 @@
 ---
 import Layout from "@/layouts/Layout.astro";
-import { PageHeader } from "@/components/PageHeader";
 import { GuidesPage } from "@/components/guides/GuidesPage";
 import { useTranslations } from "@/i18n";
 
@@ -8,6 +7,6 @@ const t = useTranslations();
 ---
 
 <Layout title={`${t("guides.title")} · ${t("app.name")}`}>
-  <PageHeader title={t("guides.title")} />
+
   <GuidesPage client:load />
 </Layout>

@@ -1,6 +1,5 @@
 import { useStore } from "@nanostores/react";
 import { useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
 import { buildContentExport } from "@/lib/content-file";
 import { useTranslations } from "@/i18n";
 import type { Guide } from "@/lib/guide/types";
@@ -24,8 +23,11 @@ export const fileSafe = (s: string) =>
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "") || "export";
 
-/** Export-all and import controls for the user's own guides (content only, no progress). */
-export function ContentTransfer() {
+/**
+ * Export-all and import for the user's own guides (content only, no progress). The caller places the
+ * actions (a menu) and renders `input` and `message` somewhere on the page.
+ */
+export function useContentTransfer() {
   const t = useTranslations();
   const { guides } = useStore($profile);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -41,35 +43,23 @@ export function ContentTransfer() {
     if (fileRef.current) fileRef.current.value = "";
   };
 
-  return (
-    <div className="flex flex-col gap-2">
-      <p className="text-muted-foreground text-xs">{t("transfer.hint")}</p>
-      <div className="flex flex-wrap gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          disabled={guides.length === 0}
-          title={guides.length === 0 ? t("transfer.empty") : undefined}
-          onClick={() => downloadGuides("dcc-guides.json", guides)}
-        >
-          {t("transfer.exportAll")}
-        </Button>
-        <Button variant="outline" size="sm" onClick={() => fileRef.current?.click()}>
-          {t("transfer.import")}
-        </Button>
-        <input
-          ref={fileRef}
-          type="file"
-          accept="application/json"
-          hidden
-          onChange={(e) => onImport(e.target.files?.[0])}
-        />
-      </div>
-      {message && (
-        <p className="text-sm whitespace-pre-line" role="status">
-          {message}
-        </p>
-      )}
-    </div>
-  );
+  return {
+    canExport: guides.length > 0,
+    exportAll: () => downloadGuides("dcc-guides.json", guides),
+    openImport: () => fileRef.current?.click(),
+    input: (
+      <input
+        ref={fileRef}
+        type="file"
+        accept="application/json"
+        hidden
+        onChange={(e) => onImport(e.target.files?.[0])}
+      />
+    ),
+    message: message && (
+      <p className="text-sm whitespace-pre-line" role="status">
+        {message}
+      </p>
+    ),
+  };
 }
