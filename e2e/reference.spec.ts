@@ -71,3 +71,46 @@ test("the weapons list groups by owner and can show finals only", async ({ page 
   await expect(page.getByRole("link", { name: /Grade Zero/ })).toBeVisible();
   await expect(page.getByRole("link", { name: /Battle Wrench/ })).toHaveCount(0);
 });
+
+test.describe("trackers", () => {
+  test("the jump chips open a group and the hero counts ticks", async ({ page }) => {
+    await go(page, "/ridepod");
+    const parts = page.getByRole("progressbar", { name: "Parts built" });
+    await expect(parts).toHaveAttribute("aria-valuenow", "0");
+    await page
+      .getByRole("navigation", { name: "Jump to a group" })
+      .getByRole("button", { name: /^Legs/ })
+      .click();
+    const legs = page.locator("#group-legs");
+    const box = legs.getByRole("checkbox").first();
+    await box.click();
+    await expect(box).toBeChecked();
+    await expect(
+      page
+        .getByRole("navigation", { name: "Jump to a group" })
+        .getByRole("button", { name: /^Legs 1\// }),
+    ).toBeVisible();
+  });
+
+  test("monster classes have Badge and Mastered toggles and a form tree", async ({ page }) => {
+    await go(page, "/monsters");
+    const flora = page.locator("#group-flora");
+    await expect(flora.getByRole("list", { name: "Forms" })).toContainText("Mandora");
+    await flora.getByRole("checkbox", { name: /Badge owned/ }).check();
+    await expect(page.getByRole("progressbar", { name: "Badges" })).toHaveAttribute(
+      "aria-valuenow",
+      "10",
+    );
+  });
+
+  test("Spheda clubs can be marked as owned", async ({ page }) => {
+    await go(page, "/spheda");
+    const club = page.getByRole("checkbox", { name: /^I own / }).first();
+    await club.check();
+    await expect(club).toBeChecked();
+    await expect(page.getByRole("progressbar", { name: "Clubs owned" })).not.toHaveAttribute(
+      "aria-valuenow",
+      "0",
+    );
+  });
+});

@@ -10,10 +10,12 @@ interface Props {
   detail?: ReactNode;
   /** Shorter rows for long lists (tap target stays around 36px). */
   dense?: boolean;
+  /** Right-aligned column (numbers). */
+  aside?: ReactNode;
 }
 
 /** A single big-tap-target checklist row. */
-export function CheckRow({ checked, onChange, label, badges, detail, dense }: Props) {
+export function CheckRow({ checked, onChange, label, badges, detail, dense, aside }: Props) {
   return (
     <label
       className={cn(
@@ -38,6 +40,7 @@ export function CheckRow({ checked, onChange, label, badges, detail, dense }: Pr
         </span>
         {detail ? <span className="text-muted-foreground text-xs">{detail}</span> : null}
       </span>
+      {aside ? <span className="shrink-0 text-right text-xs tabular-nums">{aside}</span> : null}
     </label>
   );
 }
