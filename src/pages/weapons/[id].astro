@@ -5,7 +5,8 @@ import { withBase } from "@/lib/base";
 import { STAT_KEYS } from "@/lib/schemas";
 import { useTranslations } from "@/i18n";
 import { weaponData } from "@/lib/planner/sources";
-import { absTable, buildsFrom, buildsInto, dungeonsFor, eventFor, inventionFor, shopsFor } from "@/lib/weapons/info";
+import { absTable, buildsInto, dungeonsFor, eventFor, inventionFor, lineTo, shopsFor } from "@/lib/weapons/info";
+import { finalWeaponIds } from "@/lib/planner/graph";
 
 export function getStaticPaths() {
   return weaponData.weapons.map((w) => ({ params: { id: w.id }, props: { weapon: w } }));
@@ -17,72 +18,113 @@ const shops = shopsFor(w.id);
 const invention = inventionFor(w.id);
 const event = eventFor(w.id);
 const dungeons = dungeonsFor(w.id);
-const from = buildsFrom(w.id);
 const into = buildsInto(w.id);
+const isFinal = finalWeaponIds.includes(w.id);
+const owner = w.character === "max" ? t("weapons.max") : t("weapons.monica");
+// The line from its root, with long middles folded: root, "… n more", the two before this weapon.
+const line = lineTo(w.id);
+const hidden = line.length > 5 ? line.length - 4 : 0;
+const shownLine = hidden ? [line[0], null, ...line.slice(-3)] : line;
+// Stat bars share one scale: the weapon's largest maximum.
+const scale = Math.max(1, ...STAT_KEYS.map((k) => w.maxStats[k]));
+const abs = absTable(w);
+const absMax = Math.max(...abs.map((r) => r.abs));
+const facts = [
+  { label: t("weapons.baseAbs"), value: String(w.baseAbs) },
+  { label: t("weapons.spPerLevel"), value: String(w.spPerLevel) },
+  ...(w.combo ? [{ label: t("weapons.combo"), value: String(w.combo) }] : []),
+  { label: t("weapons.durability"), value: `≤ ${w.maxDu}` },
+];
 ---
 
 <Layout title={`${w.name} · ${t("app.name")}`} page={w.name}>
   <div class="flex flex-col gap-6">
-    <PageHeader
-      className="mb-0"
-      title={w.name}
-      description={`${t(`weapon.type.${w.type}` as const)} · ${w.character === "max" ? "Max" : "Monica"}`}
-    />
-
-    {w.description && <p class="text-sm italic">{w.description}</p>}
-
-    <dl class="grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
-      <div><dt class="text-muted-foreground text-xs">{t("weapons.baseAbs")}</dt><dd>{w.baseAbs}</dd></div>
-      <div><dt class="text-muted-foreground text-xs">{t("weapons.spPerLevel")}</dt><dd>{w.spPerLevel}</dd></div>
-      {w.combo && <div><dt class="text-muted-foreground text-xs">{t("weapons.combo")}</dt><dd>{w.combo}</dd></div>}
-      {w.gunType && <div><dt class="text-muted-foreground text-xs">{t("weapons.gunType")}</dt><dd>{w.gunType}</dd></div>}
-      <div>
-        <dt class="text-muted-foreground text-xs">{t("weapons.abilities")}</dt>
-        <dd>{w.abilities.length ? w.abilities.map((a) => t(`ability.${a}` as const)).join(", ") : t("weapons.none")}</dd>
+    <section class="bg-card shadow-sticker flex flex-col gap-4 rounded-xl border-2 p-4">
+      <div class="flex flex-wrap items-center gap-2 text-xs font-bold tracking-wider uppercase">
+        <span class:list={["rounded-full border-2 px-2 py-0.5", w.character === "max" ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground"]}>{owner}</span>
+        <span class="text-muted-foreground">{t(`weapon.type.${w.type}` as const)}</span>
+        {isFinal && <span class="bg-accent text-accent-foreground rounded-full border-2 px-2 py-0.5">★ {t("weapons.final")}</span>}
       </div>
-      <div><dt class="text-muted-foreground text-xs">{t("weapons.durability")}</dt><dd>≤ {w.maxDu}</dd></div>
-    </dl>
-    {w.attackVariesByTime && <p class="text-muted-foreground text-sm">{t("weapons.attackVaries")}</p>}
-
-    <section class="overflow-x-auto">
-      <table class="w-full text-left text-sm">
-        <thead>
-          <tr class="text-muted-foreground text-xs">
-            <th class="py-1 pr-3 font-normal"></th>
-            {STAT_KEYS.map((k) => <th class="py-1 pr-3 font-normal">{t(`stat.${k}` as const)}</th>)}
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <th class="py-1 pr-3 text-left font-normal">{t("weapons.baseStats")}</th>
-            {STAT_KEYS.map((k) => <td class="py-1 pr-3 tabular-nums">{w.baseStats[k]}</td>)}
-          </tr>
-          <tr>
-            <th class="py-1 pr-3 text-left font-normal">{t("weapons.maxStats")}</th>
-            {STAT_KEYS.map((k) => <td class="py-1 pr-3 tabular-nums">{w.maxStats[k]}</td>)}
-          </tr>
-        </tbody>
-      </table>
+      <PageHeader className="mb-0" title={w.name} description={w.description} />
+      <dl class="grid grid-cols-2 gap-2 sm:grid-cols-4">
+        {facts.map((f) => (
+          <div class="bg-background flex flex-col rounded-lg border-2 px-3 py-2">
+            <dt class="text-muted-foreground text-[11px] font-bold tracking-wider uppercase">{f.label}</dt>
+            <dd class="font-heading text-xl font-extrabold tabular-nums">{f.value}</dd>
+          </div>
+        ))}
+      </dl>
+      <div class="flex flex-wrap items-center gap-1.5 text-xs">
+        <span class="text-muted-foreground">{t("weapons.abilities")}:</span>
+        {w.abilities.length
+          ? w.abilities.map((a) => <span class="rounded-full border-2 px-2 py-0.5 font-semibold">{t(`ability.${a}` as const)}</span>)
+          : <span>{t("weapons.none")}</span>}
+        {w.gunType && <span class="text-muted-foreground ml-2">{t("weapons.gunType")}: {w.gunType}</span>}
+      </div>
+      {w.attackVariesByTime && <p class="text-muted-foreground text-sm">{t("weapons.attackVaries")}</p>}
+      <a
+        href={withBase(`/planner?target=${w.id}`)}
+        class="bg-primary text-primary-foreground shadow-sticker w-fit rounded-md border-2 px-4 py-2 text-sm font-semibold active:translate-x-(--shadow-offset) active:translate-y-(--shadow-offset) active:shadow-none"
+      >
+        {t("weapons.plan")}
+      </a>
     </section>
 
-    {w.requiresKills.length > 0 && (
-      <p class="text-sm"><span class="text-muted-foreground">{t("weapons.requiresKills")}: </span>{w.requiresKills.join(", ")}</p>
-    )}
-
-    <section class="flex flex-col gap-3 text-sm">
-      <h2 class="text-lg font-semibold">{t("weapons.buildsFrom")} / {t("weapons.buildsInto")}</h2>
-      <p>
-        <span class="text-muted-foreground">{t("weapons.buildsFrom")}: </span>
-        {from.length ? from.map((x, i) => <><a class="underline" href={withBase(`/weapons/${x.id}`)}>{x.name}</a>{i < from.length - 1 ? ", " : ""}</>) : "—"}
-      </p>
-      <p>
-        <span class="text-muted-foreground">{t("weapons.buildsInto")}: </span>
-        {into.length ? into.map((x, i) => <><a class="underline" href={withBase(`/weapons/${x.id}`)}>{x.name}</a>{i < into.length - 1 ? ", " : ""}</>) : "—"}
-      </p>
+    <section class="flex flex-col gap-2" aria-labelledby="stats">
+      <h2 id="stats" class="font-heading text-base font-extrabold tracking-tight">{t("weapons.statsTitle")}</h2>
+      <ul class="bg-card flex flex-col gap-2 rounded-lg border-2 p-3">
+        {STAT_KEYS.map((k) => (
+          <li class="grid grid-cols-[5.5rem_1fr_4.5rem] items-center gap-2 text-sm">
+            <span class="text-muted-foreground truncate text-xs font-semibold">{t(`stat.${k}` as const)}</span>
+            <span class="bg-muted relative h-3 rounded-full" aria-hidden="true">
+              <span class="border-border absolute inset-y-0 left-0 rounded-full border-2 border-dashed" style={`width: ${(100 * w.maxStats[k]) / scale}%`}></span>
+              <span class="bg-primary absolute inset-y-0 left-0 rounded-full" style={`width: ${(100 * w.baseStats[k]) / scale}%`}></span>
+            </span>
+            <span class="text-right text-xs tabular-nums"><b>{w.baseStats[k]}</b> / {w.maxStats[k]}</span>
+          </li>
+        ))}
+      </ul>
+      <p class="text-muted-foreground text-xs">{t("weapons.statsLegend")}</p>
     </section>
 
-    <section class="flex flex-col gap-2 text-sm">
-      <h2 class="text-lg font-semibold">{t("weapons.obtain")}</h2>
+    <section class="flex flex-col gap-2" aria-labelledby="line">
+      <h2 id="line" class="font-heading text-base font-extrabold tracking-tight">{t("weapons.lineTitle")}</h2>
+      <ol class="relative flex flex-col gap-2 pl-7">
+        <span aria-hidden="true" class="bg-border absolute top-2 bottom-2 left-[9px] w-0.5"></span>
+        {shownLine.map((x) => x === null ? (
+          <li class="text-muted-foreground relative text-xs">
+            <span aria-hidden="true" class="bg-background absolute top-0.5 -left-[22px] size-3 rounded-full border-2 border-dashed"></span>
+            {t("weapons.lineMore", { n: hidden })}
+          </li>
+        ) : (
+          <li class="relative">
+            <span aria-hidden="true" class:list={["absolute top-1 -left-7 size-5 rounded-full border-2", x.id === w.id ? "bg-accent" : "bg-background"]}></span>
+            {x.id === w.id
+              ? <span class="font-heading font-extrabold" aria-current="page">{x.name}</span>
+              : <a class="text-sm underline" href={withBase(`/weapons/${x.id}`)}>{x.name}</a>}
+          </li>
+        ))}
+        {into.length > 0 && (
+          <li class="relative flex flex-col gap-1">
+            <span aria-hidden="true" class="bg-background absolute top-1 -left-7 size-5 rounded-full border-2 border-dashed"></span>
+            <span class="text-muted-foreground text-xs">{t("weapons.buildsInto")}</span>
+            <span class="flex flex-wrap gap-1.5">
+              {into.map((x) => (
+                <a class="bg-card rounded-full border-2 px-2.5 py-0.5 text-sm font-semibold" href={withBase(`/weapons/${x.id}`)}>
+                  {finalWeaponIds.includes(x.id) ? "★ " : ""}{x.name}
+                </a>
+              ))}
+            </span>
+          </li>
+        )}
+      </ol>
+      {w.requiresKills.length > 0 && (
+        <p class="text-sm"><span class="text-muted-foreground">{t("weapons.requiresKills")}: </span>{w.requiresKills.join(", ")}</p>
+      )}
+    </section>
+
+    <section class="flex flex-col gap-2 text-sm" aria-labelledby="obtain">
+      <h2 id="obtain" class="font-heading text-base font-extrabold tracking-tight">{t("weapons.obtain")}</h2>
       {shops.map((s) => <p>{t("weapons.shop", { shop: s.shop, chapter: s.chapter, price: s.price })}</p>)}
       {invention && (
         <div>
@@ -95,16 +137,19 @@ const into = buildsInto(w.id);
       {!shops.length && !invention && !event && !dungeons.length && <p class="text-muted-foreground">{t("weapons.buildOnly")}</p>}
     </section>
 
-    <section class="overflow-x-auto">
-      <h2 class="mb-2 text-lg font-semibold">{t("weapons.absTable")}</h2>
-      <table class="text-sm">
-        <tbody>
-          <tr>{absTable(w).map((r) => <th class="text-muted-foreground py-1 pr-4 text-left text-xs font-normal">+{r.level}</th>)}</tr>
-          <tr>{absTable(w).map((r) => <td class="py-1 pr-4 tabular-nums">{Math.round(r.abs).toLocaleString()}</td>)}</tr>
-        </tbody>
-      </table>
+    <section class="flex flex-col gap-2" aria-labelledby="abs">
+      <h2 id="abs" class="font-heading text-base font-extrabold tracking-tight">{t("weapons.absTable")}</h2>
+      <ol class="bg-card grid grid-cols-7 items-end gap-1.5 rounded-lg border-2 p-3">
+        {abs.map((r) => (
+          <li class="flex flex-col items-center gap-1" title={`+${r.level}: ${Math.round(r.abs).toLocaleString()} ABS`}>
+            <span class="flex h-24 w-full items-end" aria-hidden="true">
+              <span class="bg-secondary w-full rounded-t-sm border-2 border-b-0" style={`height: ${Math.max(4, (100 * r.abs) / absMax)}%`}></span>
+            </span>
+            <span class="text-muted-foreground text-[10px] font-semibold">+{r.level}</span>
+            <span class="text-[10px] font-semibold tabular-nums">{Math.round(r.abs).toLocaleString()}</span>
+          </li>
+        ))}
+      </ol>
     </section>
-
-    <p><a class="underline" href={withBase(`/planner?target=${w.id}`)}>{t("weapons.plan")}</a></p>
   </div>
 </Layout>

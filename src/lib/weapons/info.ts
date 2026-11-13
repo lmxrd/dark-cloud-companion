@@ -17,3 +17,19 @@ export const dungeonsFor = (id: string) =>
 /** Total ABS to reach each of the given levels. */
 export const absTable = (w: Weapon, levels = [1, 5, 10, 20, 30, 50, 99]) =>
   levels.map((l) => ({ level: l, abs: absToReach(w.baseAbs, l) }));
+
+/**
+ * The build-up line leading to a weapon, from the root of its line: each step follows the first weapon
+ * that builds into the previous one (lines rarely merge; the first parent is the usual route).
+ */
+export function lineTo(id: string): Weapon[] {
+  const line: Weapon[] = [];
+  const seen = new Set<string>();
+  let current = weaponById.get(id);
+  while (current && !seen.has(current.id)) {
+    seen.add(current.id);
+    line.unshift(current);
+    current = buildsFrom(current.id)[0];
+  }
+  return line;
+}
