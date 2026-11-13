@@ -1,13 +1,10 @@
 import { useEffect, useState } from "react";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-import { SearchIcon } from "lucide-react";
+import { SearchIcon, SlidersHorizontalIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Switch } from "@/components/ui/switch";
+import { useIsMobile } from "@/hooks/use-mobile";
 import type { StepFilters } from "@/components/guide/StepCard";
 import { useTranslations } from "@/i18n";
 import { chapterById } from "@/lib/data";
@@ -27,6 +24,7 @@ function DashboardInner() {
   const [needle, setNeedle] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
   const [viewChapter, setViewChapter] = useState<string | null>(null);
+  const isMobile = useIsMobile();
 
   // A chapter can be requested with ?chapter=c3 (e.g. from redirected old links).
   useEffect(() => {
@@ -61,52 +59,85 @@ function DashboardInner() {
   return (
     <div className="flex flex-col gap-3">
       <h1 className="sr-only">{t("nav.dashboard")}</h1>
-      <div className="flex items-center gap-1 border-b">
-        <div role="tablist" className="flex min-w-0 flex-1 gap-1">
+      <div className="flex items-center gap-1.5">
+        <div
+          role="tablist"
+          aria-label={t("dash.viewsLabel")}
+          className="bg-muted/60 flex min-w-0 flex-1 rounded-lg border-2 p-0.5 sm:flex-none"
+        >
           {views.map((v) => (
             <button
               key={v}
               role="tab"
               aria-selected={profile.dashboard.view === v}
               onClick={() => setDashboardView(v)}
-              className={`-mb-px border-b-2 px-2.5 py-2 text-sm whitespace-nowrap ${profile.dashboard.view === v ? "border-primary font-medium" : "text-muted-foreground border-transparent"}`}
+              className={`min-w-0 flex-1 truncate rounded-md px-2.5 py-1.5 text-xs font-semibold whitespace-nowrap sm:flex-none sm:text-sm ${profile.dashboard.view === v ? "bg-card shadow-sticker-sm border-2" : "text-muted-foreground border-2 border-transparent"}`}
             >
-              {t(`dash.views.${v}` as const)}
+              {v === "chapter" ? (
+                <>
+                  <span className="sm:hidden">{t("dash.views.chapterShort")}</span>
+                  <span className="hidden sm:inline">{t("dash.views.chapter")}</span>
+                </>
+              ) : (
+                t(`dash.views.${v}` as const)
+              )}
             </button>
           ))}
         </div>
-        {canSearch && (
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            aria-label={t("dash.search")}
-            aria-pressed={searchOpen || needle !== ""}
-            onClick={() => setSearchOpen((o) => !o)}
-          >
-            <SearchIcon />
-          </Button>
-        )}
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            render={<Button variant="outline" size="sm" className="mb-1" />}
-            aria-label={t("dash.viewMenu")}
-          >
-            {t("dash.viewMenu")}
-            {activeToggles > 0 && <span className="tabular-nums"> · {activeToggles}</span>}
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-60">
-            {toggles.map((x) => (
-              <DropdownMenuCheckboxItem
-                key={x.key}
-                checked={profile.view[x.key]}
-                onCheckedChange={(v) => setView({ [x.key]: v })}
-                title={x.hint}
-              >
-                {x.label}
-              </DropdownMenuCheckboxItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className="ml-auto flex shrink-0 gap-1.5">
+          {canSearch && (
+            <Button
+              variant="outline"
+              size="icon"
+              aria-label={t("dash.search")}
+              aria-pressed={searchOpen || needle !== ""}
+              onClick={() => setSearchOpen((o) => !o)}
+            >
+              <SearchIcon />
+            </Button>
+          )}
+          <Sheet>
+            <SheetTrigger
+              render={<Button variant="outline" size="icon" className="relative" />}
+              aria-label={t("dash.viewMenu")}
+            >
+              <SlidersHorizontalIcon />
+              {activeToggles > 0 && (
+                <span
+                  aria-hidden
+                  className="bg-accent text-accent-foreground absolute -top-2 -right-2 grid size-5 place-items-center rounded-full border-2 text-[10px] font-bold tabular-nums"
+                >
+                  {activeToggles}
+                </span>
+              )}
+            </SheetTrigger>
+            <SheetContent
+              side={isMobile ? "bottom" : "right"}
+              className="gap-2 pb-[env(safe-area-inset-bottom)]"
+            >
+              <SheetHeader>
+                <SheetTitle>{t("dash.viewMenu")}</SheetTitle>
+              </SheetHeader>
+              <div className="flex flex-col px-4 pb-4">
+                {toggles.map((x) => (
+                  <label
+                    key={x.key}
+                    className="flex min-h-12 cursor-pointer items-center justify-between gap-4 border-b py-2 last:border-b-0"
+                  >
+                    <span className="flex flex-col">
+                      <span className="text-sm font-medium">{x.label}</span>
+                      {x.hint && <span className="text-muted-foreground text-xs">{x.hint}</span>}
+                    </span>
+                    <Switch
+                      checked={profile.view[x.key]}
+                      onCheckedChange={(v) => setView({ [x.key]: v })}
+                    />
+                  </label>
+                ))}
+              </div>
+            </SheetContent>
+          </Sheet>
+        </div>
       </div>
       {canSearch && (searchOpen || needle !== "") && (
         <FilterBar filters={filters} needle={needle} onNeedle={setNeedle} />

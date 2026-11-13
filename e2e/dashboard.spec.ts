@@ -122,10 +122,51 @@ test.describe("dashboard and progress", () => {
   test("buyable-only is a dashboard toggle that starts on", async ({ page }) => {
     await go(page, "/");
     await page.getByRole("button", { name: "View" }).click();
-    const toggle = page.getByRole("menuitemcheckbox", { name: "Only buyable items" });
+    const toggle = page.getByRole("switch", { name: /^Only buyable items/ });
     await expect(toggle).toBeChecked();
     await toggle.click();
     await expect(toggle).not.toBeChecked();
     expect((await activeProfile(page)).view.buyableOnly).toBe(false);
+  });
+
+  test("a category chip in the chapter hero filters the list", async ({ page }) => {
+    await go(page, "/");
+    const linda = page.getByRole("checkbox", { name: /Brave Little Linda/ });
+    await expect(linda.first()).toBeVisible();
+    const chips = page.getByRole("group", { name: "Show" });
+    const medals = chips.getByRole("button", { name: /^Medals/ });
+    await medals.click();
+    await expect(medals).toHaveAttribute("aria-pressed", "true");
+    await expect(linda).toHaveCount(0);
+    await expect(page.getByRole("checkbox", { name: /^Time:/ }).first()).toBeVisible();
+    await chips.getByRole("button", { name: /^Scoops/ }).click();
+    await expect(linda.first()).toBeVisible();
+    await chips.getByRole("button", { name: "All" }).click();
+    await expect(chips.getByRole("button", { name: "All" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+  });
+
+  test("a medal tile ticks the medal and counts toward the chip", async ({ page }) => {
+    await go(page, "/");
+    const medals = page
+      .getByRole("group", { name: "Show" })
+      .getByRole("button", { name: /^Medals/ });
+    await expect(medals).toContainText(/ 0\//);
+    const tile = page.getByRole("checkbox", { name: /^Time:/ }).first();
+    await tile.click();
+    await expect(tile).toHaveAttribute("aria-checked", "true");
+    await expect(medals).toContainText(/ 1\//);
+  });
+
+  test("the next chapter button and set-as-current work from the hero", async ({ page }) => {
+    await go(page, "/");
+    await page.getByRole("button", { name: "Next chapter" }).click();
+    const picker = page.getByLabel("Chapter", { exact: true });
+    await expect(picker).toHaveValue("c2");
+    await page.getByRole("button", { name: "Set as current chapter" }).click();
+    await expect(page.getByRole("button", { name: "Set as current chapter" })).toHaveCount(0);
+    expect((await activeProfile(page)).dashboard.currentChapter).toBe("c2");
   });
 });

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { ChevronDownIcon } from "lucide-react";
-import { CheckRow } from "@/components/chapter/CheckRow";
+import { cn } from "cn";
 import { Badge } from "@/components/ui/badge";
 import { useTranslations } from "@/i18n";
 import type { medalItems } from "@/lib/data";
@@ -8,7 +8,7 @@ import type { Section } from "@/lib/schemas";
 import { setChecked } from "@/lib/store";
 
 /**
- * A section's medal and prize checkboxes, plus its facts (enemies, totals, boss, …) as one summary
+ * A section's medals and prizes as a strip of tiles (yellow once won), plus its facts (enemies, totals, boss, …) as one summary
  * line that expands on tap. `showFacts` decides whether it starts expanded.
  */
 export function SectionFacts({
@@ -57,24 +57,46 @@ export function SectionFacts({
           )}
         </div>
       )}
-      {medals.map((m) => (
-        <CheckRow
-          key={m.id}
-          dense
-          checked={!!checks[m.id]}
-          onChange={(v) => setChecked(m.id, v)}
-          label={
-            <>
-              <span className="text-muted-foreground w-24 shrink-0">
-                {m.kind === "prize" && m.prizeType === "spheda"
-                  ? t("medal.spheda")
-                  : t(`medal.${m.kind}` as const)}
-              </span>
-              <span>{m.value}</span>
-            </>
-          }
-        />
-      ))}
+      {medals.length > 0 && (
+        <div className="grid grid-cols-3 gap-1.5 px-2 py-1">
+          {medals.map((m) => {
+            const won = !!checks[m.id];
+            const kind =
+              m.kind === "prize" && m.prizeType === "spheda"
+                ? t("medal.short.spheda")
+                : t(`medal.short.${m.kind}` as const);
+            return (
+              <button
+                key={m.id}
+                type="button"
+                role="checkbox"
+                aria-checked={won}
+                aria-label={`${kind}: ${m.value}`}
+                onClick={() => setChecked(m.id, !won)}
+                className={cn(
+                  "flex min-h-12 min-w-0 flex-col items-start justify-center rounded-md border-2 px-2 py-1 text-left transition-[translate,box-shadow]",
+                  won
+                    ? "border-border bg-accent text-accent-foreground shadow-sticker-sm"
+                    : "border-border/40 hover:border-border",
+                )}
+              >
+                <span
+                  className={cn(
+                    "text-[10px] font-bold tracking-wider uppercase",
+                    won ? "" : "text-muted-foreground",
+                  )}
+                >
+                  {won ? "✓ " : ""}
+                  {kind}
+                </span>
+                <span className="w-full truncate text-xs font-semibold" title={m.value}>
+                  {m.value}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      )}
       {hasFacts && (
         <>
           <button

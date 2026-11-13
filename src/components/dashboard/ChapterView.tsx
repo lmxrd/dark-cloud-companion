@@ -1,14 +1,8 @@
 import { useState } from "react";
-import { CheckRow } from "@/components/chapter/CheckRow";
 import type { StepFilters } from "@/components/guide/StepCard";
 import { Button } from "@/components/ui/button";
-import { ChevronLeftIcon, ChevronRightIcon, MoreHorizontalIcon } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { ChevronDownIcon, TriangleAlertIcon } from "lucide-react";
+import { ItemRow } from "@/components/guide/ItemRow";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Input } from "@/components/ui/input";
 import { useTranslations } from "@/i18n";
@@ -16,15 +10,18 @@ import { chapterById, chapters } from "@/lib/data";
 import {
   carriedSteps,
   anytimeSteps,
+  chapterCategoryProgress,
   chapterProgressOfGuides,
+  type ChapterCategory,
   openMissable,
   stepsInChapter,
 } from "@/lib/guide/dashboard";
 import { isStepDone } from "@/lib/guide/progress";
 import { derivedFor } from "@/lib/guide/useDerived";
 import type { Guide } from "@/lib/guide/types";
-import { setChecked, setCurrentChapter } from "@/lib/store";
+import { setCurrentChapter } from "@/lib/store";
 import type { Profile } from "@/lib/profiles";
+import { ChapterHero } from "./ChapterHero";
 import { GuideBlock } from "./GuideBlock";
 
 interface Props {
@@ -50,11 +47,18 @@ export function ChapterView({
   const t = useTranslations();
   const chapter = chapterById.get(chapterId)!;
   const index = chapters.findIndex((c) => c.id === chapterId);
-  const prev = chapters[index - 1];
   const next = chapters[index + 1];
   const mainProgress = chapterProgressOfGuides(guides, chapterId, checks);
-  const pct = mainProgress.total ? Math.round((mainProgress.done / mainProgress.total) * 100) : 0;
+  const categories = chapterCategoryProgress(guides, chapterId, checks);
   const [showAnytime, setShowAnytime] = useState(false);
+  const [missableOpen, setMissableOpen] = useState(false);
+  // The category chip applies to the chapter it was picked in.
+  const [picked, setPicked] = useState<{ chapterId: string; category: ChapterCategory | null }>({
+    chapterId,
+    category: null,
+  });
+  const category = picked.chapterId === chapterId ? picked.category : null;
+  const listFilters: StepFilters = category ? { ...filters, category } : filters;
 
   // Missable items from the switched-on guides that are still open up to and including this chapter.
   const missable = openMissable(guides, checks, chapter.number);
@@ -79,126 +83,52 @@ export function ChapterView({
 
   return (
     <div className="flex flex-col gap-4">
-      <header className="flex flex-col gap-2">
-        <div className="flex items-center gap-1.5">
+      <ChapterHero
+        chapter={chapter}
+        isCurrent={chapterId === currentId}
+        pinned={profile.dashboard.currentChapter !== null}
+        progress={mainProgress}
+        categories={categories}
+        category={category}
+        onCategory={(c) => setPicked({ chapterId, category: c })}
+        onChapter={onChapter}
+      />
+      {mainProgress.total > 0 && mainProgress.done === mainProgress.total && next && (
+        <div className="flex flex-wrap items-center gap-2 rounded-md border-2 px-3 py-2 text-sm">
+          <span>{t("dash.chapterDone")}</span>
           <Button
-            variant="outline"
-            size="icon-sm"
-            aria-label={t("dash.prev")}
-            disabled={!prev}
-            onClick={() => prev && onChapter(prev.id)}
+            size="sm"
+            onClick={() => {
+              onChapter(next.id);
+              if (chapterId === currentId) setCurrentChapter(next.id);
+            }}
           >
-            <ChevronLeftIcon />
+            {t("dash.goNext", { title: next.title })}
           </Button>
-          <h2 className="sr-only">
-            {chapter.phase === "main" ? `${chapter.number}. ` : ""}
-            {chapter.title}
-          </h2>
-          {chapterId === currentId && (
-            <span
-              role="img"
-              aria-label={t("dash.isCurrent")}
-              title={t("dash.isCurrent")}
-              className="bg-primary size-2 shrink-0 rounded-full"
-            />
-          )}
-          <select
-            className="min-w-0 flex-1 truncate rounded-md bg-transparent py-1 text-lg font-semibold"
-            value={chapterId}
-            onChange={(e) => onChapter(e.target.value)}
-            aria-label={t("dash.chapter")}
-          >
-            {chapters.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.phase === "main" ? `${c.number}. ` : ""}
-                {c.title}
-              </option>
-            ))}
-          </select>
-          {mainProgress.total > 0 && (
-            <span className="text-muted-foreground text-sm tabular-nums">
-              {t("step.progress", { done: mainProgress.done, total: mainProgress.total })}
-            </span>
-          )}
-          <Button
-            variant="outline"
-            size="icon-sm"
-            aria-label={t("dash.next")}
-            disabled={!next}
-            onClick={() => next && onChapter(next.id)}
-          >
-            <ChevronRightIcon />
-          </Button>
-          {(chapterId !== currentId || profile.dashboard.currentChapter !== null) && (
-            <DropdownMenu>
-              <DropdownMenuTrigger
-                render={<Button variant="outline" size="icon-sm" />}
-                aria-label={t("dash.moreActions")}
-              >
-                <MoreHorizontalIcon />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                {chapterId !== currentId && (
-                  <DropdownMenuItem onClick={() => setCurrentChapter(chapterId)}>
-                    {t("dash.setCurrent")}
-                  </DropdownMenuItem>
-                )}
-                {profile.dashboard.currentChapter !== null && (
-                  <DropdownMenuItem onClick={() => setCurrentChapter(null)}>
-                    {t("dash.followProgress")}
-                  </DropdownMenuItem>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
         </div>
-        {mainProgress.total > 0 && (
-          <div
-            className="bg-muted h-1 overflow-hidden rounded-full"
-            role="progressbar"
-            aria-label={chapter.title}
-            aria-valuenow={pct}
-            aria-valuemin={0}
-            aria-valuemax={100}
-          >
-            <div className="bg-primary h-full transition-all" style={{ width: `${pct}%` }} />
-          </div>
-        )}
-        {mainProgress.total > 0 && mainProgress.done === mainProgress.total && (
-          <div className="flex flex-wrap items-center gap-2 rounded-md border px-3 py-1.5 text-sm">
-            <span>{t("dash.chapterDone")}</span>
-            {next && (
-              <Button
-                size="sm"
-                onClick={() => {
-                  onChapter(next.id);
-                  if (chapterId === currentId) setCurrentChapter(next.id);
-                }}
-              >
-                {t("dash.goNext", { title: next.title })}
-              </Button>
-            )}
-          </div>
-        )}
-      </header>
+      )}
 
       {guides.length === 0 && <p className="text-muted-foreground text-sm">{t("dash.noActive")}</p>}
 
       {missable.length > 0 && (
-        <Collapsible className="border-destructive/50 rounded-lg border">
-          <CollapsibleTrigger className="text-destructive flex w-full items-center justify-between px-3 py-2 text-left text-sm font-medium">
-            <span>{t("dash.missableOpen")}</span>
-            <span className="tabular-nums">{missable.length}</span>
+        <Collapsible
+          open={missableOpen}
+          onOpenChange={setMissableOpen}
+          className="border-destructive bg-destructive/5 rounded-lg border-2"
+        >
+          <CollapsibleTrigger className="text-destructive flex w-full items-center justify-between gap-2 px-3 py-2.5 text-left text-sm font-semibold">
+            <span className="flex items-center gap-2">
+              <TriangleAlertIcon className="size-4 shrink-0" aria-hidden />
+              {t("dash.missableCount", { n: missable.length })}
+            </span>
+            <span className="flex items-center gap-1 text-xs">
+              {missableOpen ? t("dash.hide") : t("dash.show")}
+              <ChevronDownIcon className={`size-4 ${missableOpen ? "rotate-180" : ""}`} />
+            </span>
           </CollapsibleTrigger>
-          <CollapsibleContent className="px-3 pb-2">
+          <CollapsibleContent className="px-1 pb-1">
             {missable.map((i) => (
-              <CheckRow
-                key={i.id}
-                checked={false}
-                onChange={(v) => setChecked(i.id, v)}
-                label={i.name}
-                detail={chapterById.get(i.chapterId)?.title}
-              />
+              <ItemRow key={i.id} item={i} checks={checks} />
             ))}
           </CollapsibleContent>
         </Collapsible>
@@ -214,7 +144,7 @@ export function ChapterView({
           guide={guide}
           placed={placed}
           derived={derivedFor(guide)}
-          filters={filters}
+          filters={listFilters}
           chapterNumber={chapter.number}
         />
       ))}

@@ -8,6 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useTranslations } from "@/i18n";
 import { chapterById, sectionById } from "@/lib/data";
 import type { DerivedStep } from "@/lib/guide/derive";
+import type { ChapterCategory } from "@/lib/guide/dashboard";
 import { stepProgress } from "@/lib/guide/progress";
 import { resolveEntry } from "@/lib/guide/refs";
 import type { Section } from "@/lib/schemas";
@@ -25,6 +26,8 @@ export interface StepFilters {
   buyableOnly: boolean;
   /** Lowercased search text; entries that don't match are hidden. */
   needle: string;
+  /** Show only collectables of this category, or only section medals ("medal"). */
+  category?: ChapterCategory;
 }
 
 /** Entries that survive the view filters (hide done / post-game / search). */
@@ -35,6 +38,7 @@ export function visibleEntries(
   f: StepFilters,
 ): Entry[] {
   return step.entries.filter((e) => {
+    if (f.category && e.kind === "text") return false;
     if (e.kind === "text") {
       if (f.hideDone && checks[textTickId(guide.id, step.id, e.id)]) return false;
       return !f.needle || e.text.toLowerCase().includes(f.needle);
@@ -42,10 +46,12 @@ export function visibleEntries(
     const r = resolveEntry(e);
     if (r.kind === "missing") return false;
     if (r.kind === "item") {
+      if (f.category && r.item.category !== f.category) return false;
       if (f.hidePostgame && r.item.postgame) return false;
       if (f.hideDone && checks[r.item.id]) return false;
       return !f.needle || r.item.name.toLowerCase().includes(f.needle);
     }
+    if (f.category && f.category !== "medal") return false;
     // Section facts: hidden while searching; hide when every medal is done and "hide done" is on.
     if (f.needle) return false;
     return !(f.hideDone && r.medals.length > 0 && r.medals.every((m) => checks[m.id]));
@@ -92,6 +98,8 @@ export function StepCard({
     // oxlint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   if (step.entries.length > 0 && entries.length === 0 && !step.build && !step.notes) return null;
+  // A category filter shows matching entries only, never steps without any.
+  if (filters.category && entries.length === 0) return null;
 
   const ownTick =
     step.build || step.entries.length === 0 ? stepTickId(guide.id, step.id) : undefined;
