@@ -18,13 +18,14 @@ pnpm db:studio        # edit the game data in drizzle/game.db (Drizzle Studio)
 pnpm db:generate      # after changing src/db/schema.ts: write a migration in drizzle/
 pnpm db:migrate       # apply new migrations to drizzle/game.db
 pnpm db:check         # broken links and cross-row rules in drizzle/game.db
+pnpm db:export        # write src/gamedata/ from drizzle/game.db (dev, build, typecheck and test do this themselves)
 ```
 
 Before finishing a change run `pnpm check && pnpm typecheck && pnpm test`, plus `pnpm e2e` when UI, routing, storage, the service worker or the planner changed. Mention in your summary anything you could not verify.
 
 ## Where things are
 
-- `src/db/schema.ts` – the game-data database schema (Drizzle, SQLite); `drizzle/` holds its migrations and `game.db`, the committed database and the single source of truth for game data. `scripts/db/` checks it. The app still reads `src/data/` until the export from `game.db` replaces it.
+- `src/db/schema.ts` – the game-data database schema (Drizzle, SQLite); `drizzle/` holds its migrations and `game.db`, the committed database and the single source of truth for game data. `scripts/db/` checks it and exports it (`export.ts`) into `src/gamedata/` (generated, git-ignored; shapes in `src/lib/gamedata/types.ts`), via the `integrations/gamedata.ts` Astro integration and a Vitest global setup. The app still reads `src/data/` until it moves over to `src/gamedata/`.
 - `src/data/` – the extracted static game data (JSON only; schemas live in `src/lib/schemas.ts`). The cross-check tests live in `scripts/extract/data.test.ts`. `INCONSISTENCIES.md` is generated (`node scripts/extract/crosscheck.ts && pnpm fmt`).
 - `src/lib/weapons/` – pure game mechanics (ABS curve, levelling, spectrumize, build-up). Verified against the weapon FAQ's worked examples; do not "simplify" the formulas.
 - `src/lib/planner/` – `simulate.ts` is the source of truth for rules; `solve.ts` builds a MILP (HiGHS wasm, `highs.ts`) per build-up chain; `plan.ts` ranks chains, solves the best, adds ability coins; `templates.ts` generates sphere-weapon templates; `worker.ts`/`client.ts` run it off the main thread.
