@@ -2,6 +2,8 @@
 dist/
 # generated types
 .astro/
+# game data exported from drizzle/game.db
+src/gamedata/
 
 # dependencies
 node_modules/
