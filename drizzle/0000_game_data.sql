@@ -12,7 +12,7 @@ CREATE UNIQUE INDEX `abilities_name_unique` ON `abilities` (`name`);--> statemen
 CREATE TABLE `chapters` (
 	`number` integer PRIMARY KEY NOT NULL,
 	`title` text NOT NULL,
-	CONSTRAINT "chapters_number" CHECK("chapters"."number" BETWEEN 1 AND 9)
+	CONSTRAINT "chapters_number" CHECK("chapters"."number" BETWEEN 1 AND 8)
 );
 --> statement-breakpoint
 CREATE TABLE `dungeon_weapons` (
@@ -50,7 +50,6 @@ CREATE TABLE `enemies` (
 	`abs` integer,
 	`gilda` integer,
 	`effectiveness_wrench` integer,
-	`effectiveness_hammer` integer,
 	`effectiveness_sword` integer,
 	`effectiveness_gun` integer,
 	`effectiveness_beam` integer,

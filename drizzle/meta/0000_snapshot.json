@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "8c0df159-3177-40cc-b7a1-f52948d670a9",
+  "id": "bae620e6-c24d-452a-b072-df0b851ce2db",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "abilities": {
@@ -92,7 +92,7 @@
       "checkConstraints": {
         "chapters_number": {
           "name": "chapters_number",
-          "value": "\"chapters\".\"number\" BETWEEN 1 AND 9"
+          "value": "\"chapters\".\"number\" BETWEEN 1 AND 8"
         }
       }
     },
@@ -316,13 +316,6 @@
         },
         "effectiveness_wrench": {
           "name": "effectiveness_wrench",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "effectiveness_hammer": {
-          "name": "effectiveness_hammer",
           "type": "integer",
           "primaryKey": false,
           "notNull": false,
