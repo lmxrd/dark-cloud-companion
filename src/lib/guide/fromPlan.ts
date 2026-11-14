@@ -2,6 +2,7 @@ import { chapters } from "@/lib/data";
 import { enemyChapter, stageResourceChapter } from "@/lib/guides/fromPlan";
 import type { PlanResult } from "@/lib/planner/plan";
 import { getWeapon } from "@/lib/planner/sources";
+import type { PlacedStage } from "@/lib/planner/timeline";
 import type { Acquire } from "@/lib/planner/types";
 import type { WeaponState } from "@/lib/weapons/mechanics";
 import { newId, type BuildStart, type Guide, type Step } from "./types";
@@ -22,7 +23,10 @@ export function stateToBuildStart(s: WeaponState, spBonus: number, acquire?: Acq
   };
 }
 
-/** Turns a planner result into a guide: one build step per stage, each placed in the earliest workable chapter. */
+/**
+ * Turns a planner result into a guide: one build step per stage, each placed in the earliest workable
+ * chapter, or at the section `placement` gives (with a note on ABS to grind).
+ */
 export function planResultToGuide(args: {
   id?: string;
   title: string;
@@ -33,6 +37,8 @@ export function planResultToGuide(args: {
   acquire?: Acquire;
   kind?: Guide["kind"];
   createdAt?: number;
+  /** Where each stage falls in the story (see planner/timeline); without it, stages get a chapter only. */
+  placement?: PlacedStage[];
 }): Guide {
   const { result } = args;
   if (!result.plan || !result.chain) throw new Error("no plan to convert");
@@ -46,11 +52,20 @@ export function planResultToGuide(args: {
       stageResourceChapter(stage),
       ...kills.map((e) => enemyChapter.get(e) ?? 8),
     );
+    const placed = args.placement?.[i];
     return {
       id: `s${i + 1}`,
       title: getWeapon(stage.weaponId).name + (next ? ` → ${getWeapon(next.weaponId).name}` : ""),
-      notes: "",
-      chapterId: chapterIdOf(Math.min(chapter, 8)),
+      notes: [
+        placed?.grindAbs &&
+          `Grind about ${placed.grindAbs.toLocaleString("en")} ABS more than the story gives by this point.`,
+        placed?.grindGilda &&
+          `Farm about ${placed.grindGilda.toLocaleString("en")} gilda more than the story pays by this point.`,
+      ]
+        .filter(Boolean)
+        .join(" "),
+      chapterId: chapterIdOf(placed ? placed.chapter : Math.min(chapter, 8)),
+      ...(placed ? { sectionId: placed.sectionId } : {}),
       entries: [],
       build: stage,
     };

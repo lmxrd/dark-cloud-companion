@@ -9,6 +9,12 @@ const variantSchema = z.object({
   /** Becomes the guide id: <targetId>-<id>. Must be unique across all plans. */
   id: z.string().min(1),
   objective: z.enum(["abs", "gilda", "steps"]),
+  /**
+   * How stages are placed on the story (ABS from clearing each section once, all of it to this
+   * weapon): `story` waits for the story's ABS and grinds only when it runs out; `earliest` finishes
+   * in the earliest chapter possible, doing each stage as soon as it's unlocked and grinding the rest.
+   */
+  flow: z.enum(["earliest", "story"]).default("story"),
   label: z.string().min(1),
   maxGilda: z.number().optional(),
   maxChapter: z.number().optional(),
@@ -48,6 +54,7 @@ export interface PlanSpec {
   id: string;
   targetId: string;
   objective: "abs" | "gilda" | "steps";
+  flow: "earliest" | "story";
   label: string;
   goal: "max" | "reach";
   maxChapter: number;
@@ -75,6 +82,7 @@ export function expandPlans(config: PlansConfig): PlanSpec[] {
           id,
           targetId,
           objective: v.objective,
+          flow: v.flow,
           label: v.label,
           goal: config.defaults.goal,
           maxChapter: v.maxChapter ?? group.maxChapter ?? config.defaults.maxChapter,

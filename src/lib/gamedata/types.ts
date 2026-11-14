@@ -49,8 +49,15 @@ export interface Names {
 // ─── core.json (always loaded) ───────────────────────────────────────────────────────────────────
 
 export type Chapter = Select<typeof db.chapters>;
-/** A section; `sphedaPrize` is its first-win Spheda prize (the medal prize). */
-export type Section = Select<typeof db.sections> & { sphedaPrize?: Reward };
+/**
+ * A section; `sphedaPrize` is its first-win Spheda prize (the medal prize). Derived: `abs` and
+ * `gilda` for clearing it once (Star Key areas left out), set when not zero.
+ */
+export type Section = Select<typeof db.sections> & {
+  sphedaPrize?: Reward;
+  abs?: number;
+  gilda?: number;
+};
 export type Dungeon = Select<typeof db.dungeons>;
 export type Town = Select<typeof db.towns>;
 
@@ -172,6 +179,8 @@ export interface Weapons {
   abilities: Ability[];
   /** Derived: the first chapter each kill-requirement enemy appears in. */
   killEnemyChapters: Record<string, number>;
+  /** Derived: the first section (in play order) each kill-requirement enemy appears in. */
+  killEnemySections: Record<string, string>;
 }
 
 export type Item = Select<typeof db.items> & {

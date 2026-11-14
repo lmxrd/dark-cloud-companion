@@ -5,6 +5,10 @@
 //   targets    Weapon ids to plan for; the entry "finals" expands to every final-tier weapon
 //              and can be mixed with explicit ids.
 //   objective  abs | gilda | steps — what the optimiser minimises.
+//   flow       how stages are placed on the story; ABS comes from clearing each section once and all
+//              of it goes to the weapon being built. story = wait for the story's ABS, grind only
+//              when it runs out; earliest = finish in the earliest chapter possible, each stage as
+//              soon as it's unlocked, grinding what's missing.
 //   goal       max = maxed stats, reach = just get the weapon.
 //   abilities  carried by the finished weapon (coins are added where the chain doesn't provide
 //              them); set to [] for none.
@@ -25,8 +29,8 @@ export const plansConfig = {
     {
       targets: ["finals", "falcon"],
       variants: [
-        { id: "max-abs", objective: "abs", label: "Least ABS" },
-        { id: "max-fast", objective: "steps", label: "Fastest" },
+        { id: "max-abs", objective: "abs", flow: "story", label: "Least ABS" },
+        { id: "earliest", objective: "abs", flow: "earliest", label: "Earliest" },
       ],
     },
     // {

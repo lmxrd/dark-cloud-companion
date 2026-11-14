@@ -199,8 +199,28 @@ export function buildGameData(db: DatabaseSync) {
       productOnly(r),
     ]),
   );
+  // Derived: ABS and gilda for clearing the section once (Star Key areas left out).
+  const sectionTotals = new Map(
+    (
+      db
+        .prepare(
+          `SELECT se.section_id AS id, sum(se.count * coalesce(e.abs, 0)) AS abs,
+             sum(se.count * coalesce(e.gilda, 0)) AS gilda
+           FROM section_enemies se JOIN enemies e ON e.id = se.enemy_id
+           WHERE se.star_area = 0 GROUP BY se.section_id`,
+        )
+        .all() as { id: string; abs: number; gilda: number }[]
+    ).map((r) => [r.id, r]),
+  );
   const sections = rowsOf(db, "SELECT * FROM sections ORDER BY chapter_number, position").map(
-    (s) => (firstPrizes.has(s.id) ? { ...s, sphedaPrize: firstPrizes.get(s.id) } : s),
+    (s) => {
+      const t = sectionTotals.get(s.id as string);
+      return {
+        ...s,
+        ...(firstPrizes.has(s.id) ? { sphedaPrize: firstPrizes.get(s.id) } : {}),
+        ...(t && (t.abs || t.gilda) ? { abs: t.abs, gilda: t.gilda } : {}),
+      };
+    },
   ) as unknown as Section[];
   const core: Core = {
     chapters: rowsOf(db, "SELECT * FROM chapters ORDER BY number") as unknown as Chapter[],
@@ -325,17 +345,24 @@ export function buildGameData(db: DatabaseSync) {
       sources: src(`weapon:${w.id}`),
     })) as never,
     abilities: rowsOf(db, "SELECT * FROM abilities ORDER BY id") as never,
-    killEnemyChapters: Object.fromEntries(
-      (
-        db
-          .prepare(
-            `SELECT k.enemy_id AS id, min(s.chapter_number) AS chapter FROM weapon_kill_requirements k
-             JOIN section_enemies se ON se.enemy_id = k.enemy_id JOIN sections s ON s.id = se.section_id
-             GROUP BY k.enemy_id`,
-          )
-          .all() as { id: string; chapter: number }[]
-      ).map((r) => [r.id, r.chapter]),
-    ),
+    ...(() => {
+      // The first section (in play order) each kill-requirement enemy appears in.
+      const firsts = db
+        .prepare(
+          `SELECT id, chapter, section FROM (
+             SELECT k.enemy_id AS id, s.chapter_number AS chapter, s.id AS section,
+               row_number() OVER (PARTITION BY k.enemy_id ORDER BY s.chapter_number, s.position) AS n
+             FROM (SELECT DISTINCT enemy_id FROM weapon_kill_requirements) k
+             JOIN section_enemies se ON se.enemy_id = k.enemy_id
+             JOIN sections s ON s.id = se.section_id)
+           WHERE n = 1`,
+        )
+        .all() as { id: string; chapter: number; section: string }[];
+      return {
+        killEnemyChapters: Object.fromEntries(firsts.map((r) => [r.id, r.chapter])),
+        killEnemySections: Object.fromEntries(firsts.map((r) => [r.id, r.section])),
+      };
+    })(),
   };
 
   const effects = groupBy(rowsOf(db, "SELECT * FROM item_effects ORDER BY item_id, id"), "itemId");
