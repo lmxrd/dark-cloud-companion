@@ -8,7 +8,7 @@ import {
   importProfiles,
   initialState,
   parseProfileExport,
-  parseState,
+  loadState,
   type AppState,
   type DashboardView,
   type ExportFile,
@@ -31,10 +31,36 @@ export const $ready = atom(false);
 export const $profile = computed($state, (s) => s.profiles[s.activeProfile]);
 export const $checks = computed($profile, (p) => p.checks);
 
+/** Something is wrong with what is stored in this browser; the app shows a banner for it. */
+export type StorageProblem =
+  | { kind: "corrupt"; backupKey: string | null }
+  | { kind: "newer" }
+  | { kind: "save-failed" };
+export const $storageProblem = atom<StorageProblem | null>(null);
+
+/** False when the stored data is from a newer version of the app: never write over it. */
+let writable = true;
+
 function persist(s: AppState) {
+  if (!writable) return;
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
-  } catch {}
+    if ($storageProblem.get()?.kind === "save-failed") $storageProblem.set(null);
+  } catch {
+    // Storage full, or blocked (private browsing): every later change would be lost on reload.
+    $storageProblem.set({ kind: "save-failed" });
+  }
+}
+
+/** Keeps a copy of stored data the app can't read, so a fallback never destroys it. */
+function backUp(raw: string): string | null {
+  const key = `${STORAGE_KEY}:backup-${Date.now()}`;
+  try {
+    localStorage.setItem(key, raw);
+    return key;
+  } catch {
+    return null;
+  }
 }
 
 if (typeof window !== "undefined") {
@@ -42,13 +68,41 @@ if (typeof window !== "undefined") {
   try {
     raw = localStorage.getItem(STORAGE_KEY);
   } catch {}
-  $state.set(parseState(raw));
+  const loaded = loadState(raw);
+  if (loaded.problem === "newer") {
+    writable = false;
+    $storageProblem.set({ kind: "newer" });
+  } else if (loaded.problem === "corrupt" && raw) {
+    $storageProblem.set({ kind: "corrupt", backupKey: backUp(raw) });
+  }
+  $state.set(loaded.state);
   $ready.set(true);
   $state.listen(persist);
-  // Keep tabs in sync.
+  // Keep tabs in sync, but only with data this version can read: a cleared key, a newer format or
+  // garbage from another tab must not replace (and then overwrite) this tab's state.
   window.addEventListener("storage", (e) => {
-    if (e.key === STORAGE_KEY) $state.set(parseState(e.newValue));
+    if (e.key !== STORAGE_KEY || e.newValue === null) return;
+    const next = loadState(e.newValue);
+    if (next.problem === "newer") {
+      writable = false;
+      $storageProblem.set({ kind: "newer" });
+      return;
+    }
+    if (!next.problem) $state.set(next.state);
   });
+}
+
+/** The raw text of a backup made by `backUp`, for downloading. */
+export function readBackup(key: string): string | null {
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+export function dismissStorageProblem() {
+  $storageProblem.set(null);
 }
 
 function updateProfile(fn: (p: Profile) => Profile) {

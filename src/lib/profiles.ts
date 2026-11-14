@@ -132,25 +132,56 @@ export function createProfile(name: string, now = Date.now()): Profile {
 }
 
 /** Reads persisted JSON of either version; falls back to a fresh state. */
-export function parseState(raw: string | null): AppState {
-  const fresh = () => {
-    const p = createProfile("Playthrough 1");
-    return {
-      version: STATE_VERSION,
-      activeProfile: p.id,
-      profiles: { [p.id]: p },
-    } satisfies AppState;
-  };
-  if (!raw) return fresh();
-  try {
-    const data = JSON.parse(raw);
-    const v2 = appState.safeParse(data);
-    if (v2.success && v2.data.profiles[v2.data.activeProfile]) return v2.data;
-    const v1 = appStateV1.safeParse(data);
-    if (v1.success && v1.data.profiles[v1.data.activeProfile]) return migrateState(v1.data);
-  } catch {}
-  return fresh();
+/** Why stored data could not be used as is. */
+export type LoadProblem = "corrupt" | "newer";
+
+export interface LoadResult {
+  state: AppState;
+  /** Set when the stored data was not used; the caller must not lose it. */
+  problem?: LoadProblem;
 }
+
+/** The active profile must exist; fall back to the first profile instead of discarding everything. */
+function withActiveProfile(s: AppState): AppState | null {
+  if (s.profiles[s.activeProfile]) return s;
+  const first = Object.keys(s.profiles)[0];
+  return first ? { ...s, activeProfile: first } : null;
+}
+
+/**
+ * Reads stored state. Unreadable data and data from a newer version of the app come back as a fresh
+ * state plus a `problem`, so the caller can keep the original (back it up, or not write over it).
+ */
+export function loadState(raw: string | null): LoadResult {
+  const fresh = () => initialState();
+  if (!raw) return { state: fresh() };
+  let data: unknown;
+  try {
+    data = JSON.parse(raw);
+  } catch {
+    return { state: fresh(), problem: "corrupt" };
+  }
+  const version =
+    data && typeof data === "object" && "version" in data
+      ? (data as { version: unknown }).version
+      : undefined;
+  if (typeof version === "number" && version > STATE_VERSION)
+    return { state: fresh(), problem: "newer" };
+  const v2 = appState.safeParse(data);
+  if (v2.success) {
+    const s = withActiveProfile(v2.data);
+    return s ? { state: s } : { state: fresh() };
+  }
+  const v1 = appStateV1.safeParse(data);
+  if (v1.success && Object.keys(v1.data.profiles).length > 0) {
+    const migrated = withActiveProfile(migrateState(v1.data));
+    if (migrated) return { state: migrated };
+  }
+  return { state: fresh(), problem: "corrupt" };
+}
+
+/** Stored state, or a fresh one when it can't be used (see `loadState` for the reason). */
+export const parseState = (raw: string | null): AppState => loadState(raw).state;
 
 export type ViewSettings = z.infer<typeof viewSettings>;
 

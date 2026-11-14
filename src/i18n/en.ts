@@ -80,6 +80,16 @@ export const en = {
   "chapters.mainOnly": "main story only",
 
   "settings.title": "Settings",
+  "storage.corrupt":
+    "Your saved progress couldn't be read, so the app started a fresh profile. The old data was kept as a backup in this browser; download it before clearing site data.",
+  "storage.newer":
+    "This progress was saved by a newer version of the app. Reload to update; until then nothing you change here is saved, so the newer data stays intact.",
+  "storage.save-failed":
+    "Changes can't be saved in this browser (storage is full or blocked, e.g. in private browsing). Export your profiles to keep them.",
+  "storage.reload": "Reload",
+  "storage.downloadBackup": "Download the backup",
+  "storage.export": "Go to export",
+  "storage.dismiss": "Dismiss",
   "settings.switchTo": "Switch to {name}",
   "settings.activeProfile": "active",
   "settings.profileActions": "Actions for {name}",

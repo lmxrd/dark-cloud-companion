@@ -12,6 +12,7 @@ import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarProvider, SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import { AppSidebar, ProfileButton } from "@/components/AppSidebar";
 import { BottomNav } from "@/components/BottomNav";
+import { StorageBanner } from "@/components/StorageBanner";
 import { crumbsFor } from "@/components/nav";
 import { withBase } from "@/lib/base";
 import { useTranslations } from "@/i18n";
@@ -87,6 +88,7 @@ export function AppShell({
         <AppHeader pathname={pathname} page={page} />
         {/* On phones, leave room for the fixed tab bar and the home indicator below it. */}
         <div className="mx-auto w-full max-w-5xl px-4 pt-6 pb-[calc(6rem+env(safe-area-inset-bottom))] md:pb-6">
+          <StorageBanner />
           {children}
         </div>
         <BottomNav pathname={pathname} />

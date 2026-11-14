@@ -10,7 +10,7 @@ import { getWeapon } from "@/lib/planner/sources";
 import { freshState } from "@/lib/weapons/mechanics";
 import { emptyWalkthrough } from "@/lib/walkthroughs/types";
 import { deriveBuild } from "@/lib/guide/derive";
-import { appState, createProfile, migrateProfile, parseState } from "./profiles";
+import { appState, createProfile, loadState, migrateProfile, parseState } from "./profiles";
 
 async function legacyProfile() {
   const p = createProfileV1("Old", 5);
@@ -151,5 +151,39 @@ describe("planner inputs", () => {
       profiles: { [p.id]: { ...withInputs, planner: { ...withInputs.planner, maxChapter: 99 } } },
     };
     expect(parseState(JSON.stringify(bad)).profiles[p.id]?.planner).toBeUndefined();
+  });
+});
+
+describe("loadState", () => {
+  const valid = () => {
+    const p = createProfile("Alpha");
+    return { version: 2, activeProfile: p.id, profiles: { [p.id]: p } };
+  };
+
+  test("nothing stored is a fresh state without a problem", () => {
+    expect(loadState(null).problem).toBeUndefined();
+  });
+
+  test("valid state loads as is", () => {
+    const s = valid();
+    expect(loadState(JSON.stringify(s))).toEqual({ state: s });
+  });
+
+  test("corrupt JSON and unknown shapes are reported, not silently replaced", () => {
+    expect(loadState("{ nope").problem).toBe("corrupt");
+    expect(loadState(JSON.stringify({ version: 2, profiles: "x" })).problem).toBe("corrupt");
+  });
+
+  test("data from a newer version is reported so it is never overwritten", () => {
+    const r = loadState(JSON.stringify({ ...valid(), version: 99 }));
+    expect(r.problem).toBe("newer");
+  });
+
+  test("a missing active profile is repaired instead of discarding everything", () => {
+    const s = valid();
+    const r = loadState(JSON.stringify({ ...s, activeProfile: "gone" }));
+    expect(r.problem).toBeUndefined();
+    expect(r.state.activeProfile).toBe(Object.keys(s.profiles)[0]);
+    expect(r.state.profiles).toEqual(s.profiles);
   });
 });
