@@ -47,7 +47,7 @@ export function SphedaTracker() {
               ))}
               <a
                 className="text-muted-foreground block px-2 py-1.5 text-xs underline"
-                href={withBase(`/?chapter=${c.id}`)}
+                href={withBase(`/chapters/${c.id}`)}
               >
                 {t("spheda.openChapter")}
               </a>

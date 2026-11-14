@@ -18,6 +18,8 @@ import type { Objective } from "@/lib/planner/solve";
 import { getWeapon, weaponById, weaponData } from "@/lib/planner/sources";
 import { freshState, type WeaponState } from "@/lib/weapons/mechanics";
 import { $profile, saveGuide, setPlannerInputs, setView } from "@/lib/store";
+import type { PlannerInputs } from "@/lib/profiles";
+import { queryParam, setQuery } from "@/lib/url";
 import { AbilityPicker } from "./AbilityPicker";
 import { PlanPreview } from "./PlanPreview";
 import { StartSpecs } from "./StartSpecs";
@@ -45,6 +47,20 @@ function defaultTargetOf(type: WeaponType): string {
 
 const isZero = (s: Stats) => STAT_KEYS.every((k) => s[k] === 0);
 
+/** Remembered inputs moved to another target, as if it had been picked in the form. */
+function retarget(inputs: PlannerInputs, id: string): PlannerInputs {
+  const w = getWeapon(id);
+  const keepStart = inputs.customStart && ancestorsOf(id).has(inputs.start.weaponId);
+  return {
+    ...inputs,
+    targetId: id,
+    endStats: { ...w.maxStats },
+    endLevel: 0,
+    customStart: keepStart,
+    maxChapter: earliestChapter(defaultStart(id), id),
+  };
+}
+
 /**
  * Generates an optimal weapon build: pick a weapon type (left tabs), a target weapon with required
  * specs, optional abilities, a start point and the limits; the result can be opened in the editor or
@@ -57,11 +73,17 @@ export function GeneratorSection({ onOpenEditor }: { onOpenEditor: () => void })
   const allowFound = !view.buyableOnly;
   // The last inputs are remembered per profile; ignore ones that point at weapons that no longer exist.
   const remembered = $profile.get().planner;
-  const saved0 =
+  const valid =
     remembered && weaponById.has(remembered.targetId) && weaponById.has(remembered.start.weaponId)
       ? remembered
       : undefined;
-  const initialTarget = saved0?.targetId ?? defaultTargetOf("wrench");
+  // Weapon pages link here with ?target=<weapon id>; it replaces the remembered target.
+  const [linked] = useState(() => {
+    const id = queryParam("target");
+    return id && weaponById.has(id) ? id : undefined;
+  });
+  const saved0 = linked && valid && linked !== valid.targetId ? retarget(valid, linked) : valid;
+  const initialTarget = linked ?? saved0?.targetId ?? defaultTargetOf("wrench");
   const [typeTab, setTypeTab] = useState<WeaponType>(() => getWeapon(initialTarget).type);
   const [targetId, setTargetId] = useState(initialTarget);
   // Target specs default to the weapon's max stats (all-zero inputs come from older remembered data).
@@ -176,15 +198,11 @@ export function GeneratorSection({ onOpenEditor }: { onOpenEditor: () => void })
     if (mode === "optimal") setStart(freshState(getWeapon(defaultStart(targetId))));
   };
 
-  // Deep link from weapon pages: /planner?target=<weapon id>
+  // The linked target is now remembered with the other inputs: drop it from the URL so a reload
+  // keeps whatever the user picks next.
   useEffect(() => {
-    const id = new URLSearchParams(location.search).get("target");
-    if (id && weaponData.weapons.some((w) => w.id === id)) {
-      setTypeTab(getWeapon(id).type);
-      selectTarget(id);
-    }
-    // Run once on mount.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    if (linked) setQuery({ target: null }, { replace: true });
+    // oxlint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Warm the sphere-template cache for the current option set while the user fills in the form,

@@ -31,7 +31,7 @@ test.describe("reference pages", () => {
 
   test("old chapter URLs redirect to the dashboard", async ({ page }) => {
     await go(page, "/chapters/c3");
-    await expect(page).toHaveURL(/\/\?chapter=c3$/);
+    await expect(page).toHaveURL(/\/chapters\/c3$/);
     await expect(page.getByRole("heading", { name: /The Sage of the Stars/ })).toBeVisible();
   });
 });

@@ -3,6 +3,8 @@ import { cn } from "cn";
 import { useEffect, useMemo, useState } from "react";
 import { BookOpenIcon, SearchIcon, StarIcon } from "lucide-react";
 import { withBase } from "@/lib/base";
+import { useQueryChoice, useQueryText } from "@/lib/url";
+import { Gate } from "@/components/Gate";
 import { weaponType, type Weapon, type WeaponType } from "@/lib/schemas";
 import { useTranslations } from "@/i18n";
 import { allGuides } from "@/lib/guide/builtin";
@@ -42,10 +44,13 @@ function useGuideWeapons(): Set<string> {
 
 export function WeaponList() {
   const t = useTranslations();
-  const [q, setQ] = useState("");
-  const [type, setType] = useState<string>("all");
-  const [finalsOnly, setFinalsOnly] = useState(false);
-  const [sort, setSort] = useState<Sort>("name");
+  // Search, type, finals and sort live in the query (?q=&type=&finals=1&sort=).
+  const [q, setQ] = useQueryText("q");
+  const [type, setType] = useQueryChoice("type", ["all", ...weaponType.options], "all");
+  const [finals, setFinals] = useQueryChoice("finals", ["", "1"], "");
+  const finalsOnly = finals === "1";
+  const setFinalsOnly = (v: boolean) => setFinals(v ? "1" : "");
+  const [sort, setSort] = useQueryChoice<Sort>("sort", ["name", "attack", "abs", "sp"], "name");
   const inGuides = useGuideWeapons();
 
   const sections = useMemo(() => {
@@ -78,7 +83,7 @@ export function WeaponList() {
     );
 
   return (
-    <div className="flex flex-col gap-5">
+    <Gate on={["url"]} className="flex flex-col gap-5">
       <div className="bg-background/95 sticky top-0 z-20 -mx-4 flex flex-col gap-2 px-4 py-2 backdrop-blur">
         <div className="flex gap-2">
           <label className="bg-card focus-within:ring-ring flex h-10 min-w-0 flex-1 items-center gap-2 rounded-md border-2 px-3 focus-within:ring-2">
@@ -213,6 +218,6 @@ export function WeaponList() {
           </section>
         )),
       )}
-    </div>
+    </Gate>
   );
 }

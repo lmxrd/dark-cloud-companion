@@ -20,6 +20,14 @@ const profile = (id: string, name: string) => ({
 
 const pages = [
   "/",
+  "/overview",
+  "/by-guide",
+  "/chapters/c3",
+  "/?chapter=c3&cat=medal&q=a",
+  "/guides?q=zero",
+  "/weapons?type=sword&finals=1&sort=abs&q=a",
+  "/items?kind=found&gives=at&q=a",
+  "/monsters#flora",
   "/guides",
   "/reference",
   "/weapons",

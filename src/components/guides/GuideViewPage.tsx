@@ -2,7 +2,8 @@ import { PageHeader } from "@/components/PageHeader";
 import { useChecks, useProfile } from "@/lib/useAppStore";
 import { cn } from "cn";
 import { withBase } from "@/lib/base";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
+import { queryParam, useQueryText } from "@/lib/url";
 import { MoreHorizontalIcon, PlayIcon, StarIcon } from "lucide-react";
 import { downloadGuides, fileSafe } from "@/components/ContentTransfer";
 import { StepCard, type StepFilters } from "@/components/guide/StepCard";
@@ -46,7 +47,7 @@ function GuideMenu({ guide }: { guide: Guide }) {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-52">
         {mine && (
-          <DropdownMenuItem render={<a href={withBase(`/planner?edit=${q}`)} />}>
+          <DropdownMenuItem render={<a href={withBase(`/planner/editor?edit=${q}`)} />}>
             {t("guides.edit")}
           </DropdownMenuItem>
         )}
@@ -54,7 +55,7 @@ function GuideMenu({ guide }: { guide: Guide }) {
           onClick={() => {
             const copy = duplicateGuide(guide);
             saveGuide(copy);
-            location.href = withBase(`/planner?edit=${encodeURIComponent(copy.id)}`);
+            location.href = withBase(`/planner/editor?edit=${encodeURIComponent(copy.id)}`);
           }}
         >
           {t("guides.duplicate")}
@@ -91,14 +92,14 @@ export function GuideViewPage() {
   const t = useTranslations();
   const profile = useProfile();
   const checks = useChecks();
-  const [id, setId] = useState<string | null>(null);
-  const [needle, setNeedle] = useState("");
+  // Client-only island: the URL is there from the first render.
+  const [id] = useState(() => queryParam("id") ?? "");
+  const [needle, setNeedle] = useQueryText("q");
   // Chapter groups the user opened or closed; the rest follow the default.
   const [opened, setOpened] = useState<Record<string, boolean>>({});
-  useEffect(() => setId(new URLSearchParams(location.search).get("id")), []);
   const guide = id ? findGuide(id, profile.guides) : undefined;
   const groups = useMemo(() => (guide ? [...groupByChapter(guide.steps)] : []), [guide]);
-  if (!guide) return <p className="text-sm">{id === null ? "" : t("guides.notFound")}</p>;
+  if (!guide) return <p className="text-sm">{t("guides.notFound")}</p>;
 
   const derived = derivedFor(guide);
   const p = stepsProgress(guide, guide.steps, checks);

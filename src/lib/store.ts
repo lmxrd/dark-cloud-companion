@@ -11,7 +11,6 @@ import {
   parseProfileExport,
   loadState,
   type AppState,
-  type DashboardView,
   type ExportFile,
   type PlannerInputs,
   type Profile,
@@ -135,10 +134,6 @@ export function setManyChecked(ids: string[], checked: boolean) {
 
 export function setView(patch: Partial<ViewSettings>) {
   updateProfile((p) => ({ ...p, view: { ...p.view, ...patch } }));
-}
-
-export function setDashboardView(view: DashboardView) {
-  updateProfile((p) => ({ ...p, dashboard: { ...p.dashboard, view } }));
 }
 
 /** `null` follows progress automatically. */

@@ -31,6 +31,13 @@ const pathname = stripBase(Astro.url.pathname);
         const dark = t ? t === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
         document.documentElement.classList.toggle("dark", dark);
       } catch {}
+      // Tell gated islands (see Gate.tsx) what their server render could not know about.
+      const pending = [];
+      if (location.search || location.hash) pending.push("url");
+      try {
+        if (localStorage.getItem("dcc:state")) pending.push("state");
+      } catch {}
+      document.documentElement.dataset.pending = pending.join(" ");
     </script>
   </head>
   <body class="bg-background text-foreground min-h-screen font-sans antialiased">

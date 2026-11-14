@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { SearchIcon, SlidersHorizontalIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,10 @@ import { useTranslations } from "@/i18n";
 import { chapterById } from "@/lib/data";
 import { firstIncompleteChapter } from "@/lib/guide/dashboard";
 import type { DashboardView } from "@/lib/profiles";
-import { setDashboardView } from "@/lib/store";
+import { stripBase, withBase } from "@/lib/base";
+import { navigate, usePathname, useQueryParam, useQueryText } from "@/lib/url";
+import { Gate } from "@/components/Gate";
+import { dashboardPath, parseDashboardPath, type DashboardRoute } from "./route";
 import { ByGuideView } from "./ByGuideView";
 import { ChapterView, FilterBar } from "./ChapterView";
 import { OverviewView } from "./OverviewView";
@@ -18,19 +21,38 @@ import { useActiveGuides } from "./useActiveGuides";
 
 const views: DashboardView[] = ["chapter", "overview", "byGuide"];
 
-function DashboardInner() {
+const isChapter = (id: string) => chapterById.has(id);
+
+function DashboardInner({ path }: { path: string }) {
   const t = useTranslations();
   const { profile, checks, guides } = useActiveGuides();
-  const [needle, setNeedle] = useState("");
+  // The view and the chapter are the path (`/overview`, `/chapters/c3`), the search is `?q=`.
+  const pathname = stripBase(usePathname(withBase(path)));
+  const legacyChapter = useQueryParam("chapter");
+  const route = parseDashboardPath(
+    pathname,
+    legacyChapter ? `?chapter=${legacyChapter}` : "",
+    isChapter,
+  );
+  const [needle, setNeedle] = useQueryText("q");
   const [searchOpen, setSearchOpen] = useState(false);
-  const [viewChapter, setViewChapter] = useState<string | null>(null);
   const isMobile = useIsMobile();
 
-  // A chapter can be requested with ?chapter=c3 (e.g. from redirected old links).
+  // Older links asked for a chapter with /?chapter=c3: move them to the chapter's own path.
   useEffect(() => {
-    const id = new URLSearchParams(location.search).get("chapter");
-    if (id && chapterById.has(id)) setViewChapter(id);
-  }, []);
+    if (legacyChapter && route.chapter) navigate(withBase(dashboardPath(route)), { replace: true });
+    // oxlint-disable-next-line react-hooks/exhaustive-deps
+  }, [legacyChapter]);
+
+  // Switching back to the chapter tab returns to the chapter last looked at on this page.
+  const lastChapter = useRef(route.chapter);
+  if (route.chapter) lastChapter.current = route.chapter;
+  const go = (to: DashboardRoute) => {
+    const q = needle ? `?q=${encodeURIComponent(needle)}` : "";
+    navigate(withBase(dashboardPath(to)) + q);
+  };
+  const viewChapter = route.chapter;
+  const view = route.view;
 
   const currentId = profile.dashboard.currentChapter ?? firstIncompleteChapter(guides, checks);
   const chapterId = viewChapter ?? currentId;
@@ -42,13 +64,12 @@ function DashboardInner() {
     needle: needle.trim().toLowerCase(),
   };
 
-  const openChapter = (id: string) => {
-    setViewChapter(id);
-    setDashboardView("chapter");
-  };
+  const openChapter = (id: string) => go({ view: "chapter", chapter: id });
+  const openView = (v: DashboardView) =>
+    go({ view: v, chapter: v === "chapter" ? lastChapter.current : null });
 
   const { activeCount: activeToggles } = useViewToggles();
-  const canSearch = profile.dashboard.view !== "overview";
+  const canSearch = view !== "overview";
 
   return (
     <div className="flex flex-col gap-3">
@@ -63,9 +84,9 @@ function DashboardInner() {
             <button
               key={v}
               role="tab"
-              aria-selected={profile.dashboard.view === v}
-              onClick={() => setDashboardView(v)}
-              className={`min-w-0 flex-1 truncate rounded-md px-2.5 py-1.5 text-xs font-semibold whitespace-nowrap sm:flex-none sm:text-sm ${profile.dashboard.view === v ? "bg-card shadow-sticker-sm border-2" : "text-muted-foreground border-2 border-transparent"}`}
+              aria-selected={view === v}
+              onClick={() => openView(v)}
+              className={`min-w-0 flex-1 truncate rounded-md px-2.5 py-1.5 text-xs font-semibold whitespace-nowrap sm:flex-none sm:text-sm ${view === v ? "bg-card shadow-sticker-sm border-2" : "text-muted-foreground border-2 border-transparent"}`}
             >
               {v === "chapter" ? (
                 <>
@@ -121,18 +142,18 @@ function DashboardInner() {
         <FilterBar filters={filters} needle={needle} onNeedle={setNeedle} />
       )}
 
-      {profile.dashboard.view === "chapter" && (
+      {view === "chapter" && (
         <ChapterView
           guides={guides}
           profile={profile}
           checks={checks}
           chapterId={chapterId}
           currentId={currentId}
-          onChapter={setViewChapter}
+          onChapter={openChapter}
           filters={filters}
         />
       )}
-      {profile.dashboard.view === "overview" && (
+      {view === "overview" && (
         <OverviewView
           guides={guides}
           checks={checks}
@@ -140,17 +161,19 @@ function DashboardInner() {
           onChapter={openChapter}
         />
       )}
-      {profile.dashboard.view === "byGuide" && (
-        <ByGuideView guides={guides} checks={checks} filters={filters} />
-      )}
+      {view === "byGuide" && <ByGuideView guides={guides} checks={checks} filters={filters} />}
     </div>
   );
 }
 
-export function Dashboard() {
+/** `path` is the page's base-less path (the server render can't see the URL otherwise). */
+export function Dashboard({ path }: { path: string }) {
   return (
     <ErrorBoundary label="the dashboard">
-      <DashboardInner />
+      {/* Hidden until saved progress and the query are applied, so the defaults never flash. */}
+      <Gate on={["url", "state"]}>
+        <DashboardInner path={path} />
+      </Gate>
     </ErrorBoundary>
   );
 }

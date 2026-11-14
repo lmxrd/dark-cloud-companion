@@ -3,6 +3,8 @@ import { cn } from "cn";
 import { InfoIcon, SearchIcon } from "lucide-react";
 import { STAT_KEYS, type StatKey } from "@/lib/schemas";
 import { useTranslations } from "@/i18n";
+import { useQueryChoice, useQueryText } from "@/lib/url";
+import { Gate } from "@/components/Gate";
 import { itemAvailability, synthSources } from "@/lib/planner/sources";
 
 type Filter = "all" | "buyable" | "found";
@@ -16,9 +18,12 @@ const short = (t: ReturnType<typeof useTranslations>, k: StatKey) => t(`stat.sho
  */
 export function ItemsList() {
   const t = useTranslations();
-  const [filter, setFilter] = useState<Filter>("all");
-  const [gives, setGives] = useState<StatKey | null>(null);
-  const [q, setQ] = useState("");
+  // Search, kind and "gives" live in the query (?q=&kind=&gives=).
+  const [filter, setFilter] = useQueryChoice<Filter>("kind", ["all", "buyable", "found"], "all");
+  const [givesRaw, setGivesRaw] = useQueryChoice<StatKey | "">("gives", ["", ...STAT_KEYS], "");
+  const gives = givesRaw || null;
+  const setGives = (k: StatKey | null) => setGivesRaw(k ?? "");
+  const [q, setQ] = useQueryText("q");
   const [showNote, setShowNote] = useState(false);
   const needle = q.trim().toLowerCase();
 
@@ -58,7 +63,7 @@ export function ItemsList() {
     );
 
   return (
-    <div className="flex flex-col gap-5">
+    <Gate on={["url"]} className="flex flex-col gap-5">
       <div className="flex items-start gap-2">
         <p className="text-muted-foreground min-w-0 flex-1 text-sm">{t("items.introShort")}</p>
         <button
@@ -215,6 +220,6 @@ export function ItemsList() {
           </ul>
         </section>
       ))}
-    </div>
+    </Gate>
   );
 }

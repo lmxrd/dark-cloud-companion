@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import type { Translate } from "@/i18n";
 import { MAIN_GUIDE_ID } from "@/lib/guide/main";
+import { DASHBOARD_SEGMENTS } from "@/components/dashboard/route";
 
 export type NavChild = { title: string; href: string };
 export type NavItem = { title: string; href: string; icon: LucideIcon; children?: NavChild[] };
@@ -40,9 +41,16 @@ export function mainNav(t: Translate): NavItem[] {
   ];
 }
 
+/** "/" and the dashboard's other views (`/overview`, `/chapters/c3`, …). */
+const isDashboardPath = (pathname: string) =>
+  pathname === "/" ||
+  (DASHBOARD_SEGMENTS as readonly string[]).includes(pathname.split("/")[1] ?? "");
+
 export const isActive = (href: string, pathname: string) => {
   const path = href.split("?")[0];
-  return path === "/" ? pathname === "/" : pathname === path || pathname.startsWith(`${path}/`);
+  return path === "/"
+    ? isDashboardPath(pathname)
+    : pathname === path || pathname.startsWith(`${path}/`);
 };
 
 /**
@@ -76,7 +84,8 @@ export type Crumb = { label: string; href?: string };
  */
 export function crumbsFor(t: Translate, pathname: string, page?: string): Crumb[] {
   const [head, sub] = pathname.replace(/^\/|\/$/g, "").split("/");
-  if (!head) return [{ label: t("nav.dashboard") }];
+  if (!head || (DASHBOARD_SEGMENTS as readonly string[]).includes(head))
+    return [{ label: t("nav.dashboard") }];
 
   const label =
     {

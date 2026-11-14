@@ -109,8 +109,9 @@ test.describe("dashboard and progress", () => {
     await unfoldAll(page);
     await expect(page.getByRole("checkbox", { name: /Brave Little Linda/ }).first()).toBeChecked();
     // Any change writes the migrated (version 2) state back.
-    await page.getByRole("tab", { name: "Overview" }).click();
-    await page.getByRole("tab", { name: "By guide" }).click();
+    const linda = page.getByRole("checkbox", { name: /Brave Little Linda/ }).first();
+    await linda.click();
+    await linda.click();
     const p = await activeProfile(page);
     expect(p.activeGuides).toContain("main");
     expect(p.guides.map((g: { id: string }) => g.id)).toContain("wt-old");

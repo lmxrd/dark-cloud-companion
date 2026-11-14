@@ -1,0 +1,14 @@
+---
+// The planner's guide editor tab (PlannerPage reads the tab from the path).
+import Layout from "@/layouts/Layout.astro";
+import { PageHeader } from "@/components/PageHeader";
+import { PlannerPage } from "@/components/planner/PlannerPage";
+import { useTranslations } from "@/i18n";
+
+const t = useTranslations();
+---
+
+<Layout title={`${t("planner.tab.create")} · ${t("planner.title")} · ${t("app.name")}`}>
+  <PageHeader title={t("planner.title")} />
+  <PlannerPage client:only="react" />
+</Layout>

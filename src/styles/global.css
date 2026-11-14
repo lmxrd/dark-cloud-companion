@@ -145,3 +145,19 @@
     @apply font-sans;
   }
 }
+
+/*
+ * Islands whose first render depends on the URL query or on saved data stay hidden until they have
+ * applied it (`Gate`, `data-pending` comes from the inline script in Layout.astro). The animation
+ * shows them anyway if scripts never run.
+ */
+@keyframes gate-reveal {
+  to {
+    visibility: visible;
+  }
+}
+html[data-pending~="url"] [data-gate~="url"]:not([data-ready]),
+html[data-pending~="state"] [data-gate~="state"]:not([data-ready]) {
+  visibility: hidden;
+  animation: gate-reveal 0s 1.5s forwards;
+}

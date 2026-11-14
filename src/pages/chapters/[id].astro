@@ -1,24 +1,18 @@
 ---
-// Old chapter URLs now open the dashboard on that chapter.
-import { withBase } from "@/lib/base";
+// The dashboard's chapter view on one chapter (the dashboard reads the chapter from the path).
+import Layout from "@/layouts/Layout.astro";
+import { Dashboard } from "@/components/dashboard/Dashboard";
+import { useTranslations } from "@/i18n";
 import { chapters } from "@/lib/data";
 
 export function getStaticPaths() {
-  return chapters.map((c) => ({ params: { id: c.id } }));
+  return chapters.map((c) => ({ params: { id: c.id }, props: { title: c.title } }));
 }
 const { id } = Astro.params;
-const target = withBase(`/?chapter=${id}`);
+const { title } = Astro.props;
+const t = useTranslations();
 ---
 
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta http-equiv="refresh" content={`0; url=${target}`} />
-    <link rel="canonical" href={target} />
-    <title>Redirecting…</title>
-  </head>
-  <body>
-    <a href={target}>Open the dashboard</a>
-  </body>
-</html>
+<Layout title={`${title} · ${t("app.name")}`}>
+  <Dashboard client:load path={`/chapters/${id}`} />
+</Layout>

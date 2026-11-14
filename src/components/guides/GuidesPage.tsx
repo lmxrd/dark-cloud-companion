@@ -1,6 +1,6 @@
 import { useChecks, useProfile } from "@/lib/useAppStore";
 import { cn } from "cn";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { BookOpenIcon, MoreHorizontalIcon, PlusIcon, SearchIcon } from "lucide-react";
 import { withBase } from "@/lib/base";
 import { useContentTransfer } from "@/components/ContentTransfer";
@@ -15,6 +15,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Switch } from "@/components/ui/switch";
 import { useTranslations } from "@/i18n";
+import { useQueryText } from "@/lib/url";
+import { Gate } from "@/components/Gate";
 import { builtinGuides, weaponGuides } from "@/lib/guide/builtin";
 import { mainWalkthrough } from "@/lib/guide/main";
 import { guideProgress } from "@/lib/guide/progress";
@@ -72,7 +74,7 @@ export function GuidesPage() {
   const t = useTranslations();
   const { guides, activeGuides } = useProfile();
   const transfer = useContentTransfer();
-  const [q, setQ] = useState("");
+  const [q, setQ] = useQueryText("q");
   const needle = q.trim().toLowerCase();
   const match = (g: Guide) => !needle || g.title.toLowerCase().includes(needle);
 
@@ -94,7 +96,7 @@ export function GuidesPage() {
   );
 
   return (
-    <div className="flex flex-col gap-6">
+    <Gate on={["url", "state"]} className="flex flex-col gap-6">
       <PageHeader
         className="mb-0"
         title={t("guides.title")}
@@ -117,7 +119,7 @@ export function GuidesPage() {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            <Button nativeButton={false} render={<a href={withBase("/planner?new")} />}>
+            <Button nativeButton={false} render={<a href={withBase("/planner/editor?new")} />}>
               <PlusIcon />
               {t("guides.new")}
             </Button>
@@ -229,6 +231,6 @@ export function GuidesPage() {
           </ul>
         </section>
       )}
-    </div>
+    </Gate>
   );
 }

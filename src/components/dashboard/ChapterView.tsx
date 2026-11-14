@@ -12,6 +12,7 @@ import {
   anytimeSteps,
   chapterCategoryProgress,
   chapterProgressOfGuides,
+  CATEGORY_ORDER,
   type ChapterCategory,
   openMissable,
   stepsInChapter,
@@ -20,6 +21,7 @@ import { isStepDone } from "@/lib/guide/progress";
 import { derivedFor } from "@/lib/guide/useDerived";
 import type { Guide } from "@/lib/guide/types";
 import { setCurrentChapter } from "@/lib/store";
+import { setQuery, useQueryParam } from "@/lib/url";
 import type { Profile } from "@/lib/profiles";
 import { ChapterHero } from "./ChapterHero";
 import { GuideBlock } from "./GuideBlock";
@@ -52,12 +54,9 @@ export function ChapterView({
   const categories = chapterCategoryProgress(guides, chapterId, checks);
   const [showAnytime, setShowAnytime] = useState(false);
   const [missableOpen, setMissableOpen] = useState(false);
-  // The category chip applies to the chapter it was picked in.
-  const [picked, setPicked] = useState<{ chapterId: string; category: ChapterCategory | null }>({
-    chapterId,
-    category: null,
-  });
-  const category = picked.chapterId === chapterId ? picked.category : null;
+  // The category chip is `?cat=`; moving to another chapter drops it.
+  const cat = useQueryParam("cat");
+  const category = (CATEGORY_ORDER as string[]).includes(cat) ? (cat as ChapterCategory) : null;
   const listFilters: StepFilters = category ? { ...filters, category } : filters;
 
   // Missable items from the switched-on guides that are still open up to and including this chapter.
@@ -91,7 +90,7 @@ export function ChapterView({
         progress={mainProgress}
         categories={categories}
         category={category}
-        onCategory={(c) => setPicked({ chapterId, category: c })}
+        onCategory={(c) => setQuery({ cat: c }, { replace: true })}
         onChapter={onChapter}
       />
       {mainProgress.total > 0 && mainProgress.done === mainProgress.total && next && (

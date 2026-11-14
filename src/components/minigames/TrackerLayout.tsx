@@ -4,6 +4,7 @@ import { ChevronDownIcon } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useTranslations } from "@/i18n";
 import { useReady } from "@/lib/useAppStore";
+import { Gate } from "@/components/Gate";
 
 export type Count = { done: number; total: number };
 
@@ -42,30 +43,38 @@ export function TrackerLayout({
   const [open, setOpen] = useState<Record<string, boolean>>(() =>
     Object.fromEntries(groups.map((g) => [g.id, !!g.defaultOpen])),
   );
+  const scrollTo = (id: string, behavior: ScrollBehavior) =>
+    requestAnimationFrame(() =>
+      document.getElementById(`group-${id}`)?.scrollIntoView({ behavior, block: "start" }),
+    );
   // Saved ticks arrive right after hydration: then fold finished groups and open the defaults
-  // computed from them. Once only; afterwards the user decides.
+  // computed from them, plus the group named by the hash (#c3). Once only; afterwards the user decides.
   const ready = useReady();
   useEffect(() => {
     if (!ready) return;
+    const linked = decodeURIComponent(location.hash.slice(1));
+    const target = groups.some((g) => g.id === linked) ? linked : undefined;
     setOpen((o) =>
       Object.fromEntries(
-        groups.map((g) => [g.id, finished(g.count) ? false : o[g.id] || !!g.defaultOpen]),
+        groups.map((g) => [
+          g.id,
+          g.id === target || (finished(g.count) ? false : o[g.id] || !!g.defaultOpen),
+        ]),
       ),
     );
+    if (target) scrollTo(target, "instant");
     // oxlint-disable-next-line react-hooks/exhaustive-deps
   }, [ready]);
 
+  // A jump chip opens its group and names it in the hash, so a reload returns there.
   const jump = (id: string) => {
     setOpen((o) => ({ ...o, [id]: true }));
-    requestAnimationFrame(() =>
-      document
-        .getElementById(`group-${id}`)
-        ?.scrollIntoView({ behavior: "smooth", block: "start" }),
-    );
+    history.replaceState(history.state, "", `#${encodeURIComponent(id)}`);
+    scrollTo(id, "smooth");
   };
 
   return (
-    <div className="flex flex-col gap-4">
+    <Gate on={["url", "state"]} className="flex flex-col gap-4">
       {intro && <p className="text-muted-foreground text-sm">{intro}</p>}
 
       <section
@@ -151,6 +160,6 @@ export function TrackerLayout({
           <CollapsibleContent className="border-t-2 px-1 py-1">{g.children}</CollapsibleContent>
         </Collapsible>
       ))}
-    </div>
+    </Gate>
   );
 }

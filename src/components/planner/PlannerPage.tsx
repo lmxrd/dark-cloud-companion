@@ -1,23 +1,34 @@
 import { useStore } from "@nanostores/react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useTranslations } from "@/i18n";
 import { $draft } from "@/lib/guide/draft";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { clearPlannerInputs } from "@/lib/store";
+import { stripBase, withBase } from "@/lib/base";
+import { navigate, useHref } from "@/lib/url";
 import { EditorSection } from "./EditorSection";
 import { GeneratorSection } from "./GeneratorSection";
 
 type Tab = "generate" | "create";
 
+const PATHS: Record<Tab, string> = { generate: "/planner", create: "/planner/editor" };
+
 /** Planner tab: one section generates a weapon build, the other hand-crafts guides (generated builds prefill it). */
 export function PlannerPage() {
   const t = useTranslations();
-  const [tab, setTab] = useState<Tab>("generate");
+  // The tab is the path: /planner generates, /planner/editor edits guides.
+  const href = useHref();
+  // Older links opened the editor with /planner?edit=<id> or /planner?new (the URL is fixed below).
+  const legacy = /[?&](edit|new)(=|&|$)/.test(href);
+  const tab: Tab =
+    legacy || stripBase(href.split("?")[0]).startsWith(PATHS.create) ? "create" : "generate";
+  const setTab = (next: Tab) => navigate(withBase(PATHS[next]));
   const draft = useStore($draft);
 
   useEffect(() => {
-    const p = new URLSearchParams(location.search);
-    if (p.has("edit") || p.has("new")) setTab("create");
+    if (legacy && !stripBase(location.pathname).startsWith(PATHS.create))
+      navigate(withBase(PATHS.create) + location.search, { replace: true });
+    // oxlint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const tabs: { id: Tab; label: string }[] = [
