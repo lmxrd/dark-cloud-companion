@@ -2,7 +2,7 @@ import { atom, computed } from "nanostores";
 import { mergeGuides, type ContentFile, type MergeSummary } from "./content-file";
 import { findGuide } from "./guide/builtin";
 import type { Guide } from "./guide/types";
-import { addGoal, completeGoal, type GoalInput } from "./shopping";
+import { addGoal, type GoalInput } from "./shopping-goals";
 import {
   STATE_VERSION,
   STORAGE_KEY,
@@ -113,7 +113,9 @@ export function addShoppingGoal(input: GoalInput) {
  * Marks a shopping goal as made: uses up its items, removes it and ticks the invention or build steps.
  * Returns a function that undoes all of it.
  */
-export function completeShoppingGoal(goalId: string): () => void {
+export async function completeShoppingGoal(goalId: string): Promise<() => void> {
+  // The recipe data is only needed here and on the shopping page: load it on demand.
+  const { completeGoal } = await import("./shopping");
   const s0 = $state.get();
   const before = s0.profiles[s0.activeProfile];
   let added: string[] = [];

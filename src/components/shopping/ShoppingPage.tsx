@@ -13,7 +13,7 @@ import {
   georamaPartByName,
   georamaParts,
   goalSteps,
-  inventionByName,
+  findInvention,
   inventions,
   itemInfo,
   itemNames,
@@ -313,7 +313,7 @@ function GoalCard({
   } else {
     title = goal.name;
     if (goal.kind === "invention") {
-      const inv = inventionByName.get(goal.name);
+      const inv = findInvention(goal.name);
       if (inv) {
         recipe = recipeText(inv.components, goal.qty);
         sub = t("shopping.inventionChapter", { n: inv.chapter });
@@ -398,7 +398,8 @@ function LineRow({
       return { ...s, have };
     });
   const shops = line.info.kind === "buyable" ? line.info.shops : [];
-  const others = group === "stops" ? shops.filter((s) => s !== shop) : shops;
+  // Under a shop: the other shops that sell it. Elsewhere (A–Z, later chapters): every shop.
+  const others = shop ? shops.filter((s) => s !== shop) : shops;
   const forText = line.sources
     .map((s) =>
       s.via ? t("shopping.via", { goal: goalName(s.goalId), via: s.via }) : goalName(s.goalId),
@@ -440,9 +441,7 @@ function LineRow({
         </p>
         {others.length > 0 && (
           <p className="text-muted-foreground text-xs">
-            {group === "stops"
-              ? t("shopping.alsoAt", { shops: others.join(", ") })
-              : others.join(", ")}
+            {shop ? t("shopping.alsoAt", { shops: others.join(", ") }) : others.join(", ")}
           </p>
         )}
         {line.inventable && (
@@ -533,8 +532,8 @@ export function ShoppingPage() {
   };
   const missing = new Set(list.missing);
 
-  const onMade = (goal: ShoppingGoal) => {
-    const run = completeShoppingGoal(goal.id);
+  const onMade = async (goal: ShoppingGoal) => {
+    const run = await completeShoppingGoal(goal.id);
     const name = goalLabel(goal, findGuide);
     setUndo({
       msg:

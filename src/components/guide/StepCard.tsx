@@ -12,6 +12,8 @@ import { resolveEntry } from "@/lib/guide/refs";
 import { stepTickId, textTickId, type Entry, type Guide, type Step } from "@/lib/guide/types";
 import { $checks, $profile, setChecked } from "@/lib/store";
 import { BuildStepBody } from "./BuildStepBody";
+import { AddToListButton } from "@/components/shopping/AddToListButton";
+import { findGuide } from "@/lib/guide/builtin";
 import { ItemRow } from "./ItemRow";
 import { SectionFacts } from "./SectionFacts";
 
@@ -72,7 +74,7 @@ export function StepCard({
 }: Props) {
   const t = useTranslations();
   const checks = useStore($checks);
-  useStore($profile); // re-render with the profile (guide edits)
+  const profile = useStore($profile); // re-render with the profile (guide edits)
   const entries = useMemo(
     () => visibleEntries(guide, step, checks, filters),
     [guide, step, checks, filters],
@@ -119,6 +121,16 @@ export function StepCard({
       <CardContent className="flex flex-col gap-2">
         {step.notes && <p className="text-sm whitespace-pre-wrap">{step.notes}</p>}
         <BuildStepBody step={step} derived={derived} buyableOnly={filters.buyableOnly} />
+        {/* Only saved guides: the shopping list follows the guide by id. */}
+        {step.build?.synths.some((x) => x.kind === "item") &&
+          findGuide(guide.id, profile.guides) && (
+            <div>
+              <AddToListButton
+                label={t("shopping.addMaterials")}
+                goal={{ kind: "build", guideId: guide.id, stepIds: [step.id] }}
+              />
+            </div>
+          )}
         {entries.map((e, i) => {
           if (e.kind === "text") {
             const id = textTickId(guide.id, step.id, e.id);

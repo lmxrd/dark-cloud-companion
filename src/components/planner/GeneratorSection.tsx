@@ -23,7 +23,8 @@ import { earliestChapter, type PlanProgress, type PlanResult } from "@/lib/plann
 import type { Objective } from "@/lib/planner/solve";
 import { getWeapon, weaponById, weaponData } from "@/lib/planner/sources";
 import { OPPOSITES, freshState, type WeaponState } from "@/lib/weapons/mechanics";
-import { $profile, saveGuide, setPlannerInputs, setView } from "@/lib/store";
+import { $profile, addShoppingGoal, saveGuide, setPlannerInputs, setView } from "@/lib/store";
+import { AddToListButton } from "@/components/shopping/AddToListButton";
 import { PlanPreview } from "./PlanPreview";
 import { StartSpecs } from "./StartSpecs";
 import { selectClass, WeaponSelect } from "./WeaponSelect";
@@ -534,6 +535,26 @@ export function GeneratorSection({ onOpenEditor }: { onOpenEditor: () => void })
             >
               {t("planner.saveAsGuide")}
             </Button>
+            {draft.steps.some((s) => s.build?.synths.some((x) => x.kind === "item")) && (
+              <AddToListButton
+                size="sm"
+                label={t("shopping.saveAndAdd")}
+                onAdd={() => {
+                  // The list follows the guide by id, so the plan is saved first.
+                  if (!saved) {
+                    saveGuide(draft, { activate: true });
+                    setSaved(true);
+                  }
+                  addShoppingGoal({
+                    kind: "build",
+                    guideId: draft.id,
+                    stepIds: draft.steps
+                      .filter((s) => s.build?.synths.some((x) => x.kind === "item"))
+                      .map((s) => s.id),
+                  });
+                }}
+              />
+            )}
             {saved && (
               <span className="text-sm" role="status">
                 {t("planner.saved")}{" "}

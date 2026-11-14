@@ -145,6 +145,7 @@ export const en = {
   "shopping.more": "More",
   "shopping.addToList": "Add to shopping list",
   "shopping.added": "Added",
+  "shopping.addNamed": "Add {name} to shopping list",
   "shopping.addMaterials": "Materials to list",
   "shopping.addAllGeorama": "Add all to list",
   "shopping.addRemaining": "Add remaining steps to list",

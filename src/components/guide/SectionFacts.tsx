@@ -3,7 +3,8 @@ import { Badge } from "@/components/ui/badge";
 import { useTranslations } from "@/i18n";
 import type { medalItems } from "@/lib/data";
 import type { Section } from "@/lib/schemas";
-import { setChecked } from "@/lib/store";
+import { addShoppingGoal, setChecked } from "@/lib/store";
+import { AddToListButton } from "@/components/shopping/AddToListButton";
 
 /** A section's facts (enemies, totals, boss, …) with its medal and prize checkboxes. */
 export function SectionFacts({
@@ -69,10 +70,19 @@ export function SectionFacts({
             </p>
           )}
           {section.georamaBuild.length > 0 && (
-            <p>
-              {t("section.georama", {
-                parts: section.georamaBuild.map((g) => `${g.qty}× ${g.name}`).join(", "),
-              })}
+            <p className="flex flex-wrap items-center gap-2">
+              <span>
+                {t("section.georama", {
+                  parts: section.georamaBuild.map((g) => `${g.qty}× ${g.name}`).join(", "),
+                })}
+              </span>
+              <AddToListButton
+                label={t("shopping.addAllGeorama")}
+                onAdd={() => {
+                  for (const g of section.georamaBuild)
+                    addShoppingGoal({ kind: "georama", name: g.name, qty: g.qty });
+                }}
+              />
             </p>
           )}
           {section.recruits.map((r) => (

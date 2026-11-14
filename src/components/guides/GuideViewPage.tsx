@@ -15,6 +15,8 @@ import { duplicateGuide, groupByChapter } from "@/lib/guide/ops";
 import { stepsProgress } from "@/lib/guide/progress";
 import { derivedFor } from "@/lib/guide/useDerived";
 import { $checks, $profile, saveGuide } from "@/lib/store";
+import { AddToListButton } from "@/components/shopping/AddToListButton";
+import { stepTickId } from "@/lib/guide/types";
 
 /** One guide, all its steps, grouped by chapter (steps without a chapter come last). Client-only (`?id=`). */
 export function GuideViewPage() {
@@ -38,6 +40,11 @@ export function GuideViewPage() {
     needle: needle.trim().toLowerCase(),
   };
   const q = encodeURIComponent(guide.id);
+  // Build steps with items that aren't ticked yet: "add remaining steps" to the shopping list.
+  const remaining = guide.steps
+    .filter((s) => s.build?.synths.some((x) => x.kind === "item"))
+    .filter((s) => !checks[stepTickId(guide.id, s.id)])
+    .map((s) => s.id);
 
   return (
     <div className="flex flex-col gap-4">
@@ -52,6 +59,13 @@ export function GuideViewPage() {
           </Badge>
         )}
         <GuideToggle guideId={guide.id} />
+        {remaining.length > 0 && (
+          <AddToListButton
+            size="sm"
+            label={t("shopping.addRemaining")}
+            goal={{ kind: "build", guideId: guide.id, stepIds: remaining }}
+          />
+        )}
         {guide.kind === "custom" && (
           <Button
             variant="outline"

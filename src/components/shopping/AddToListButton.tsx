@@ -13,7 +13,10 @@ export function AddToListButton({
   disabled,
   size = "xs",
   variant = "outline",
+  name,
 }: {
+  /** Icon-only button for list rows; the accessible label names the thing. */
+  name?: string;
   goal?: GoalInput;
   label?: string;
   onAdd?: () => void;
@@ -28,11 +31,12 @@ export function AddToListButton({
     const id = setTimeout(() => setAdded(false), 1800);
     return () => clearTimeout(id);
   }, [added]);
-  const text = label ?? t("shopping.addToList");
+  const text = label ?? (name ? t("shopping.addNamed", { name }) : t("shopping.addToList"));
   return (
     <Button
       type="button"
-      size={size}
+      size={name ? "icon-xs" : size}
+      title={name ? text : undefined}
       variant={variant}
       disabled={disabled}
       aria-label={added ? `${t("shopping.added")}: ${text}` : text}
@@ -49,7 +53,15 @@ export function AddToListButton({
       ) : (
         <ShoppingCartIcon data-icon="inline-start" />
       )}
-      <span role={added ? "status" : undefined}>{added ? t("shopping.added") : text}</span>
+      {name ? (
+        added && (
+          <span role="status" className="sr-only">
+            {t("shopping.added")}
+          </span>
+        )
+      ) : (
+        <span role={added ? "status" : undefined}>{added ? t("shopping.added") : text}</span>
+      )}
     </Button>
   );
 }

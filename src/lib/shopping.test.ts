@@ -24,9 +24,10 @@ describe("shopping data", () => {
     expect(georamaParts.every((p) => p.components.length > 0)).toBe(true);
   });
 
-  test("inventions can be ticked on the dashboard (two are not in the checklist data)", () => {
+  test("every invention can be ticked on the dashboard (spellings compared loosely)", () => {
     const missing = inventions.filter((i) => inventionTickIds(i.name).length === 0);
-    expect(missing.map((i) => i.name).sort()).toEqual(["Level-Up Powder", "Super Alloy Body"]);
+    expect(missing.map((i) => i.name)).toEqual([]);
+    expect(inventionTickIds("Super-Alloy Body")).toEqual(inventionTickIds("Super Alloy Body"));
   });
 });
 

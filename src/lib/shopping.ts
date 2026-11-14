@@ -11,6 +11,8 @@ import { georamaPart, invention } from "@/lib/schemas";
 import { synthSources } from "@/lib/planner/sources";
 import type { Shopping, ShoppingGoal } from "@/lib/profiles";
 
+export { addGoal, type GoalInput } from "./shopping-goals";
+
 export const inventions = z.array(invention).parse(inventionsJson);
 export const georamaParts = z
   .object({ parts: z.array(georamaPart) })
@@ -30,7 +32,10 @@ const shopItems = new Map(
     .map((i) => [i.name, i]),
 );
 
-export const inventionByName = new Map(inventions.map((i) => [i.name, i]));
+/** Names differ in spelling between sources ("Super-Alloy Body" / "Super Alloy Body"): compare loosely. */
+export const nameKey = (name: string) => name.toLowerCase().replace(/[^a-z0-9]/g, "");
+const inventionByKey = new Map(inventions.map((i) => [nameKey(i.name), i]));
+export const findInvention = (name: string) => inventionByKey.get(nameKey(name));
 export const georamaPartByName = new Map(georamaParts.map((p) => [p.name, p]));
 
 /** Every item name the list can contain: sold items, synth items and recipe components. */
@@ -74,7 +79,7 @@ export function goalRecipe(goal: ShoppingGoal, findGuide: FindGuide): Ingredient
   if (goal.kind !== "build") {
     if (goal.kind === "item") return [{ name: goal.name, qty: goal.qty }];
     const src =
-      goal.kind === "invention" ? inventionByName.get(goal.name) : georamaPartByName.get(goal.name);
+      goal.kind === "invention" ? findInvention(goal.name) : georamaPartByName.get(goal.name);
     return src ? src.components.map((c) => ({ name: c.name, qty: c.qty * goal.qty })) : null;
   }
   const { steps } = goalSteps(goal, findGuide);
@@ -101,8 +106,8 @@ function expand(
   seen: Set<string> = new Set(),
 ) {
   for (const { name, qty } of recipe) {
-    const inv = inventionByName.get(name);
-    if (inv && invent.has(name) && !seen.has(name)) {
+    const inv = findInvention(name);
+    if (inv && invent.has(inv.name) && !seen.has(name)) {
       const next = new Set(seen).add(name);
       expand(
         inv.components.map((c) => ({ name: c.name, qty: c.qty * qty })),
@@ -194,7 +199,7 @@ export function shoppingList(
         sources: e.sources,
         info,
         later: info.kind === "buyable" && info.fromChapter > opts.chapter,
-        inventable: inventionByName.has(name),
+        inventable: !!findInvention(name),
       };
     })
     .sort((a, b) => a.name.localeCompare(b.name));
@@ -243,40 +248,11 @@ export function shoppingList(
   };
 }
 
-const newGoalId = () =>
-  globalThis.crypto?.randomUUID?.() ??
-  `g${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
-
-export type GoalInput =
-  | { kind: "item" | "invention" | "georama"; name: string; qty?: number }
-  | { kind: "build"; guideId: string; stepIds: string[] };
-
-/** Adds a goal; the same item/invention/part adds to its quantity, the same guide merges its steps. */
-export function addGoal(s: Shopping, input: GoalInput): Shopping {
-  if (input.kind === "build") {
-    if (!input.stepIds.length) return s;
-    const ex = s.goals.find((g) => g.kind === "build" && g.guideId === input.guideId);
-    if (ex && ex.kind === "build") {
-      const stepIds = [...new Set([...ex.stepIds, ...input.stepIds])];
-      return { ...s, goals: s.goals.map((g) => (g === ex ? { ...ex, stepIds } : g)) };
-    }
-    return { ...s, goals: [{ id: newGoalId(), ...input }, ...s.goals] };
-  }
-  const qty = Math.max(1, input.qty ?? 1);
-  const ex = s.goals.find(
-    (g): g is Extract<ShoppingGoal, { name: string }> =>
-      g.kind !== "build" && g.kind === input.kind && g.name === input.name,
-  );
-  if (ex) return { ...s, goals: s.goals.map((g) => (g === ex ? { ...ex, qty: ex.qty + qty } : g)) };
-  return {
-    ...s,
-    goals: [{ id: newGoalId(), kind: input.kind, name: input.name, qty }, ...s.goals],
-  };
-}
-
 /** Checklist ids of an invention (to tick it on the dashboard when it is made). */
 export const inventionTickIds = (name: string) =>
-  checklist.filter((i) => i.category === "invention" && i.name === name).map((i) => i.id);
+  checklist
+    .filter((i) => i.category === "invention" && nameKey(i.name) === nameKey(name))
+    .map((i) => i.id);
 
 /**
  * Marks a goal as made: removes it, uses up the items it needed from the "have" counts, and returns the ticks to

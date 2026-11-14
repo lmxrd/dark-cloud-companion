@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { STAT_KEYS } from "@/lib/schemas";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { AddToListButton } from "@/components/shopping/AddToListButton";
 import { useTranslations } from "@/i18n";
 import { itemAvailability, synthSources } from "@/lib/planner/sources";
 
@@ -78,6 +79,9 @@ export function ItemsList() {
                     ) : (
                       <Badge variant="outline">{t("items.foundOnly")}</Badge>
                     )}
+                    <span className="ml-auto">
+                      <AddToListButton name={s.name} goal={{ kind: "item", name: s.name }} />
+                    </span>
                   </div>
                   <p className="text-muted-foreground text-xs">{gains.join(", ") || "—"}</p>
                   {a.kind === "buyable" && (
