@@ -1,7 +1,7 @@
-// Checks the predefined plans (src/data/plans.json) against the config they were generated from:
+// Checks the predefined plans (src/generated/plans.json) against the config they were generated from:
 // the plans must cover exactly the configured variants, and every plan must derive cleanly and
 // actually deliver the goal it promises.
-import plansJson from "@/data/plans.json";
+import plansJson from "@/generated/plans.json";
 import { STAT_KEYS } from "@/lib/schemas";
 import { getWeapon } from "@/lib/planner/sources";
 import { z } from "zod";
@@ -15,7 +15,7 @@ const file = z.object({ hash: z.string(), guides: z.array(guide) }).parse(plansJ
 const specs = expandPlans(parsePlansConfig(plansConfig));
 const specById = new Map(specs.map((s) => [s.id, s]));
 
-describe("predefined plans (src/data/plans.json)", () => {
+describe("predefined plans (src/generated/plans.json)", () => {
   test("cover the config exactly, one guide per target and variant", () => {
     expect(file.guides.map((g) => g.id)).toEqual(specs.map((s) => s.id));
     for (const g of file.guides) expect(g.kind).toBe("builtin");
