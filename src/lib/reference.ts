@@ -13,6 +13,8 @@ export const monsterClasses = monstersData.parse(monstersRaw);
 
 export const ridepodPartCheckId = (p: RidepodPart) => `ridepod:${p.id}`;
 export const ridepodCoreCheckId = (name: string) => `ridepod-core:${name}`;
+/** Owning a Spheda club is a plain tick, like any collectable. */
+export const clubCheckId = (id: string) => `club:${id}`;
 export const monsterCheckIds = (classId: string) =>
   [`monster:${classId}:badge`, `monster:${classId}:mastered`] as const;
 

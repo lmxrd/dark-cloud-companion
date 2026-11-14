@@ -72,7 +72,7 @@ export function OverviewView({
                       c.phase === "postgame" && "text-xs sm:text-sm",
                     )}
                   >
-                    {c.phase === "main" ? c.number : "PG"}
+                    {c.phase === "main" ? c.number : t("chapter.postgameShort")}
                   </span>
                 </button>
               </li>
@@ -223,7 +223,7 @@ function CollectableMatrix({
                     aria-label={`${t("dash.openChapter")}: ${c.phase === "main" ? `${c.number}. ${c.title}` : c.title}`}
                     className="min-h-8 w-full rounded px-1 text-left hover:underline"
                   >
-                    {c.phase === "main" ? c.number : "PG"}
+                    {c.phase === "main" ? c.number : t("chapter.postgameShort")}
                   </button>
                 </th>
                 {columns.map((cat) => {

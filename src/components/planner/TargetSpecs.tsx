@@ -39,7 +39,7 @@ export function TargetSpecs({
         <span className="text-sm font-semibold">{t("planner.targetStats")}</span>
         <div
           role="group"
-          aria-label={weapon.name}
+          aria-label={t("planner.specsPreset")}
           className="bg-muted/60 flex rounded-lg border-2 p-0.5"
         >
           <button

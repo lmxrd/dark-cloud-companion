@@ -69,4 +69,30 @@ test.describe("sidebar shell", () => {
     await expect(page.getByRole("progressbar", { name: "Spheda" })).toBeVisible();
     await expect(page.getByRole("navigation", { name: "Main sections" })).toBeHidden();
   });
+
+  test("a guide page marks at most one Guides sub-item", async ({ page }) => {
+    const sidebar = page.locator('[data-slot="sidebar"]');
+    await go(page, "/guides/view?id=grade-zero-max-abs");
+    await expect(sidebar.locator('[data-slot="sidebar-menu-sub-button"][data-active]')).toHaveCount(
+      0,
+    );
+    await go(page, "/guides/view?id=main");
+    await expect(sidebar.getByRole("link", { name: "Main walkthrough" })).toHaveAttribute(
+      "data-active",
+      "",
+    );
+    await expect(sidebar.getByRole("link", { name: "My guides" })).not.toHaveAttribute(
+      "data-active",
+    );
+  });
+
+  test("the profile menu's theme option follows a change made in Settings", async ({ page }) => {
+    await go(page, "/settings");
+    await page
+      .getByRole("radiogroup", { name: "Appearance" })
+      .getByRole("radio", { name: "Dark" })
+      .click();
+    await page.locator('[data-slot="sidebar-footer"] button').click();
+    await expect(page.getByRole("menuitem", { name: "Switch to light theme" })).toBeVisible();
+  });
 });

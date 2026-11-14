@@ -149,7 +149,7 @@ export function WeaponList() {
                     : "bg-secondary text-secondary-foreground",
                 )}
               >
-                {owner === "max" ? "M" : "Mo"}
+                {t(`weapons.${owner}Short` as const)}
               </span>
               <span className="font-heading text-base font-extrabold tracking-tight">
                 {t(`weapons.${owner}` as const)} · {t(`weapon.type.${g.type}` as const)}
@@ -174,6 +174,7 @@ export function WeaponList() {
                           {final && (
                             <StarIcon
                               className="fill-accent size-3.5 shrink-0"
+                              role="img"
                               aria-label={t("weapons.final")}
                             />
                           )}
@@ -181,6 +182,7 @@ export function WeaponList() {
                           {inGuides.has(w.id) && (
                             <BookOpenIcon
                               className="text-secondary size-3.5 shrink-0"
+                              role="img"
                               aria-label={t("weapons.inGuide")}
                             />
                           )}

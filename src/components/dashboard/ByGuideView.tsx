@@ -49,7 +49,7 @@ export function ByGuideView({
           .concat(
             chapters.map((c) => ({
               id: c.id,
-              label: c.phase === "main" ? String(c.number) : "PG",
+              label: c.phase === "main" ? String(c.number) : t("chapter.postgameShort"),
               title: c.phase === "main" ? `${c.number}. ${c.title}` : c.title,
             })),
           )

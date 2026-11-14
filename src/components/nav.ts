@@ -45,6 +45,25 @@ export const isActive = (href: string, pathname: string) => {
   return path === "/" ? pathname === "/" : pathname === path || pathname.startsWith(`${path}/`);
 };
 
+/**
+ * The sub-item to mark for the current page: the most specific path match, and for sub-items with a
+ * query (`/guides/view?id=main`) only when the page's query matches too. `search` is only known in
+ * the browser; pass "" on the server.
+ */
+export function activeChild(item: NavItem, pathname: string, search: string): string | undefined {
+  const path = (href: string) => href.split("?")[0];
+  const matches = (item.children ?? []).filter((c) => isActive(c.href, pathname));
+  if (!matches.length) return undefined;
+  const longest = Math.max(...matches.map((c) => path(c.href).length));
+  const params = new URLSearchParams(search);
+  return matches
+    .filter((c) => path(c.href).length === longest)
+    .find((c) => {
+      const query = c.href.split("?")[1];
+      return !query || [...new URLSearchParams(query)].every(([k, v]) => params.get(k) === v);
+    })?.href;
+}
+
 /** A section is active on its own page and on any of its sub-pages. */
 export const isSectionActive = (item: NavItem, pathname: string) =>
   isActive(item.href, pathname) || (item.children ?? []).some((c) => isActive(c.href, pathname));

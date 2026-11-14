@@ -5,12 +5,9 @@ import { CheckRow } from "@/components/chapter/CheckRow";
 import { weaponData } from "@/lib/planner/sources";
 import { useTranslations } from "@/i18n";
 import { chapters, sectionById } from "@/lib/data";
-import { sphedaMedals } from "@/lib/reference";
+import { clubCheckId, sphedaMedals } from "@/lib/reference";
 import { setChecked } from "@/lib/store";
 import { TrackerLayout, type TrackerGroup } from "./TrackerLayout";
-
-/** Owning a club is a plain tick, like any collectable. */
-export const clubCheckId = (id: string) => `club:${id}`;
 
 export function SphedaTracker() {
   const t = useTranslations();
@@ -100,7 +97,7 @@ export function SphedaTracker() {
                   </label>
                   <a
                     href={withBase(`/weapons/${c.id}`)}
-                    aria-label={c.name}
+                    aria-label={t("spheda.openWeapon", { club: c.name })}
                     className={cn(
                       "grid place-items-center rounded-r-full border-2 border-l-0 px-2 text-xs",
                       have ? "border-border" : "border-border/50 text-muted-foreground",

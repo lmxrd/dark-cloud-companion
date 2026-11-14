@@ -141,7 +141,7 @@ const facts = [
       <h2 id="abs" class="font-heading text-base font-extrabold tracking-tight">{t("weapons.absTable")}</h2>
       <ol class="bg-card grid grid-cols-7 items-end gap-1.5 rounded-lg border-2 p-3">
         {abs.map((r) => (
-          <li class="flex flex-col items-center gap-1" title={`+${r.level}: ${Math.round(r.abs).toLocaleString()} ABS`}>
+          <li class="flex flex-col items-center gap-1" title={t("weapons.absAt", { level: r.level, abs: Math.round(r.abs).toLocaleString() })}>
             <span class="flex h-24 w-full items-end" aria-hidden="true">
               <span class="bg-secondary w-full rounded-t-sm border-2 border-b-0" style={`height: ${Math.max(4, (100 * r.abs) / absMax)}%`}></span>
             </span>

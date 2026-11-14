@@ -1,6 +1,6 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, test } from "vitest";
 import { useTranslations } from "@/i18n";
-import { crumbsFor, isSectionActive, mainNav } from "./nav";
+import { activeChild, crumbsFor, isSectionActive, mainNav } from "./nav";
 
 const t = useTranslations();
 
@@ -54,5 +54,21 @@ describe("mainNav", () => {
       expect(isSectionActive(reference, path)).toBe(true);
     expect(isSectionActive(reference, "/")).toBe(false);
     expect(isSectionActive(today, "/weapons")).toBe(false);
+  });
+});
+
+describe("activeChild", () => {
+  const [, guides, , reference] = mainNav(t);
+
+  test("marks only the most specific sub-item", () => {
+    expect(activeChild(guides, "/guides", "")).toBe("/guides");
+    expect(activeChild(reference, "/weapons/poison-wrench", "")).toBe("/weapons");
+  });
+
+  test("a sub-item with a query needs a matching query", () => {
+    expect(activeChild(guides, "/guides/view", "?id=main")).toBe("/guides/view?id=main");
+    // Another guide: neither "Main walkthrough" nor "My guides" (the section stays active).
+    expect(activeChild(guides, "/guides/view", "?id=grade-zero-max-abs")).toBeUndefined();
+    expect(isSectionActive(guides, "/guides/view")).toBe(true);
   });
 });

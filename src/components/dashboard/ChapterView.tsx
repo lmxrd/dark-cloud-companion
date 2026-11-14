@@ -69,9 +69,10 @@ export function ChapterView({
         ...p,
         from: undefined as number | undefined,
       }));
-      // The main walkthrough lists everything per chapter already; other guides also show unfinished earlier steps.
+      // The main walkthrough lists everything per chapter already; other guides also show unfinished
+      // earlier steps, except under a category chip, whose count covers this chapter only.
       const carried =
-        guide.id === "main"
+        guide.id === "main" || category
           ? []
           : carriedSteps(guide, chapterId, (s) => isStepDone(guide, s, checks));
       return { guide, placed: [...carried, ...here] };

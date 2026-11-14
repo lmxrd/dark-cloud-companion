@@ -135,7 +135,9 @@ export function StepCard({
           <button
             type="button"
             aria-expanded={!isFolded}
-            aria-label={isFolded ? t("step.expand") : t("step.collapse")}
+            aria-label={t(isFolded ? "step.expandNamed" : "step.collapseNamed", {
+              title: step.title || `${index + 1}`,
+            })}
             onClick={() => setFolded(!isFolded)}
             className="flex min-w-0 flex-1 items-center gap-2 text-left text-sm font-medium"
           >

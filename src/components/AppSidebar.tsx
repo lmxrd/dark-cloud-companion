@@ -29,7 +29,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { useTranslations } from "@/i18n";
-import { isActive, isSectionActive, mainNav, type NavItem } from "@/components/nav";
+import { activeChild, isSectionActive, mainNav, type NavItem } from "@/components/nav";
 import { switchProfile } from "@/lib/store";
 import { setThemePref } from "@/lib/theme";
 
@@ -46,6 +46,10 @@ function NavLink({
   collapsed: boolean;
 }) {
   const active = isSectionActive(item, pathname);
+  // The query (?id=…) is only known in the browser; until then no sub-item that needs one is marked.
+  const [search, setSearch] = useState("");
+  useEffect(() => setSearch(location.search), []);
+  const current = activeChild(item, pathname, search);
   const activeClasses =
     "data-active:border-2 data-active:border-sidebar-border data-active:shadow-sticker";
 
@@ -98,7 +102,7 @@ function NavLink({
             <SidebarMenuSubItem key={child.href}>
               <SidebarMenuSubButton
                 render={<a href={withBase(child.href)} />}
-                isActive={isActive(child.href, pathname)}
+                isActive={child.href === current}
                 className="data-active:border-2 data-active:border-sidebar-border data-active:shadow-sticker-sm"
               >
                 <span>{child.title}</span>
@@ -153,8 +157,16 @@ function ProfileMenuContent({
   const t = useTranslations();
   const state = useAppState();
   const { name, initials, mounted } = useProfileName();
+  // Follow the page's theme, also when Settings changes it while this menu is mounted.
   const [dark, setDark] = useState(false);
-  useEffect(() => setDark(document.documentElement.classList.contains("dark")), []);
+  useEffect(() => {
+    const html = document.documentElement;
+    const read = () => setDark(html.classList.contains("dark"));
+    read();
+    const observer = new MutationObserver(read);
+    observer.observe(html, { attributes: true, attributeFilter: ["class"] });
+    return () => observer.disconnect();
+  }, []);
   const profiles = Object.values(state.profiles);
 
   return (
@@ -190,7 +202,6 @@ function ProfileMenuContent({
       <DropdownMenuItem
         onClick={() => {
           applyTheme(!dark);
-          setDark(!dark);
         }}
       >
         {dark ? <SunIcon /> : <MoonIcon />}

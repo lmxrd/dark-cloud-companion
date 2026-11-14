@@ -32,6 +32,7 @@ export function ItemsList() {
       return !needle || s.name.toLowerCase().includes(needle);
     });
     // With a stat picked, one list sorted by that stat beats category groups.
+    if (pool.length === 0) return [];
     if (gives)
       return [
         [

@@ -114,3 +114,11 @@ test.describe("trackers", () => {
     );
   });
 });
+
+test("a Gives filter with no matches says so", async ({ page }) => {
+  await go(page, "/items");
+  await page.getByRole("group", { name: "Gives" }).getByRole("button", { name: "Flame" }).click();
+  await page.getByLabel("Search items").fill("zzz");
+  await expect(page.getByText("No items match.")).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Items that add/ })).toHaveCount(0);
+});

@@ -75,7 +75,7 @@ export function AbilityPicker({
             { value: left, label: t(`ability.${left}` as const) },
             {
               value: null,
-              label: "–",
+              label: t("planner.abilityNone"),
               aria: t("planner.abilityNeither", {
                 a: t(`ability.${left}` as const),
                 b: t(`ability.${right}` as const),
