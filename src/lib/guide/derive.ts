@@ -33,6 +33,8 @@ export interface DerivedStep {
    * build-up step after it, the next work step's (other) weapon.
    */
   nextWeaponId?: string;
+  /** Work steps: what each sphere synthed in the step passed on, in the step's order. */
+  spheres: { weaponId: string; level: number; gains: Partial<Stats> }[];
   cost: Cost;
   errors: string[];
 }
@@ -80,6 +82,14 @@ export function deriveBuild(guide: Guide): DerivedBuild {
   });
   const sim = simulatePlan(startToState(guide.build), { stages }, { spBonus: guide.build.spBonus });
   const snapshots = sim.log.filter((l) => l.type === "state" && l.depth === 0);
+  // The spheres synthed onto the main weapon, per stage (a stage's log ends with its snapshot).
+  const spheresByStage: DerivedStep["spheres"][] = [[]];
+  for (const l of sim.log) {
+    if (l.depth !== 0) continue;
+    if (l.type === "sphere")
+      spheresByStage.at(-1)!.push({ weaponId: l.weaponId, level: l.level, gains: l.gains });
+    if (l.type === "state") spheresByStage.push([]);
+  }
   const snapAt = (i: number) => {
     const snap = snapshots[i];
     return snap?.type === "state"
@@ -105,6 +115,7 @@ export function deriveBuild(guide: Guide): DerivedBuild {
         ...snapAt(at),
         ...(upgrade ? { requirements: buildUpRequirements(getWeapon(upgrade)) } : {}),
         ...(upgrade && !explicit ? { nextWeaponId: upgrade } : {}),
+        spheres: spheresByStage[at] ?? [],
         cost: sim.stages?.[at]?.cost ?? { ...noCost },
         errors: explicit ? errors.filter((e) => !isBuildUpError(e)) : errors,
       });
@@ -122,6 +133,7 @@ export function deriveBuild(guide: Guide): DerivedBuild {
       }),
       requirements: buildUpRequirements(getWeapon(target)),
       nextWeaponId: target,
+      spheres: [],
       cost: { abs: 0, gilda: 0, steps: 1 },
       errors: [
         ...(ownErrors.get(s.id) ?? []),

@@ -1,4 +1,5 @@
-import { STAT_KEYS } from "@/lib/schemas";
+import { STAT_KEYS, type StatKey } from "@/lib/schemas";
+import { stageItems } from "@/lib/guide/buildItems";
 import { useTranslations, type Translate } from "@/i18n";
 import type { DerivedStep } from "@/lib/guide/derive";
 import type { Step } from "@/lib/guide/types";
@@ -18,11 +19,13 @@ export function acquireText(t: Translate, a: Acquire) {
 
 type Group =
   | { kind: "item"; name: string; count: number }
-  | { kind: "sphere"; recipe: Recipe; count: number };
+  /** `first`: the position of its first sphere among the stage's spheres. */
+  | { kind: "sphere"; recipe: Recipe; count: number; first: number };
 
 /** Merges identical sphere recipes so "3 × Heavy Hammer +5" reads as one line. */
 function groupSynths(stage: Stage): Group[] {
   const groups: Group[] = [];
+  let sphere = 0;
   for (const s of stage.synths) {
     if (s.kind === "item") {
       groups.push({ kind: "item", name: s.name, count: s.count });
@@ -31,9 +34,19 @@ function groupSynths(stage: Stage): Group[] {
     const key = JSON.stringify(s.recipe);
     const same = groups.find((g) => g.kind === "sphere" && JSON.stringify(g.recipe) === key);
     if (same) same.count++;
-    else groups.push({ kind: "sphere", recipe: s.recipe, count: 1 });
+    else groups.push({ kind: "sphere", recipe: s.recipe, count: 1, first: sphere });
+    sphere++;
   }
   return groups;
+}
+
+/** "At +24 · Fl +12 · …" for the stats a sphere passes on (only those it adds). */
+export function GainsText({ gains }: { gains: Partial<Record<StatKey, number>> }) {
+  const t = useTranslations();
+  const parts = STAT_KEYS.filter((k) => (gains[k] ?? 0) > 0).map(
+    (k) => `${t(`stat.short.${k}` as const)} +${gains[k]}`,
+  );
+  return <>{parts.length ? parts.join(" · ") : "–"}</>;
 }
 
 export function RecipeView({ recipe }: { recipe: Recipe }) {
@@ -112,24 +125,44 @@ export function BuildStepBody({
           })}
         </ul>
       )}
-      {spheres.map((g, i) => (
-        <div key={i}>
-          <p>
-            {t(g.count > 1 ? "planner.step.sphereCount" : "planner.step.sphere", {
-              count: g.count,
-              weapon: name(last(g.recipe).weaponId),
-              level: last(g.recipe).levelTo,
-              sp: last(g.recipe).levelTo,
-            })}
-          </p>
-          <details>
-            <summary className="text-muted-foreground cursor-pointer text-xs">
-              {t("planner.step.prepare")}
-            </summary>
-            <RecipeView recipe={g.recipe} />
-          </details>
-        </div>
-      ))}
+      {spheres.map((g, i) => {
+        const passed = g.kind === "sphere" ? derived?.spheres[g.first] : undefined;
+        return (
+          <div key={i}>
+            <p>
+              {t(g.count > 1 ? "planner.step.sphereCount" : "planner.step.sphere", {
+                count: g.count,
+                weapon: name(last(g.recipe).weaponId),
+                level: last(g.recipe).levelTo,
+                sp: last(g.recipe).levelTo,
+              })}
+            </p>
+            {passed && (
+              <p className="text-muted-foreground text-xs">
+                {t(g.count > 1 ? "planner.step.passesOnEach" : "planner.step.passesOn")}{" "}
+                <span className="text-foreground tabular-nums">
+                  <GainsText gains={passed.gains} />
+                </span>
+              </p>
+            )}
+            <details>
+              <summary className="text-muted-foreground cursor-pointer text-xs">
+                {t("planner.step.prepare")}
+              </summary>
+              <RecipeView recipe={g.recipe} />
+            </details>
+          </div>
+        );
+      })}
+      {stageItems(stage).size > 0 && (
+        <p className="text-xs">
+          <span className="text-muted-foreground">{t("planner.step.allItems")} </span>
+          {[...stageItems(stage)]
+            .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+            .map(([n, c]) => `${c}× ${n}`)
+            .join(", ")}
+        </p>
+      )}
       {buyableOnly && foundItems.length > 0 && (
         <p className="text-destructive text-xs">
           {t("step.foundItems", { items: foundItems.join(", ") })}
@@ -144,7 +177,7 @@ export function BuildStepBody({
             })}{" "}
             · {t("planner.after", { level: derived.level, sp: derived.sp })}
           </p>
-          <details className="group">
+          <details className="group" open>
             <summary className="text-muted-foreground cursor-pointer text-xs">
               {t("planner.step.stats")}
             </summary>

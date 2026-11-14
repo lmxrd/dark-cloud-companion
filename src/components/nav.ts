@@ -4,6 +4,7 @@ import {
   LayoutDashboardIcon,
   RouteIcon,
   ShoppingCartIcon,
+  WrenchIcon,
   type LucideIcon,
 } from "lucide-react";
 import type { Translate } from "@/i18n";
@@ -18,10 +19,15 @@ export type NavItem = {
   children?: NavChild[];
   /** A count shown next to the item (e.g. shopping lines left). */
   badge?: number;
+  /** Left out of the phone tab bar (reached from the Reference hub there instead). */
+  wideOnly?: boolean;
 };
 
 /** The Reference sub-pages, by their top-level path segment. */
 export const REFERENCE_PAGES = ["weapons", "items", "ridepod", "monsters", "spheda"] as const;
+
+/** The Tools pages, under /tools/. */
+export const TOOL_PAGES = ["spheres"] as const;
 
 /** The main sections: the sidebar on wide screens, the bottom tab bar on phones. */
 export function mainNav(t: Translate): NavItem[] {
@@ -45,6 +51,16 @@ export function mainNav(t: Translate): NavItem[] {
       children: REFERENCE_PAGES.map((page) => ({
         title: t(`nav.${page}` as const),
         href: `/${page}`,
+      })),
+    },
+    {
+      title: t("nav.tools"),
+      href: "/tools",
+      icon: WrenchIcon,
+      wideOnly: true,
+      children: TOOL_PAGES.map((page) => ({
+        title: t(`nav.${page}` as const),
+        href: `/tools/${page}`,
       })),
     },
   ];
@@ -101,12 +117,18 @@ export function crumbsFor(t: Translate, pathname: string, page?: string): Crumb[
       guides: t("nav.guides"),
       planner: t("nav.planner"),
       shopping: t("nav.shopping"),
+      tools: t("nav.tools"),
       reference: t("nav.reference"),
       settings: t("nav.settings"),
       about: t("nav.about"),
       ...Object.fromEntries(REFERENCE_PAGES.map((p) => [p, t(`nav.${p}` as const)])),
     }[head] ?? head;
 
+  if (head === "tools" && sub)
+    return [
+      { label, href: `/tools/${TOOL_PAGES[0]}` },
+      { label: t(`nav.${sub}` as "nav.spheres") },
+    ];
   if (head === "guides" && sub === "view")
     return [{ label, href: "/guides" }, { label: page ?? t("nav.guide") }];
   if ((REFERENCE_PAGES as readonly string[]).includes(head)) {

@@ -1,0 +1,13 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { PageHeader } from "@/components/PageHeader";
+import { SphereCalculator } from "@/components/reference/SphereCalculator";
+import { useTranslations } from "@/i18n";
+
+const t = useTranslations();
+---
+
+<Layout title={`${t("sphere.title")} · ${t("app.name")}`}>
+  <PageHeader title={t("sphere.title")} description={t("sphere.intro")} />
+  <SphereCalculator client:load />
+</Layout>

@@ -55,9 +55,9 @@ test("the Gives filter lists items that add a stat, largest first", async ({ pag
   // Every row carries a Lightning chip, and the list is sorted by it.
   const values = await page
     .locator("li")
-    .filter({ hasText: /Lght \+\d+/ })
+    .filter({ hasText: /Li \+\d+/ })
     .evaluateAll((rows) =>
-      rows.map((r) => Number(/Lght \+(\d+)/.exec(r.textContent ?? "")?.[1] ?? 0)),
+      rows.map((r) => Number(/Li \+(\d+)/.exec(r.textContent ?? "")?.[1] ?? 0)),
     );
   expect(values.length).toBeGreaterThan(3);
   expect([...values].sort((a, b) => b - a)).toEqual(values);
@@ -121,4 +121,16 @@ test("a Gives filter with no matches says so", async ({ page }) => {
   await page.getByLabel("Search items").fill("zzz");
   await expect(page.getByText("No items match.")).toBeVisible();
   await expect(page.getByRole("heading", { name: /Items that add/ })).toHaveCount(0);
+});
+
+test("the synth sphere calculator shows what a filled sphere passes on", async ({ page }) => {
+  await go(page, "/tools/spheres");
+  // True Battle Wrench +5 with the support bonus: 21 SP; Scrap of Metal adds Lightning (capped at 19).
+  await page.getByLabel("Add item").selectOption("Scrap of Metal");
+  await page.getByRole("button", { name: "Fill SP" }).click();
+  await expect(page.getByText("SP used: 21 / 21")).toBeVisible();
+  const lightning = page.getByRole("row").filter({ hasText: "Lightning" });
+  await expect(lightning).toContainText("19 / 19");
+  await expect(lightning).toContainText("+11");
+  await expect(page.getByText("Costs 5 SP on the receiving weapon")).toBeVisible();
 });

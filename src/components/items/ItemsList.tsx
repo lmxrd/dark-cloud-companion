@@ -10,7 +10,7 @@ import { itemAvailability, synthSources } from "@/lib/planner/sources";
 
 type Filter = "all" | "buyable" | "found";
 
-/** Short stat names for the chips ("Lght +10"). */
+/** Short stat names for the chips ("Li +10"): the 2-letter ones used everywhere in the app. */
 const short = (t: ReturnType<typeof useTranslations>, k: StatKey) => t(`stat.short.${k}` as const);
 
 /**
