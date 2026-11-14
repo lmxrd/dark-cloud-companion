@@ -39,9 +39,7 @@
       "indexes": {
         "abilities_name_unique": {
           "name": "abilities_name_unique",
-          "columns": [
-            "name"
-          ],
+          "columns": ["name"],
           "isUnique": true
         }
       },
@@ -50,12 +48,8 @@
           "name": "abilities_opposite_id_abilities_id_fk",
           "tableFrom": "abilities",
           "tableTo": "abilities",
-          "columnsFrom": [
-            "opposite_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["opposite_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -126,12 +120,8 @@
           "name": "dungeon_weapons_dungeon_id_dungeons_id_fk",
           "tableFrom": "dungeon_weapons",
           "tableTo": "dungeons",
-          "columnsFrom": [
-            "dungeon_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["dungeon_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -139,22 +129,15 @@
           "name": "dungeon_weapons_weapon_id_weapons_id_fk",
           "tableFrom": "dungeon_weapons",
           "tableTo": "weapons",
-          "columnsFrom": [
-            "weapon_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["weapon_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {
         "dungeon_weapons_dungeon_id_weapon_id_pk": {
-          "columns": [
-            "dungeon_id",
-            "weapon_id"
-          ],
+          "columns": ["dungeon_id", "weapon_id"],
           "name": "dungeon_weapons_dungeon_id_weapon_id_pk"
         }
       },
@@ -203,9 +186,7 @@
       "indexes": {
         "dungeons_name_unique": {
           "name": "dungeons_name_unique",
-          "columns": [
-            "name"
-          ],
+          "columns": ["name"],
           "isUnique": true
         }
       },
@@ -214,12 +195,8 @@
           "name": "dungeons_chapter_number_chapters_number_fk",
           "tableFrom": "dungeons",
           "tableTo": "chapters",
-          "columnsFrom": [
-            "chapter_number"
-          ],
-          "columnsTo": [
-            "number"
-          ],
+          "columnsFrom": ["chapter_number"],
+          "columnsTo": ["number"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -227,12 +204,8 @@
           "name": "dungeons_town_id_towns_id_fk",
           "tableFrom": "dungeons",
           "tableTo": "towns",
-          "columnsFrom": [
-            "town_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["town_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -460,12 +433,8 @@
           "name": "enemies_variant_of_id_enemies_id_fk",
           "tableFrom": "enemies",
           "tableTo": "enemies",
-          "columnsFrom": [
-            "variant_of_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["variant_of_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -473,12 +442,8 @@
           "name": "enemies_class_id_monster_classes_id_fk",
           "tableFrom": "enemies",
           "tableTo": "monster_classes",
-          "columnsFrom": [
-            "class_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["class_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -486,12 +451,8 @@
           "name": "enemies_photo_id_photos_id_fk",
           "tableFrom": "enemies",
           "tableTo": "photos",
-          "columnsFrom": [
-            "photo_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["photo_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -579,12 +540,8 @@
           "name": "enemy_drops_enemy_id_enemies_id_fk",
           "tableFrom": "enemy_drops",
           "tableTo": "enemies",
-          "columnsFrom": [
-            "enemy_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["enemy_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -592,22 +549,15 @@
           "name": "enemy_drops_item_id_items_id_fk",
           "tableFrom": "enemy_drops",
           "tableTo": "items",
-          "columnsFrom": [
-            "item_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["item_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {
         "enemy_drops_enemy_id_item_id_pk": {
-          "columns": [
-            "enemy_id",
-            "item_id"
-          ],
+          "columns": ["enemy_id", "item_id"],
           "name": "enemy_drops_enemy_id_item_id_pk"
         }
       },
@@ -658,16 +608,12 @@
       "indexes": {
         "fish_name_unique": {
           "name": "fish_name_unique",
-          "columns": [
-            "name"
-          ],
+          "columns": ["name"],
           "isUnique": true
         },
         "fish_itemId_unique": {
           "name": "fish_itemId_unique",
-          "columns": [
-            "item_id"
-          ],
+          "columns": ["item_id"],
           "isUnique": true
         }
       },
@@ -676,12 +622,8 @@
           "name": "fish_item_id_items_id_fk",
           "tableFrom": "fish",
           "tableTo": "items",
-          "columnsFrom": [
-            "item_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["item_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -730,12 +672,8 @@
           "name": "fish_breeding_parent_a_id_fish_id_fk",
           "tableFrom": "fish_breeding",
           "tableTo": "fish",
-          "columnsFrom": [
-            "parent_a_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["parent_a_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -743,12 +681,8 @@
           "name": "fish_breeding_parent_b_id_fish_id_fk",
           "tableFrom": "fish_breeding",
           "tableTo": "fish",
-          "columnsFrom": [
-            "parent_b_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["parent_b_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -756,23 +690,15 @@
           "name": "fish_breeding_child_id_fish_id_fk",
           "tableFrom": "fish_breeding",
           "tableTo": "fish",
-          "columnsFrom": [
-            "child_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["child_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {
         "fish_breeding_parent_a_id_parent_b_id_child_id_pk": {
-          "columns": [
-            "parent_a_id",
-            "parent_b_id",
-            "child_id"
-          ],
+          "columns": ["parent_a_id", "parent_b_id", "child_id"],
           "name": "fish_breeding_parent_a_id_parent_b_id_child_id_pk"
         }
       },
@@ -810,22 +736,15 @@
           "name": "fish_feed_effects_item_id_fishing_tackle_item_id_fk",
           "tableFrom": "fish_feed_effects",
           "tableTo": "fishing_tackle",
-          "columnsFrom": [
-            "item_id"
-          ],
-          "columnsTo": [
-            "item_id"
-          ],
+          "columnsFrom": ["item_id"],
+          "columnsTo": ["item_id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {
         "fish_feed_effects_item_id_stat_pk": {
-          "columns": [
-            "item_id",
-            "stat"
-          ],
+          "columns": ["item_id", "stat"],
           "name": "fish_feed_effects_item_id_stat_pk"
         }
       },
@@ -907,12 +826,8 @@
           "name": "fish_habitats_fish_id_fish_id_fk",
           "tableFrom": "fish_habitats",
           "tableTo": "fish",
-          "columnsFrom": [
-            "fish_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["fish_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -920,12 +835,8 @@
           "name": "fish_habitats_section_id_sections_id_fk",
           "tableFrom": "fish_habitats",
           "tableTo": "sections",
-          "columnsFrom": [
-            "section_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["section_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -933,12 +844,8 @@
           "name": "fish_habitats_dungeon_id_dungeons_id_fk",
           "tableFrom": "fish_habitats",
           "tableTo": "dungeons",
-          "columnsFrom": [
-            "dungeon_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["dungeon_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -946,12 +853,8 @@
           "name": "fish_habitats_town_id_towns_id_fk",
           "tableFrom": "fish_habitats",
           "tableTo": "towns",
-          "columnsFrom": [
-            "town_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["town_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1015,12 +918,8 @@
           "name": "fishing_contest_classes_contest_id_fishing_contests_id_fk",
           "tableFrom": "fishing_contest_classes",
           "tableTo": "fishing_contests",
-          "columnsFrom": [
-            "contest_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["contest_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1103,12 +1002,8 @@
           "name": "fishing_contest_prizes_contest_id_fishing_contests_id_fk",
           "tableFrom": "fishing_contest_prizes",
           "tableTo": "fishing_contests",
-          "columnsFrom": [
-            "contest_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["contest_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1116,12 +1011,8 @@
           "name": "fishing_contest_prizes_class_id_fishing_contest_classes_id_fk",
           "tableFrom": "fishing_contest_prizes",
           "tableTo": "fishing_contest_classes",
-          "columnsFrom": [
-            "class_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["class_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1129,12 +1020,8 @@
           "name": "fishing_contest_prizes_item_id_items_id_fk",
           "tableFrom": "fishing_contest_prizes",
           "tableTo": "items",
-          "columnsFrom": [
-            "item_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["item_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1142,12 +1029,8 @@
           "name": "fishing_contest_prizes_weapon_id_weapons_id_fk",
           "tableFrom": "fishing_contest_prizes",
           "tableTo": "weapons",
-          "columnsFrom": [
-            "weapon_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["weapon_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1155,12 +1038,8 @@
           "name": "fishing_contest_prizes_ridepod_part_id_ridepod_parts_id_fk",
           "tableFrom": "fishing_contest_prizes",
           "tableTo": "ridepod_parts",
-          "columnsFrom": [
-            "ridepod_part_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["ridepod_part_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1284,9 +1163,7 @@
       "indexes": {
         "fishing_contests_name_unique": {
           "name": "fishing_contests_name_unique",
-          "columns": [
-            "name"
-          ],
+          "columns": ["name"],
           "isUnique": true
         }
       },
@@ -1295,12 +1172,8 @@
           "name": "fishing_contests_town_id_towns_id_fk",
           "tableFrom": "fishing_contests",
           "tableTo": "towns",
-          "columnsFrom": [
-            "town_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["town_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1308,12 +1181,8 @@
           "name": "fishing_contests_from_chapter_number_chapters_number_fk",
           "tableFrom": "fishing_contests",
           "tableTo": "chapters",
-          "columnsFrom": [
-            "from_chapter_number"
-          ],
-          "columnsTo": [
-            "number"
-          ],
+          "columnsFrom": ["from_chapter_number"],
+          "columnsTo": ["number"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1321,12 +1190,8 @@
           "name": "fishing_contests_after_section_id_sections_id_fk",
           "tableFrom": "fishing_contests",
           "tableTo": "sections",
-          "columnsFrom": [
-            "after_section_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["after_section_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1334,12 +1199,8 @@
           "name": "fishing_contests_after_recruit_npc_id_npcs_id_fk",
           "tableFrom": "fishing_contests",
           "tableTo": "npcs",
-          "columnsFrom": [
-            "after_recruit_npc_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["after_recruit_npc_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1347,12 +1208,8 @@
           "name": "fishing_contests_after_georama_task_id_georama_tasks_id_fk",
           "tableFrom": "fishing_contests",
           "tableTo": "georama_tasks",
-          "columnsFrom": [
-            "after_georama_task_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["after_georama_task_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1360,12 +1217,8 @@
           "name": "fishing_contests_until_chapter_number_chapters_number_fk",
           "tableFrom": "fishing_contests",
           "tableTo": "chapters",
-          "columnsFrom": [
-            "until_chapter_number"
-          ],
-          "columnsTo": [
-            "number"
-          ],
+          "columnsFrom": ["until_chapter_number"],
+          "columnsTo": ["number"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1373,12 +1226,8 @@
           "name": "fishing_contests_until_section_id_sections_id_fk",
           "tableFrom": "fishing_contests",
           "tableTo": "sections",
-          "columnsFrom": [
-            "until_section_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["until_section_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1386,12 +1235,8 @@
           "name": "fishing_contests_until_recruit_npc_id_npcs_id_fk",
           "tableFrom": "fishing_contests",
           "tableTo": "npcs",
-          "columnsFrom": [
-            "until_recruit_npc_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["until_recruit_npc_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1459,9 +1304,7 @@
       "indexes": {
         "fishing_rod_stats_name_unique": {
           "name": "fishing_rod_stats_name_unique",
-          "columns": [
-            "name"
-          ],
+          "columns": ["name"],
           "isUnique": true
         }
       },
@@ -1514,12 +1357,8 @@
           "name": "fishing_tackle_item_id_items_id_fk",
           "tableFrom": "fishing_tackle",
           "tableTo": "items",
-          "columnsFrom": [
-            "item_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["item_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1565,12 +1404,8 @@
           "name": "fishing_tackle_fish_item_id_fishing_tackle_item_id_fk",
           "tableFrom": "fishing_tackle_fish",
           "tableTo": "fishing_tackle",
-          "columnsFrom": [
-            "item_id"
-          ],
-          "columnsTo": [
-            "item_id"
-          ],
+          "columnsFrom": ["item_id"],
+          "columnsTo": ["item_id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1578,22 +1413,15 @@
           "name": "fishing_tackle_fish_fish_id_fish_id_fk",
           "tableFrom": "fishing_tackle_fish",
           "tableTo": "fish",
-          "columnsFrom": [
-            "fish_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["fish_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {
         "fishing_tackle_fish_item_id_fish_id_pk": {
-          "columns": [
-            "item_id",
-            "fish_id"
-          ],
+          "columns": ["item_id", "fish_id"],
           "name": "fishing_tackle_fish_item_id_fish_id_pk"
         }
       },
@@ -1708,12 +1536,8 @@
           "name": "georama_goals_task_id_georama_tasks_id_fk",
           "tableFrom": "georama_goals",
           "tableTo": "georama_tasks",
-          "columnsFrom": [
-            "task_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["task_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1721,12 +1545,8 @@
           "name": "georama_goals_georama_part_id_georama_parts_id_fk",
           "tableFrom": "georama_goals",
           "tableTo": "georama_parts",
-          "columnsFrom": [
-            "georama_part_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["georama_part_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1734,12 +1554,8 @@
           "name": "georama_goals_related_georama_part_id_georama_parts_id_fk",
           "tableFrom": "georama_goals",
           "tableTo": "georama_parts",
-          "columnsFrom": [
-            "related_georama_part_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["related_georama_part_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1747,12 +1563,8 @@
           "name": "georama_goals_npc_id_npcs_id_fk",
           "tableFrom": "georama_goals",
           "tableTo": "npcs",
-          "columnsFrom": [
-            "npc_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["npc_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1760,12 +1572,8 @@
           "name": "georama_goals_required_task_id_georama_tasks_id_fk",
           "tableFrom": "georama_goals",
           "tableTo": "georama_tasks",
-          "columnsFrom": [
-            "required_task_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["required_task_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1773,12 +1581,8 @@
           "name": "georama_goals_section_id_sections_id_fk",
           "tableFrom": "georama_goals",
           "tableTo": "sections",
-          "columnsFrom": [
-            "section_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["section_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1843,12 +1647,8 @@
           "name": "georama_part_items_georama_part_id_georama_parts_id_fk",
           "tableFrom": "georama_part_items",
           "tableTo": "georama_parts",
-          "columnsFrom": [
-            "georama_part_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["georama_part_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1856,22 +1656,15 @@
           "name": "georama_part_items_item_id_items_id_fk",
           "tableFrom": "georama_part_items",
           "tableTo": "items",
-          "columnsFrom": [
-            "item_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["item_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {
         "georama_part_items_georama_part_id_item_id_pk": {
-          "columns": [
-            "georama_part_id",
-            "item_id"
-          ],
+          "columns": ["georama_part_id", "item_id"],
           "name": "georama_part_items_georama_part_id_item_id_pk"
         }
       },
@@ -1932,9 +1725,7 @@
       "indexes": {
         "georama_parts_name_unique": {
           "name": "georama_parts_name_unique",
-          "columns": [
-            "name"
-          ],
+          "columns": ["name"],
           "isUnique": true
         }
       },
@@ -1991,12 +1782,8 @@
           "name": "georama_starting_parts_town_id_towns_id_fk",
           "tableFrom": "georama_starting_parts",
           "tableTo": "towns",
-          "columnsFrom": [
-            "town_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["town_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -2004,22 +1791,15 @@
           "name": "georama_starting_parts_georama_part_id_georama_parts_id_fk",
           "tableFrom": "georama_starting_parts",
           "tableTo": "georama_parts",
-          "columnsFrom": [
-            "georama_part_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["georama_part_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {
         "georama_starting_parts_town_id_georama_part_id_pk": {
-          "columns": [
-            "town_id",
-            "georama_part_id"
-          ],
+          "columns": ["town_id", "georama_part_id"],
           "name": "georama_starting_parts_town_id_georama_part_id_pk"
         }
       },
@@ -2076,12 +1856,8 @@
           "name": "georama_tasks_town_id_towns_id_fk",
           "tableFrom": "georama_tasks",
           "tableTo": "towns",
-          "columnsFrom": [
-            "town_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["town_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2126,12 +1902,8 @@
           "name": "georama_town_parts_town_id_towns_id_fk",
           "tableFrom": "georama_town_parts",
           "tableTo": "towns",
-          "columnsFrom": [
-            "town_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["town_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -2139,22 +1911,15 @@
           "name": "georama_town_parts_georama_part_id_georama_parts_id_fk",
           "tableFrom": "georama_town_parts",
           "tableTo": "georama_parts",
-          "columnsFrom": [
-            "georama_part_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["georama_part_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {
         "georama_town_parts_town_id_georama_part_id_pk": {
-          "columns": [
-            "town_id",
-            "georama_part_id"
-          ],
+          "columns": ["town_id", "georama_part_id"],
           "name": "georama_town_parts_town_id_georama_part_id_pk"
         }
       },
@@ -2219,12 +1984,8 @@
           "name": "georama_town_rewards_town_id_towns_id_fk",
           "tableFrom": "georama_town_rewards",
           "tableTo": "towns",
-          "columnsFrom": [
-            "town_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["town_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -2232,12 +1993,8 @@
           "name": "georama_town_rewards_item_id_items_id_fk",
           "tableFrom": "georama_town_rewards",
           "tableTo": "items",
-          "columnsFrom": [
-            "item_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["item_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -2245,12 +2002,8 @@
           "name": "georama_town_rewards_weapon_id_weapons_id_fk",
           "tableFrom": "georama_town_rewards",
           "tableTo": "weapons",
-          "columnsFrom": [
-            "weapon_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["weapon_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -2258,12 +2011,8 @@
           "name": "georama_town_rewards_ridepod_part_id_ridepod_parts_id_fk",
           "tableFrom": "georama_town_rewards",
           "tableTo": "ridepod_parts",
-          "columnsFrom": [
-            "ridepod_part_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["ridepod_part_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2313,12 +2062,8 @@
           "name": "invention_ideas_invention_id_inventions_id_fk",
           "tableFrom": "invention_ideas",
           "tableTo": "inventions",
-          "columnsFrom": [
-            "invention_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["invention_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -2326,23 +2071,15 @@
           "name": "invention_ideas_photo_id_photos_id_fk",
           "tableFrom": "invention_ideas",
           "tableTo": "photos",
-          "columnsFrom": [
-            "photo_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["photo_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {
         "invention_ideas_invention_id_recipe_photo_id_pk": {
-          "columns": [
-            "invention_id",
-            "recipe",
-            "photo_id"
-          ],
+          "columns": ["invention_id", "recipe", "photo_id"],
           "name": "invention_ideas_invention_id_recipe_photo_id_pk"
         }
       },
@@ -2385,12 +2122,8 @@
           "name": "invention_items_invention_id_inventions_id_fk",
           "tableFrom": "invention_items",
           "tableTo": "inventions",
-          "columnsFrom": [
-            "invention_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["invention_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -2398,22 +2131,15 @@
           "name": "invention_items_item_id_items_id_fk",
           "tableFrom": "invention_items",
           "tableTo": "items",
-          "columnsFrom": [
-            "item_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["item_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {
         "invention_items_invention_id_item_id_pk": {
-          "columns": [
-            "invention_id",
-            "item_id"
-          ],
+          "columns": ["invention_id", "item_id"],
           "name": "invention_items_invention_id_item_id_pk"
         }
       },
@@ -2538,9 +2264,7 @@
       "indexes": {
         "inventions_name_unique": {
           "name": "inventions_name_unique",
-          "columns": [
-            "name"
-          ],
+          "columns": ["name"],
           "isUnique": true
         }
       },
@@ -2549,12 +2273,8 @@
           "name": "inventions_chapter_number_chapters_number_fk",
           "tableFrom": "inventions",
           "tableTo": "chapters",
-          "columnsFrom": [
-            "chapter_number"
-          ],
-          "columnsTo": [
-            "number"
-          ],
+          "columnsFrom": ["chapter_number"],
+          "columnsTo": ["number"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -2562,12 +2282,8 @@
           "name": "inventions_until_chapter_number_chapters_number_fk",
           "tableFrom": "inventions",
           "tableTo": "chapters",
-          "columnsFrom": [
-            "until_chapter_number"
-          ],
-          "columnsTo": [
-            "number"
-          ],
+          "columnsFrom": ["until_chapter_number"],
+          "columnsTo": ["number"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -2575,12 +2291,8 @@
           "name": "inventions_section_id_sections_id_fk",
           "tableFrom": "inventions",
           "tableTo": "sections",
-          "columnsFrom": [
-            "section_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["section_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -2588,12 +2300,8 @@
           "name": "inventions_town_id_towns_id_fk",
           "tableFrom": "inventions",
           "tableTo": "towns",
-          "columnsFrom": [
-            "town_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["town_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -2601,12 +2309,8 @@
           "name": "inventions_after_section_id_sections_id_fk",
           "tableFrom": "inventions",
           "tableTo": "sections",
-          "columnsFrom": [
-            "after_section_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["after_section_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -2614,12 +2318,8 @@
           "name": "inventions_after_georama_task_id_georama_tasks_id_fk",
           "tableFrom": "inventions",
           "tableTo": "georama_tasks",
-          "columnsFrom": [
-            "after_georama_task_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["after_georama_task_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -2627,12 +2327,8 @@
           "name": "inventions_requires_georama_part_id_georama_parts_id_fk",
           "tableFrom": "inventions",
           "tableTo": "georama_parts",
-          "columnsFrom": [
-            "requires_georama_part_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["requires_georama_part_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -2640,12 +2336,8 @@
           "name": "inventions_ridepod_part_id_ridepod_parts_id_fk",
           "tableFrom": "inventions",
           "tableTo": "ridepod_parts",
-          "columnsFrom": [
-            "ridepod_part_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["ridepod_part_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -2653,12 +2345,8 @@
           "name": "inventions_weapon_id_weapons_id_fk",
           "tableFrom": "inventions",
           "tableTo": "weapons",
-          "columnsFrom": [
-            "weapon_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["weapon_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -2666,12 +2354,8 @@
           "name": "inventions_item_id_items_id_fk",
           "tableFrom": "inventions",
           "tableTo": "items",
-          "columnsFrom": [
-            "item_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["item_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2762,12 +2446,8 @@
           "name": "item_effects_item_id_items_id_fk",
           "tableFrom": "item_effects",
           "tableTo": "items",
-          "columnsFrom": [
-            "item_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["item_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2981,9 +2661,7 @@
       "indexes": {
         "items_name_unique": {
           "name": "items_name_unique",
-          "columns": [
-            "name"
-          ],
+          "columns": ["name"],
           "isUnique": true
         }
       },
@@ -2992,12 +2670,8 @@
           "name": "items_ability_id_abilities_id_fk",
           "tableFrom": "items",
           "tableTo": "abilities",
-          "columnsFrom": [
-            "ability_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["ability_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -3094,12 +2768,8 @@
           "name": "monster_class_level_rewards_class_id_monster_classes_id_fk",
           "tableFrom": "monster_class_level_rewards",
           "tableTo": "monster_classes",
-          "columnsFrom": [
-            "class_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["class_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -3107,23 +2777,15 @@
           "name": "monster_class_level_rewards_item_id_items_id_fk",
           "tableFrom": "monster_class_level_rewards",
           "tableTo": "items",
-          "columnsFrom": [
-            "item_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["item_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {
         "monster_class_level_rewards_class_id_level_item_id_pk": {
-          "columns": [
-            "class_id",
-            "level",
-            "item_id"
-          ],
+          "columns": ["class_id", "level", "item_id"],
           "name": "monster_class_level_rewards_class_id_level_item_id_pk"
         }
       },
@@ -3191,12 +2853,8 @@
           "name": "monster_class_unlocks_class_id_monster_classes_id_fk",
           "tableFrom": "monster_class_unlocks",
           "tableTo": "monster_classes",
-          "columnsFrom": [
-            "class_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["class_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -3204,12 +2862,8 @@
           "name": "monster_class_unlocks_item_id_items_id_fk",
           "tableFrom": "monster_class_unlocks",
           "tableTo": "items",
-          "columnsFrom": [
-            "item_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["item_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -3217,12 +2871,8 @@
           "name": "monster_class_unlocks_enemy_id_enemies_id_fk",
           "tableFrom": "monster_class_unlocks",
           "tableTo": "enemies",
-          "columnsFrom": [
-            "enemy_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["enemy_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -3336,16 +2986,12 @@
       "indexes": {
         "monster_classes_name_unique": {
           "name": "monster_classes_name_unique",
-          "columns": [
-            "name"
-          ],
+          "columns": ["name"],
           "isUnique": true
         },
         "monster_classes_badgeName_unique": {
           "name": "monster_classes_badgeName_unique",
-          "columns": [
-            "badge_name"
-          ],
+          "columns": ["badge_name"],
           "isUnique": true
         }
       },
@@ -3354,12 +3000,8 @@
           "name": "monster_classes_chapter_number_chapters_number_fk",
           "tableFrom": "monster_classes",
           "tableTo": "chapters",
-          "columnsFrom": [
-            "chapter_number"
-          ],
-          "columnsTo": [
-            "number"
-          ],
+          "columnsFrom": ["chapter_number"],
+          "columnsTo": ["number"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -3367,12 +3009,8 @@
           "name": "monster_classes_until_chapter_number_chapters_number_fk",
           "tableFrom": "monster_classes",
           "tableTo": "chapters",
-          "columnsFrom": [
-            "until_chapter_number"
-          ],
-          "columnsTo": [
-            "number"
-          ],
+          "columnsFrom": ["until_chapter_number"],
+          "columnsTo": ["number"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -3380,12 +3018,8 @@
           "name": "monster_classes_section_id_sections_id_fk",
           "tableFrom": "monster_classes",
           "tableTo": "sections",
-          "columnsFrom": [
-            "section_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["section_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -3393,12 +3027,8 @@
           "name": "monster_classes_town_id_towns_id_fk",
           "tableFrom": "monster_classes",
           "tableTo": "towns",
-          "columnsFrom": [
-            "town_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["town_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -3406,12 +3036,8 @@
           "name": "monster_classes_after_section_id_sections_id_fk",
           "tableFrom": "monster_classes",
           "tableTo": "sections",
-          "columnsFrom": [
-            "after_section_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["after_section_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -3419,12 +3045,8 @@
           "name": "monster_classes_after_georama_task_id_georama_tasks_id_fk",
           "tableFrom": "monster_classes",
           "tableTo": "georama_tasks",
-          "columnsFrom": [
-            "after_georama_task_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["after_georama_task_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -3432,12 +3054,8 @@
           "name": "monster_classes_requires_georama_part_id_georama_parts_id_fk",
           "tableFrom": "monster_classes",
           "tableTo": "georama_parts",
-          "columnsFrom": [
-            "requires_georama_part_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["requires_georama_part_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -3496,12 +3114,8 @@
           "name": "monster_evolutions_from_id_monster_forms_id_fk",
           "tableFrom": "monster_evolutions",
           "tableTo": "monster_forms",
-          "columnsFrom": [
-            "from_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["from_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -3509,12 +3123,8 @@
           "name": "monster_evolutions_to_id_monster_forms_id_fk",
           "tableFrom": "monster_evolutions",
           "tableTo": "monster_forms",
-          "columnsFrom": [
-            "to_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["to_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -3522,22 +3132,15 @@
           "name": "monster_evolutions_required_item_id_items_id_fk",
           "tableFrom": "monster_evolutions",
           "tableTo": "items",
-          "columnsFrom": [
-            "required_item_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["required_item_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {
         "monster_evolutions_from_id_to_id_pk": {
-          "columns": [
-            "from_id",
-            "to_id"
-          ],
+          "columns": ["from_id", "to_id"],
           "name": "monster_evolutions_from_id_to_id_pk"
         }
       },
@@ -3602,12 +3205,8 @@
           "name": "monster_forms_class_id_monster_classes_id_fk",
           "tableFrom": "monster_forms",
           "tableTo": "monster_classes",
-          "columnsFrom": [
-            "class_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["class_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -3680,12 +3279,8 @@
           "name": "npc_housing_requirements_npc_id_npcs_id_fk",
           "tableFrom": "npc_housing_requirements",
           "tableTo": "npcs",
-          "columnsFrom": [
-            "npc_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["npc_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -3693,12 +3288,8 @@
           "name": "npc_housing_requirements_georama_part_id_georama_parts_id_fk",
           "tableFrom": "npc_housing_requirements",
           "tableTo": "georama_parts",
-          "columnsFrom": [
-            "georama_part_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["georama_part_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -3779,10 +3370,7 @@
       "indexes": {
         "npc_skills_npc_name": {
           "name": "npc_skills_npc_name",
-          "columns": [
-            "npc_id",
-            "name"
-          ],
+          "columns": ["npc_id", "name"],
           "isUnique": true
         }
       },
@@ -3791,12 +3379,8 @@
           "name": "npc_skills_npc_id_npcs_id_fk",
           "tableFrom": "npc_skills",
           "tableTo": "npcs",
-          "columnsFrom": [
-            "npc_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["npc_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -3804,12 +3388,8 @@
           "name": "npc_skills_item_id_items_id_fk",
           "tableFrom": "npc_skills",
           "tableTo": "items",
-          "columnsFrom": [
-            "item_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["item_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -3870,9 +3450,7 @@
       "indexes": {
         "npcs_name_unique": {
           "name": "npcs_name_unique",
-          "columns": [
-            "name"
-          ],
+          "columns": ["name"],
           "isUnique": true
         }
       },
@@ -3881,12 +3459,8 @@
           "name": "npcs_home_town_id_towns_id_fk",
           "tableFrom": "npcs",
           "tableTo": "towns",
-          "columnsFrom": [
-            "home_town_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["home_town_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -3935,12 +3509,8 @@
           "name": "photo_levels_reward_item_id_items_id_fk",
           "tableFrom": "photo_levels",
           "tableTo": "items",
-          "columnsFrom": [
-            "reward_item_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["reward_item_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -4094,9 +3664,7 @@
       "indexes": {
         "photos_name_unique": {
           "name": "photos_name_unique",
-          "columns": [
-            "name"
-          ],
+          "columns": ["name"],
           "isUnique": true
         }
       },
@@ -4105,12 +3673,8 @@
           "name": "photos_chapter_number_chapters_number_fk",
           "tableFrom": "photos",
           "tableTo": "chapters",
-          "columnsFrom": [
-            "chapter_number"
-          ],
-          "columnsTo": [
-            "number"
-          ],
+          "columnsFrom": ["chapter_number"],
+          "columnsTo": ["number"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -4118,12 +3682,8 @@
           "name": "photos_until_chapter_number_chapters_number_fk",
           "tableFrom": "photos",
           "tableTo": "chapters",
-          "columnsFrom": [
-            "until_chapter_number"
-          ],
-          "columnsTo": [
-            "number"
-          ],
+          "columnsFrom": ["until_chapter_number"],
+          "columnsTo": ["number"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -4131,12 +3691,8 @@
           "name": "photos_section_id_sections_id_fk",
           "tableFrom": "photos",
           "tableTo": "sections",
-          "columnsFrom": [
-            "section_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["section_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -4144,12 +3700,8 @@
           "name": "photos_town_id_towns_id_fk",
           "tableFrom": "photos",
           "tableTo": "towns",
-          "columnsFrom": [
-            "town_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["town_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -4157,12 +3709,8 @@
           "name": "photos_after_section_id_sections_id_fk",
           "tableFrom": "photos",
           "tableTo": "sections",
-          "columnsFrom": [
-            "after_section_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["after_section_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -4170,12 +3718,8 @@
           "name": "photos_after_georama_task_id_georama_tasks_id_fk",
           "tableFrom": "photos",
           "tableTo": "georama_tasks",
-          "columnsFrom": [
-            "after_georama_task_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["after_georama_task_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -4183,12 +3727,8 @@
           "name": "photos_requires_georama_part_id_georama_parts_id_fk",
           "tableFrom": "photos",
           "tableTo": "georama_parts",
-          "columnsFrom": [
-            "requires_georama_part_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["requires_georama_part_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -4322,12 +3862,8 @@
           "name": "pickups_item_id_items_id_fk",
           "tableFrom": "pickups",
           "tableTo": "items",
-          "columnsFrom": [
-            "item_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["item_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -4335,12 +3871,8 @@
           "name": "pickups_chapter_number_chapters_number_fk",
           "tableFrom": "pickups",
           "tableTo": "chapters",
-          "columnsFrom": [
-            "chapter_number"
-          ],
-          "columnsTo": [
-            "number"
-          ],
+          "columnsFrom": ["chapter_number"],
+          "columnsTo": ["number"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -4348,12 +3880,8 @@
           "name": "pickups_until_chapter_number_chapters_number_fk",
           "tableFrom": "pickups",
           "tableTo": "chapters",
-          "columnsFrom": [
-            "until_chapter_number"
-          ],
-          "columnsTo": [
-            "number"
-          ],
+          "columnsFrom": ["until_chapter_number"],
+          "columnsTo": ["number"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -4361,12 +3889,8 @@
           "name": "pickups_section_id_sections_id_fk",
           "tableFrom": "pickups",
           "tableTo": "sections",
-          "columnsFrom": [
-            "section_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["section_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -4374,12 +3898,8 @@
           "name": "pickups_town_id_towns_id_fk",
           "tableFrom": "pickups",
           "tableTo": "towns",
-          "columnsFrom": [
-            "town_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["town_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -4387,12 +3907,8 @@
           "name": "pickups_after_section_id_sections_id_fk",
           "tableFrom": "pickups",
           "tableTo": "sections",
-          "columnsFrom": [
-            "after_section_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["after_section_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -4400,12 +3916,8 @@
           "name": "pickups_after_georama_task_id_georama_tasks_id_fk",
           "tableFrom": "pickups",
           "tableTo": "georama_tasks",
-          "columnsFrom": [
-            "after_georama_task_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["after_georama_task_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -4413,12 +3925,8 @@
           "name": "pickups_requires_georama_part_id_georama_parts_id_fk",
           "tableFrom": "pickups",
           "tableTo": "georama_parts",
-          "columnsFrom": [
-            "requires_georama_part_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["requires_georama_part_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -4526,12 +4034,8 @@
           "name": "recruit_requirements_npc_id_recruits_npc_id_fk",
           "tableFrom": "recruit_requirements",
           "tableTo": "recruits",
-          "columnsFrom": [
-            "npc_id"
-          ],
-          "columnsTo": [
-            "npc_id"
-          ],
+          "columnsFrom": ["npc_id"],
+          "columnsTo": ["npc_id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -4539,12 +4043,8 @@
           "name": "recruit_requirements_item_id_items_id_fk",
           "tableFrom": "recruit_requirements",
           "tableTo": "items",
-          "columnsFrom": [
-            "item_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["item_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -4552,12 +4052,8 @@
           "name": "recruit_requirements_weapon_id_weapons_id_fk",
           "tableFrom": "recruit_requirements",
           "tableTo": "weapons",
-          "columnsFrom": [
-            "weapon_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["weapon_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -4565,12 +4061,8 @@
           "name": "recruit_requirements_photo_id_photos_id_fk",
           "tableFrom": "recruit_requirements",
           "tableTo": "photos",
-          "columnsFrom": [
-            "photo_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["photo_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -4578,12 +4070,8 @@
           "name": "recruit_requirements_fish_id_fish_id_fk",
           "tableFrom": "recruit_requirements",
           "tableTo": "fish",
-          "columnsFrom": [
-            "fish_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["fish_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -4591,12 +4079,8 @@
           "name": "recruit_requirements_contest_class_id_fishing_contest_classes_id_fk",
           "tableFrom": "recruit_requirements",
           "tableTo": "fishing_contest_classes",
-          "columnsFrom": [
-            "contest_class_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["contest_class_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -4728,12 +4212,8 @@
           "name": "recruits_npc_id_npcs_id_fk",
           "tableFrom": "recruits",
           "tableTo": "npcs",
-          "columnsFrom": [
-            "npc_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["npc_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -4741,12 +4221,8 @@
           "name": "recruits_chapter_number_chapters_number_fk",
           "tableFrom": "recruits",
           "tableTo": "chapters",
-          "columnsFrom": [
-            "chapter_number"
-          ],
-          "columnsTo": [
-            "number"
-          ],
+          "columnsFrom": ["chapter_number"],
+          "columnsTo": ["number"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -4754,12 +4230,8 @@
           "name": "recruits_until_chapter_number_chapters_number_fk",
           "tableFrom": "recruits",
           "tableTo": "chapters",
-          "columnsFrom": [
-            "until_chapter_number"
-          ],
-          "columnsTo": [
-            "number"
-          ],
+          "columnsFrom": ["until_chapter_number"],
+          "columnsTo": ["number"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -4767,12 +4239,8 @@
           "name": "recruits_section_id_sections_id_fk",
           "tableFrom": "recruits",
           "tableTo": "sections",
-          "columnsFrom": [
-            "section_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["section_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -4780,12 +4248,8 @@
           "name": "recruits_town_id_towns_id_fk",
           "tableFrom": "recruits",
           "tableTo": "towns",
-          "columnsFrom": [
-            "town_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["town_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -4793,12 +4257,8 @@
           "name": "recruits_after_section_id_sections_id_fk",
           "tableFrom": "recruits",
           "tableTo": "sections",
-          "columnsFrom": [
-            "after_section_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["after_section_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -4806,12 +4266,8 @@
           "name": "recruits_after_georama_task_id_georama_tasks_id_fk",
           "tableFrom": "recruits",
           "tableTo": "georama_tasks",
-          "columnsFrom": [
-            "after_georama_task_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["after_georama_task_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -4819,12 +4275,8 @@
           "name": "recruits_requires_georama_part_id_georama_parts_id_fk",
           "tableFrom": "recruits",
           "tableTo": "georama_parts",
-          "columnsFrom": [
-            "requires_georama_part_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["requires_georama_part_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -4870,14 +4322,8 @@
           "name": "ridepod_bodies_part_fk",
           "tableFrom": "ridepod_bodies",
           "tableTo": "ridepod_parts",
-          "columnsFrom": [
-            "part_id",
-            "part_type"
-          ],
-          "columnsTo": [
-            "id",
-            "type"
-          ],
+          "columnsFrom": ["part_id", "part_type"],
+          "columnsTo": ["id", "type"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -4937,9 +4383,7 @@
       "indexes": {
         "ridepod_cores_name_unique": {
           "name": "ridepod_cores_name_unique",
-          "columns": [
-            "name"
-          ],
+          "columns": ["name"],
           "isUnique": true
         }
       },
@@ -4993,14 +4437,8 @@
           "name": "ridepod_energy_packs_part_fk",
           "tableFrom": "ridepod_energy_packs",
           "tableTo": "ridepod_parts",
-          "columnsFrom": [
-            "part_id",
-            "part_type"
-          ],
-          "columnsTo": [
-            "id",
-            "type"
-          ],
+          "columnsFrom": ["part_id", "part_type"],
+          "columnsTo": ["id", "type"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -5057,14 +4495,8 @@
           "name": "ridepod_legs_part_fk",
           "tableFrom": "ridepod_legs",
           "tableTo": "ridepod_parts",
-          "columnsFrom": [
-            "part_id",
-            "part_type"
-          ],
-          "columnsTo": [
-            "id",
-            "type"
-          ],
+          "columnsFrom": ["part_id", "part_type"],
+          "columnsTo": ["id", "type"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -5128,24 +4560,17 @@
       "indexes": {
         "ridepod_parts_name_unique": {
           "name": "ridepod_parts_name_unique",
-          "columns": [
-            "name"
-          ],
+          "columns": ["name"],
           "isUnique": true
         },
         "ridepod_parts_itemId_unique": {
           "name": "ridepod_parts_itemId_unique",
-          "columns": [
-            "item_id"
-          ],
+          "columns": ["item_id"],
           "isUnique": true
         },
         "ridepod_parts_id_type": {
           "name": "ridepod_parts_id_type",
-          "columns": [
-            "id",
-            "type"
-          ],
+          "columns": ["id", "type"],
           "isUnique": true
         }
       },
@@ -5154,12 +4579,8 @@
           "name": "ridepod_parts_item_id_items_id_fk",
           "tableFrom": "ridepod_parts",
           "tableTo": "items",
-          "columnsFrom": [
-            "item_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["item_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -5287,10 +4708,7 @@
       "indexes": {
         "ridepod_weapons_sub_type_tier": {
           "name": "ridepod_weapons_sub_type_tier",
-          "columns": [
-            "sub_type",
-            "tier"
-          ],
+          "columns": ["sub_type", "tier"],
           "isUnique": true
         }
       },
@@ -5299,14 +4717,8 @@
           "name": "ridepod_weapons_part_fk",
           "tableFrom": "ridepod_weapons",
           "tableTo": "ridepod_parts",
-          "columnsFrom": [
-            "part_id",
-            "part_type"
-          ],
-          "columnsTo": [
-            "id",
-            "type"
-          ],
+          "columnsFrom": ["part_id", "part_type"],
+          "columnsTo": ["id", "type"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -5383,12 +4795,8 @@
           "name": "section_enemies_section_id_sections_id_fk",
           "tableFrom": "section_enemies",
           "tableTo": "sections",
-          "columnsFrom": [
-            "section_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["section_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -5396,23 +4804,15 @@
           "name": "section_enemies_enemy_id_enemies_id_fk",
           "tableFrom": "section_enemies",
           "tableTo": "enemies",
-          "columnsFrom": [
-            "enemy_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["enemy_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {
         "section_enemies_section_id_enemy_id_star_area_pk": {
-          "columns": [
-            "section_id",
-            "enemy_id",
-            "star_area"
-          ],
+          "columns": ["section_id", "enemy_id", "star_area"],
           "name": "section_enemies_section_id_enemy_id_star_area_pk"
         }
       },
@@ -5456,12 +4856,8 @@
           "name": "section_exits_from_section_id_sections_id_fk",
           "tableFrom": "section_exits",
           "tableTo": "sections",
-          "columnsFrom": [
-            "from_section_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["from_section_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -5469,23 +4865,15 @@
           "name": "section_exits_to_section_id_sections_id_fk",
           "tableFrom": "section_exits",
           "tableTo": "sections",
-          "columnsFrom": [
-            "to_section_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["to_section_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {
         "section_exits_from_section_id_to_section_id_type_pk": {
-          "columns": [
-            "from_section_id",
-            "to_section_id",
-            "type"
-          ],
+          "columns": ["from_section_id", "to_section_id", "type"],
           "name": "section_exits_from_section_id_to_section_id_type_pk"
         }
       },
@@ -5521,12 +4909,8 @@
           "name": "section_georama_items_section_id_sections_id_fk",
           "tableFrom": "section_georama_items",
           "tableTo": "sections",
-          "columnsFrom": [
-            "section_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["section_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -5534,22 +4918,15 @@
           "name": "section_georama_items_item_id_items_id_fk",
           "tableFrom": "section_georama_items",
           "tableTo": "items",
-          "columnsFrom": [
-            "item_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["item_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {
         "section_georama_items_section_id_item_id_pk": {
-          "columns": [
-            "section_id",
-            "item_id"
-          ],
+          "columns": ["section_id", "item_id"],
           "name": "section_georama_items_section_id_item_id_pk"
         }
       },
@@ -5580,12 +4957,8 @@
           "name": "section_geostone_parts_section_id_sections_id_fk",
           "tableFrom": "section_geostone_parts",
           "tableTo": "sections",
-          "columnsFrom": [
-            "section_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["section_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -5593,22 +4966,15 @@
           "name": "section_geostone_parts_georama_part_id_georama_parts_id_fk",
           "tableFrom": "section_geostone_parts",
           "tableTo": "georama_parts",
-          "columnsFrom": [
-            "georama_part_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["georama_part_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {
         "section_geostone_parts_section_id_georama_part_id_pk": {
-          "columns": [
-            "section_id",
-            "georama_part_id"
-          ],
+          "columns": ["section_id", "georama_part_id"],
           "name": "section_geostone_parts_section_id_georama_part_id_pk"
         }
       },
@@ -5675,12 +5041,8 @@
           "name": "section_rewards_section_id_sections_id_fk",
           "tableFrom": "section_rewards",
           "tableTo": "sections",
-          "columnsFrom": [
-            "section_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["section_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -5688,12 +5050,8 @@
           "name": "section_rewards_item_id_items_id_fk",
           "tableFrom": "section_rewards",
           "tableTo": "items",
-          "columnsFrom": [
-            "item_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["item_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -5701,12 +5059,8 @@
           "name": "section_rewards_weapon_id_weapons_id_fk",
           "tableFrom": "section_rewards",
           "tableTo": "weapons",
-          "columnsFrom": [
-            "weapon_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["weapon_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -5714,12 +5068,8 @@
           "name": "section_rewards_ridepod_part_id_ridepod_parts_id_fk",
           "tableFrom": "section_rewards",
           "tableTo": "ridepod_parts",
-          "columnsFrom": [
-            "ridepod_part_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["ridepod_part_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -5798,10 +5148,7 @@
       "indexes": {
         "section_spheda_prizes_section_tier": {
           "name": "section_spheda_prizes_section_tier",
-          "columns": [
-            "section_id",
-            "tier"
-          ],
+          "columns": ["section_id", "tier"],
           "isUnique": true
         }
       },
@@ -5810,12 +5157,8 @@
           "name": "section_spheda_prizes_section_id_sections_id_fk",
           "tableFrom": "section_spheda_prizes",
           "tableTo": "sections",
-          "columnsFrom": [
-            "section_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["section_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -5823,12 +5166,8 @@
           "name": "section_spheda_prizes_item_id_items_id_fk",
           "tableFrom": "section_spheda_prizes",
           "tableTo": "items",
-          "columnsFrom": [
-            "item_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["item_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -5836,12 +5175,8 @@
           "name": "section_spheda_prizes_weapon_id_weapons_id_fk",
           "tableFrom": "section_spheda_prizes",
           "tableTo": "weapons",
-          "columnsFrom": [
-            "weapon_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["weapon_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -5849,12 +5184,8 @@
           "name": "section_spheda_prizes_ridepod_part_id_ridepod_parts_id_fk",
           "tableFrom": "section_spheda_prizes",
           "tableTo": "ridepod_parts",
-          "columnsFrom": [
-            "ridepod_part_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["ridepod_part_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -5983,10 +5314,7 @@
       "indexes": {
         "sections_chapter_position": {
           "name": "sections_chapter_position",
-          "columns": [
-            "chapter_number",
-            "position"
-          ],
+          "columns": ["chapter_number", "position"],
           "isUnique": true
         }
       },
@@ -5995,12 +5323,8 @@
           "name": "sections_chapter_number_chapters_number_fk",
           "tableFrom": "sections",
           "tableTo": "chapters",
-          "columnsFrom": [
-            "chapter_number"
-          ],
-          "columnsTo": [
-            "number"
-          ],
+          "columnsFrom": ["chapter_number"],
+          "columnsTo": ["number"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -6008,12 +5332,8 @@
           "name": "sections_dungeon_id_dungeons_id_fk",
           "tableFrom": "sections",
           "tableTo": "dungeons",
-          "columnsFrom": [
-            "dungeon_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["dungeon_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -6021,12 +5341,8 @@
           "name": "sections_closed_after_section_id_sections_id_fk",
           "tableFrom": "sections",
           "tableTo": "sections",
-          "columnsFrom": [
-            "closed_after_section_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["closed_after_section_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -6213,37 +5529,25 @@
       "indexes": {
         "shop_stock_shop_item": {
           "name": "shop_stock_shop_item",
-          "columns": [
-            "shop_id",
-            "item_id"
-          ],
+          "columns": ["shop_id", "item_id"],
           "isUnique": true,
           "where": "\"shop_stock\".\"item_id\" IS NOT NULL"
         },
         "shop_stock_shop_weapon": {
           "name": "shop_stock_shop_weapon",
-          "columns": [
-            "shop_id",
-            "weapon_id"
-          ],
+          "columns": ["shop_id", "weapon_id"],
           "isUnique": true,
           "where": "\"shop_stock\".\"weapon_id\" IS NOT NULL"
         },
         "shop_stock_shop_ridepod_part": {
           "name": "shop_stock_shop_ridepod_part",
-          "columns": [
-            "shop_id",
-            "ridepod_part_id"
-          ],
+          "columns": ["shop_id", "ridepod_part_id"],
           "isUnique": true,
           "where": "\"shop_stock\".\"ridepod_part_id\" IS NOT NULL"
         },
         "shop_stock_shop_ridepod_core": {
           "name": "shop_stock_shop_ridepod_core",
-          "columns": [
-            "shop_id",
-            "ridepod_core_id"
-          ],
+          "columns": ["shop_id", "ridepod_core_id"],
           "isUnique": true,
           "where": "\"shop_stock\".\"ridepod_core_id\" IS NOT NULL"
         }
@@ -6253,12 +5557,8 @@
           "name": "shop_stock_shop_id_shops_id_fk",
           "tableFrom": "shop_stock",
           "tableTo": "shops",
-          "columnsFrom": [
-            "shop_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["shop_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -6266,12 +5566,8 @@
           "name": "shop_stock_item_id_items_id_fk",
           "tableFrom": "shop_stock",
           "tableTo": "items",
-          "columnsFrom": [
-            "item_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["item_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -6279,12 +5575,8 @@
           "name": "shop_stock_weapon_id_weapons_id_fk",
           "tableFrom": "shop_stock",
           "tableTo": "weapons",
-          "columnsFrom": [
-            "weapon_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["weapon_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -6292,12 +5584,8 @@
           "name": "shop_stock_ridepod_part_id_ridepod_parts_id_fk",
           "tableFrom": "shop_stock",
           "tableTo": "ridepod_parts",
-          "columnsFrom": [
-            "ridepod_part_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["ridepod_part_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -6305,12 +5593,8 @@
           "name": "shop_stock_ridepod_core_id_ridepod_cores_id_fk",
           "tableFrom": "shop_stock",
           "tableTo": "ridepod_cores",
-          "columnsFrom": [
-            "ridepod_core_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["ridepod_core_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -6318,12 +5602,8 @@
           "name": "shop_stock_from_chapter_number_chapters_number_fk",
           "tableFrom": "shop_stock",
           "tableTo": "chapters",
-          "columnsFrom": [
-            "from_chapter_number"
-          ],
-          "columnsTo": [
-            "number"
-          ],
+          "columnsFrom": ["from_chapter_number"],
+          "columnsTo": ["number"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -6331,12 +5611,8 @@
           "name": "shop_stock_after_section_id_sections_id_fk",
           "tableFrom": "shop_stock",
           "tableTo": "sections",
-          "columnsFrom": [
-            "after_section_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["after_section_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -6344,12 +5620,8 @@
           "name": "shop_stock_after_recruit_npc_id_npcs_id_fk",
           "tableFrom": "shop_stock",
           "tableTo": "npcs",
-          "columnsFrom": [
-            "after_recruit_npc_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["after_recruit_npc_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -6357,12 +5629,8 @@
           "name": "shop_stock_after_georama_task_id_georama_tasks_id_fk",
           "tableFrom": "shop_stock",
           "tableTo": "georama_tasks",
-          "columnsFrom": [
-            "after_georama_task_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["after_georama_task_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -6370,12 +5638,8 @@
           "name": "shop_stock_until_chapter_number_chapters_number_fk",
           "tableFrom": "shop_stock",
           "tableTo": "chapters",
-          "columnsFrom": [
-            "until_chapter_number"
-          ],
-          "columnsTo": [
-            "number"
-          ],
+          "columnsFrom": ["until_chapter_number"],
+          "columnsTo": ["number"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -6383,12 +5647,8 @@
           "name": "shop_stock_until_section_id_sections_id_fk",
           "tableFrom": "shop_stock",
           "tableTo": "sections",
-          "columnsFrom": [
-            "until_section_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["until_section_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -6396,12 +5656,8 @@
           "name": "shop_stock_until_recruit_npc_id_npcs_id_fk",
           "tableFrom": "shop_stock",
           "tableTo": "npcs",
-          "columnsFrom": [
-            "until_recruit_npc_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["until_recruit_npc_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -6515,9 +5771,7 @@
       "indexes": {
         "shops_name_unique": {
           "name": "shops_name_unique",
-          "columns": [
-            "name"
-          ],
+          "columns": ["name"],
           "isUnique": true
         }
       },
@@ -6526,12 +5780,8 @@
           "name": "shops_town_id_towns_id_fk",
           "tableFrom": "shops",
           "tableTo": "towns",
-          "columnsFrom": [
-            "town_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["town_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -6539,12 +5789,8 @@
           "name": "shops_npc_id_npcs_id_fk",
           "tableFrom": "shops",
           "tableTo": "npcs",
-          "columnsFrom": [
-            "npc_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["npc_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -6552,12 +5798,8 @@
           "name": "shops_from_chapter_number_chapters_number_fk",
           "tableFrom": "shops",
           "tableTo": "chapters",
-          "columnsFrom": [
-            "from_chapter_number"
-          ],
-          "columnsTo": [
-            "number"
-          ],
+          "columnsFrom": ["from_chapter_number"],
+          "columnsTo": ["number"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -6565,12 +5807,8 @@
           "name": "shops_after_section_id_sections_id_fk",
           "tableFrom": "shops",
           "tableTo": "sections",
-          "columnsFrom": [
-            "after_section_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["after_section_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -6578,12 +5816,8 @@
           "name": "shops_after_recruit_npc_id_npcs_id_fk",
           "tableFrom": "shops",
           "tableTo": "npcs",
-          "columnsFrom": [
-            "after_recruit_npc_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["after_recruit_npc_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -6591,12 +5825,8 @@
           "name": "shops_after_georama_task_id_georama_tasks_id_fk",
           "tableFrom": "shops",
           "tableTo": "georama_tasks",
-          "columnsFrom": [
-            "after_georama_task_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["after_georama_task_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -6604,12 +5834,8 @@
           "name": "shops_until_chapter_number_chapters_number_fk",
           "tableFrom": "shops",
           "tableTo": "chapters",
-          "columnsFrom": [
-            "until_chapter_number"
-          ],
-          "columnsTo": [
-            "number"
-          ],
+          "columnsFrom": ["until_chapter_number"],
+          "columnsTo": ["number"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -6617,12 +5843,8 @@
           "name": "shops_until_section_id_sections_id_fk",
           "tableFrom": "shops",
           "tableTo": "sections",
-          "columnsFrom": [
-            "until_section_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["until_section_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -6630,12 +5852,8 @@
           "name": "shops_until_recruit_npc_id_npcs_id_fk",
           "tableFrom": "shops",
           "tableTo": "npcs",
-          "columnsFrom": [
-            "until_recruit_npc_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["until_recruit_npc_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -6709,12 +5927,8 @@
           "name": "starting_equipment_item_id_items_id_fk",
           "tableFrom": "starting_equipment",
           "tableTo": "items",
-          "columnsFrom": [
-            "item_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["item_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -6722,12 +5936,8 @@
           "name": "starting_equipment_weapon_id_weapons_id_fk",
           "tableFrom": "starting_equipment",
           "tableTo": "weapons",
-          "columnsFrom": [
-            "weapon_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["weapon_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -6735,12 +5945,8 @@
           "name": "starting_equipment_ridepod_part_id_ridepod_parts_id_fk",
           "tableFrom": "starting_equipment",
           "tableTo": "ridepod_parts",
-          "columnsFrom": [
-            "ridepod_part_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["ridepod_part_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -6748,12 +5954,8 @@
           "name": "starting_equipment_ridepod_core_id_ridepod_cores_id_fk",
           "tableFrom": "starting_equipment",
           "tableTo": "ridepod_cores",
-          "columnsFrom": [
-            "ridepod_core_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["ridepod_core_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -6822,9 +6024,7 @@
       "indexes": {
         "towns_name_unique": {
           "name": "towns_name_unique",
-          "columns": [
-            "name"
-          ],
+          "columns": ["name"],
           "isUnique": true
         }
       },
@@ -6833,12 +6033,8 @@
           "name": "towns_present_town_id_towns_id_fk",
           "tableFrom": "towns",
           "tableTo": "towns",
-          "columnsFrom": [
-            "present_town_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["present_town_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -6944,9 +6140,7 @@
       "indexes": {
         "trophies_name_unique": {
           "name": "trophies_name_unique",
-          "columns": [
-            "name"
-          ],
+          "columns": ["name"],
           "isUnique": true
         }
       },
@@ -6955,12 +6149,8 @@
           "name": "trophies_chapter_number_chapters_number_fk",
           "tableFrom": "trophies",
           "tableTo": "chapters",
-          "columnsFrom": [
-            "chapter_number"
-          ],
-          "columnsTo": [
-            "number"
-          ],
+          "columnsFrom": ["chapter_number"],
+          "columnsTo": ["number"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -6968,12 +6158,8 @@
           "name": "trophies_enemy_id_enemies_id_fk",
           "tableFrom": "trophies",
           "tableTo": "enemies",
-          "columnsFrom": [
-            "enemy_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["enemy_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -6981,12 +6167,8 @@
           "name": "trophies_fish_id_fish_id_fk",
           "tableFrom": "trophies",
           "tableTo": "fish",
-          "columnsFrom": [
-            "fish_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["fish_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -6994,12 +6176,8 @@
           "name": "trophies_ridepod_core_id_ridepod_cores_id_fk",
           "tableFrom": "trophies",
           "tableTo": "ridepod_cores",
-          "columnsFrom": [
-            "ridepod_core_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["ridepod_core_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -7007,12 +6185,8 @@
           "name": "trophies_contest_class_id_fishing_contest_classes_id_fk",
           "tableFrom": "trophies",
           "tableTo": "fishing_contest_classes",
-          "columnsFrom": [
-            "contest_class_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["contest_class_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -7020,12 +6194,8 @@
           "name": "trophies_photo_level_photo_levels_level_fk",
           "tableFrom": "trophies",
           "tableTo": "photo_levels",
-          "columnsFrom": [
-            "photo_level"
-          ],
-          "columnsTo": [
-            "level"
-          ],
+          "columnsFrom": ["photo_level"],
+          "columnsTo": ["level"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -7067,12 +6237,8 @@
           "name": "trophy_weapons_trophy_id_trophies_id_fk",
           "tableFrom": "trophy_weapons",
           "tableTo": "trophies",
-          "columnsFrom": [
-            "trophy_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["trophy_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -7080,22 +6246,15 @@
           "name": "trophy_weapons_weapon_id_weapons_id_fk",
           "tableFrom": "trophy_weapons",
           "tableTo": "weapons",
-          "columnsFrom": [
-            "weapon_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["weapon_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {
         "trophy_weapons_trophy_id_weapon_id_pk": {
-          "columns": [
-            "trophy_id",
-            "weapon_id"
-          ],
+          "columns": ["trophy_id", "weapon_id"],
           "name": "trophy_weapons_trophy_id_weapon_id_pk"
         }
       },
@@ -7126,12 +6285,8 @@
           "name": "weapon_abilities_weapon_id_weapons_id_fk",
           "tableFrom": "weapon_abilities",
           "tableTo": "weapons",
-          "columnsFrom": [
-            "weapon_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["weapon_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -7139,22 +6294,15 @@
           "name": "weapon_abilities_ability_id_abilities_id_fk",
           "tableFrom": "weapon_abilities",
           "tableTo": "abilities",
-          "columnsFrom": [
-            "ability_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["ability_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {
         "weapon_abilities_weapon_id_ability_id_pk": {
-          "columns": [
-            "weapon_id",
-            "ability_id"
-          ],
+          "columns": ["weapon_id", "ability_id"],
           "name": "weapon_abilities_weapon_id_ability_id_pk"
         }
       },
@@ -7185,12 +6333,8 @@
           "name": "weapon_build_ups_weapon_id_weapons_id_fk",
           "tableFrom": "weapon_build_ups",
           "tableTo": "weapons",
-          "columnsFrom": [
-            "weapon_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["weapon_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -7198,22 +6342,15 @@
           "name": "weapon_build_ups_target_id_weapons_id_fk",
           "tableFrom": "weapon_build_ups",
           "tableTo": "weapons",
-          "columnsFrom": [
-            "target_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["target_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {
         "weapon_build_ups_weapon_id_target_id_pk": {
-          "columns": [
-            "weapon_id",
-            "target_id"
-          ],
+          "columns": ["weapon_id", "target_id"],
           "name": "weapon_build_ups_weapon_id_target_id_pk"
         }
       },
@@ -7249,12 +6386,8 @@
           "name": "weapon_kill_requirements_weapon_id_weapons_id_fk",
           "tableFrom": "weapon_kill_requirements",
           "tableTo": "weapons",
-          "columnsFrom": [
-            "weapon_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["weapon_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -7262,22 +6395,15 @@
           "name": "weapon_kill_requirements_enemy_id_enemies_id_fk",
           "tableFrom": "weapon_kill_requirements",
           "tableTo": "enemies",
-          "columnsFrom": [
-            "enemy_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["enemy_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {
         "weapon_kill_requirements_weapon_id_enemy_id_pk": {
-          "columns": [
-            "weapon_id",
-            "enemy_id"
-          ],
+          "columns": ["weapon_id", "enemy_id"],
           "name": "weapon_kill_requirements_weapon_id_enemy_id_pk"
         }
       },
@@ -7502,9 +6628,7 @@
       "indexes": {
         "weapons_name_unique": {
           "name": "weapons_name_unique",
-          "columns": [
-            "name"
-          ],
+          "columns": ["name"],
           "isUnique": true
         }
       },

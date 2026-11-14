@@ -8,6 +8,13 @@
       "when": 1794663820351,
       "tag": "0000_game_data",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1794665396021,
+      "tag": "0001_drop_postgame_and_hammer",
+      "breakpoints": true
     }
   ]
 }

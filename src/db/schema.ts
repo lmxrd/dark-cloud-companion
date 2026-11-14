@@ -112,18 +112,19 @@ export const WEAPON_TYPES = ["wrench", "gun", "club", "sword", "armband"] as con
 // ─── Story ────────────────────────────────────────────────────────────────────────────────────────
 
 /**
- * The 8 chapters plus the postgame as chapter 9. End-of-chapter totals (ideas, scoops, inventions,
- * photo points and level, HP and defense) are derived from the tables below.
+ * The 8 chapters. Chapter 8 (the Zelmite Mine) opens after the main ending, so it is also the
+ * postgame. End-of-chapter totals (ideas, scoops, inventions, photo points and level, HP and
+ * defense) are derived from the tables below.
  */
 export const chapters = sqliteTable(
   "chapters",
   {
-    /** Chapter number, 1-8; 9 is the postgame. */
+    /** Chapter number, 1-8. */
     number: integer().primaryKey(),
     /** Chapter title as the game shows it ("To the Outside World"). */
     title: text().notNull(),
   },
-  (t) => [inRange("chapters_number", t.number, 1, 9)],
+  (t) => [inRange("chapters_number", t.number, 1, 8)],
 );
 
 export const ERAS = ["present", "future"] as const;
@@ -453,10 +454,8 @@ export const enemies = sqliteTable(
     abs: integer(),
     /** Gilda received when defeated. */
     gilda: integer(),
-    /** Damage taken from wrenches, as a percentage (under 100 = resists). */
+    /** Damage taken from wrenches, hammers included, as a percentage (under 100 = resists). */
     effectivenessWrench: integer(),
-    /** Damage taken from hammers, as a percentage. */
-    effectivenessHammer: integer(),
     /** Damage taken from swords, as a percentage. */
     effectivenessSword: integer(),
     /** Damage taken from guns, as a percentage. */
@@ -534,7 +533,7 @@ export const enemyDrops = sqliteTable(
  */
 const whereFound = () =>
   ({
-    /** The chapter it becomes available in (9 = only after the ending). */
+    /** The chapter it becomes available in (8 = only after the main ending). */
     chapterNumber: integer()
       .notNull()
       .references(() => chapters.number),
