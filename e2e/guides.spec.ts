@@ -252,9 +252,9 @@ test.describe("custom start and end weapons, one tab per weapon type", () => {
     const builds = page.getByRole("region", { name: "Weapon builds" });
     const row = builds.getByRole("listitem").filter({ hasText: "Grade Zero" });
     await expect(row.getByRole("link")).toHaveCount(2);
-    await row.getByRole("link", { name: /Fastest/ }).click();
+    await row.getByRole("link", { name: /Earliest/ }).click();
     await expect(
-      page.getByRole("heading", { name: "Grade Zero — Fastest", level: 1 }),
+      page.getByRole("heading", { name: "Grade Zero — Earliest", level: 1 }),
     ).toBeVisible();
     await expect(page.getByText(/^0 \/ \d+ stages$/)).toBeVisible();
     await page.getByRole("button", { name: /Continue at stage 1/ }).click();
@@ -263,9 +263,9 @@ test.describe("custom start and end weapons, one tab per weapon type", () => {
     await go(page, "/guides");
     await expect(
       page.getByRole("region", { name: "On the dashboard" }).getByRole("link", {
-        name: /Grade Zero — Fastest/,
+        name: /Grade Zero — Earliest/,
       }),
     ).toBeVisible();
-    await expect(row.getByRole("link", { name: /Fastest \(on the dashboard\)/ })).toBeVisible();
+    await expect(row.getByRole("link", { name: /Earliest \(on the dashboard\)/ })).toBeVisible();
   });
 });
