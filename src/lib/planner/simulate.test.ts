@@ -23,6 +23,21 @@ describe("simulator", () => {
     expect(r.state.sp).toBe(33);
   });
 
+  test("a stage on the same weapon continues it: split levelling costs the same as one stage", () => {
+    const split: Recipe = {
+      ...tbw,
+      stages: [
+        { weaponId: "battle-wrench", levelTo: 2, synths: [] },
+        { weaponId: "battle-wrench", levelTo: 3, synths: [] },
+        { weaponId: "true-battle-wrench", levelTo: 5, synths: [] },
+      ],
+    };
+    const r = simulateRecipe(split, { spBonus: 1 });
+    expect(r.errors).toEqual([]);
+    expect(r.cost.abs).toBe(368);
+    expect(r.state.sp).toBe(33);
+  });
+
   test("without the support bonus SP is 25", () => {
     expect(simulateRecipe(tbw, { spBonus: 0 }).state.sp).toBe(25);
   });

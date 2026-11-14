@@ -55,7 +55,9 @@ export function planResultToGuide(args: {
     return id;
   };
   const steps: Step[] = stages.map((stage, i) => {
-    const next = stages[i + 1];
+    // A next stage on the same weapon continues it (an in-between step): no build-up yet.
+    const following = stages[i + 1];
+    const next = following?.weaponId !== stage.weaponId ? following : undefined;
     const kills = next ? getWeapon(next.weaponId).requiresKills : [];
     chapter = Math.max(
       chapter,

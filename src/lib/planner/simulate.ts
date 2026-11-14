@@ -144,7 +144,8 @@ function runStages(
     });
 
     const next = stages[i + 1];
-    if (next) {
+    // A next stage on the same weapon continues it (an in-between step while the build-up waits).
+    if (next && next.weaponId !== stage.weaponId) {
       const target = getWeapon(next.weaponId);
       if (!weapon.buildsUpTo.includes(target.id)) {
         run.errors.push(`${weapon.name} cannot build up to ${target.name}`);

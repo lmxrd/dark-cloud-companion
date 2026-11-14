@@ -508,22 +508,31 @@ export async function planPath(
   });
 
   /** Story constraints and sphere abilities for one chain (see ProgressionOptions). */
-  const progressionFor = (c: Candidate, chain: string[]) => {
+  const progressionFor = (c: Candidate, route: string[]) => {
     if (!prog) return {};
-    const nStages = req.goal.kind === "reach" ? chain.length - 1 : chain.length;
     const startChapter = c.acquire.kind === "have" ? 1 : c.acquire.chapter;
     // A stage ends with the build-up to the next weapon: it can't be done before its kills.
     const killChapter = (id: string) =>
       Math.max(1, ...getWeapon(id).requiresKills.map((e) => enemyChapter.get(e) ?? 8));
+    const routeStages = req.goal.kind === "reach" ? route.length - 1 : route.length;
+    // When a build-up is locked two or more chapters after the weapon is obtained, the weapon gets
+    // an in-between stage first (a stage on the same weapon, no build-up), so it is strengthened
+    // while the story catches up instead of waiting idle.
+    const chain: string[] = [];
     const stageUnlock: number[] = [];
-    for (let j = 0; j < nStages; j++)
-      stageUnlock.push(
-        Math.max(
-          startChapter,
-          j > 0 ? stageUnlock[j - 1] : 1,
-          killChapter(chain[Math.min(j + 1, chain.length - 1)]),
-        ),
-      );
+    let obtained = startChapter;
+    for (let j = 0; j < routeStages; j++) {
+      const unlock = Math.max(obtained, killChapter(route[Math.min(j + 1, route.length - 1)]));
+      if (unlock - obtained >= 2) {
+        chain.push(route[j]);
+        stageUnlock.push(obtained);
+      }
+      chain.push(route[j]);
+      stageUnlock.push(unlock);
+      obtained = unlock;
+    }
+    if (req.goal.kind === "reach") chain.push(route[route.length - 1]);
+    const nStages = stageUnlock.length;
     // Abilities the chain's own weapons bring (build-ups merge them in) need no sphere. A sphere
     // must come on or after the last weapon that brings the opposite (that build-up would cancel
     // it), and if the opposite is still there, a first sphere only cancels it: two are needed.
@@ -535,7 +544,8 @@ export async function planPath(
         const opposite = OPPOSITES[ability];
         let fromStage = 0;
         chain.forEach((id, m) => {
-          if (m > 0 && opposite && getWeapon(id).abilities.includes(opposite)) fromStage = m;
+          const builtUp = m > 0 && id !== chain[m - 1];
+          if (builtUp && opposite && getWeapon(id).abilities.includes(opposite)) fromStage = m;
         });
         return {
           ability,
@@ -552,8 +562,10 @@ export async function planPath(
       spentGilda: acquireGilda(c.acquire),
       delayCost: prog.delayCost,
       itemChapter: items.map((it) => it.fromChapter ?? 1),
+      chapterWindow: 2,
     };
     return {
+      chain,
       progression,
       sphereAbilities,
       stageMaxLevels: Array.from({ length: nStages }, (_, j) =>
@@ -568,8 +580,8 @@ export async function planPath(
     onProgress?.({ phase: "rank", done: n, total: pairs.length });
     const r = await solveChain({
       ...baseFor(candidate),
-      ...progressionFor(candidate, chain),
       chain,
+      ...progressionFor(candidate, chain),
       relax: true,
       timeLimitSec: 20,
     });
@@ -629,14 +641,21 @@ export async function planPath(
         ? abilityReserve(o.chain, wanted, spheres, req.maxChapter, req.objective, source)
         : { sp: 0, gilda: 0 };
     const chainBase = { ...baseFor(candidate), ...progressionFor(candidate, o.chain) };
-    for (const extra of wanted.length && !prog ? [0, 10] : [0]) {
+    // Following the story, a retry keeps more margin on the requirements instead (the sphere
+    // transfer and SP rounding can leave the simulator a point short of what the model expects).
+    const tries = prog ? [1, 3] : wanted.length ? [0, 10] : [0];
+    for (const [n, extraOrMargin] of tries.entries()) {
+      const extra = prog ? 0 : extraOrMargin;
+      if (prog && n > 0 && !sim?.errors.length) break;
       r = await solveChain({
         ...chainBase,
         ...(chainBase.maxGilda !== undefined
           ? { maxGilda: Math.max(0, chainBase.maxGilda - reserve.gilda) }
           : {}),
         reserveSp: reserve.sp + extra,
-        chain: o.chain,
+        ...(prog ? { statMargin: extraOrMargin } : {}),
+        // Following the story, the chain may repeat a weapon for in-between stages.
+        chain: chainBase.chain ?? o.chain,
         // HiGHS finds a near-optimal incumbent early and spends minutes proving the last 1%:
         // cap the proof instead and keep whatever incumbent it has (still simulator-verified).
         timeLimitSec: req.timeLimitSec ?? 3,

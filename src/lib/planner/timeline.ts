@@ -63,7 +63,8 @@ export function stageUnlockIndex(
   killsOf: (weaponId: string) => string[],
 ): number {
   let i = fromChapter(stageResourceChapter(stage));
-  if (next) for (const e of killsOf(next.weaponId)) i = Math.max(i, killIndex(e));
+  if (next && next.weaponId !== stage.weaponId)
+    for (const e of killsOf(next.weaponId)) i = Math.max(i, killIndex(e));
   return i;
 }
 

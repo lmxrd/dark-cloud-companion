@@ -73,6 +73,8 @@ export interface SolveInput {
   sphereAbilities?: { ability: AbilityId; fromStage: number; count: number }[];
   /** Places every stage in a chapter of the story; see the model notes at the top. */
   progression?: Progression;
+  /** Extra points required on every build-up and final stat (absorbs rounding the model can't see). */
+  statMargin?: number;
   /** Relative optimality gap for exact solves (default 0.001). ~0.01 is far faster for high-tier chains. */
   mipGap?: number;
   /** Primal bound in objective units: solutions no better than this are pruned (used to skip chains). */
@@ -97,6 +99,8 @@ export interface Progression {
   delayCost: number;
   /** Chapter each item is first sold in (by item index); missing = chapter 1. */
   itemChapter: number[];
+  /** A stage may be placed at most this many chapters after its unlock (keeps the search small). */
+  chapterWindow?: number;
 }
 
 export interface SolveResult {
@@ -109,6 +113,8 @@ export interface SolveResult {
 }
 
 const itemGain = (it: SynthSource, k: StatKey) => it.gains[k] ?? 0;
+/** Stage j continues the weapon of stage j − 1 (same weapon, no build-up in between). */
+const isContinuation = (chain: string[], j: number) => j > 0 && chain[j] === chain[j - 1];
 /**
  * Objective coefficients are scaled by this so every coefficient stays an integer (all game costs are
  * integers). HiGHS then knows the objective itself is integer-valued and can round its bounds up, which
@@ -195,10 +201,18 @@ export function buildModel(input: SolveInput) {
   const spPerLevel: number[] = [];
   const spend: { v: string; amount: number }[][] = [];
 
+  // A stage on the same weapon as the one before continues it (no build-up in between): its level,
+  // ABS and levelling At count from where that weapon started, so vA/vG are cumulative over the run
+  // and only the last stage of a run carries the ABS cost.
+  /** Index of the first stage of each stage's weapon run. */
+  const runStart: number[] = [];
   for (let j = 0; j < nStages; j++) {
     const w = getWeapon(chain[j]);
-    const ls = j === 0 ? start.level : 0;
-    lStart.push(ls);
+    const cont = isContinuation(chain, j);
+    runStart.push(cont ? runStart[j - 1] : j);
+    const first = runStart[j];
+    const ls = first === 0 ? start.level : 0;
+    lStart.push(cont ? 0 : ls);
     spPerLevel.push(w.spPerLevel + spBonus);
     spend.push([]);
 
@@ -207,12 +221,23 @@ export function buildModel(input: SolveInput) {
     const A = `vA${j}`;
     model.integers.push(L);
     cost(A, 1, 0);
-    row(`cLmin${j}`, { min: ls });
-    coef(`cLmin${j}`, L, 1);
+    if (cont) {
+      // Only the run's last stage pays: earlier ones' vA are its cumulative ABS so far.
+      model.objective.delete(`vA${j - 1}`);
+      row(`cRun${j}`, { min: 0 });
+      coef(`cRun${j}`, A, 1);
+      coef(`cRun${j}`, `vA${j - 1}`, -1);
+      row(`cLmin${j}`, { min: 0 });
+      coef(`cLmin${j}`, L, 1);
+      coef(`cLmin${j}`, `vL${j - 1}`, -1);
+    } else {
+      row(`cLmin${j}`, { min: ls });
+      coef(`cLmin${j}`, L, 1);
+    }
     const levelCap = Math.max(ls, input.stageMaxLevels?.[j] ?? maxLevel);
     row(`cLmax${j}`, { max: levelCap });
     coef(`cLmax${j}`, L, 1);
-    const stored = j === 0 ? start.abs : 0;
+    const stored = first === 0 ? start.abs : 0;
     const absAt = (m: number) => Math.max(0, absBetween(w.baseAbs, ls, m) - stored);
     for (let m = ls; m < levelCap; m++) {
       const slope = absAt(m + 1) - absAt(m);
@@ -235,21 +260,27 @@ export function buildModel(input: SolveInput) {
 
     // Stat rows first so item/sphere columns can attach to them.
     for (const k of STAT_KEYS) {
-      const base = j === 0 ? start.stats[k] : buildUpBonus(w.baseStats[k]);
+      const base = j === 0 ? start.stats[k] : cont ? 0 : buildUpBonus(w.baseStats[k]);
       row(`cSt${j}_${k}`, { max: base });
       coef(`cSt${j}_${k}`, `vE${j}_${k}`, 1);
       if (j > 0) coef(`cSt${j}_${k}`, `vE${j - 1}_${k}`, -1);
       if (k === "at") coef(`cSt${j}_${k}`, a, -1);
+      // Levelling At is cumulative over the run: this stage adds only what came since the last one.
+      if (k === "at" && cont) coef(`cSt${j}_${k}`, `vG${j - 1}`, 1);
       row(`cCap${j}_${k}`, { max: w.maxStats[k] });
       coef(`cCap${j}_${k}`, `vE${j}_${k}`, 1);
+      // The build-up's requirements: on the stage before it, and already on an in-between stage
+      // (one followed by a stage on the same weapon), which gets the weapon ready for its next
+      // upgrade so only the build-up itself waits.
       const next = chain[j + 1];
-      if (next) {
-        const need = buildUpRequirements(getWeapon(next))[k];
+      const upgrade = chain.slice(j + 1).find((id) => id !== chain[j]);
+      if (next && upgrade) {
+        const need = buildUpRequirements(getWeapon(upgrade))[k];
         if (need > 0) {
-          row(`cReq${j}_${k}`, { min: need });
+          row(`cReq${j}_${k}`, { min: Math.min(need + (input.statMargin ?? 0), w.maxStats[k]) });
           coef(`cReq${j}_${k}`, `vE${j}_${k}`, 1);
         }
-      } else if (input.finalStats?.[k]) {
+      } else if (!next && input.finalStats?.[k]) {
         row(`cFin${j}_${k}`, { min: Math.min(input.finalStats[k]!, w.maxStats[k]) });
         coef(`cFin${j}_${k}`, `vE${j}_${k}`, 1);
       }
@@ -288,6 +319,8 @@ export function buildModel(input: SolveInput) {
     row(c, { min: -constant + (j === nStages - 1 ? (input.reserveSp ?? 0) : 0) });
     for (let i = 0; i <= j; i++) {
       coef(c, `vL${i}`, spPerLevel[i]);
+      // A continued weapon gains SP only for the levels since its previous stage.
+      if (isContinuation(chain, i)) coef(c, `vL${i - 1}`, -spPerLevel[i]);
       for (const s of spend[i]) coef(c, s.v, -s.amount);
     }
   }
@@ -308,7 +341,10 @@ export function buildModel(input: SolveInput) {
     /** A generous upper bound on how many of one item or sphere a stage can take. */
     const MANY = 200;
     for (let j = 0; j < nStages; j++) {
-      const open = chapters.filter((c) => c >= (p.stageUnlock[j] ?? 1));
+      const open = chapters.filter(
+        (c) =>
+          c >= (p.stageUnlock[j] ?? 1) && c <= (p.stageUnlock[j] ?? 1) + (p.chapterWindow ?? 8),
+      );
       const z = (c: number) => `vZ${j}_${c}`;
       row(`cOne${j}`, { min: 1, max: 1 });
       for (const c of open) {
@@ -324,7 +360,11 @@ export function buildModel(input: SolveInput) {
       if (j > 0) {
         row(`cOrder${j}`, { min: 0 });
         for (const c of open) coef(`cOrder${j}`, z(c), c);
-        for (const c of chapters.filter((c) => c >= (p.stageUnlock[j - 1] ?? 1)))
+        for (const c of chapters.filter(
+          (c) =>
+            c >= (p.stageUnlock[j - 1] ?? 1) &&
+            c <= (p.stageUnlock[j - 1] ?? 1) + (p.chapterWindow ?? 8),
+        ))
           coef(`cOrder${j}`, `vZ${j - 1}_${c}`, -c);
       }
       // Items and spheres only once they are available: x ≤ MANY · Σ z[c] over chapters ≥ theirs.
@@ -352,6 +392,8 @@ export function buildModel(input: SolveInput) {
       }
       for (let i = 0; i <= j; i++) {
         coef(absRow, `vA${i}`, 1);
+        // vA is cumulative over a weapon run, so a continued stage adds only its increase.
+        if (isContinuation(chain, i)) coef(absRow, `vA${i - 1}`, -1);
         items.forEach((it, ii) => coef(gildaRow, `vX${i}_${ii}`, it.price ?? 0));
         templates.forEach((t, ti) => {
           coef(absRow, `vY${i}_${ti}`, t.abs);
@@ -379,7 +421,7 @@ export async function solveChain(input: SolveInput): Promise<SolveResult> {
   if (!sol.values.size) return { status: sol.status };
 
   const get = (name: string) => Math.round(sol.values.get(name) ?? 0);
-  const { chain, items, templates } = input;
+  const { chain, items, templates, start } = input;
   const stages: Stage[] = [];
   for (let j = 0; j < nStages; j++) {
     const synths: SynthUse[] = [];
@@ -424,10 +466,22 @@ export async function solveChain(input: SolveInput): Promise<SolveResult> {
         (_, j) => [1, 2, 3, 4, 5, 6, 7, 8].find((c) => get(`vZ${j}_${c}`) === 1) ?? 8,
       )
     : undefined;
+  // An in-between stage (one followed by a stage on the same weapon, which then does the build-up)
+  // that the model left empty is no step at all.
+  const keep = stages.map(
+    (st, j) =>
+      !(
+        j + 1 < nStages &&
+        isContinuation(chain, j + 1) &&
+        st.synths.length === 0 &&
+        st.levelTo ===
+          (j === 0 ? start.level : isContinuation(chain, j) ? stages[j - 1].levelTo : 0)
+      ),
+  );
   return {
     status: sol.status,
-    plan: { stages },
+    plan: { stages: stages.filter((_, j) => keep[j]) },
     value,
-    ...(stageChapters ? { stageChapters } : {}),
+    ...(stageChapters ? { stageChapters: stageChapters.filter((_, j) => keep[j]) } : {}),
   };
 }

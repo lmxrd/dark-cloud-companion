@@ -64,7 +64,9 @@ export function deriveBuild(guide: Guide): DerivedBuild {
   const snapshots = sim.log.filter((l) => l.type === "state" && l.depth === 0);
   buildSteps.forEach((s, i) => {
     const snap = snapshots[i];
-    const next = buildSteps[i + 1]?.build?.weaponId;
+    // A next step on the same weapon continues it (an in-between step): no build-up yet.
+    const following = buildSteps[i + 1]?.build?.weaponId;
+    const next = following !== s.build!.weaponId ? following : undefined;
     steps.set(s.id, {
       stepId: s.id,
       level: snap?.type === "state" ? snap.level : 0,

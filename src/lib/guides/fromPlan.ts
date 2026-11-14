@@ -41,7 +41,9 @@ export function planToGuide(args: {
 
   let chapter = args.start?.acquire.kind === "have" || !args.start ? 1 : args.start.acquire.chapter;
   const steps: GuideStep[] = plan.stages.map((stage, i) => {
-    const next = plan.stages[i + 1];
+    // A next stage on the same weapon continues it (an in-between step): no build-up yet.
+    const following = plan.stages[i + 1];
+    const next = following?.weaponId !== stage.weaponId ? following : undefined;
     const snap = snapshots[i];
     const kills = next ? getWeapon(next.weaponId).requiresKills : [];
     chapter = Math.max(
