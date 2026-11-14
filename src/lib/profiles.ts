@@ -57,6 +57,36 @@ export const plannerInputs = z.preprocess((v) => {
 }, plannerInputsData);
 export type PlannerInputs = z.infer<typeof plannerInputsData>;
 
+/** One thing the player wants to make; the shopping list is derived from these (see `src/lib/shopping.ts`). */
+export const shoppingGoal = z.discriminatedUnion("kind", [
+  z.object({
+    id: z.string(),
+    kind: z.enum(["item", "invention", "georama"]),
+    name: z.string(),
+    qty: z.number().int().min(1),
+  }),
+  z.object({
+    id: z.string(),
+    kind: z.literal("build"),
+    /** Build goals follow their guide: steps are resolved from the guide every time. */
+    guideId: z.string(),
+    stepIds: z.array(z.string()).min(1),
+  }),
+]);
+export type ShoppingGoal = z.infer<typeof shoppingGoal>;
+
+/** One shopping list per profile (shaped so it can later move into a `lists[]` array). */
+export const shopping = z.object({
+  goals: z.array(shoppingGoal),
+  /** Items already carried, per item name; shared by every goal. */
+  have: z.record(z.string(), z.number().int().min(0)),
+  /** Components that are inventions themselves and should be invented instead of bought. */
+  invent: z.array(z.string()),
+  group: z.enum(["stops", "az"]),
+});
+export type Shopping = z.infer<typeof shopping>;
+export const emptyShopping = (): Shopping => ({ goals: [], have: {}, invent: [], group: "stops" });
+
 export const profile = z.object({
   id: z.string(),
   name: z.string().min(1),
@@ -74,6 +104,8 @@ export const profile = z.object({
     /** Chapter shown by the dashboard's chapter view ("1"…"8"); null follows progress. */
     currentChapter: z.string().nullable(),
   }),
+  /** Added after version 2 shipped; older profiles get an empty list. */
+  shopping: shopping.default(emptyShopping),
 });
 export type Profile = z.infer<typeof profile>;
 
@@ -132,6 +164,7 @@ export function migrateProfile(p: ProfileV1): Profile {
     activeGuides: [...new Set([MAIN_GUIDE_ID, ...p.activeGuides])],
     guides,
     dashboard: { view: "chapter", currentChapter: null },
+    shopping: emptyShopping(),
   };
 }
 
@@ -157,6 +190,7 @@ export function createProfile(name: string, now = Date.now()): Profile {
     activeGuides: [MAIN_GUIDE_ID],
     guides: [],
     dashboard: { view: "chapter", currentChapter: null },
+    shopping: emptyShopping(),
   };
 }
 

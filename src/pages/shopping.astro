@@ -1,0 +1,12 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { ShoppingPage } from "@/components/shopping/ShoppingPage";
+import { useTranslations } from "@/i18n";
+
+const t = useTranslations();
+---
+
+<Layout title={`${t("shopping.title")} · ${t("app.name")}`}>
+  <h1 class="mb-4 text-2xl font-semibold">{t("shopping.title")}</h1>
+  <ShoppingPage client:only="react" />
+</Layout>

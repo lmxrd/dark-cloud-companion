@@ -39,6 +39,8 @@ export interface ChecklistItem {
   recipe?: RecipePart[];
   /** Where exactly, or what it takes. */
   notes?: string[];
+  /** Georama goals that ask for a number of one part (for the shopping list). */
+  georamaPart?: { name: string; qty: number };
 }
 
 export type SectionKind = "story" | "interlude" | "dungeon" | "boss";
@@ -198,6 +200,9 @@ const georamaItems: ChecklistItem[] = collectables.georamaTasks.flatMap((task) =
     id: tick.georamaGoal(g.id),
     name: g.name,
     notes: [task.name],
+    ...(g.georamaPartId && g.quantity
+      ? { georamaPart: { name: names.georamaParts[g.georamaPartId], qty: g.quantity } }
+      : {}),
   }));
 });
 

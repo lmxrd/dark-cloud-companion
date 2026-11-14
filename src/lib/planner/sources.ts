@@ -95,8 +95,8 @@ interface ShopItem {
   fromChapter: number;
   shops: string[];
 }
-/** Cheapest gilda price per item name, the earliest chapter it is sold and where. */
-const shopItems = new Map<string, ShopItem>();
+/** Cheapest gilda price per item name, the earliest chapter it is sold and where (shop names). */
+export const shopItems = new Map<string, ShopItem>();
 for (const item of itemsFile.items) {
   const listings = (item.sources.shops ?? []).filter(
     (l) => l.price !== undefined && gildaShop(l.shopId),

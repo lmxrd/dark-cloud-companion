@@ -1,3 +1,4 @@
+import { stageNeedsItems } from "@/lib/guide/buildItems";
 import { PageHeader } from "@/components/PageHeader";
 import { useChecks, useProfile } from "@/lib/useAppStore";
 import { cn } from "cn";
@@ -24,9 +25,10 @@ import { findGuide } from "@/lib/guide/builtin";
 import { duplicateGuide, groupByChapter } from "@/lib/guide/ops";
 import { isStepDone, stepsProgress } from "@/lib/guide/progress";
 import { derivedFor } from "@/lib/guide/useDerived";
-import type { Guide } from "@/lib/guide/types";
+import { stepTickId, type Guide } from "@/lib/guide/types";
 import { getWeapon } from "@/lib/planner/sources";
 import { deleteGuide, saveGuide, toggleGuide } from "@/lib/store";
+import { AddToListButton } from "@/components/shopping/AddToListButton";
 
 const pctOf = (p: { done: number; total: number }) =>
   p.total ? Math.round((p.done / p.total) * 100) : 0;
@@ -142,6 +144,11 @@ export function GuideViewPage() {
             title: next.title || nextChapter.title,
           })
         : t("guides.resumeStep", { title: next.title });
+  // Build steps with items that aren't ticked yet: "add remaining steps" to the shopping list.
+  const remaining = guide.steps
+    .filter((s) => stageNeedsItems(s.build))
+    .filter((s) => !checks[stepTickId(guide.id, s.id)])
+    .map((s) => s.id);
   const target = guide.steps.at(-1)?.build?.weaponId;
   const finalWeapon = isBuild
     ? (derived.steps.get(guide.steps.at(-1)!.id)?.nextWeaponId ?? target)
@@ -185,11 +192,22 @@ export function GuideViewPage() {
         </div>
       </div>
 
-      {guide.build && (
-        <p className="text-muted-foreground text-sm">
-          {t("planner.totalAbs", { n: Math.round(derived.total.abs).toLocaleString() })} ·{" "}
-          {t("planner.totalGilda", { n: Math.round(derived.total.gilda).toLocaleString() })}
-        </p>
+      {(guide.build || remaining.length > 0) && (
+        <div className="flex flex-wrap items-center gap-3">
+          {guide.build && (
+            <p className="text-muted-foreground text-sm">
+              {t("planner.totalAbs", { n: Math.round(derived.total.abs).toLocaleString() })} ·{" "}
+              {t("planner.totalGilda", { n: Math.round(derived.total.gilda).toLocaleString() })}
+            </p>
+          )}
+          {remaining.length > 0 && (
+            <AddToListButton
+              size="sm"
+              label={t("shopping.addRemaining")}
+              goal={{ kind: "build", guideId: guide.id, stepIds: remaining }}
+            />
+          )}
+        </div>
       )}
 
       {resumeLabel && (

@@ -12,7 +12,7 @@ export function BottomNav({ pathname }: { pathname: string }) {
       data-slot="bottom-nav"
       className="bg-background fixed inset-x-0 bottom-0 z-40 border-t-2 pb-[env(safe-area-inset-bottom)] md:hidden"
     >
-      <ul className="grid grid-cols-4 gap-1 px-2 py-1.5">
+      <ul className="grid grid-cols-5 gap-1 px-2 py-1.5">
         {mainNav(t).map((item) => {
           const active = isSectionActive(item, pathname);
           return (

@@ -1,6 +1,8 @@
 import { atom, computed } from "nanostores";
 import { mergeGuides, type ContentFile, type MergeSummary } from "./content-file";
+import { findGuide } from "./guide/builtin";
 import type { Guide } from "./guide/types";
+import { addGoal, type GoalInput } from "./shopping-goals";
 import {
   STATE_VERSION,
   STORAGE_KEY,
@@ -14,6 +16,7 @@ import {
   type ExportFile,
   type PlannerInputs,
   type Profile,
+  type Shopping,
   type ViewSettings,
 } from "./profiles";
 
@@ -152,6 +155,41 @@ export function clearPlannerInputs() {
     const { planner: _drop, ...rest } = p;
     return rest;
   });
+}
+
+export function updateShopping(fn: (s: Shopping) => Shopping) {
+  updateProfile((p) => ({ ...p, shopping: fn(p.shopping) }));
+}
+
+/** Adds something to make to the shopping list (merging with an existing goal for the same thing). */
+export function addShoppingGoal(input: GoalInput) {
+  updateShopping((s) => addGoal(s, input));
+}
+
+/**
+ * Marks a shopping goal as made: uses up its items, removes it and ticks the invention or build steps.
+ * Returns a function that undoes all of it.
+ */
+export async function completeShoppingGoal(goalId: string): Promise<() => void> {
+  // The recipe data is only needed here and on the shopping page: load it on demand.
+  const { completeGoal } = await import("./shopping");
+  const s0 = $state.get();
+  const before = s0.profiles[s0.activeProfile];
+  let added: string[] = [];
+  updateProfile((p) => {
+    const { shopping, ticks } = completeGoal(p.shopping, goalId, (id) => findGuide(id, p.guides));
+    added = ticks.filter((id) => !p.checks[id]);
+    const checks = { ...p.checks };
+    for (const id of added) checks[id] = true;
+    return { ...p, shopping, checks };
+  });
+  return () =>
+    updateProfile((p) => {
+      if (p.id !== before.id) return p;
+      const checks = { ...p.checks };
+      for (const id of added) delete checks[id];
+      return { ...p, shopping: before.shopping, checks };
+    });
 }
 
 export function toggleGuide(id: string, on: boolean) {

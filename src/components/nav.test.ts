@@ -38,13 +38,14 @@ describe("crumbsFor", () => {
 });
 
 describe("mainNav", () => {
-  const [today, guides, planner, reference] = mainNav(t);
+  const [today, guides, planner, shopping, reference] = mainNav(t);
 
-  it("has the four main sections", () => {
-    expect([today, guides, planner, reference].map((i) => i.title)).toEqual([
+  it("has the five main sections", () => {
+    expect([today, guides, planner, shopping, reference].map((i) => i.title)).toEqual([
       "Today",
       "Guides",
       "Planner",
+      "Shopping list",
       "Reference",
     ]);
   });
@@ -58,7 +59,7 @@ describe("mainNav", () => {
 });
 
 describe("activeChild", () => {
-  const [, guides, , reference] = mainNav(t);
+  const [, guides, , , reference] = mainNav(t);
 
   test("marks only the most specific sub-item", () => {
     expect(activeChild(guides, "/guides", "")).toBe("/guides");

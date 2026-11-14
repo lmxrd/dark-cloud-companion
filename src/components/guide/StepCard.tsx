@@ -1,3 +1,4 @@
+import { stageNeedsItems } from "@/lib/guide/buildItems";
 import { useEffect, useMemo, useState } from "react";
 import { useChecks, useProfile, useReady } from "@/lib/useAppStore";
 import { CheckIcon } from "lucide-react";
@@ -15,6 +16,8 @@ import type { Section } from "@/lib/data";
 import { stepTickId, textTickId, type Entry, type Guide, type Step } from "@/lib/guide/types";
 import { setChecked } from "@/lib/store";
 import { BuildStepBody } from "./BuildStepBody";
+import { AddToListButton } from "@/components/shopping/AddToListButton";
+import { findGuide } from "@/lib/guide/builtin";
 import { ItemRow } from "./ItemRow";
 import { SectionFacts } from "./SectionFacts";
 
@@ -83,7 +86,7 @@ export function StepCard({
 }: Props) {
   const t = useTranslations();
   const checks = useChecks();
-  useProfile(); // re-render with the profile (guide edits)
+  const profile = useProfile(); // re-render with the profile (guide edits)
   const entries = useMemo(
     () => visibleEntries(guide, step, checks, filters),
     [guide, step, checks, filters],
@@ -178,6 +181,15 @@ export function StepCard({
             <div className="flex flex-col gap-2 px-2 py-1">
               {step.notes && <p className="text-sm whitespace-pre-wrap">{step.notes}</p>}
               <BuildStepBody step={step} derived={derived} buyableOnly={filters.buyableOnly} />
+              {/* Only saved guides: the shopping list follows the guide by id. */}
+              {stageNeedsItems(step.build) && findGuide(guide.id, profile.guides) && (
+                <div>
+                  <AddToListButton
+                    label={t("shopping.addMaterials")}
+                    goal={{ kind: "build", guideId: guide.id, stepIds: [step.id] }}
+                  />
+                </div>
+              )}
             </div>
           )}
           {entries.map((e, i) => {

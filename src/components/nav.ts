@@ -3,6 +3,7 @@ import {
   DatabaseIcon,
   LayoutDashboardIcon,
   RouteIcon,
+  ShoppingCartIcon,
   type LucideIcon,
 } from "lucide-react";
 import type { Translate } from "@/i18n";
@@ -10,12 +11,19 @@ import { MAIN_GUIDE_ID } from "@/lib/guide/main";
 import { DASHBOARD_SEGMENTS } from "@/components/dashboard/route";
 
 export type NavChild = { title: string; href: string };
-export type NavItem = { title: string; href: string; icon: LucideIcon; children?: NavChild[] };
+export type NavItem = {
+  title: string;
+  href: string;
+  icon: LucideIcon;
+  children?: NavChild[];
+  /** A count shown next to the item (e.g. shopping lines left). */
+  badge?: number;
+};
 
 /** The Reference sub-pages, by their top-level path segment. */
 export const REFERENCE_PAGES = ["weapons", "items", "ridepod", "monsters", "spheda"] as const;
 
-/** The four main sections: the sidebar on wide screens, the bottom tab bar on phones. */
+/** The main sections: the sidebar on wide screens, the bottom tab bar on phones. */
 export function mainNav(t: Translate): NavItem[] {
   return [
     { title: t("nav.dashboard"), href: "/", icon: LayoutDashboardIcon },
@@ -29,6 +37,7 @@ export function mainNav(t: Translate): NavItem[] {
       ],
     },
     { title: t("nav.planner"), href: "/planner", icon: RouteIcon },
+    { title: t("nav.shopping"), href: "/shopping", icon: ShoppingCartIcon },
     {
       title: t("nav.reference"),
       href: "/reference",
@@ -91,6 +100,7 @@ export function crumbsFor(t: Translate, pathname: string, page?: string): Crumb[
     {
       guides: t("nav.guides"),
       planner: t("nav.planner"),
+      shopping: t("nav.shopping"),
       reference: t("nav.reference"),
       settings: t("nav.settings"),
       about: t("nav.about"),

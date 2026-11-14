@@ -1,4 +1,4 @@
-import { useAppState, useReady } from "@/lib/useAppStore";
+import { useAppState, useProfile, useReady } from "@/lib/useAppStore";
 import { withBase } from "@/lib/base";
 import { useEffect, useState } from "react";
 import { ChevronsUpDownIcon, MoonIcon, SunIcon } from "lucide-react";
@@ -20,6 +20,7 @@ import {
   SidebarGroupContent,
   SidebarHeader,
   SidebarMenu,
+  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarMenuSub,
@@ -96,6 +97,11 @@ function NavLink({
   return (
     <SidebarMenuItem>
       {button}
+      {item.badge ? (
+        <SidebarMenuBadge className="border-sidebar-border bg-accent text-accent-foreground border font-mono">
+          {item.badge}
+        </SidebarMenuBadge>
+      ) : null}
       {item.children && (
         <SidebarMenuSub className="border-l-2">
           {item.children.map((child) => (
@@ -254,13 +260,45 @@ export function ProfileButton({ className }: { className?: string }) {
   );
 }
 
+/**
+ * Lines still to buy on the shopping list. Read after mounting (localStorage), and the shopping module (with its
+ * recipe data) is loaded lazily so it stays out of every page's first load.
+ */
+function useShoppingLeft(): number {
+  const ready = useReady();
+  const profile = useProfile();
+  const [left, setLeft] = useState(0);
+  useEffect(() => {
+    if (!ready) return;
+    if (!profile.shopping.goals.length) return setLeft(0);
+    let live = true;
+    void Promise.all([import("@/lib/shopping"), import("@/lib/guide/builtin")]).then(
+      ([{ shoppingList }, { findGuide }]) => {
+        const list = shoppingList(profile.shopping, {
+          chapter: 8,
+          findGuide: (id) => findGuide(id, profile.guides),
+        });
+        if (live) setLeft(list.left);
+      },
+    );
+    return () => {
+      live = false;
+    };
+  }, [ready, profile.shopping, profile.guides]);
+  return left;
+}
+
 /** The flat, always-visible app navigation (collapses to an icon rail). */
 export function AppSidebar({ pathname }: { pathname: string }) {
   const t = useTranslations();
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
+  const shoppingLeft = useShoppingLeft();
 
-  const items: NavItem[] = mainNav(t);
+  // The shopping list shows how many lines are still to buy.
+  const items: NavItem[] = mainNav(t).map((item) =>
+    item.href === "/shopping" ? { ...item, badge: shoppingLeft } : item,
+  );
 
   return (
     <Sidebar collapsible="icon" className="border-r-2">

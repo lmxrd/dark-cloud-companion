@@ -1,3 +1,4 @@
+import { stageNeedsItems } from "@/lib/guide/buildItems";
 import { useEffect, useMemo, useState } from "react";
 import { useProfile } from "@/lib/useAppStore";
 import { cn } from "cn";
@@ -22,10 +23,11 @@ import {
 import type { Objective } from "@/lib/planner/solve";
 import { getWeapon, weaponById, weaponData } from "@/lib/planner/sources";
 import { freshState, type WeaponState } from "@/lib/weapons/mechanics";
-import { $profile, saveGuide, setPlannerInputs, setView } from "@/lib/store";
+import { $profile, addShoppingGoal, saveGuide, setPlannerInputs, setView } from "@/lib/store";
 import type { PlannerInputs } from "@/lib/profiles";
 import { queryParam, setQuery } from "@/lib/url";
 import { AbilityPicker } from "./AbilityPicker";
+import { AddToListButton } from "@/components/shopping/AddToListButton";
 import { PlanPreview } from "./PlanPreview";
 import { StartSpecs } from "./StartSpecs";
 import { selectClass, WeaponSelect } from "./WeaponSelect";
@@ -558,6 +560,24 @@ export function GeneratorSection({ onOpenEditor }: { onOpenEditor: () => void })
             >
               {t("planner.openInEditor")}
             </Button>
+            {draft.steps.some((s) => stageNeedsItems(s.build)) && (
+              <AddToListButton
+                size="sm"
+                label={t("shopping.saveAndAdd")}
+                onAdd={() => {
+                  // The list follows the guide by id, so the plan is saved first.
+                  if (!saved) {
+                    saveGuide(draft, { activate: true });
+                    setSaved(true);
+                  }
+                  addShoppingGoal({
+                    kind: "build",
+                    guideId: draft.id,
+                    stepIds: draft.steps.filter((s) => stageNeedsItems(s.build)).map((s) => s.id),
+                  });
+                }}
+              />
+            )}
             {saved && (
               <span className="text-sm" role="status">
                 {t("planner.saved")}{" "}

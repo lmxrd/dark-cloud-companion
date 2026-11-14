@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { cn } from "cn";
 import { InfoIcon, SearchIcon } from "lucide-react";
 import { STAT_KEYS, type StatKey } from "@/lib/schemas";
+import { AddToListButton } from "@/components/shopping/AddToListButton";
 import { useTranslations } from "@/i18n";
 import { useQueryChoice, useQueryText } from "@/lib/url";
 import { Gate } from "@/components/Gate";
@@ -213,6 +214,9 @@ export function ItemsList() {
                         {t("items.foundOnly")}
                       </span>
                     )}
+                    <span className="ml-auto">
+                      <AddToListButton name={s.name} goal={{ kind: "item", name: s.name }} />
+                    </span>
                   </div>
                 </li>
               );
