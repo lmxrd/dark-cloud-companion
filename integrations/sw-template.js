@@ -39,14 +39,12 @@ self.addEventListener("fetch", (event) => {
       const cache = await caches.open(CACHE);
       // ignoreSearch: pages like /guides/view?id=… share one prerendered file. ignoreVary: some servers send
       // `Vary: Origin`, which would stop module scripts and fonts (CORS-mode requests) from matching precached copies.
+      const opts = { ignoreSearch: true, ignoreVary: true };
+      // Pages may be cached with or without a trailing slash (see integrations/pwa.mjs): try both.
+      const other = url.pathname.endsWith("/") ? url.pathname.slice(0, -1) : `${url.pathname}/`;
       const hit =
-        (await cache.match(req, { ignoreSearch: true, ignoreVary: true })) ??
-        (req.mode === "navigate"
-          ? await cache.match(url.pathname.replace(/\/?$/, "/"), {
-              ignoreSearch: true,
-              ignoreVary: true,
-            })
-          : undefined);
+        (await cache.match(req, opts)) ??
+        (req.mode === "navigate" && other ? await cache.match(other, opts) : undefined);
       if (hit) return hit;
       try {
         return await fetch(req);

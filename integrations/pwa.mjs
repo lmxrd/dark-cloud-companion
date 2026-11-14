@@ -15,19 +15,26 @@ function walk(dir) {
 export default function pwa() {
   /** The deployment base path ("" when served from the root). */
   let base = "";
+  /** Astro's trailingSlash setting: with "never", pages are served without one (`/guides`). */
+  let trailingSlash = "ignore";
   return {
     name: "dcc-pwa",
     hooks: {
       "astro:config:setup": ({ config }) => {
         base = config.base.replace(/\/+$/, "");
+        trailingSlash = config.trailingSlash;
       },
       "astro:build:done": ({ dir }) => {
         const root = fileURLToPath(dir);
         const files = walk(root)
           .map((f) => relative(root, f).split(sep).join("/"))
           .filter((f) => f !== "sw.js" && !f.endsWith(".map"));
+        // Pages are precached under the URL the server answers for them: `/guides/` normally,
+        // `/guides` with trailingSlash "never" (the home page is always the base with a slash).
+        const pageUrl = (dir) =>
+          trailingSlash === "never" && dir ? `${base}/${dir.replace(/\/$/, "")}` : `${base}/${dir}`;
         const urls = files.map((f) =>
-          f.endsWith("index.html") ? `${base}/${f.slice(0, -"index.html".length)}` : `${base}/${f}`,
+          f.endsWith("index.html") ? pageUrl(f.slice(0, -"index.html".length)) : `${base}/${f}`,
         );
         const hash = createHash("sha1");
         for (const f of files) hash.update(f).update(readFileSync(join(root, f)));
