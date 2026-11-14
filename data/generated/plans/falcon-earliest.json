@@ -1,10 +1,10 @@
 {
-  "name": "Falcon — Least ABS",
-  "hash": "a6188a2dba05d6c614781bdf0b03ac6c5d3979e336e58268f488ae55a3f89f46",
+  "name": "Falcon — Earliest",
+  "hash": "d69bf8c5d700b0a0320fdbcf26da180d546f631b0670b8aa3673f0f88ae9cd7a",
   "guide": {
-    "id": "falcon-max-abs",
-    "title": "Falcon — Least ABS",
-    "description": "Least ABS · maxed stats · 8 abilities · optimal start (Turkey) · done after Omen (chapter 8) · no ABS grinding",
+    "id": "falcon-earliest",
+    "title": "Falcon — Earliest",
+    "description": "Earliest · maxed stats · 8 abilities · optimal start (Turkey) · done after The Zelmite Mine (chapter 8) · no ABS grinding · 65,139 gilda to farm",
     "kind": "builtin",
     "build": {
       "weaponId": "turkey",
@@ -101,9 +101,9 @@
       {
         "id": "falcon+2",
         "title": "Falcon",
-        "notes": "",
+        "notes": "Farm about 65,139 gilda more than the story pays by this point.",
         "chapterId": "8",
-        "sectionId": "omen",
+        "sectionId": "the-zelmite-mine",
         "entries": [],
         "build": {
           "weaponId": "falcon",

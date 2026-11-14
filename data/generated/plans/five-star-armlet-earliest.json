@@ -1,24 +1,24 @@
 {
-  "name": "Dark Cloud — Least ABS",
-  "hash": "5a49a829cd17a783727c953e43fdfd5516ea808fa19eb2447c30da2f778a9e1e",
+  "name": "Five-Star Armlet — Earliest",
+  "hash": "93aba60798d3f1616f6100eaf2c73ecbb942722ca945ea93a69817672f705924",
   "guide": {
-    "id": "dark-cloud-max-abs",
-    "title": "Dark Cloud — Least ABS",
-    "description": "Least ABS · maxed stats · 8 abilities · optimal start (Gladius) · done after Mr. Big Shot Shadow (chapter 8) · no ABS grinding · 1,333 gilda to farm",
+    "id": "five-star-armlet-earliest",
+    "title": "Five-Star Armlet — Earliest",
+    "description": "Earliest · maxed stats · 8 abilities · optimal start (Magic Brassard) · done after The Zelmite Mine (chapter 8) · no ABS grinding · 58,449 gilda to farm",
     "kind": "builtin",
     "build": {
-      "weaponId": "gladius",
+      "weaponId": "magic-brassard",
       "level": 0,
       "abs": 0,
       "stats": {
-        "at": 20,
-        "fl": 0,
+        "at": 14,
+        "fl": 10,
         "ch": 0,
         "li": 0,
-        "cy": 10,
+        "cy": 0,
         "sm": 0,
         "ex": 0,
-        "be": 5,
+        "be": 0,
         "sc": 0
       },
       "du": 0,
@@ -31,50 +31,35 @@
     },
     "steps": [
       {
-        "id": "gladius+8",
-        "title": "Gladius → Cliff Knife",
+        "id": "magic-brassard+11",
+        "title": "Magic Brassard → Bandit Brassard",
         "notes": "",
         "chapterId": "8",
         "sectionId": "the-zelmite-mine",
         "entries": [],
         "build": {
-          "weaponId": "gladius",
-          "levelTo": 8,
+          "weaponId": "magic-brassard",
+          "levelTo": 11,
           "synths": [
             {
               "kind": "item",
-              "name": "Bundle of Hay",
-              "count": 9
-            },
-            {
-              "kind": "item",
-              "name": "Emerald",
-              "count": 1
-            },
-            {
-              "kind": "item",
-              "name": "Wind Crystal",
+              "name": "Topaz",
               "count": 2
             }
           ]
         }
       },
       {
-        "id": "cliff-knife+3",
-        "title": "Cliff Knife → Chopper",
+        "id": "bandit-brassard+5",
+        "title": "Bandit Brassard → Crystal Brassard",
         "notes": "",
         "chapterId": "8",
         "sectionId": "the-zelmite-mine",
         "entries": [],
         "build": {
-          "weaponId": "cliff-knife",
-          "levelTo": 3,
+          "weaponId": "bandit-brassard",
+          "levelTo": 5,
           "synths": [
-            {
-              "kind": "item",
-              "name": "Bundle of Hay",
-              "count": 5
-            },
             {
               "kind": "item",
               "name": "Emerald",
@@ -84,56 +69,30 @@
         }
       },
       {
-        "id": "chopper+4",
-        "title": "Chopper → Choora",
+        "id": "crystal-brassard+5",
+        "title": "Crystal Brassard → Pocklekul",
         "notes": "",
         "chapterId": "8",
         "sectionId": "the-zelmite-mine",
         "entries": [],
         "build": {
-          "weaponId": "chopper",
-          "levelTo": 4,
+          "weaponId": "crystal-brassard",
+          "levelTo": 5,
           "synths": [
-            {
-              "kind": "item",
-              "name": "Antidote Drink",
-              "count": 1
-            },
-            {
-              "kind": "item",
-              "name": "Bundle of Hay",
-              "count": 1
-            },
-            {
-              "kind": "item",
-              "name": "Emerald",
-              "count": 1
-            },
-            {
-              "kind": "item",
-              "name": "Sea Dragon Crystal",
-              "count": 1
-            },
             {
               "kind": "sphere",
               "recipe": {
                 "acquire": {
                   "kind": "shop",
-                  "shop": "Starlight Weapons",
-                  "price": 1800,
-                  "chapter": 6
+                  "shop": "Julia's Ringware",
+                  "price": 860,
+                  "chapter": 5
                 },
                 "stages": [
                   {
-                    "weaponId": "moon-armlet",
+                    "weaponId": "pocklekul",
                     "levelTo": 5,
-                    "synths": [
-                      {
-                        "kind": "item",
-                        "name": "Scrap of Metal",
-                        "count": 27
-                      }
-                    ]
+                    "synths": []
                   }
                 ]
               }
@@ -142,21 +101,16 @@
         }
       },
       {
-        "id": "choora+2",
-        "title": "Choora → Small Sword",
+        "id": "pocklekul+4",
+        "title": "Pocklekul → Moon Armlet",
         "notes": "",
         "chapterId": "8",
         "sectionId": "the-zelmite-mine",
         "entries": [],
         "build": {
-          "weaponId": "choora",
-          "levelTo": 2,
+          "weaponId": "pocklekul",
+          "levelTo": 4,
           "synths": [
-            {
-              "kind": "item",
-              "name": "Flour",
-              "count": 7
-            },
             {
               "kind": "sphere",
               "recipe": {
@@ -179,49 +133,6 @@
                   }
                 ]
               }
-            }
-          ]
-        }
-      },
-      {
-        "id": "small-sword+2",
-        "title": "Small Sword → Maneater",
-        "notes": "",
-        "chapterId": "8",
-        "sectionId": "the-zelmite-mine",
-        "entries": [],
-        "build": {
-          "weaponId": "small-sword",
-          "levelTo": 2,
-          "synths": [
-            {
-              "kind": "item",
-              "name": "Wind Crystal",
-              "count": 1
-            }
-          ]
-        }
-      },
-      {
-        "id": "maneater+2",
-        "title": "Maneater → Dark Cloud",
-        "notes": "",
-        "chapterId": "8",
-        "sectionId": "the-zelmite-mine",
-        "entries": [],
-        "build": {
-          "weaponId": "maneater",
-          "levelTo": 2,
-          "synths": [
-            {
-              "kind": "item",
-              "name": "Bundle of Hay",
-              "count": 2
-            },
-            {
-              "kind": "item",
-              "name": "Ruby",
-              "count": 1
             },
             {
               "kind": "sphere",
@@ -250,16 +161,63 @@
         }
       },
       {
-        "id": "dark-cloud+2",
-        "title": "Dark Cloud",
-        "notes": "Farm about 1,333 gilda more than the story pays by this point.",
+        "id": "moon-armlet+4",
+        "title": "Moon Armlet → Star Armlet",
+        "notes": "",
         "chapterId": "8",
-        "sectionId": "mr-big-shot-shadow",
+        "sectionId": "the-zelmite-mine",
         "entries": [],
         "build": {
-          "weaponId": "dark-cloud",
-          "levelTo": 2,
+          "weaponId": "moon-armlet",
+          "levelTo": 4,
           "synths": [
+            {
+              "kind": "item",
+              "name": "Flour",
+              "count": 1
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "invent",
+                  "chapter": 8,
+                  "gilda": 13100
+                },
+                "stages": [
+                  {
+                    "weaponId": "sexy-panther",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 27
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "star-armlet+3",
+        "title": "Star Armlet → Five-Star Armlet",
+        "notes": "",
+        "chapterId": "8",
+        "sectionId": "the-zelmite-mine",
+        "entries": [],
+        "build": {
+          "weaponId": "star-armlet",
+          "levelTo": 3,
+          "synths": [
+            {
+              "kind": "item",
+              "name": "Destruction Crystal",
+              "count": 1
+            },
             {
               "kind": "item",
               "name": "Emerald",
@@ -267,28 +225,47 @@
             },
             {
               "kind": "item",
-              "name": "Gunpowder",
-              "count": 9
-            },
-            {
-              "kind": "item",
-              "name": "Holy Crystal",
-              "count": 6
-            },
-            {
-              "kind": "item",
-              "name": "Peridot",
-              "count": 2
-            },
-            {
-              "kind": "item",
-              "name": "Scrap of Metal",
+              "name": "Flour",
               "count": 1
             },
             {
               "kind": "item",
-              "name": "Sea Dragon Crystal",
-              "count": 4
+              "name": "Holy Crystal",
+              "count": 1
+            },
+            {
+              "kind": "item",
+              "name": "Peridot",
+              "count": 1
+            },
+            {
+              "kind": "item",
+              "name": "Rolling Log",
+              "count": 1
+            }
+          ]
+        }
+      },
+      {
+        "id": "five-star-armlet+3",
+        "title": "Five-Star Armlet",
+        "notes": "Farm about 58,449 gilda more than the story pays by this point.",
+        "chapterId": "8",
+        "sectionId": "the-zelmite-mine",
+        "entries": [],
+        "build": {
+          "weaponId": "five-star-armlet",
+          "levelTo": 3,
+          "synths": [
+            {
+              "kind": "item",
+              "name": "Chill Crystal",
+              "count": 1
+            },
+            {
+              "kind": "item",
+              "name": "Knight Boots",
+              "count": 99
             },
             {
               "kind": "sphere",
@@ -341,18 +318,18 @@
               "recipe": {
                 "acquire": {
                   "kind": "invent",
-                  "chapter": 8,
-                  "gilda": 13100
+                  "chapter": 7,
+                  "gilda": 2500
                 },
                 "stages": [
                   {
-                    "weaponId": "sexy-panther",
+                    "weaponId": "twin-buster",
                     "levelTo": 5,
                     "synths": [
                       {
                         "kind": "item",
                         "name": "Scrap of Metal",
-                        "count": 27
+                        "count": 37
                       }
                     ]
                   }
@@ -422,18 +399,8 @@
             },
             {
               "kind": "item",
-              "name": "Bandit Coin",
-              "count": 1
-            },
-            {
-              "kind": "item",
-              "name": "Wealth Coin",
-              "count": 1
-            },
-            {
-              "kind": "item",
               "name": "Dark Coin",
-              "count": 2
+              "count": 1
             },
             {
               "kind": "item",

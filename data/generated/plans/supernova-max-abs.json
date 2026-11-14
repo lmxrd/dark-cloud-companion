@@ -1,81 +1,183 @@
 {
-  "name": "Last Resort — Least ABS",
-  "hash": "0dceadf2296bfe1bdff6218772a2507a7a0ea8b42dbec3835be1d6c9c6d135b8",
+  "name": "Supernova — Least ABS",
+  "hash": "89e7b627c1eb6d51ad562ca19893096ee3aa7c2f61c1af4bf6c3e9a663c76dc3",
   "guide": {
-    "id": "last-resort-max-abs",
-    "title": "Last Resort — Least ABS",
-    "description": "Least ABS · maxed stats · 8 abilities · optimal start (Sexy Panther) · done after Seeping Light (chapter 8) · no ABS grinding",
+    "id": "supernova-max-abs",
+    "title": "Supernova — Least ABS",
+    "description": "Least ABS · maxed stats · 8 abilities · optimal start (Classic Gun) · done after Firm Belief (chapter 8) · no ABS grinding",
     "kind": "builtin",
     "build": {
-      "weaponId": "sexy-panther",
+      "weaponId": "classic-gun",
       "level": 0,
       "abs": 0,
       "stats": {
-        "at": 77,
-        "fl": 80,
+        "at": 7,
+        "fl": 0,
         "ch": 0,
         "li": 0,
-        "cy": 95,
-        "sm": 95,
+        "cy": 0,
+        "sm": 0,
         "ex": 0,
-        "be": 85,
-        "sc": 95
+        "be": 0,
+        "sc": 0
       },
       "du": 0,
-      "sp": 2,
+      "sp": 1,
       "abilities": [],
       "spBonus": 1,
       "acquire": {
-        "kind": "invent",
-        "chapter": 8,
-        "gilda": 13100
+        "kind": "have"
       }
     },
     "steps": [
       {
-        "id": "sexy-panther+4",
-        "title": "Sexy Panther → Desperado",
+        "id": "classic-gun+14",
+        "title": "Classic Gun → Trumpet Gun",
         "notes": "",
         "chapterId": "8",
-        "sectionId": "moon-mole",
+        "sectionId": "the-zelmite-mine",
         "entries": [],
         "build": {
-          "weaponId": "sexy-panther",
-          "levelTo": 4,
+          "weaponId": "classic-gun",
+          "levelTo": 14,
+          "synths": [
+            {
+              "kind": "item",
+              "name": "Sapphire",
+              "count": 1
+            }
+          ]
+        }
+      },
+      {
+        "id": "trumpet-gun+7",
+        "title": "Trumpet Gun → Bell Trigger",
+        "notes": "",
+        "chapterId": "8",
+        "sectionId": "the-zelmite-mine",
+        "entries": [],
+        "build": {
+          "weaponId": "trumpet-gun",
+          "levelTo": 7,
           "synths": [
             {
               "kind": "item",
               "name": "Emerald",
-              "count": 2
+              "count": 1
             },
             {
               "kind": "item",
-              "name": "Flour",
-              "count": 2
+              "name": "Hunter Crystal",
+              "count": 1
             },
             {
               "kind": "sphere",
               "recipe": {
                 "acquire": {
                   "kind": "shop",
-                  "shop": "Jurak Arms",
-                  "price": 160,
-                  "chapter": 2
+                  "shop": "Gerald's Guns",
+                  "price": 900,
+                  "chapter": 5
                 },
                 "stages": [
                   {
-                    "weaponId": "dryer-gun",
+                    "weaponId": "wild-cat",
                     "levelTo": 5,
                     "synths": [
                       {
                         "kind": "item",
                         "name": "Scrap of Metal",
-                        "count": 15
-                      },
+                        "count": 27
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "bell-trigger+4",
+        "title": "Bell Trigger → Magic Gun",
+        "notes": "",
+        "chapterId": "8",
+        "sectionId": "the-zelmite-mine",
+        "entries": [],
+        "build": {
+          "weaponId": "bell-trigger",
+          "levelTo": 4,
+          "synths": [
+            {
+              "kind": "item",
+              "name": "Emerald",
+              "count": 1
+            },
+            {
+              "kind": "item",
+              "name": "Lightning Crystal",
+              "count": 1
+            }
+          ]
+        }
+      },
+      {
+        "id": "magic-gun+4",
+        "title": "Magic Gun → Question Shooter",
+        "notes": "",
+        "chapterId": "8",
+        "sectionId": "the-zelmite-mine",
+        "entries": [],
+        "build": {
+          "weaponId": "magic-gun",
+          "levelTo": 4,
+          "synths": [
+            {
+              "kind": "item",
+              "name": "Flour",
+              "count": 1
+            },
+            {
+              "kind": "item",
+              "name": "Garnet",
+              "count": 1
+            },
+            {
+              "kind": "item",
+              "name": "Pearl",
+              "count": 1
+            }
+          ]
+        }
+      },
+      {
+        "id": "question-shooter+4",
+        "title": "Question Shooter → Steal Gun",
+        "notes": "",
+        "chapterId": "8",
+        "sectionId": "the-zelmite-mine",
+        "entries": [],
+        "build": {
+          "weaponId": "question-shooter",
+          "levelTo": 4,
+          "synths": [
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "invent",
+                  "chapter": 8,
+                  "gilda": 13100
+                },
+                "stages": [
+                  {
+                    "weaponId": "sexy-panther",
+                    "levelTo": 5,
+                    "synths": [
                       {
                         "kind": "item",
-                        "name": "Bundle of Hay",
-                        "count": 6
+                        "name": "Scrap of Metal",
+                        "count": 27
                       }
                     ]
                   }
@@ -104,30 +206,53 @@
                   }
                 ]
               }
+            }
+          ]
+        }
+      },
+      {
+        "id": "steal-gun+3",
+        "title": "Steal Gun → Supernova",
+        "notes": "",
+        "chapterId": "8",
+        "sectionId": "the-zelmite-mine",
+        "entries": [],
+        "build": {
+          "weaponId": "steal-gun",
+          "levelTo": 3,
+          "synths": [
+            {
+              "kind": "item",
+              "name": "Emerald",
+              "count": 1
+            },
+            {
+              "kind": "item",
+              "name": "Glass Material",
+              "count": 1
+            },
+            {
+              "kind": "item",
+              "name": "Holy Crystal",
+              "count": 2
             },
             {
               "kind": "sphere",
               "recipe": {
                 "acquire": {
-                  "kind": "shop",
-                  "shop": "Julia's Ringware",
-                  "price": 200,
-                  "chapter": 2
+                  "kind": "invent",
+                  "chapter": 8,
+                  "gilda": 13100
                 },
                 "stages": [
                   {
-                    "weaponId": "magic-brassard",
+                    "weaponId": "sexy-panther",
                     "levelTo": 5,
                     "synths": [
                       {
                         "kind": "item",
                         "name": "Scrap of Metal",
-                        "count": 17
-                      },
-                      {
-                        "kind": "item",
-                        "name": "Bundle of Hay",
-                        "count": 4
+                        "count": 27
                       }
                     ]
                   }
@@ -138,69 +263,42 @@
         }
       },
       {
-        "id": "desperado+3",
-        "title": "Desperado → Last Resort",
+        "id": "supernova+3",
+        "title": "Supernova",
         "notes": "",
         "chapterId": "8",
-        "sectionId": "moon-mole",
+        "sectionId": "firm-belief",
         "entries": [],
         "build": {
-          "weaponId": "desperado",
+          "weaponId": "supernova",
           "levelTo": 3,
           "synths": [
             {
               "kind": "item",
-              "name": "Bundle of Hay",
-              "count": 1
-            },
-            {
-              "kind": "item",
-              "name": "Glass Material",
-              "count": 1
-            },
-            {
-              "kind": "item",
-              "name": "Peridot",
+              "name": "Gunpowder",
               "count": 2
-            },
-            {
-              "kind": "item",
-              "name": "Topaz",
-              "count": 1
-            }
-          ]
-        }
-      },
-      {
-        "id": "last-resort+3",
-        "title": "Last Resort",
-        "notes": "",
-        "chapterId": "8",
-        "sectionId": "seeping-light",
-        "entries": [],
-        "build": {
-          "weaponId": "last-resort",
-          "levelTo": 3,
-          "synths": [
-            {
-              "kind": "item",
-              "name": "Amethyst",
-              "count": 4
-            },
-            {
-              "kind": "item",
-              "name": "Flour",
-              "count": 1
             },
             {
               "kind": "item",
               "name": "Knight Boots",
-              "count": 2
+              "count": 113
             },
             {
-              "kind": "item",
-              "name": "Peridot",
-              "count": 2
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "invent",
+                  "chapter": 8,
+                  "gilda": 13100
+                },
+                "stages": [
+                  {
+                    "weaponId": "sexy-panther",
+                    "levelTo": 5,
+                    "synths": []
+                  }
+                ]
+              }
             },
             {
               "kind": "sphere",
@@ -246,20 +344,19 @@
               "kind": "sphere",
               "recipe": {
                 "acquire": {
-                  "kind": "shop",
-                  "shop": "Starlight Weapons",
-                  "price": 1800,
-                  "chapter": 6
+                  "kind": "invent",
+                  "chapter": 5,
+                  "gilda": 800
                 },
                 "stages": [
                   {
-                    "weaponId": "moon-armlet",
+                    "weaponId": "heavy-hammer",
                     "levelTo": 5,
                     "synths": [
                       {
                         "kind": "item",
                         "name": "Scrap of Metal",
-                        "count": 27
+                        "count": 37
                       }
                     ]
                   }
@@ -283,13 +380,8 @@
             },
             {
               "kind": "item",
-              "name": "Bandit Coin",
-              "count": 1
-            },
-            {
-              "kind": "item",
               "name": "Wealth Coin",
-              "count": 1
+              "count": 2
             },
             {
               "kind": "item",

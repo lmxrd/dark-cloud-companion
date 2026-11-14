@@ -1,24 +1,24 @@
 {
-  "name": "LEGEND — Least ABS",
-  "hash": "5303466e98c16d0b165af8a0ad19f7184bc0af6f328f7db55e7acec07535289d",
+  "name": "Dark Cloud — Least ABS",
+  "hash": "c5046af09e8c5035a2f9ad29f810948a9d6d33fe7ab04a91a0e0367ff1089f4a",
   "guide": {
-    "id": "legend-max-abs",
-    "title": "LEGEND — Least ABS",
-    "description": "Least ABS · maxed stats · 8 abilities · optimal start (Battle Wrench) · done after Ultimate Snake (chapter 8) · no ABS grinding",
+    "id": "dark-cloud-max-abs",
+    "title": "Dark Cloud — Least ABS",
+    "description": "Least ABS · maxed stats · 8 abilities · optimal start (Gladius) · done after Mr. Big Shot Shadow (chapter 8) · no ABS grinding · 1,333 gilda to farm",
     "kind": "builtin",
     "build": {
-      "weaponId": "battle-wrench",
+      "weaponId": "gladius",
       "level": 0,
       "abs": 0,
       "stats": {
-        "at": 8,
-        "fl": 2,
+        "at": 20,
+        "fl": 0,
         "ch": 0,
         "li": 0,
-        "cy": 0,
-        "sm": 5,
+        "cy": 10,
+        "sm": 0,
         "ex": 0,
-        "be": 0,
+        "be": 5,
         "sc": 0
       },
       "du": 0,
@@ -31,68 +31,68 @@
     },
     "steps": [
       {
-        "id": "battle-wrench+15",
-        "title": "Battle Wrench → True Battle Wrench",
+        "id": "gladius+8",
+        "title": "Gladius → Cliff Knife",
         "notes": "",
-        "chapterId": "2",
-        "sectionId": "legendary-killer-snake",
+        "chapterId": "8",
+        "sectionId": "the-zelmite-mine",
         "entries": [],
         "build": {
-          "weaponId": "battle-wrench",
-          "levelTo": 15,
-          "synths": [
-            {
-              "kind": "item",
-              "name": "Sturdy Cloth",
-              "count": 1
-            }
-          ]
-        }
-      },
-      {
-        "id": "true-battle-wrench+15",
-        "title": "True Battle Wrench → Drill Wrench",
-        "notes": "",
-        "chapterId": "3",
-        "sectionId": "earth-shaking-demon",
-        "entries": [],
-        "build": {
-          "weaponId": "true-battle-wrench",
-          "levelTo": 15,
-          "synths": [
-            {
-              "kind": "item",
-              "name": "Destruction Crystal",
-              "count": 2
-            },
-            {
-              "kind": "item",
-              "name": "Flame Crystal",
-              "count": 3
-            },
-            {
-              "kind": "item",
-              "name": "Gunpowder",
-              "count": 2
-            },
-            {
-              "kind": "item",
-              "name": "Hunter Crystal",
-              "count": 1
-            }
-          ]
-        }
-      },
-      {
-        "id": "drill-wrench+8",
-        "title": "Drill Wrench → Smash Wrench",
-        "notes": "",
-        "chapterId": "3",
-        "sectionId": "warrior-in-starlight-canyon",
-        "entries": [],
-        "build": {
-          "weaponId": "drill-wrench",
+          "weaponId": "gladius",
           "levelTo": 8,
+          "synths": [
+            {
+              "kind": "item",
+              "name": "Bundle of Hay",
+              "count": 9
+            },
+            {
+              "kind": "item",
+              "name": "Emerald",
+              "count": 1
+            },
+            {
+              "kind": "item",
+              "name": "Wind Crystal",
+              "count": 2
+            }
+          ]
+        }
+      },
+      {
+        "id": "cliff-knife+3",
+        "title": "Cliff Knife → Chopper",
+        "notes": "",
+        "chapterId": "8",
+        "sectionId": "the-zelmite-mine",
+        "entries": [],
+        "build": {
+          "weaponId": "cliff-knife",
+          "levelTo": 3,
+          "synths": [
+            {
+              "kind": "item",
+              "name": "Bundle of Hay",
+              "count": 5
+            },
+            {
+              "kind": "item",
+              "name": "Emerald",
+              "count": 2
+            }
+          ]
+        }
+      },
+      {
+        "id": "chopper+4",
+        "title": "Chopper → Choora",
+        "notes": "",
+        "chapterId": "8",
+        "sectionId": "the-zelmite-mine",
+        "entries": [],
+        "build": {
+          "weaponId": "chopper",
+          "levelTo": 4,
           "synths": [
             {
               "kind": "item",
@@ -101,38 +101,128 @@
             },
             {
               "kind": "item",
-              "name": "Destruction Crystal",
-              "count": 2
-            },
-            {
-              "kind": "item",
-              "name": "Flame Crystal",
+              "name": "Bundle of Hay",
               "count": 1
             },
             {
               "kind": "item",
-              "name": "Scrap of Metal",
-              "count": 5
+              "name": "Emerald",
+              "count": 1
             },
             {
               "kind": "item",
               "name": "Sea Dragon Crystal",
+              "count": 1
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "shop",
+                  "shop": "Starlight Weapons",
+                  "price": 1800,
+                  "chapter": 6
+                },
+                "stages": [
+                  {
+                    "weaponId": "moon-armlet",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 27
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "choora+2",
+        "title": "Choora → Small Sword",
+        "notes": "",
+        "chapterId": "8",
+        "sectionId": "the-zelmite-mine",
+        "entries": [],
+        "build": {
+          "weaponId": "choora",
+          "levelTo": 2,
+          "synths": [
+            {
+              "kind": "item",
+              "name": "Flour",
+              "count": 7
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "invent",
+                  "chapter": 8,
+                  "gilda": 13100
+                },
+                "stages": [
+                  {
+                    "weaponId": "sexy-panther",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 27
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "small-sword+2",
+        "title": "Small Sword → Maneater",
+        "notes": "",
+        "chapterId": "8",
+        "sectionId": "the-zelmite-mine",
+        "entries": [],
+        "build": {
+          "weaponId": "small-sword",
+          "levelTo": 2,
+          "synths": [
+            {
+              "kind": "item",
+              "name": "Wind Crystal",
               "count": 1
             }
           ]
         }
       },
       {
-        "id": "smash-wrench+4",
-        "title": "Smash Wrench → Cubic Hammer",
+        "id": "maneater+2",
+        "title": "Maneater → Dark Cloud",
         "notes": "",
-        "chapterId": "5",
-        "sectionId": "heim-rada-rebuilding",
+        "chapterId": "8",
+        "sectionId": "the-zelmite-mine",
         "entries": [],
         "build": {
-          "weaponId": "smash-wrench",
-          "levelTo": 4,
+          "weaponId": "maneater",
+          "levelTo": 2,
           "synths": [
+            {
+              "kind": "item",
+              "name": "Bundle of Hay",
+              "count": 2
+            },
+            {
+              "kind": "item",
+              "name": "Ruby",
+              "count": 1
+            },
             {
               "kind": "sphere",
               "recipe": {
@@ -160,162 +250,45 @@
         }
       },
       {
-        "id": "cubic-hammer+2",
-        "title": "Cubic Hammer → Digi Hammer",
-        "notes": "",
+        "id": "dark-cloud+2",
+        "title": "Dark Cloud",
+        "notes": "Farm about 1,333 gilda more than the story pays by this point.",
         "chapterId": "8",
-        "sectionId": "the-zelmite-mine",
+        "sectionId": "mr-big-shot-shadow",
         "entries": [],
         "build": {
-          "weaponId": "cubic-hammer",
-          "levelTo": 2,
-          "synths": [
-            {
-              "kind": "item",
-              "name": "Garnet",
-              "count": 2
-            },
-            {
-              "kind": "sphere",
-              "recipe": {
-                "acquire": {
-                  "kind": "invent",
-                  "chapter": 8,
-                  "gilda": 13100
-                },
-                "stages": [
-                  {
-                    "weaponId": "sexy-panther",
-                    "levelTo": 5,
-                    "synths": [
-                      {
-                        "kind": "item",
-                        "name": "Scrap of Metal",
-                        "count": 27
-                      }
-                    ]
-                  }
-                ]
-              }
-            }
-          ]
-        }
-      },
-      {
-        "id": "digi-hammer+2",
-        "title": "Digi Hammer → Heavy Hammer",
-        "notes": "",
-        "chapterId": "8",
-        "sectionId": "the-zelmite-mine",
-        "entries": [],
-        "build": {
-          "weaponId": "digi-hammer",
-          "levelTo": 2,
-          "synths": [
-            {
-              "kind": "item",
-              "name": "Flame Crystal",
-              "count": 1
-            },
-            {
-              "kind": "sphere",
-              "recipe": {
-                "acquire": {
-                  "kind": "shop",
-                  "shop": "Julia's Ringware",
-                  "price": 860,
-                  "chapter": 5
-                },
-                "stages": [
-                  {
-                    "weaponId": "pocklekul",
-                    "levelTo": 5,
-                    "synths": [
-                      {
-                        "kind": "item",
-                        "name": "Scrap of Metal",
-                        "count": 27
-                      }
-                    ]
-                  }
-                ]
-              }
-            }
-          ]
-        }
-      },
-      {
-        "id": "heavy-hammer+2",
-        "title": "Heavy Hammer → LEGEND",
-        "notes": "",
-        "chapterId": "8",
-        "sectionId": "the-zelmite-mine",
-        "entries": [],
-        "build": {
-          "weaponId": "heavy-hammer",
+          "weaponId": "dark-cloud",
           "levelTo": 2,
           "synths": [
             {
               "kind": "item",
               "name": "Emerald",
-              "count": 3
-            },
-            {
-              "kind": "sphere",
-              "recipe": {
-                "acquire": {
-                  "kind": "invent",
-                  "chapter": 8,
-                  "gilda": 13100
-                },
-                "stages": [
-                  {
-                    "weaponId": "sexy-panther",
-                    "levelTo": 5,
-                    "synths": [
-                      {
-                        "kind": "item",
-                        "name": "Scrap of Metal",
-                        "count": 27
-                      }
-                    ]
-                  }
-                ]
-              }
-            }
-          ]
-        }
-      },
-      {
-        "id": "legend+2",
-        "title": "LEGEND",
-        "notes": "",
-        "chapterId": "8",
-        "sectionId": "ultimate-snake",
-        "entries": [],
-        "build": {
-          "weaponId": "legend",
-          "levelTo": 2,
-          "synths": [
-            {
-              "kind": "item",
-              "name": "Chill Crystal",
-              "count": 5
+              "count": 1
             },
             {
               "kind": "item",
-              "name": "Flame Crystal",
-              "count": 2
-            },
-            {
-              "kind": "item",
-              "name": "Holy Crystal",
+              "name": "Gunpowder",
               "count": 9
             },
             {
               "kind": "item",
-              "name": "Knight Boots",
-              "count": 129
+              "name": "Holy Crystal",
+              "count": 6
+            },
+            {
+              "kind": "item",
+              "name": "Peridot",
+              "count": 2
+            },
+            {
+              "kind": "item",
+              "name": "Scrap of Metal",
+              "count": 1
+            },
+            {
+              "kind": "item",
+              "name": "Sea Dragon Crystal",
+              "count": 4
             },
             {
               "kind": "sphere",
@@ -357,6 +330,52 @@
                         "kind": "item",
                         "name": "Scrap of Metal",
                         "count": 27
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "invent",
+                  "chapter": 8,
+                  "gilda": 13100
+                },
+                "stages": [
+                  {
+                    "weaponId": "sexy-panther",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 27
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "invent",
+                  "chapter": 5,
+                  "gilda": 800
+                },
+                "stages": [
+                  {
+                    "weaponId": "heavy-hammer",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 37
                       }
                     ]
                   }
@@ -408,7 +427,17 @@
             },
             {
               "kind": "item",
+              "name": "Wealth Coin",
+              "count": 1
+            },
+            {
+              "kind": "item",
               "name": "Dark Coin",
+              "count": 2
+            },
+            {
+              "kind": "item",
+              "name": "Indestructible Coin",
               "count": 1
             },
             {

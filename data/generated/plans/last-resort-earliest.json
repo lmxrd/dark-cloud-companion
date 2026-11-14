@@ -1,45 +1,47 @@
 {
-  "name": "Island King — Earliest",
-  "hash": "60f355d560454906de5ed435b0c90eb84895c19ec3020a796363154f7d9176f9",
+  "name": "Last Resort — Earliest",
+  "hash": "8fd848f10292205a834732eb98abc1e695fa0d09c206966e4fa0b0dfda5accc7",
   "guide": {
-    "id": "island-king-earliest",
-    "title": "Island King — Earliest",
-    "description": "Earliest · maxed stats · 8 abilities · optimal start (Gladius) · done after Mr. Big Shot Shadow (chapter 8) · no ABS grinding",
+    "id": "last-resort-earliest",
+    "title": "Last Resort — Earliest",
+    "description": "Earliest · maxed stats · 8 abilities · optimal start (Sexy Panther) · done after The Zelmite Mine (chapter 8) · 16,097 ABS to grind · 70,909 gilda to farm",
     "kind": "builtin",
     "build": {
-      "weaponId": "gladius",
+      "weaponId": "sexy-panther",
       "level": 0,
       "abs": 0,
       "stats": {
-        "at": 20,
-        "fl": 0,
+        "at": 77,
+        "fl": 80,
         "ch": 0,
         "li": 0,
-        "cy": 10,
-        "sm": 0,
+        "cy": 95,
+        "sm": 95,
         "ex": 0,
-        "be": 5,
-        "sc": 0
+        "be": 85,
+        "sc": 95
       },
       "du": 0,
-      "sp": 1,
+      "sp": 2,
       "abilities": [],
       "spBonus": 1,
       "acquire": {
-        "kind": "have"
+        "kind": "invent",
+        "chapter": 8,
+        "gilda": 13100
       }
     },
     "steps": [
       {
-        "id": "gladius+13",
-        "title": "Gladius → Cliff Knife",
-        "notes": "",
+        "id": "sexy-panther+4",
+        "title": "Sexy Panther → Desperado",
+        "notes": "Grind about 5,559 ABS more than the story gives by this point.",
         "chapterId": "8",
         "sectionId": "the-zelmite-mine",
         "entries": [],
         "build": {
-          "weaponId": "gladius",
-          "levelTo": 13,
+          "weaponId": "sexy-panther",
+          "levelTo": 4,
           "synths": [
             {
               "kind": "item",
@@ -48,95 +50,38 @@
             },
             {
               "kind": "item",
-              "name": "Hunter Crystal",
+              "name": "Flour",
               "count": 2
-            },
-            {
-              "kind": "item",
-              "name": "Topaz",
-              "count": 1
-            }
-          ]
-        }
-      },
-      {
-        "id": "cliff-knife+5",
-        "title": "Cliff Knife → Chopper",
-        "notes": "",
-        "chapterId": "8",
-        "sectionId": "the-zelmite-mine",
-        "entries": [],
-        "build": {
-          "weaponId": "cliff-knife",
-          "levelTo": 5,
-          "synths": [
-            {
-              "kind": "item",
-              "name": "Hunter Crystal",
-              "count": 2
-            },
-            {
-              "kind": "item",
-              "name": "Topaz",
-              "count": 1
-            }
-          ]
-        }
-      },
-      {
-        "id": "chopper+5",
-        "title": "Chopper → Choora",
-        "notes": "",
-        "chapterId": "8",
-        "sectionId": "the-zelmite-mine",
-        "entries": [],
-        "build": {
-          "weaponId": "chopper",
-          "levelTo": 5,
-          "synths": [
-            {
-              "kind": "item",
-              "name": "Emerald",
-              "count": 1
             },
             {
               "kind": "sphere",
               "recipe": {
                 "acquire": {
                   "kind": "shop",
-                  "shop": "Gerald's Guns",
-                  "price": 900,
-                  "chapter": 5
+                  "shop": "Jurak Arms",
+                  "price": 160,
+                  "chapter": 2
                 },
                 "stages": [
                   {
-                    "weaponId": "wild-cat",
+                    "weaponId": "dryer-gun",
                     "levelTo": 5,
                     "synths": [
                       {
                         "kind": "item",
                         "name": "Scrap of Metal",
-                        "count": 27
+                        "count": 15
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Bundle of Hay",
+                        "count": 6
                       }
                     ]
                   }
                 ]
               }
-            }
-          ]
-        }
-      },
-      {
-        "id": "choora+3",
-        "title": "Choora → Small Sword",
-        "notes": "",
-        "chapterId": "8",
-        "sectionId": "the-zelmite-mine",
-        "entries": [],
-        "build": {
-          "weaponId": "choora",
-          "levelTo": 3,
-          "synths": [
+            },
             {
               "kind": "sphere",
               "recipe": {
@@ -159,99 +104,98 @@
                   }
                 ]
               }
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "shop",
+                  "shop": "Julia's Ringware",
+                  "price": 200,
+                  "chapter": 2
+                },
+                "stages": [
+                  {
+                    "weaponId": "magic-brassard",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 17
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Bundle of Hay",
+                        "count": 4
+                      }
+                    ]
+                  }
+                ]
+              }
             }
           ]
         }
       },
       {
-        "id": "small-sword+2",
-        "title": "Small Sword → Maneater",
-        "notes": "",
+        "id": "desperado+3",
+        "title": "Desperado → Last Resort",
+        "notes": "Grind about 1,505 ABS more than the story gives by this point.",
         "chapterId": "8",
         "sectionId": "the-zelmite-mine",
         "entries": [],
         "build": {
-          "weaponId": "small-sword",
-          "levelTo": 2,
-          "synths": [
-            {
-              "kind": "sphere",
-              "recipe": {
-                "acquire": {
-                  "kind": "invent",
-                  "chapter": 8,
-                  "gilda": 13100
-                },
-                "stages": [
-                  {
-                    "weaponId": "sexy-panther",
-                    "levelTo": 5,
-                    "synths": [
-                      {
-                        "kind": "item",
-                        "name": "Scrap of Metal",
-                        "count": 27
-                      }
-                    ]
-                  }
-                ]
-              }
-            }
-          ]
-        }
-      },
-      {
-        "id": "maneater+3",
-        "title": "Maneater → Griffon Fork",
-        "notes": "",
-        "chapterId": "8",
-        "sectionId": "mr-big-shot-shadow",
-        "entries": [],
-        "build": {
-          "weaponId": "maneater",
-          "levelTo": 3,
-          "synths": [
-            {
-              "kind": "sphere",
-              "recipe": {
-                "acquire": {
-                  "kind": "invent",
-                  "chapter": 5,
-                  "gilda": 800
-                },
-                "stages": [
-                  {
-                    "weaponId": "heavy-hammer",
-                    "levelTo": 5,
-                    "synths": [
-                      {
-                        "kind": "item",
-                        "name": "Scrap of Metal",
-                        "count": 37
-                      }
-                    ]
-                  }
-                ]
-              }
-            }
-          ]
-        }
-      },
-      {
-        "id": "griffon-fork+3",
-        "title": "Griffon Fork → Island King",
-        "notes": "",
-        "chapterId": "8",
-        "sectionId": "mr-big-shot-shadow",
-        "entries": [],
-        "build": {
-          "weaponId": "griffon-fork",
+          "weaponId": "desperado",
           "levelTo": 3,
           "synths": [
             {
               "kind": "item",
-              "name": "Chill Crystal",
-              "count": 3
+              "name": "Bundle of Hay",
+              "count": 1
+            },
+            {
+              "kind": "item",
+              "name": "Glass Material",
+              "count": 1
+            },
+            {
+              "kind": "item",
+              "name": "Peridot",
+              "count": 2
+            },
+            {
+              "kind": "item",
+              "name": "Topaz",
+              "count": 1
+            }
+          ]
+        }
+      },
+      {
+        "id": "last-resort+3",
+        "title": "Last Resort",
+        "notes": "Grind about 9,033 ABS more than the story gives by this point. Farm about 70,909 gilda more than the story pays by this point.",
+        "chapterId": "8",
+        "sectionId": "the-zelmite-mine",
+        "entries": [],
+        "build": {
+          "weaponId": "last-resort",
+          "levelTo": 3,
+          "synths": [
+            {
+              "kind": "item",
+              "name": "Amethyst",
+              "count": 4
+            },
+            {
+              "kind": "item",
+              "name": "Flour",
+              "count": 1
+            },
+            {
+              "kind": "item",
+              "name": "Knight Boots",
+              "count": 2
             },
             {
               "kind": "item",
@@ -270,60 +214,7 @@
                   {
                     "weaponId": "sexy-panther",
                     "levelTo": 5,
-                    "synths": [
-                      {
-                        "kind": "item",
-                        "name": "Scrap of Metal",
-                        "count": 27
-                      }
-                    ]
-                  }
-                ]
-              }
-            }
-          ]
-        }
-      },
-      {
-        "id": "island-king+3",
-        "title": "Island King",
-        "notes": "",
-        "chapterId": "8",
-        "sectionId": "mr-big-shot-shadow",
-        "entries": [],
-        "build": {
-          "weaponId": "island-king",
-          "levelTo": 3,
-          "synths": [
-            {
-              "kind": "item",
-              "name": "Flame Crystal",
-              "count": 10
-            },
-            {
-              "kind": "item",
-              "name": "Knight Boots",
-              "count": 111
-            },
-            {
-              "kind": "sphere",
-              "recipe": {
-                "acquire": {
-                  "kind": "invent",
-                  "chapter": 8,
-                  "gilda": 13100
-                },
-                "stages": [
-                  {
-                    "weaponId": "sexy-panther",
-                    "levelTo": 5,
-                    "synths": [
-                      {
-                        "kind": "item",
-                        "name": "Scrap of Metal",
-                        "count": 27
-                      }
-                    ]
+                    "synths": []
                   }
                 ]
               }
@@ -345,6 +236,30 @@
                         "kind": "item",
                         "name": "Scrap of Metal",
                         "count": 37
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "shop",
+                  "shop": "Starlight Weapons",
+                  "price": 1800,
+                  "chapter": 6
+                },
+                "stages": [
+                  {
+                    "weaponId": "moon-armlet",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 27
                       }
                     ]
                   }
@@ -379,7 +294,7 @@
             {
               "kind": "item",
               "name": "Dark Coin",
-              "count": 2
+              "count": 1
             },
             {
               "kind": "item",

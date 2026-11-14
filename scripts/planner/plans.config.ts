@@ -1,4 +1,4 @@
-// The predefined plans: what gets generated into src/generated/plans.json at build time (see
+// The predefined plans: what gets generated into data/generated/plans/ at build time (see
 // scripts/planner/predefined.ts and integrations/plans.ts). One built-in guide is generated per
 // target × variant — this is the file to edit.
 //

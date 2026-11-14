@@ -1,10 +1,10 @@
 {
-  "name": "Sigma Bazooka — Earliest",
-  "hash": "a09378039b6213e6ddfb0e33cc29cf522155529ba3b96bf57bff6d79ac2e72db",
+  "name": "Sigma Bazooka — Least ABS",
+  "hash": "e9efc9ab0c93b0ff278d2a2dc6b54ecaa19bd443ae244566a5eec018cb730d44",
   "guide": {
-    "id": "sigma-bazooka-earliest",
-    "title": "Sigma Bazooka — Earliest",
-    "description": "Earliest · maxed stats · 8 abilities · optimal start (Twin Buster) · done after The Zelmite Mine (chapter 8) · no ABS grinding · 61,399 gilda to farm",
+    "id": "sigma-bazooka-max-abs",
+    "title": "Sigma Bazooka — Least ABS",
+    "description": "Least ABS · maxed stats · 8 abilities · optimal start (Twin Buster) · done after Ultimate Snake (chapter 8) · no ABS grinding",
     "kind": "builtin",
     "build": {
       "weaponId": "twin-buster",
@@ -71,9 +71,9 @@
       {
         "id": "sigma-bazooka+3",
         "title": "Sigma Bazooka",
-        "notes": "Farm about 61,399 gilda more than the story pays by this point.",
+        "notes": "",
         "chapterId": "8",
-        "sectionId": "the-zelmite-mine",
+        "sectionId": "ultimate-snake",
         "entries": [],
         "build": {
           "weaponId": "sigma-bazooka",

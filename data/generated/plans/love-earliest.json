@@ -1,24 +1,24 @@
 {
-  "name": "Island King — Least ABS",
-  "hash": "b8d3f3d8c9ecea41f2769784d444e38699163c498d87a5d40e7fb3ba6dfc4238",
+  "name": "Love — Earliest",
+  "hash": "a24c213c64fb34b140e69c114905687595de257615c3d6d5cc6ac64089b893b0",
   "guide": {
-    "id": "island-king-max-abs",
-    "title": "Island King — Least ABS",
-    "description": "Least ABS · maxed stats · 8 abilities · optimal start (Gladius) · done after Mr. Big Shot Shadow (chapter 8) · no ABS grinding",
+    "id": "love-earliest",
+    "title": "Love — Earliest",
+    "description": "Earliest · maxed stats · 8 abilities · optimal start (Magic Brassard) · done after Mr. Big Shot Shadow (chapter 8) · no ABS grinding",
     "kind": "builtin",
     "build": {
-      "weaponId": "gladius",
+      "weaponId": "magic-brassard",
       "level": 0,
       "abs": 0,
       "stats": {
-        "at": 20,
-        "fl": 0,
+        "at": 14,
+        "fl": 10,
         "ch": 0,
         "li": 0,
-        "cy": 10,
+        "cy": 0,
         "sm": 0,
         "ex": 0,
-        "be": 5,
+        "be": 0,
         "sc": 0
       },
       "du": 0,
@@ -31,112 +31,64 @@
     },
     "steps": [
       {
-        "id": "gladius+13",
-        "title": "Gladius → Cliff Knife",
+        "id": "magic-brassard+10",
+        "title": "Magic Brassard → Bandit Brassard",
         "notes": "",
         "chapterId": "8",
         "sectionId": "the-zelmite-mine",
         "entries": [],
         "build": {
-          "weaponId": "gladius",
-          "levelTo": 13,
+          "weaponId": "magic-brassard",
+          "levelTo": 10,
           "synths": [
             {
               "kind": "item",
-              "name": "Emerald",
-              "count": 2
+              "name": "Sapphire",
+              "count": 1
             },
             {
               "kind": "item",
-              "name": "Hunter Crystal",
-              "count": 2
-            },
-            {
-              "kind": "item",
-              "name": "Topaz",
+              "name": "Wind Crystal",
               "count": 1
             }
           ]
         }
       },
       {
-        "id": "cliff-knife+5",
-        "title": "Cliff Knife → Chopper",
+        "id": "bandit-brassard+5",
+        "title": "Bandit Brassard → Thorn Armlet",
         "notes": "",
         "chapterId": "8",
         "sectionId": "the-zelmite-mine",
         "entries": [],
         "build": {
-          "weaponId": "cliff-knife",
+          "weaponId": "bandit-brassard",
           "levelTo": 5,
           "synths": [
             {
               "kind": "item",
-              "name": "Hunter Crystal",
-              "count": 2
-            },
-            {
-              "kind": "item",
               "name": "Topaz",
-              "count": 1
+              "count": 2
             }
           ]
         }
       },
       {
-        "id": "chopper+5",
-        "title": "Chopper → Choora",
+        "id": "thorn-armlet+5",
+        "title": "Thorn Armlet → Pocklekul",
         "notes": "",
         "chapterId": "8",
         "sectionId": "the-zelmite-mine",
         "entries": [],
         "build": {
-          "weaponId": "chopper",
+          "weaponId": "thorn-armlet",
           "levelTo": 5,
           "synths": [
             {
               "kind": "item",
-              "name": "Emerald",
-              "count": 1
+              "name": "Wind Crystal",
+              "count": 4
             },
-            {
-              "kind": "sphere",
-              "recipe": {
-                "acquire": {
-                  "kind": "shop",
-                  "shop": "Gerald's Guns",
-                  "price": 900,
-                  "chapter": 5
-                },
-                "stages": [
-                  {
-                    "weaponId": "wild-cat",
-                    "levelTo": 5,
-                    "synths": [
-                      {
-                        "kind": "item",
-                        "name": "Scrap of Metal",
-                        "count": 27
-                      }
-                    ]
-                  }
-                ]
-              }
-            }
-          ]
-        }
-      },
-      {
-        "id": "choora+3",
-        "title": "Choora → Small Sword",
-        "notes": "",
-        "chapterId": "8",
-        "sectionId": "the-zelmite-mine",
-        "entries": [],
-        "build": {
-          "weaponId": "choora",
-          "levelTo": 3,
-          "synths": [
             {
               "kind": "sphere",
               "recipe": {
@@ -164,16 +116,36 @@
         }
       },
       {
-        "id": "small-sword+2",
-        "title": "Small Sword → Maneater",
+        "id": "pocklekul+3",
+        "title": "Pocklekul → Athena's Armlet",
         "notes": "",
         "chapterId": "8",
         "sectionId": "the-zelmite-mine",
         "entries": [],
         "build": {
-          "weaponId": "small-sword",
-          "levelTo": 2,
+          "weaponId": "pocklekul",
+          "levelTo": 3,
           "synths": [
+            {
+              "kind": "item",
+              "name": "Emerald",
+              "count": 3
+            },
+            {
+              "kind": "item",
+              "name": "Flame Crystal",
+              "count": 3
+            },
+            {
+              "kind": "item",
+              "name": "Glass Material",
+              "count": 1
+            },
+            {
+              "kind": "item",
+              "name": "Hunter Crystal",
+              "count": 1
+            },
             {
               "kind": "sphere",
               "recipe": {
@@ -201,62 +173,44 @@
         }
       },
       {
-        "id": "maneater+3",
-        "title": "Maneater → Griffon Fork",
+        "id": "athenas-armlet+3",
+        "title": "Athena's Armlet → Sun Armlet",
         "notes": "",
         "chapterId": "8",
-        "sectionId": "mr-big-shot-shadow",
+        "sectionId": "the-zelmite-mine",
         "entries": [],
         "build": {
-          "weaponId": "maneater",
+          "weaponId": "athenas-armlet",
           "levelTo": 3,
           "synths": [
             {
-              "kind": "sphere",
-              "recipe": {
-                "acquire": {
-                  "kind": "invent",
-                  "chapter": 5,
-                  "gilda": 800
-                },
-                "stages": [
-                  {
-                    "weaponId": "heavy-hammer",
-                    "levelTo": 5,
-                    "synths": [
-                      {
-                        "kind": "item",
-                        "name": "Scrap of Metal",
-                        "count": 37
-                      }
-                    ]
-                  }
-                ]
-              }
+              "kind": "item",
+              "name": "Glass Material",
+              "count": 1
+            },
+            {
+              "kind": "item",
+              "name": "Gunpowder",
+              "count": 1
             }
           ]
         }
       },
       {
-        "id": "griffon-fork+3",
-        "title": "Griffon Fork → Island King",
+        "id": "sun-armlet+3",
+        "title": "Sun Armlet → Angel Shooter",
         "notes": "",
         "chapterId": "8",
-        "sectionId": "mr-big-shot-shadow",
+        "sectionId": "the-zelmite-mine",
         "entries": [],
         "build": {
-          "weaponId": "griffon-fork",
+          "weaponId": "sun-armlet",
           "levelTo": 3,
           "synths": [
             {
               "kind": "item",
               "name": "Chill Crystal",
-              "count": 3
-            },
-            {
-              "kind": "item",
-              "name": "Peridot",
-              "count": 2
+              "count": 9
             },
             {
               "kind": "sphere",
@@ -285,25 +239,80 @@
         }
       },
       {
-        "id": "island-king+3",
-        "title": "Island King",
+        "id": "angel-shooter+3",
+        "title": "Angel Shooter → Love",
         "notes": "",
         "chapterId": "8",
         "sectionId": "mr-big-shot-shadow",
         "entries": [],
         "build": {
-          "weaponId": "island-king",
+          "weaponId": "angel-shooter",
+          "levelTo": 3,
+          "synths": [
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "invent",
+                  "chapter": 8,
+                  "gilda": 13100
+                },
+                "stages": [
+                  {
+                    "weaponId": "sexy-panther",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 27
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "invent",
+                  "chapter": 5,
+                  "gilda": 800
+                },
+                "stages": [
+                  {
+                    "weaponId": "heavy-hammer",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 37
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "love+3",
+        "title": "Love",
+        "notes": "",
+        "chapterId": "8",
+        "sectionId": "mr-big-shot-shadow",
+        "entries": [],
+        "build": {
+          "weaponId": "love",
           "levelTo": 3,
           "synths": [
             {
               "kind": "item",
-              "name": "Flame Crystal",
-              "count": 10
-            },
-            {
-              "kind": "item",
               "name": "Knight Boots",
-              "count": 111
+              "count": 101
             },
             {
               "kind": "sphere",
@@ -363,23 +372,13 @@
             },
             {
               "kind": "item",
-              "name": "Experience Coin",
-              "count": 1
-            },
-            {
-              "kind": "item",
-              "name": "Bandit Coin",
-              "count": 1
-            },
-            {
-              "kind": "item",
               "name": "Wealth Coin",
               "count": 1
             },
             {
               "kind": "item",
               "name": "Dark Coin",
-              "count": 2
+              "count": 1
             },
             {
               "kind": "item",
@@ -389,7 +388,7 @@
             {
               "kind": "item",
               "name": "Absorption Coin",
-              "count": 1
+              "count": 2
             }
           ]
         }

@@ -1,7 +1,7 @@
 // Built-in guides: the generated main walkthrough plus the weapon build guides — all of the
 // latter are predefined plans, generated at build time from scripts/planner/plans.config.ts
-// into src/generated/plans.json (see scripts/planner/predefined.ts and integrations/plans.ts).
-import plansJson from "@/generated/plans.json";
+// into src/data/plans.json (see scripts/planner/predefined.ts and integrations/plans.ts).
+import plansJson from "@/data/plans.json";
 import { z } from "zod";
 import { mainWalkthrough } from "./main";
 import { guide, type Guide } from "./types";

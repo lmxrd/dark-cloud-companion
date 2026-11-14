@@ -1,8 +1,8 @@
 // Generates the predefined plans (built-in guides), configured in scripts/planner/plans.config.ts.
-// Each plan is committed as drizzle/derived/plans/<plan id>.json ({ name, hash, guide }); its hash
+// Each plan is committed as data/generated/plans/<plan id>.json ({ name, hash, guide }); its hash
 // covers the game data, the planning code and the plan's settings. Only plans whose file is missing
 // or whose hash no longer matches are solved, spread over several processes, and files of plans
-// that are no longer configured are deleted. The app reads src/generated/plans.json (git-ignored),
+// that are no longer configured are deleted. The app reads src/data/plans.json (git-ignored),
 // assembled from these files (see integrations/plans.ts).
 // By hand:
 //   pnpm plans          regenerate only when stale
@@ -109,7 +109,7 @@ async function main() {
   mkdirSync(dirname(PLANS_OUT), { recursive: true });
   writeFileSync(PLANS_OUT, json);
   console.log(
-    `predefined plans: ${guides.length} guides written to src/generated/plans.json in ${((Date.now() - began) / 1000).toFixed(1)}s` +
+    `predefined plans: ${guides.length} guides written to src/data/plans.json in ${((Date.now() - began) / 1000).toFixed(1)}s` +
       (missing.length < specs.length ? ` (${specs.length - missing.length} unchanged)` : ""),
   );
 }

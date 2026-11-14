@@ -1,123 +1,93 @@
 {
-  "name": "Falcon — Earliest",
-  "hash": "6d1bcf206dc191ae50262fe53d8e8c464f076a47aa80fd2f49546764545e3145",
+  "name": "Sigma Bazooka — Earliest",
+  "hash": "8e540c77a32650fd6f8bb8da3113349d89ce149a259eec594b1f4c55fb7db8a5",
   "guide": {
-    "id": "falcon-earliest",
-    "title": "Falcon — Earliest",
-    "description": "Earliest · maxed stats · 8 abilities · optimal start (Turkey) · done after The Zelmite Mine (chapter 8) · no ABS grinding · 65,139 gilda to farm",
+    "id": "sigma-bazooka-earliest",
+    "title": "Sigma Bazooka — Earliest",
+    "description": "Earliest · maxed stats · 8 abilities · optimal start (Twin Buster) · done after The Zelmite Mine (chapter 8) · no ABS grinding · 61,399 gilda to farm",
     "kind": "builtin",
     "build": {
-      "weaponId": "turkey",
+      "weaponId": "twin-buster",
       "level": 0,
       "abs": 0,
       "stats": {
-        "at": 25,
-        "fl": 10,
+        "at": 101,
+        "fl": 85,
         "ch": 0,
         "li": 0,
-        "cy": 10,
-        "sm": 0,
+        "cy": 85,
+        "sm": 95,
         "ex": 0,
         "be": 0,
         "sc": 0
       },
       "du": 0,
-      "sp": 1,
+      "sp": 2,
       "abilities": [],
       "spBonus": 1,
       "acquire": {
-        "kind": "have"
+        "kind": "invent",
+        "chapter": 7,
+        "gilda": 2500
       }
     },
     "steps": [
       {
-        "id": "turkey+4",
-        "title": "Turkey → Flamingo",
+        "id": "twin-buster+4",
+        "title": "Twin Buster → Sigma Bazooka",
         "notes": "",
         "chapterId": "8",
         "sectionId": "the-zelmite-mine",
         "entries": [],
         "build": {
-          "weaponId": "turkey",
+          "weaponId": "twin-buster",
           "levelTo": 4,
           "synths": [
             {
               "kind": "item",
-              "name": "Topaz",
+              "name": "Turquoise",
               "count": 3
             },
             {
-              "kind": "item",
-              "name": "Turquoise",
-              "count": 1
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "invent",
+                  "chapter": 8,
+                  "gilda": 13100
+                },
+                "stages": [
+                  {
+                    "weaponId": "sexy-panther",
+                    "levelTo": 5,
+                    "synths": []
+                  }
+                ]
+              }
             }
           ]
         }
       },
       {
-        "id": "flamingo+3",
-        "title": "Flamingo → Falcon",
-        "notes": "",
+        "id": "sigma-bazooka+3",
+        "title": "Sigma Bazooka",
+        "notes": "Farm about 61,399 gilda more than the story pays by this point.",
         "chapterId": "8",
         "sectionId": "the-zelmite-mine",
         "entries": [],
         "build": {
-          "weaponId": "flamingo",
+          "weaponId": "sigma-bazooka",
           "levelTo": 3,
           "synths": [
             {
               "kind": "item",
-              "name": "Emerald",
+              "name": "Peridot",
               "count": 1
-            },
-            {
-              "kind": "item",
-              "name": "Lightning Crystal",
-              "count": 1
-            },
-            {
-              "kind": "item",
-              "name": "Ruby",
-              "count": 1
-            },
-            {
-              "kind": "item",
-              "name": "Sapphire",
-              "count": 1
-            },
-            {
-              "kind": "item",
-              "name": "Scrap of Metal",
-              "count": 3
             },
             {
               "kind": "item",
               "name": "Turquoise",
-              "count": 2
-            }
-          ]
-        }
-      },
-      {
-        "id": "falcon+2",
-        "title": "Falcon",
-        "notes": "Farm about 65,139 gilda more than the story pays by this point.",
-        "chapterId": "8",
-        "sectionId": "the-zelmite-mine",
-        "entries": [],
-        "build": {
-          "weaponId": "falcon",
-          "levelTo": 2,
-          "synths": [
-            {
-              "kind": "item",
-              "name": "Emerald",
-              "count": 2
-            },
-            {
-              "kind": "item",
-              "name": "Pearl",
-              "count": 1
+              "count": 6
             },
             {
               "kind": "sphere",
@@ -136,6 +106,52 @@
                         "kind": "item",
                         "name": "Scrap of Metal",
                         "count": 27
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "invent",
+                  "chapter": 5,
+                  "gilda": 800
+                },
+                "stages": [
+                  {
+                    "weaponId": "heavy-hammer",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 37
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "invent",
+                  "chapter": 5,
+                  "gilda": 800
+                },
+                "stages": [
+                  {
+                    "weaponId": "heavy-hammer",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 37
                       }
                     ]
                   }
@@ -193,7 +209,7 @@
             {
               "kind": "item",
               "name": "Dark Coin",
-              "count": 2
+              "count": 1
             },
             {
               "kind": "item",

@@ -1,93 +1,123 @@
 {
-  "name": "Sigma Bazooka — Least ABS",
-  "hash": "9fdde7822ff615af60c3c41b70e68008833bf3eceb0e6855bbf07e35db7b4f11",
+  "name": "Falcon — Least ABS",
+  "hash": "f809b225d0f9be2c3aa01755b627388f332d69dfba8b68a15b4df238b3a5f1b5",
   "guide": {
-    "id": "sigma-bazooka-max-abs",
-    "title": "Sigma Bazooka — Least ABS",
-    "description": "Least ABS · maxed stats · 8 abilities · optimal start (Twin Buster) · done after Ultimate Snake (chapter 8) · no ABS grinding",
+    "id": "falcon-max-abs",
+    "title": "Falcon — Least ABS",
+    "description": "Least ABS · maxed stats · 8 abilities · optimal start (Turkey) · done after Omen (chapter 8) · no ABS grinding",
     "kind": "builtin",
     "build": {
-      "weaponId": "twin-buster",
+      "weaponId": "turkey",
       "level": 0,
       "abs": 0,
       "stats": {
-        "at": 101,
-        "fl": 85,
+        "at": 25,
+        "fl": 10,
         "ch": 0,
         "li": 0,
-        "cy": 85,
-        "sm": 95,
+        "cy": 10,
+        "sm": 0,
         "ex": 0,
         "be": 0,
         "sc": 0
       },
       "du": 0,
-      "sp": 2,
+      "sp": 1,
       "abilities": [],
       "spBonus": 1,
       "acquire": {
-        "kind": "invent",
-        "chapter": 7,
-        "gilda": 2500
+        "kind": "have"
       }
     },
     "steps": [
       {
-        "id": "twin-buster+4",
-        "title": "Twin Buster → Sigma Bazooka",
+        "id": "turkey+4",
+        "title": "Turkey → Flamingo",
         "notes": "",
         "chapterId": "8",
         "sectionId": "the-zelmite-mine",
         "entries": [],
         "build": {
-          "weaponId": "twin-buster",
+          "weaponId": "turkey",
           "levelTo": 4,
           "synths": [
             {
               "kind": "item",
-              "name": "Turquoise",
+              "name": "Topaz",
               "count": 3
             },
             {
-              "kind": "sphere",
-              "recipe": {
-                "acquire": {
-                  "kind": "invent",
-                  "chapter": 8,
-                  "gilda": 13100
-                },
-                "stages": [
-                  {
-                    "weaponId": "sexy-panther",
-                    "levelTo": 5,
-                    "synths": []
-                  }
-                ]
-              }
+              "kind": "item",
+              "name": "Turquoise",
+              "count": 1
             }
           ]
         }
       },
       {
-        "id": "sigma-bazooka+3",
-        "title": "Sigma Bazooka",
+        "id": "flamingo+3",
+        "title": "Flamingo → Falcon",
         "notes": "",
         "chapterId": "8",
-        "sectionId": "ultimate-snake",
+        "sectionId": "the-zelmite-mine",
         "entries": [],
         "build": {
-          "weaponId": "sigma-bazooka",
+          "weaponId": "flamingo",
           "levelTo": 3,
           "synths": [
             {
               "kind": "item",
-              "name": "Peridot",
+              "name": "Emerald",
               "count": 1
             },
             {
               "kind": "item",
+              "name": "Lightning Crystal",
+              "count": 1
+            },
+            {
+              "kind": "item",
+              "name": "Ruby",
+              "count": 1
+            },
+            {
+              "kind": "item",
+              "name": "Sapphire",
+              "count": 1
+            },
+            {
+              "kind": "item",
+              "name": "Scrap of Metal",
+              "count": 3
+            },
+            {
+              "kind": "item",
               "name": "Turquoise",
-              "count": 6
+              "count": 2
+            }
+          ]
+        }
+      },
+      {
+        "id": "falcon+2",
+        "title": "Falcon",
+        "notes": "",
+        "chapterId": "8",
+        "sectionId": "omen",
+        "entries": [],
+        "build": {
+          "weaponId": "falcon",
+          "levelTo": 2,
+          "synths": [
+            {
+              "kind": "item",
+              "name": "Emerald",
+              "count": 2
+            },
+            {
+              "kind": "item",
+              "name": "Pearl",
+              "count": 1
             },
             {
               "kind": "sphere",
@@ -106,52 +136,6 @@
                         "kind": "item",
                         "name": "Scrap of Metal",
                         "count": 27
-                      }
-                    ]
-                  }
-                ]
-              }
-            },
-            {
-              "kind": "sphere",
-              "recipe": {
-                "acquire": {
-                  "kind": "invent",
-                  "chapter": 5,
-                  "gilda": 800
-                },
-                "stages": [
-                  {
-                    "weaponId": "heavy-hammer",
-                    "levelTo": 5,
-                    "synths": [
-                      {
-                        "kind": "item",
-                        "name": "Scrap of Metal",
-                        "count": 37
-                      }
-                    ]
-                  }
-                ]
-              }
-            },
-            {
-              "kind": "sphere",
-              "recipe": {
-                "acquire": {
-                  "kind": "invent",
-                  "chapter": 5,
-                  "gilda": 800
-                },
-                "stages": [
-                  {
-                    "weaponId": "heavy-hammer",
-                    "levelTo": 5,
-                    "synths": [
-                      {
-                        "kind": "item",
-                        "name": "Scrap of Metal",
-                        "count": 37
                       }
                     ]
                   }
@@ -209,7 +193,7 @@
             {
               "kind": "item",
               "name": "Dark Coin",
-              "count": 1
+              "count": 2
             },
             {
               "kind": "item",
