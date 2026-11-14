@@ -380,12 +380,10 @@ function GoalCard({
 function LineRow({
   line,
   shop,
-  group,
   goalName,
 }: {
   line: ShoppingLine;
   shop?: string;
-  group: "stops" | "az";
   goalName: (id: string) => string;
 }) {
   const t = useTranslations();
@@ -545,9 +543,7 @@ export function ShoppingPage() {
   };
 
   const rows = (lines: ShoppingLine[], shop?: string) =>
-    lines.map((l) => (
-      <LineRow key={l.name} line={l} shop={shop} group={shopping.group} goalName={goalName} />
-    ));
+    lines.map((l) => <LineRow key={l.name} line={l} shop={shop} goalName={goalName} />);
 
   let body: React.ReactNode;
   if (!list.lines.length)

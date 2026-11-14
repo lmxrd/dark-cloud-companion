@@ -5,6 +5,7 @@ const pages = [
   "/",
   "/guides",
   "/planner",
+  "/shopping",
   "/weapons",
   "/weapons/poison-wrench",
   "/items",
@@ -48,4 +49,20 @@ test.describe("phone layout", () => {
     await page.getByRole("link", { name: "Items" }).click();
     await expect(page.getByRole("heading", { name: "Items", level: 1 })).toBeVisible();
   });
+});
+
+test("shopping list switches between “To buy” and “Making” on a phone", async ({ page }, info) => {
+  test.skip(info.project.name !== "phone", "phone layout only");
+  await go(page, "/shopping");
+  await page.getByRole("button", { name: "Add", exact: true }).click();
+  await page.getByLabel("Search items, inventions, Georama parts, builds…").fill("aquarium");
+  await page.getByRole("button", { name: "Add Aquarium" }).click();
+  await page.getByRole("tab", { name: /To buy/ }).click();
+  await expect(page.getByRole("checkbox", { name: "Have all Water Element" })).toBeVisible();
+  await expect(page.getByRole("list", { name: "Making" })).toBeHidden();
+  const { scroll, inner } = await page.evaluate(() => ({
+    scroll: document.documentElement.scrollWidth,
+    inner: window.innerWidth,
+  }));
+  expect(scroll).toBeLessThanOrEqual(inner);
 });
