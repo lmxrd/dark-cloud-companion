@@ -76,6 +76,8 @@ export interface ProgressionOptions {
   finalLevelCap: number;
   /** The main weapon must be obtainable by this chapter, so it is used through the story. */
   startBy: number;
+  /** See `Progression.earlyStatBonus` (0: off). */
+  earlyStatBonus?: number;
 }
 
 /** ABS and gilda paid out by clearing every section once, by the end of each chapter (index 1…8). */
@@ -566,6 +568,7 @@ export async function planPath(
       delayCost: prog.delayCost,
       itemChapter: items.map((it) => it.fromChapter ?? 1),
       chapterWindow: 2,
+      ...(prog.earlyStatBonus ? { earlyStatBonus: prog.earlyStatBonus } : {}),
     };
     return {
       chain,

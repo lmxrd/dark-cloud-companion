@@ -29,6 +29,8 @@ const variantSchema = z.object({
   levelCap: z.number().optional(),
   finalLevelCap: z.number().optional(),
   startBy: z.number().optional(),
+  /** Reward per stat point per stage for stats gained earlier (default 0.5; 0: off). */
+  earlyStatBonus: z.number().optional(),
   /** A fixed build-up route (first weapon … target) instead of searching for one. */
   route: z.array(z.string()).optional(),
   /** Also offer built-up spheres with their earlier weapons this many levels higher (default 0). */
@@ -87,6 +89,7 @@ export interface PlanSpec {
     levelCap: number;
     finalLevelCap: number;
     startBy: number;
+    earlyStatBonus: number;
   };
   /** A fixed build-up route (first weapon … target). */
   route?: string[];
@@ -130,6 +133,7 @@ export function expandPlans(config: PlansConfig): PlanSpec[] {
             levelCap: v.levelCap ?? 10,
             finalLevelCap: v.finalLevelCap ?? 15,
             startBy: v.startBy ?? 2,
+            earlyStatBonus: v.earlyStatBonus ?? 0.5,
           },
           ...(v.route ? { route: v.route } : {}),
           ...(v.extraAuxLevels ? { extraAuxLevels: v.extraAuxLevels } : {}),

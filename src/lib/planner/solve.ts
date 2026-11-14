@@ -101,6 +101,12 @@ export interface Progression {
   itemChapter: number[];
   /** A stage may be placed at most this many chapters after its unlock (keeps the search small). */
   chapterWindow?: number;
+  /**
+   * Reward (in objective units) per stat point the weapon has at the end of each stage: stats gained
+   * earlier count in more stages, so items go into the earliest spheres that can hold them and the
+   * weapon is stronger sooner. Keep it well below what a stat point costs, or it buys extra spheres.
+   */
+  earlyStatBonus?: number;
 }
 
 export interface SolveResult {
@@ -336,6 +342,12 @@ export function buildModel(input: SolveInput) {
   }
 
   const p = input.progression;
+  if (p?.earlyStatBonus)
+    for (let j = 0; j < nStages; j++)
+      for (const k of STAT_KEYS) {
+        const v = `vE${j}_${k}`;
+        model.objective.set(v, (model.objective.get(v) ?? 0) - SCALE * p.earlyStatBonus);
+      }
   if (p) {
     const chapters = [1, 2, 3, 4, 5, 6, 7, 8];
     /** A generous upper bound on how many of one item or sphere a stage can take. */
