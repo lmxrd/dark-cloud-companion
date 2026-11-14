@@ -193,9 +193,14 @@ export function buildGameData(db: DatabaseSync) {
     monsterClasses: namesOf(db, "monster_classes"),
   };
 
-  const sections = rowsOf(
-    db,
-    "SELECT * FROM sections ORDER BY chapter_number, position",
+  const firstPrizes = new Map(
+    rowsOf(db, "SELECT * FROM section_spheda_prizes WHERE tier = 'first'").map((r) => [
+      r.sectionId,
+      productOnly(r),
+    ]),
+  );
+  const sections = rowsOf(db, "SELECT * FROM sections ORDER BY chapter_number, position").map(
+    (s) => (firstPrizes.has(s.id) ? { ...s, sphedaPrize: firstPrizes.get(s.id) } : s),
   ) as unknown as Section[];
   const core: Core = {
     chapters: rowsOf(db, "SELECT * FROM chapters ORDER BY number") as unknown as Chapter[],
@@ -249,7 +254,8 @@ export function buildGameData(db: DatabaseSync) {
   const floorEnemies = groupBy(
     rowsOf(
       db,
-      `SELECT se.*, e.abs, e.gilda FROM section_enemies se JOIN enemies e ON e.id = se.enemy_id
+      `SELECT se.*, e.abs, e.gilda, NULLIF(e.type, 'normal') AS type FROM section_enemies se
+       JOIN enemies e ON e.id = se.enemy_id
        ORDER BY se.section_id, se.star_area, se.enemy_id`,
     ),
     "sectionId",
@@ -319,6 +325,17 @@ export function buildGameData(db: DatabaseSync) {
       sources: src(`weapon:${w.id}`),
     })) as never,
     abilities: rowsOf(db, "SELECT * FROM abilities ORDER BY id") as never,
+    killEnemyChapters: Object.fromEntries(
+      (
+        db
+          .prepare(
+            `SELECT k.enemy_id AS id, min(s.chapter_number) AS chapter FROM weapon_kill_requirements k
+             JOIN section_enemies se ON se.enemy_id = k.enemy_id JOIN sections s ON s.id = se.section_id
+             GROUP BY k.enemy_id`,
+          )
+          .all() as { id: string; chapter: number }[]
+      ).map((r) => [r.id, r.chapter]),
+    ),
   };
 
   const effects = groupBy(rowsOf(db, "SELECT * FROM item_effects ORDER BY item_id, id"), "itemId");

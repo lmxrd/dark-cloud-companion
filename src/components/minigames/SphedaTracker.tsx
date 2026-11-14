@@ -2,60 +2,59 @@ import { useChecks } from "@/lib/useAppStore";
 import { cn } from "cn";
 import { withBase } from "@/lib/base";
 import { CheckRow } from "@/components/chapter/CheckRow";
-import { weaponData } from "@/lib/planner/sources";
+import { weapons } from "@/lib/gamedata/weapons";
+import { tick } from "@/lib/gamedata/ticks";
 import { useTranslations } from "@/i18n";
 import { chapters, sectionById } from "@/lib/data";
-import { clubCheckId, sphedaMedals } from "@/lib/reference";
+import { sphedaMedals } from "@/lib/reference";
 import { setChecked } from "@/lib/store";
 import { TrackerLayout, type TrackerGroup } from "./TrackerLayout";
 
 export function SphedaTracker() {
   const t = useTranslations();
   const checks = useChecks();
-  const clubs = weaponData.weapons
+  const clubs = weapons.weapons
     .filter((w) => w.type === "club")
     .sort((a, b) => a.name.localeCompare(b.name));
-  const owned = clubs.filter((c) => checks[clubCheckId(c.id)]).length;
+  const owned = clubs.filter((c) => checks[tick.weapon(c.id)]).length;
   const done = sphedaMedals.filter((m) => checks[m.id]).length;
 
-  const groups: TrackerGroup[] = chapters
-    .filter((c) => c.phase === "main")
-    .flatMap((c) => {
-      const medals = sphedaMedals.filter((m) => sectionById.get(m.sectionId)?.chapterId === c.id);
-      if (!medals.length) return [];
-      const title = `${c.number}. ${c.title}`;
-      return [
-        {
-          id: c.id,
-          label: t("guides.chapterShort", { n: c.number }),
-          title,
-          count: {
-            done: medals.filter((m) => checks[m.id]).length,
-            total: medals.length,
-          },
-          children: (
-            <>
-              {medals.map((m) => (
-                <CheckRow
-                  key={m.id}
-                  dense
-                  checked={!!checks[m.id]}
-                  onChange={(v) => setChecked(m.id, v)}
-                  label={<span className="font-semibold">{m.value}</span>}
-                  detail={sectionById.get(m.sectionId)?.title}
-                />
-              ))}
-              <a
-                className="text-muted-foreground block px-2 py-1.5 text-xs underline"
-                href={withBase(`/chapters/${c.id}`)}
-              >
-                {t("spheda.openChapter")}
-              </a>
-            </>
-          ),
+  const groups: TrackerGroup[] = chapters.flatMap((c) => {
+    const medals = sphedaMedals.filter((m) => sectionById.get(m.sectionId)?.chapterId === c.id);
+    if (!medals.length) return [];
+    const title = `${c.number}. ${c.title}`;
+    return [
+      {
+        id: c.id,
+        label: t("guides.chapterShort", { n: c.number }),
+        title,
+        count: {
+          done: medals.filter((m) => checks[m.id]).length,
+          total: medals.length,
         },
-      ];
-    });
+        children: (
+          <>
+            {medals.map((m) => (
+              <CheckRow
+                key={m.id}
+                dense
+                checked={!!checks[m.id]}
+                onChange={(v) => setChecked(m.id, v)}
+                label={<span className="font-semibold">{m.value}</span>}
+                detail={sectionById.get(m.sectionId)?.title}
+              />
+            ))}
+            <a
+              className="text-muted-foreground block px-2 py-1.5 text-xs underline"
+              href={withBase(`/chapters/${c.id}`)}
+            >
+              {t("spheda.openChapter")}
+            </a>
+          </>
+        ),
+      },
+    ];
+  });
   // Open the first chapter that still has prizes to win.
   const firstOpen = groups.find((g) => g.count.done < g.count.total);
   if (firstOpen) firstOpen.defaultOpen = true;
@@ -74,7 +73,7 @@ export function SphedaTracker() {
           </h2>
           <ul className="flex flex-wrap gap-1.5">
             {clubs.map((c) => {
-              const have = !!checks[clubCheckId(c.id)];
+              const have = !!checks[tick.weapon(c.id)];
               return (
                 <li key={c.id} className="flex items-stretch">
                   <label
@@ -89,7 +88,7 @@ export function SphedaTracker() {
                       type="checkbox"
                       className="absolute inset-0 cursor-pointer appearance-none rounded-[inherit] outline-none"
                       checked={have}
-                      onChange={(e) => setChecked(clubCheckId(c.id), e.target.checked)}
+                      onChange={(e) => setChecked(tick.weapon(c.id), e.target.checked)}
                       aria-label={t("spheda.own", { club: c.name })}
                     />
                     {have ? "✓ " : ""}

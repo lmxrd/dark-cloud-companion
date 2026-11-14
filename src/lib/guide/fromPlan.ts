@@ -6,7 +6,7 @@ import type { Acquire } from "@/lib/planner/types";
 import type { WeaponState } from "@/lib/weapons/mechanics";
 import { newId, type BuildStart, type Guide, type Step } from "./types";
 
-const chapterIdOf = (n: number) => chapters.find((c) => c.phase === "main" && c.number === n)?.id;
+const chapterIdOf = (n: number) => chapters.find((c) => c.number === n)?.id;
 
 export function stateToBuildStart(s: WeaponState, spBonus: number, acquire?: Acquire): BuildStart {
   return {

@@ -49,7 +49,8 @@ export interface Names {
 // ─── core.json (always loaded) ───────────────────────────────────────────────────────────────────
 
 export type Chapter = Select<typeof db.chapters>;
-export type Section = Select<typeof db.sections>;
+/** A section; `sphedaPrize` is its first-win Spheda prize (the medal prize). */
+export type Section = Select<typeof db.sections> & { sphedaPrize?: Reward };
 export type Dungeon = Select<typeof db.dungeons>;
 export type Town = Select<typeof db.towns>;
 
@@ -92,7 +93,10 @@ export interface Collectables {
 
 // ─── chapter/<n>.json: per-floor detail, loaded with the chapter ─────────────────────────────────
 
-export type FloorEnemy = Omit<Select<typeof db.sectionEnemies>, "sectionId">;
+/** An enemy on a floor; `type` is set for bosses, sub-bosses and mimics. */
+export type FloorEnemy = Omit<Select<typeof db.sectionEnemies>, "sectionId"> & {
+  type?: Exclude<(typeof db.ENEMY_TYPES)[number], "normal">;
+};
 export interface FloorDetail {
   enemies: FloorEnemy[];
   /** Georama materials found on the floor. */
@@ -166,6 +170,8 @@ export type Ability = Select<typeof db.abilities>;
 export interface Weapons {
   weapons: Weapon[];
   abilities: Ability[];
+  /** Derived: the first chapter each kill-requirement enemy appears in. */
+  killEnemyChapters: Record<string, number>;
 }
 
 export type Item = Select<typeof db.items> & {

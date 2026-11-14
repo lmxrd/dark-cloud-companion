@@ -41,7 +41,7 @@ export function mainNav(t: Translate): NavItem[] {
   ];
 }
 
-/** "/" and the dashboard's other views (`/overview`, `/chapters/c3`, …). */
+/** "/" and the dashboard's other views (`/overview`, `/chapters/3`, …). */
 const isDashboardPath = (pathname: string) =>
   pathname === "/" ||
   (DASHBOARD_SEGMENTS as readonly string[]).includes(pathname.split("/")[1] ?? "");

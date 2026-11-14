@@ -26,7 +26,7 @@ const isChapter = (id: string) => chapterById.has(id);
 function DashboardInner({ path }: { path: string }) {
   const t = useTranslations();
   const { profile, checks, guides } = useActiveGuides();
-  // The view and the chapter are the path (`/overview`, `/chapters/c3`), the search is `?q=`.
+  // The view and the chapter are the path (`/overview`, `/chapters/3`), the search is `?q=`.
   const pathname = stripBase(usePathname(withBase(path)));
   const legacyChapter = useQueryParam("chapter");
   const route = parseDashboardPath(

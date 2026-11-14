@@ -90,7 +90,7 @@ test.describe("guides, planner and editor", () => {
     ]);
     const path = await download.path();
     const file = JSON.parse(readFileSync(path, "utf8"));
-    expect(file).toMatchObject({ app: "dark-chronicles-companion", kind: "content", version: 2 });
+    expect(file).toMatchObject({ app: "dark-chronicles-companion", kind: "content", version: 3 });
     expect(file.guides.map((g: { title: string }) => g.title)).toContain("Round trip");
 
     await page.locator('input[type="file"]').setInputFiles(path);
@@ -224,8 +224,9 @@ test.describe("custom start and end weapons, one tab per weapon type", () => {
       abilities: ["dark"],
     });
     expect(stored.planner.start).toMatchObject({ level: 3, abilities: ["poison"] });
-    // The plan starts from the custom weapon, so its first stage doesn't level a fresh weapon from +0.
-    await expect(page.getByText("Dark Coin").first()).toBeVisible();
+    // The route finishes in chapter 1, and the Dark Coin is only sold from chapter 2 (Jurak Mall),
+    // so the plan says why it can't add the Dark ability.
+    await expect(page.getByText("Not added because the coin isn't sold yet: Dark.")).toBeVisible();
   });
 
   test("opposing abilities are one three-way switch per pair", async ({ page }) => {

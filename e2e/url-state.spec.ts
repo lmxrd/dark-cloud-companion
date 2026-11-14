@@ -24,16 +24,16 @@ test.describe("navigation state in the URL", () => {
 
     await page.getByRole("tablist", { name: "Dashboard view" }).getByRole("tab").first().click();
     await expect(page).toHaveURL(/\/dark-cloud-companion\/?$/);
-    await page.getByLabel("Chapter", { exact: true }).selectOption("c3");
-    await expect(page).toHaveURL(/\/chapters\/c3$/);
+    await page.getByLabel("Chapter", { exact: true }).selectOption("3");
+    await expect(page).toHaveURL(/\/chapters\/3$/);
     await page.reload();
-    await expect(page.getByLabel("Chapter", { exact: true })).toHaveValue("c3");
+    await expect(page.getByLabel("Chapter", { exact: true })).toHaveValue("3");
   });
 
   test("old ?chapter= links move to the chapter's path", async ({ page }) => {
     await go(page, "/?chapter=c4");
-    await expect(page).toHaveURL(/\/chapters\/c4$/);
-    await expect(page.getByLabel("Chapter", { exact: true })).toHaveValue("c4");
+    await expect(page).toHaveURL(/\/chapters\/4$/);
+    await expect(page.getByLabel("Chapter", { exact: true })).toHaveValue("4");
   });
 
   test("weapon filters survive a reload", async ({ page }) => {

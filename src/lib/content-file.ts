@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { guide, type Guide } from "@/lib/guide/types";
 
-export const CONTENT_VERSION = 2;
+export const CONTENT_VERSION = 3;
 
 /** Shareable guides only (no progress). Distinct from a profile export, which also carries ticks. */
 export const contentFile = z.object({

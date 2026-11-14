@@ -25,14 +25,14 @@ Before finishing a change run `pnpm check && pnpm typecheck && pnpm test`, plus 
 
 ## Where things are
 
-- `src/db/schema.ts` – the game-data database schema (Drizzle, SQLite); `drizzle/` holds its migrations and `game.db`, the committed database and the single source of truth for game data. `scripts/db/` checks it and exports it (`export.ts`) into `src/gamedata/` (generated, git-ignored; shapes in `src/lib/gamedata/types.ts`), via the `integrations/gamedata.ts` Astro integration and a Vitest global setup. The app still reads `src/data/` until it moves over to `src/gamedata/`.
-- `src/data/` – the extracted static game data (JSON only; schemas live in `src/lib/schemas.ts`). The cross-check tests live in `scripts/extract/data.test.ts`. `INCONSISTENCIES.md` is generated (`node scripts/extract/crosscheck.ts && pnpm fmt`).
+- `src/db/schema.ts` – the game-data database schema (Drizzle, SQLite); `drizzle/` holds its migrations and `game.db`, the committed database and the single source of truth for game data. `scripts/db/` checks it and exports it (`export.ts`) into `src/gamedata/` (generated, git-ignored; shapes in `src/lib/gamedata/types.ts`), via the `integrations/gamedata.ts` Astro integration and a Vitest global setup. The app reads it through `src/lib/gamedata/` (`index.ts`: names, chapters/sections, collectables; one module per other file; floor detail and the bestiary load on demand). `src/lib/data.ts` turns it into chapters, sections, checklist items and medals; tick ids are `<kind>:<id>` (`gamedata/ticks.ts`); `gamedata/legacy-ids.json` maps the ids from before the database (state version 2, content files version 2) and must be kept.
+- `src/data/plans.json` – the generated built-in plans (see `integrations/plans.ts`). `src/lib/schemas.ts` – the planner's weapon/stat shapes (zod).
 - `src/lib/weapons/` – pure game mechanics (ABS curve, levelling, spectrumize, build-up). Verified against the weapon FAQ's worked examples; do not "simplify" the formulas.
 - `src/lib/planner/` – `simulate.ts` is the source of truth for rules; `solve.ts` builds a MILP (HiGHS wasm, `highs.ts`) per build-up chain; `plan.ts` ranks chains, solves the best, adds ability coins; `templates.ts` generates sphere-weapon templates; `worker.ts`/`client.ts` run it off the main thread.
 - `src/lib/guide/` – the unified guide model (`types.ts`), generated main walkthrough (`main.ts`), derived build data (`derive.ts`, never stored), progress/dashboard helpers, legacy converters.
 - `src/lib/profiles.ts` (schema v2 + migration from `profiles-v1.ts`), `src/lib/store.ts` (nanostores, persistence key `dcc:state`).
 - `src/components/` – React islands (`dashboard/`, `guide/`, `guides/`, `planner/`, `items/`, `weapons/`, `minigames/`, `settings/`, `ui/` = shadcn). `src/pages/` – Astro routes; client-only pages use `client:only="react"` and read `?id=` etc.
-- `scripts/` – one-off extractors (need `.local/guides/*`), planner scripts, icon generation. `e2e/` – Playwright specs.
+- `scripts/` – database checks and export (`db/`), planner scripts, icon generation. `e2e/` – Playwright specs.
 
 ## Invariants and conventions
 
@@ -55,7 +55,7 @@ Before finishing a change run `pnpm check && pnpm typecheck && pnpm test`, plus 
 - Servers that send `Vary: Origin` break cache matching for module scripts/fonts in the service worker; `integrations/sw-template.js` matches with `ignoreVary` (covered by the offline e2e).
 - The in-app/desktop browser pane cannot register service workers; use Playwright for offline checks.
 - YALPS was too slow for the planner's MILP; HiGHS (wasm, ~3.4 MB) is loaded lazily and run in a worker.
-- Source guides contain typos and conflicting values; extractors normalise spellings and `INCONSISTENCIES.md` records every disagreement and which value the app keeps.
+- Source guides contain typos and conflicting values; the data in `game.db` was cross-checked against several guides when imported, and the disagreements are noted in `.local/import-notes.md`.
 
 ## Astro documentation
 

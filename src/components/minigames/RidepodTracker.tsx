@@ -1,26 +1,58 @@
 import { useChecks } from "@/lib/useAppStore";
 import { CheckRow } from "@/components/chapter/CheckRow";
 import { TrackerLayout, type TrackerGroup } from "./TrackerLayout";
-import { ridepod, ridepodCoreCheckId, ridepodPartCheckId } from "@/lib/reference";
-import type { RidepodPart } from "@/lib/schemas";
+import { collectables, names, type Invention, type RidepodPart } from "@/lib/gamedata";
+import { ridepod } from "@/lib/gamedata/ridepod";
+import { tick } from "@/lib/gamedata/ticks";
 import { useTranslations } from "@/i18n";
-import { ingredientIdByName } from "@/lib/data";
 import { setChecked } from "@/lib/store";
 
-const data = ridepod;
 const categories = ["short", "long", "armor", "legs", "pack"] as const;
+type Category = (typeof categories)[number];
 
-const partCheckId = ridepodPartCheckId;
-const coreCheckId = ridepodCoreCheckId;
+/** Close-range arm families; the others are long-range (schema: RIDEPOD_WEAPON_SUB_TYPES). */
+const SHORT_RANGE = new Set([
+  "cannonball-arm",
+  "clown-hand",
+  "samurai-arm",
+  "hammer-arm",
+  "drill-arm",
+]);
 
-function ready(p: RidepodPart, checks: Record<string, true>) {
-  const ok = (list: RidepodPart["invent"]) =>
-    list.every((i) => checks[ingredientIdByName.get(i.name.toLowerCase()) ?? ""]);
-  return ok(p.invent) || (!!p.alternate && ok(p.alternate));
-}
+const categoryOf = (p: RidepodPart): Category =>
+  p.weapon
+    ? SHORT_RANGE.has(p.weapon.subType)
+      ? "short"
+      : "long"
+    : p.type === "body"
+      ? "armor"
+      : p.type === "legs"
+        ? "legs"
+        : "pack";
 
-const recipeText = (list: RidepodPart["invent"]) =>
-  list.map((i) => (i.scoop ? `${i.name} (scoop)` : i.name)).join(" + ");
+const inventionOf = new Map<string, Invention>(
+  collectables.inventions.filter((i) => i.ridepodPartId).map((i) => [i.ridepodPartId!, i]),
+);
+
+const ready = (inv: Invention | undefined, checks: Record<string, true>) =>
+  !!inv && inv.recipes.some((r) => r.every((photo) => checks[tick.photo(photo)]));
+
+const recipeText = (recipe: string[]) => recipe.map((id) => names.photos[id] ?? id).join(" + ");
+
+/** ABS price at Cedric's (or G-Parts), when it can be bought. */
+const price = (sources: RidepodPart["sources"]) => sources.shops?.[0]?.price;
+
+const WEAPON_STATS = [
+  "attack",
+  "flame",
+  "chill",
+  "lightning",
+  "cyclone",
+  "smash",
+  "exorcism",
+  "beast",
+  "scale",
+] as const;
 
 export function RidepodTracker() {
   const t = useTranslations();
@@ -29,42 +61,45 @@ export function RidepodTracker() {
     done: ids.filter((id) => checks[id]).length,
     total: ids.length,
   });
-  const partsOf = (cat: (typeof categories)[number]) =>
-    data.parts.filter((p) => p.category === cat);
-  const allParts = count(data.parts.map(partCheckId));
-  const cores = count(data.cores.map((c) => coreCheckId(c.name)));
-  const readyCount = data.parts.filter((p) => !checks[partCheckId(p)] && ready(p, checks)).length;
+  const partId = (p: RidepodPart) => tick.ridepodPart(p.id);
+  const allParts = count(ridepod.parts.map(partId));
+  const cores = count(ridepod.cores.map((c) => tick.ridepodCore(c.id)));
+  const readyCount = ridepod.parts.filter(
+    (p) => !checks[partId(p)] && ready(inventionOf.get(p.id), checks),
+  ).length;
 
   const groups: TrackerGroup[] = [
     ...categories.map((cat) => {
-      const parts = partsOf(cat);
+      const parts = ridepod.parts.filter((p) => categoryOf(p) === cat);
       return {
         id: cat,
         label: t(`ridepod.cat.${cat}` as const),
         title: t(`ridepod.cat.${cat}` as const),
-        count: count(parts.map(partCheckId)),
+        count: count(parts.map(partId)),
         defaultOpen: cat === "short",
         children: parts.map((p) => {
-          const built = !!checks[partCheckId(p)];
+          const built = !!checks[partId(p)];
+          const inv = inventionOf.get(p.id);
           const numbers = [
             t("ridepod.capacity", { n: p.capacity }),
-            p.whp !== undefined ? t("ridepod.whp", { n: p.whp }) : undefined,
-            p.armor !== undefined ? t("ridepod.armorValue", { n: p.armor }) : undefined,
-            p.energy !== undefined ? t("ridepod.energyValue", { n: p.energy }) : undefined,
+            p.weapon ? t("ridepod.whp", { n: p.weapon.weaponHp }) : undefined,
+            p.body ? t("ridepod.armorValue", { n: p.body.armor }) : undefined,
+            p.energyPack ? t("ridepod.energyValue", { n: p.energyPack.energy }) : undefined,
           ].filter(Boolean);
+          const cost = price(p.sources);
           const extra = [
-            p.speed ? t("ridepod.speedValue", { n: p.speed }) : undefined,
-            ...Object.entries(p.stats ?? {}).map(([k, v]) => `${v} ${k}`),
-            p.buyExp ? t("ridepod.buy", { exp: p.buyExp }) : undefined,
+            p.legs ? t("ridepod.speedValue", { n: p.legs.speed }) : undefined,
+            ...WEAPON_STATS.flatMap((k) => (p.weapon?.[k] ? [`${p.weapon[k]} ${k}`] : [])),
+            cost !== undefined ? t("ridepod.buy", { abs: cost }) : undefined,
           ].filter(Boolean);
           return (
             <CheckRow
               key={p.id}
               checked={built}
-              onChange={(v) => setChecked(partCheckId(p), v)}
+              onChange={(v) => setChecked(partId(p), v)}
               label={p.name}
               badges={
-                !built && ready(p, checks) ? (
+                !built && ready(inv, checks) ? (
                   <span className="bg-accent text-accent-foreground rounded-full border-2 px-2 py-0.5 text-[11px] font-bold">
                     {t("ridepod.ready")}
                   </span>
@@ -78,14 +113,20 @@ export function RidepodTracker() {
               detail={
                 <>
                   {extra.length > 0 && <span className="block">{extra.join(" · ")}</span>}
-                  <span className="block">
-                    {t("ridepod.recipe")}: {recipeText(p.invent)}
-                    {p.alternate ? ` · ${t("ridepod.alternate")}: ${recipeText(p.alternate)}` : ""}
-                  </span>
-                  <span className="block">
-                    {t("ridepod.resources")}:{" "}
-                    {p.resources.map((r) => `${r.qty}× ${r.name}`).join(", ")}
-                  </span>
+                  {inv && (
+                    <span className="block">
+                      {t("ridepod.recipe")}: {recipeText(inv.recipes[0] ?? [])}
+                      {inv.recipes[1]
+                        ? ` · ${t("ridepod.alternate")}: ${recipeText(inv.recipes[1])}`
+                        : ""}
+                    </span>
+                  )}
+                  {inv && inv.items.length > 0 && (
+                    <span className="block">
+                      {t("ridepod.resources")}:{" "}
+                      {inv.items.map((r) => `${r.quantity}× ${names.items[r.itemId]}`).join(", ")}
+                    </span>
+                  )}
                 </>
               }
             />
@@ -98,25 +139,28 @@ export function RidepodTracker() {
       label: t("ridepod.cores"),
       title: t("ridepod.cores"),
       count: cores,
-      children: data.cores.map((c) => (
-        <CheckRow
-          key={c.name}
-          checked={!!checks[coreCheckId(c.name)]}
-          onChange={(v) => setChecked(coreCheckId(c.name), v)}
-          label={c.name}
-          detail={c.exp ? t("ridepod.coreExp", { exp: c.exp }) : undefined}
-          aside={
-            <>
-              <span className="block whitespace-nowrap">
-                {t("ridepod.capacity", { n: c.capacity })}
-              </span>
-              <span className="block whitespace-nowrap">
-                {t("ridepod.coreArmor", { n: c.armor })}
-              </span>
-            </>
-          }
-        />
-      )),
+      children: ridepod.cores.map((c) => {
+        const cost = price(c.sources);
+        return (
+          <CheckRow
+            key={c.id}
+            checked={!!checks[tick.ridepodCore(c.id)]}
+            onChange={(v) => setChecked(tick.ridepodCore(c.id), v)}
+            label={c.name}
+            detail={cost !== undefined ? t("ridepod.coreExp", { abs: cost }) : undefined}
+            aside={
+              <>
+                <span className="block whitespace-nowrap">
+                  {t("ridepod.capacity", { n: c.capacity })}
+                </span>
+                <span className="block whitespace-nowrap">
+                  {t("ridepod.coreArmor", { n: c.armorCapacity })}
+                </span>
+              </>
+            }
+          />
+        );
+      }),
     },
   ];
 

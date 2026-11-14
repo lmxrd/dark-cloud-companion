@@ -11,7 +11,7 @@ import type { DerivedStep } from "@/lib/guide/derive";
 import type { ChapterCategory } from "@/lib/guide/dashboard";
 import { stepProgress } from "@/lib/guide/progress";
 import { resolveEntry } from "@/lib/guide/refs";
-import type { Section } from "@/lib/schemas";
+import type { Section } from "@/lib/data";
 import { stepTickId, textTickId, type Entry, type Guide, type Step } from "@/lib/guide/types";
 import { setChecked } from "@/lib/store";
 import { BuildStepBody } from "./BuildStepBody";

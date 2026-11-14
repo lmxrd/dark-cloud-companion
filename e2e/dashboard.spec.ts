@@ -20,7 +20,7 @@ test.describe("dashboard and progress", () => {
     await expect(linda).not.toBeChecked();
     await linda.click();
     await expect(linda).toBeChecked();
-    expect((await activeProfile(page)).checks["c1-scoop-brave-little-linda"]).toBe(true);
+    expect((await activeProfile(page)).checks["photo:brave-little-linda"]).toBe(true);
     await page.reload();
     await unfoldAll(page);
     await expect(page.getByRole("checkbox", { name: /Brave Little Linda/ }).first()).toBeChecked();
@@ -64,9 +64,9 @@ test.describe("dashboard and progress", () => {
     await expect(page.getByText("Missable items still open")).toBeVisible();
     await page
       .getByLabel("Chapter", { exact: true })
-      .selectOption({ label: "2. Ressurection of the Great Elder" });
+      .selectOption({ label: "2. Resurrection of the Great Elder" });
     await expect(
-      page.getByRole("heading", { name: /Ressurection of the Great Elder/ }),
+      page.getByRole("heading", { name: /Resurrection of the Great Elder/ }),
     ).toBeVisible();
     await expect(page.getByText("King Mardan").first()).toBeVisible();
   });
@@ -92,7 +92,7 @@ test.describe("dashboard and progress", () => {
     await page.getByRole("button", { name: "Show guide" }).click();
     await expect(linda.first()).toBeVisible();
 
-    const chip = page.getByRole("button", { name: "2. Ressurection of the Great Elder" });
+    const chip = page.getByRole("button", { name: "2. Resurrection of the Great Elder" });
     await chip.click();
     await expect(chip).toHaveAttribute("aria-pressed", "true");
     await expect(linda).toHaveCount(0);
@@ -162,10 +162,10 @@ test.describe("dashboard and progress", () => {
     await go(page, "/");
     await page.getByRole("button", { name: "Next chapter" }).click();
     const picker = page.getByLabel("Chapter", { exact: true });
-    await expect(picker).toHaveValue("c2");
+    await expect(picker).toHaveValue("2");
     await page.getByRole("button", { name: "Set as current chapter" }).click();
     await expect(page.getByRole("button", { name: "Set as current chapter" })).toHaveCount(0);
-    expect((await activeProfile(page)).dashboard.currentChapter).toBe("c2");
+    expect((await activeProfile(page)).dashboard.currentChapter).toBe("2");
   });
 
   test("the collectable matrix shows progress per chapter and opens a chapter", async ({
@@ -183,6 +183,6 @@ test.describe("dashboard and progress", () => {
     const row = matrix.getByRole("row").nth(1);
     await expect(row).toContainText(/1 \/ \d+/);
     await row.getByRole("button").click();
-    await expect(page.getByLabel("Chapter", { exact: true })).toHaveValue("c1");
+    await expect(page.getByLabel("Chapter", { exact: true })).toHaveValue("1");
   });
 });

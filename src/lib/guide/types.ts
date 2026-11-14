@@ -48,7 +48,7 @@ export const step = z.object({
   title: z.string().max(200),
   /** Free text shown as written (never interpreted as markup). */
   notes: z.string().max(20000),
-  /** Optional placement: chapter id such as "c3" or "postgame", and a section of that chapter. */
+  /** Optional placement: a chapter ("1"…"8") and a section of that chapter. */
   chapterId: z.string().optional(),
   sectionId: z.string().optional(),
   entries: z.array(entry).max(300),

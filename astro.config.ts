@@ -5,17 +5,17 @@ import gamedata from "./integrations/gamedata";
 import plans from "./integrations/plans";
 import pwa from "./integrations/pwa.mjs";
 
-function getSiteInfo(): { site: string | undefined, base: string | undefined } {
+function getSiteInfo(): { site: string | undefined; base: string | undefined } {
   if (!process.env.PUBLIC_SITE_URL) {
-    return { site: undefined, base: undefined }
+    return { site: undefined, base: undefined };
   }
 
-  const url = new URL(process.env.PUBLIC_SITE_URL)
+  const url = new URL(process.env.PUBLIC_SITE_URL);
 
-  return { site: url.href, base: url.pathname }
+  return { site: url.href, base: url.pathname };
 }
 
-const { site, base } = getSiteInfo()
+const { site, base } = getSiteInfo();
 
 // https://docs.astro.build/en/reference/configuration/
 export default defineConfig({

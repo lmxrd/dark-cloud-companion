@@ -17,7 +17,8 @@ export const dashboardPath = ({ view, chapter }: DashboardRoute) =>
   view === "chapter" && chapter ? `/chapters/${chapter}` : VIEW_PATHS[view];
 
 /**
- * Reads a base-less pathname. `search` covers older `/?chapter=<id>` links. Unknown chapters fall
+ * Reads a base-less pathname. `search` covers older `/?chapter=<id>` links, and old chapter keys
+ * (`c3`) still resolve. Unknown chapters fall
  * back to following progress.
  */
 export function parseDashboardPath(
@@ -28,6 +29,8 @@ export function parseDashboardPath(
   const [head, sub] = pathname.replace(/^\/|\/$/g, "").split("/");
   if (head === "overview") return { view: "overview", chapter: null };
   if (head === "by-guide") return { view: "byGuide", chapter: null };
-  const id = head === "chapters" ? sub : new URLSearchParams(search).get("chapter");
+  const raw = head === "chapters" ? sub : new URLSearchParams(search).get("chapter");
+  // Chapter keys used to be "c1"…"c8" and "postgame" (now chapter 8).
+  const id = raw === "postgame" ? "8" : raw?.replace(/^c(\d)$/, "$1");
   return { view: "chapter", chapter: id && isChapter(id) ? id : null };
 }

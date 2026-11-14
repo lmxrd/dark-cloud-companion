@@ -3,13 +3,15 @@ import { ChevronDownIcon } from "lucide-react";
 import { cn } from "cn";
 import { Badge } from "@/components/ui/badge";
 import { useTranslations } from "@/i18n";
-import type { medalItems } from "@/lib/data";
-import type { Section } from "@/lib/schemas";
+import { collectables, names } from "@/lib/gamedata";
+import { useChapterDetail } from "@/lib/gamedata/useChapterDetail";
+import type { medalItems, Section } from "@/lib/data";
 import { setChecked } from "@/lib/store";
 
 /**
  * A section's medals and prizes as a strip of tiles (yellow once won), plus its facts (enemies, totals, boss, …) as one summary
- * line that expands on tap. `showFacts` decides whether it starts expanded.
+ * line that expands on tap. `showFacts` decides whether it starts expanded. The facts come from the
+ * chapter's floor detail, which loads on demand.
  */
 export function SectionFacts({
   section,
@@ -28,20 +30,25 @@ export function SectionFacts({
   const t = useTranslations();
   const [open, setOpen] = useState(showFacts);
   useEffect(() => setOpen(showFacts), [showFacts]);
-  const hasFacts =
-    !!section.boss ||
-    !!section.totals ||
-    section.enemies.length > 0 ||
-    section.georamaBuild.length > 0 ||
-    section.recruits.length > 0;
-  const summary = [
-    section.totals && t("section.totals", { abs: section.totals.abs, gilda: section.totals.gilda }),
-    section.enemies.length > 0 && t("section.enemyCount", { n: section.enemies.length }),
-    section.boss && t("section.boss", { name: section.boss.name }),
-  ]
-    .filter(Boolean)
-    .join(" · ");
-  const hasBadges = showKind || section.seal || section.special;
+  const detail = useChapterDetail(Number(section.chapterId))?.[section.id];
+  const recruits = collectables.recruits.filter((r) => r.sectionId === section.id);
+  const enemies = detail?.enemies ?? [];
+  const bosses = enemies.filter((e) => e.type === "boss" || e.type === "sub-boss");
+  const totals = detail && detail.totals.abs + detail.totals.gilda > 0 ? detail.totals : undefined;
+  const hasFacts = section.kind === "dungeon" || section.kind === "boss" || recruits.length > 0;
+  const enemyText = (list: typeof enemies) =>
+    list.map((e) => `${names.enemies[e.enemyId]}${e.carriesKey ? "*" : ""} ×${e.count}`).join(", ");
+  const summary = detail
+    ? [
+        totals && t("section.totals", { abs: totals.abs, gilda: totals.gilda }),
+        enemies.length > 0 && t("section.enemyCount", { n: enemies.length }),
+        bosses.length > 0 &&
+          t("section.boss", { name: bosses.map((b) => names.enemies[b.enemyId]).join(", ") }),
+      ]
+        .filter(Boolean)
+        .join(" · ")
+    : t("section.loading");
+  const hasBadges = showKind || section.restriction;
   return (
     <div className="flex flex-col">
       {hasBadges && (
@@ -49,11 +56,12 @@ export function SectionFacts({
           {showKind && (
             <Badge variant="outline">{t(`section.kind.${section.kind}` as const)}</Badge>
           )}
-          {section.seal && (
-            <Badge variant="secondary">{t("section.seal", { seal: section.seal })}</Badge>
-          )}
-          {section.special && (
-            <Badge variant="outline">{t("section.special", { text: section.special })}</Badge>
+          {section.restriction && (
+            <Badge variant="secondary">
+              {t(
+                `seal.${section.restriction}` as `seal.${"white-seal" | "blue-seal" | "red-seal"}`,
+              )}
+            </Badge>
           )}
         </div>
       )}
@@ -61,17 +69,20 @@ export function SectionFacts({
         <div className="grid grid-cols-3 gap-1.5 px-2 py-1">
           {medals.map((m) => {
             const won = !!checks[m.id];
-            const kind =
-              m.kind === "prize" && m.prizeType === "spheda"
-                ? t("medal.short.spheda")
-                : t(`medal.short.${m.kind}` as const);
+            const kind = t(`medal.short.${m.kind}` as const);
+            const value =
+              m.kind === "clear-goal"
+                ? t(
+                    `clearGoal.${m.value}` as `clearGoal.${NonNullable<NonNullable<Section["medals"]>["clearGoal"]>}`,
+                  )
+                : m.value;
             return (
               <button
                 key={m.id}
                 type="button"
                 role="checkbox"
                 aria-checked={won}
-                aria-label={`${kind}: ${m.value}`}
+                aria-label={`${kind}: ${value}`}
                 onClick={() => setChecked(m.id, !won)}
                 className={cn(
                   "flex min-h-12 min-w-0 flex-col items-start justify-center rounded-md border-2 px-2 py-1 text-left transition-[translate,box-shadow]",
@@ -89,8 +100,8 @@ export function SectionFacts({
                   {won ? "✓ " : ""}
                   {kind}
                 </span>
-                <span className="w-full truncate text-xs font-semibold" title={m.value}>
-                  {m.value}
+                <span className="w-full truncate text-xs font-semibold" title={value}>
+                  {value}
                 </span>
               </button>
             );
@@ -111,36 +122,50 @@ export function SectionFacts({
           </button>
           {open && (
             <div className="text-muted-foreground flex flex-col gap-0.5 px-2 pb-1 text-xs">
-              {section.boss && (
+              {!detail && <p>{t("section.loading")}</p>}
+              {bosses.length > 0 && (
                 <p>
-                  {t("section.boss", { name: section.boss.name })}
-                  {section.boss.scoop ? ` (${t("section.bossScoop")})` : ""}
-                </p>
-              )}
-              {section.totals && (
-                <p>
-                  {t("section.totals", { abs: section.totals.abs, gilda: section.totals.gilda })}
-                  {section.geostone ? ` · ${t("section.geostone")}: ${section.geostone}` : ""}
-                </p>
-              )}
-              {section.enemies.length > 0 && (
-                <p>
-                  {t("section.enemies")}:{" "}
-                  {section.enemies
-                    .map((e) => `${e.name}${e.carriesKey ? "*" : ""} ×${e.count}`)
-                    .join(", ")}
-                </p>
-              )}
-              {section.georamaBuild.length > 0 && (
-                <p>
-                  {t("section.georama", {
-                    parts: section.georamaBuild.map((g) => `${g.qty}× ${g.name}`).join(", "),
+                  {t("section.boss", {
+                    name: bosses.map((b) => names.enemies[b.enemyId]).join(", "),
                   })}
                 </p>
               )}
-              {section.recruits.map((r) => (
-                <p key={r.name}>{t("section.recruits", { name: r.name, where: r.location })}</p>
-              ))}
+              {(totals || section.hasGeostone) && (
+                <p>
+                  {totals ? t("section.totals", { abs: totals.abs, gilda: totals.gilda }) : ""}
+                  {section.hasGeostone
+                    ? `${totals ? " · " : ""}${t("section.geostone")}${
+                        detail?.geostoneParts.length
+                          ? `: ${detail.geostoneParts.map((p) => names.georamaParts[p]).join(", ")}`
+                          : ""
+                      }`
+                    : ""}
+                </p>
+              )}
+              {enemies.some((e) => !e.starArea) && (
+                <p>
+                  {t("section.enemies")}: {enemyText(enemies.filter((e) => !e.starArea))}
+                </p>
+              )}
+              {enemies.some((e) => e.starArea) && (
+                <p>
+                  {t("section.starArea")}: {enemyText(enemies.filter((e) => e.starArea))}
+                </p>
+              )}
+              {detail && detail.georamaItems.length > 0 && (
+                <p>
+                  {t("section.materials", {
+                    items: detail.georamaItems.map((i) => names.items[i]).join(", "),
+                  })}
+                </p>
+              )}
+              {recruits.length > 0 && (
+                <p>
+                  {t("section.recruits", {
+                    names: recruits.map((r) => names.npcs[r.npcId]).join(", "),
+                  })}
+                </p>
+              )}
             </div>
           )}
         </>

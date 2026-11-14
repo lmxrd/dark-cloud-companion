@@ -1,4 +1,5 @@
-import { weaponData, weaponById } from "@/lib/planner/sources";
+import { collectables, names } from "@/lib/gamedata";
+import { weaponData, weaponById, weaponSources } from "@/lib/planner/sources";
 import type { Weapon } from "@/lib/schemas";
 import { absToReach } from "./mechanics";
 
@@ -8,11 +9,59 @@ export const buildsFrom = (id: string): Weapon[] =>
 export const buildsInto = (id: string): Weapon[] =>
   (weaponById.get(id)?.buildsUpTo ?? []).map((t) => weaponById.get(t)!).filter(Boolean);
 
-export const shopsFor = (id: string) => weaponData.shops.filter((s) => s.weaponId === id);
-export const inventionFor = (id: string) => weaponData.invented.find((i) => i.weaponId === id);
-export const eventFor = (id: string) => weaponData.events.find((e) => e.weaponId === id);
+const recruitChapter = new Map(collectables.recruits.map((r) => [r.npcId, r.chapterNumber]));
+
+/** Shops that sell it: name, first chapter and price. */
+export const shopsFor = (id: string) =>
+  (weaponSources(id).shops ?? [])
+    .filter((l) => l.price !== undefined)
+    .map((l) => ({
+      shop: names.shops[l.shopId],
+      chapter:
+        l.fromChapterNumber ??
+        (l.afterRecruitNpcId ? recruitChapter.get(l.afterRecruitNpcId) : undefined) ??
+        1,
+      price: l.price!,
+    }));
+
+/** How to invent it: each recipe's photo names, and the materials. */
+export const inventionFor = (id: string) => {
+  const inv = collectables.inventions.find((i) => i.weaponId === id);
+  return (
+    inv && {
+      recipes: inv.recipes.map((r) => r.map((p) => names.photos[p] ?? p)),
+      materials: inv.items.map((m) => ({ name: names.items[m.itemId], quantity: m.quantity })),
+    }
+  );
+};
+
+/** One-off ways to get it: prizes and rewards, as `{ kind, … }` for the page to word. */
+export const eventsFor = (id: string) => {
+  const s = weaponSources(id);
+  return [
+    ...(s.sphedaPrizes ?? []).map((p) => ({
+      kind: "spheda" as const,
+      section: names.sections[p.sectionId],
+    })),
+    ...(s.sectionRewards ?? []).map((r) => ({
+      kind: "sectionReward" as const,
+      section: names.sections[r.sectionId],
+      who: r.character,
+    })),
+    ...(s.georamaRewards ?? []).map((r) => ({
+      kind: "georama" as const,
+      town: names.towns[r.townId],
+    })),
+    ...(s.contestPrizes ?? []).map((p) => ({
+      kind: "contest" as const,
+      contest: p.contestId === "finny-frenzy" ? "Finny Frenzy" : "Fishing Contest",
+    })),
+    ...((s.startingEquipment ?? []).length ? [{ kind: "starting" as const }] : []),
+  ];
+};
+
 export const dungeonsFor = (id: string) =>
-  weaponData.dungeonWeapons.filter((d) => d.weaponIds.includes(id)).map((d) => d.dungeon);
+  (weaponSources(id).dungeons ?? []).map((d) => names.dungeons[d]);
 
 /** Total ABS to reach each of the given levels. */
 export const absTable = (w: Weapon, levels = [1, 5, 10, 20, 30, 50, 99]) =>

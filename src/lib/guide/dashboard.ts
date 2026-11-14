@@ -1,6 +1,6 @@
 // Which chapter the dashboard follows, and which steps of a guide belong to a chapter.
 import { allMedals, chapters, checklist } from "@/lib/data";
-import { checklistCategory, type ChecklistItem } from "@/lib/schemas";
+import { CHECKLIST_CATEGORIES, type ChecklistItem } from "@/lib/data";
 import { stepTickIds } from "./progress";
 import type { Guide, Step } from "./types";
 
@@ -91,7 +91,7 @@ export function openMissable(
 export type ChapterCategory = ChecklistItem["category"] | "medal";
 
 /** Display order of the chapter categories: collectables in data order, then medals. */
-export const CATEGORY_ORDER: ChapterCategory[] = [...checklistCategory.options, "medal"];
+export const CATEGORY_ORDER: ChapterCategory[] = [...CHECKLIST_CATEGORIES, "medal"];
 
 /**
  * Per-category progress of a chapter across the switched-on guides, in data order. Only collectables

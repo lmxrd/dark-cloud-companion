@@ -7,7 +7,7 @@ import { freshState } from "@/lib/weapons/mechanics";
 import type { Walkthrough } from "@/lib/walkthroughs/types";
 import type { BuildStart, Guide, Step } from "./types";
 
-const chapterIdOf = (n: number) => chapters.find((c) => c.phase === "main" && c.number === n)?.id;
+const chapterIdOf = (n: number) => chapters.find((c) => c.number === n)?.id;
 
 export function stateToStart(
   weaponId: string,

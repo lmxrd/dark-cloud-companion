@@ -33,11 +33,11 @@ function sampleTextGuide(): Guide {
         id: "s1",
         title: "Photos",
         notes: "Take a picture of the clock.",
-        chapterId: "c1",
+        chapterId: "1",
         entries: [
           { kind: "text", id: "i1", text: "Clock" },
-          { kind: "item", ref: "c1-scoop-night-stalker" },
-          { kind: "section", ref: "c1-rats" },
+          { kind: "item", ref: "photo:night-stalker" },
+          { kind: "section", ref: "battle-with-rats" },
         ],
       },
       { id: "s2", title: "Anytime thing", notes: "", entries: [] },
@@ -83,10 +83,10 @@ describe("content export/import", () => {
       mutate(g);
       return parseContentImport(JSON.stringify(buildContentExport([g])));
     };
-    expect(bad((g) => (g.steps[0].chapterId = "c99"))).toMatchObject({ ok: false });
-    expect(bad((g) => (g.steps[0].sectionId = "c1-rats"))).toMatchObject({ ok: true });
+    expect(bad((g) => (g.steps[0].chapterId = "99"))).toMatchObject({ ok: false });
+    expect(bad((g) => (g.steps[0].sectionId = "battle-with-rats"))).toMatchObject({ ok: true });
     expect(
-      bad((g) => ((g.steps[0].chapterId = "c2"), (g.steps[0].sectionId = "c1-rats"))),
+      bad((g) => ((g.steps[0].chapterId = "2"), (g.steps[0].sectionId = "battle-with-rats"))),
     ).toMatchObject({ ok: false });
     expect(bad((g) => g.steps[0].entries.push({ kind: "item", ref: "nope" }))).toMatchObject({
       ok: false,

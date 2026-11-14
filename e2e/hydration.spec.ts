@@ -22,7 +22,7 @@ const pages = [
   "/",
   "/overview",
   "/by-guide",
-  "/chapters/c3",
+  "/chapters/3",
   "/?chapter=c3&cat=medal&q=a",
   "/guides?q=zero",
   "/weapons?type=sword&finals=1&sort=abs&q=a",
@@ -62,7 +62,7 @@ test.describe("saved progress", () => {
 
   test("the stored state is shown once hydrated", async ({ page }) => {
     await go(page, "/");
-    await expect(page.getByLabel("Chapter", { exact: true })).toHaveValue("c2");
+    await expect(page.getByLabel("Chapter", { exact: true })).toHaveValue("2");
     await go(page, "/spheda");
     await expect(page.getByRole("checkbox", { name: "I own Turkey" })).toBeChecked();
     await go(page, "/settings");

@@ -45,10 +45,10 @@ describe("main walkthrough", () => {
     expect(new Set(ticks).size).toBe(ticks.length);
   });
 
-  test("post-game items are gathered in the post-game chapter", () => {
-    const post = mainWalkthrough.steps.find((s) => s.chapterId === "postgame");
-    expect(post).toBeTruthy();
-    const refs = post!.entries.flatMap((e) => (e.kind === "item" ? [e.ref] : []));
+  test("post-game items are in chapter 8, the post-game chapter", () => {
+    const refs = mainWalkthrough.steps
+      .filter((s) => s.chapterId === "8")
+      .flatMap((s) => s.entries.flatMap((e) => (e.kind === "item" ? [e.ref] : [])));
     expect(new Set(refs)).toEqual(new Set(checklist.filter((i) => i.postgame).map((i) => i.id)));
   });
 

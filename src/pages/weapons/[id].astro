@@ -5,7 +5,7 @@ import { withBase } from "@/lib/base";
 import { STAT_KEYS } from "@/lib/schemas";
 import { useTranslations } from "@/i18n";
 import { weaponData } from "@/lib/planner/sources";
-import { absTable, buildsInto, dungeonsFor, eventFor, inventionFor, lineTo, shopsFor } from "@/lib/weapons/info";
+import { absTable, buildsInto, dungeonsFor, eventsFor, inventionFor, lineTo, shopsFor } from "@/lib/weapons/info";
 import { finalWeaponIds } from "@/lib/planner/graph";
 
 export function getStaticPaths() {
@@ -16,7 +16,19 @@ const t = useTranslations();
 const { weapon: w } = Astro.props;
 const shops = shopsFor(w.id);
 const invention = inventionFor(w.id);
-const event = eventFor(w.id);
+const events = eventsFor(w.id).map((e) =>
+  e.kind === "spheda"
+    ? t("weapons.from.spheda", { section: e.section })
+    : e.kind === "sectionReward"
+      ? e.who
+        ? t("weapons.from.sectionRewardBy", { section: e.section, who: e.who === "max" ? t("weapons.max") : t("weapons.monica") })
+        : t("weapons.from.sectionReward", { section: e.section })
+      : e.kind === "georama"
+        ? t("weapons.from.georama", { town: e.town })
+        : e.kind === "contest"
+          ? t("weapons.from.contest", { contest: e.contest })
+          : t("weapons.from.starting"),
+);
 const dungeons = dungeonsFor(w.id);
 const into = buildsInto(w.id);
 const isFinal = finalWeaponIds.includes(w.id);
@@ -128,13 +140,13 @@ const facts = [
       {shops.map((s) => <p>{t("weapons.shop", { shop: s.shop, chapter: s.chapter, price: s.price })}</p>)}
       {invention && (
         <div>
-          <p>{t("weapons.invent", { ideas: invention.ideas.map((alts) => alts.join(" / ")).join(" + ") })}</p>
-          <p class="text-muted-foreground text-xs">{t("weapons.materials")}: {invention.materials.map((m) => `${m.qty}× ${m.name}`).join(", ")}</p>
+          <p>{t("weapons.invent", { ideas: invention.recipes.map((r) => r.join(" + ")).join(t("weapons.recipeOr")) })}</p>
+          <p class="text-muted-foreground text-xs">{t("weapons.materials")}: {invention.materials.map((m) => `${m.quantity}× ${m.name}`).join(", ")}</p>
         </div>
       )}
-      {event && <p>{event.how}</p>}
+      {events.map((e) => <p>{e}</p>)}
       {dungeons.length > 0 && <p>{t("weapons.dungeon", { dungeons: dungeons.join(", ") })}</p>}
-      {!shops.length && !invention && !event && !dungeons.length && <p class="text-muted-foreground">{t("weapons.buildOnly")}</p>}
+      {!shops.length && !invention && !events.length && !dungeons.length && <p class="text-muted-foreground">{t("weapons.buildOnly")}</p>}
     </section>
 
     <section class="flex flex-col gap-2" aria-labelledby="abs">

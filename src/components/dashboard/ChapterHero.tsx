@@ -11,7 +11,7 @@ import {
 import { useTranslations } from "@/i18n";
 import { chapters } from "@/lib/data";
 import type { ChapterCategory } from "@/lib/guide/dashboard";
-import type { Chapter } from "@/lib/schemas";
+import type { Chapter } from "@/lib/data";
 import { setCurrentChapter } from "@/lib/store";
 
 type Count = { done: number; total: number };

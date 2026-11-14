@@ -13,7 +13,7 @@ import { fileURLToPath } from "node:url";
 export const ROOT = fileURLToPath(new URL("..", import.meta.url));
 
 /** Everything that can change what the plans contain. Outputs and tests are never inputs. */
-const INPUTS = ["scripts/planner", "src/data"];
+const INPUTS = ["scripts/planner", "drizzle/game.db"];
 const SKIP_FILES = new Set(["plans.json", "INCONSISTENCIES.md"]);
 
 function walk(dir: string): string[] {
@@ -29,7 +29,7 @@ export function plansHash(): string {
     statSync(join(ROOT, p)).isDirectory() ? walk(join(ROOT, p)) : [join(ROOT, p)],
   )
     .filter(
-      (f) => /\.(ts|json)$/.test(f) && !f.endsWith(".test.ts") && !SKIP_FILES.has(basename(f)),
+      (f) => /\.(ts|json|db)$/.test(f) && !f.endsWith(".test.ts") && !SKIP_FILES.has(basename(f)),
     )
     .sort();
   const hash = createHash("sha256");

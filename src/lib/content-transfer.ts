@@ -2,7 +2,8 @@ import { fromLegacyGuide, fromLegacyWalkthrough } from "@/lib/guide/legacy";
 import { guide as legacyGuide } from "@/lib/guides/types";
 import { walkthrough as legacyWalkthrough } from "@/lib/walkthroughs/types";
 import { z } from "zod";
-import { contentFile, type ContentFile } from "./content-file";
+import { CONTENT_VERSION, contentFile, type ContentFile } from "./content-file";
+import { migrateGuide } from "./gamedata/legacy";
 import { validateGuide } from "./content-validate";
 
 export type ParseResult = { ok: true; file: ContentFile } | { ok: false; error: string };
@@ -28,21 +29,29 @@ export function parseContentImport(json: string): ParseResult {
     return { ok: false, error: "This is a profile export. Import it under Settings → Profiles." };
   }
   let file: ContentFile | undefined;
-  const v2 = contentFile.safeParse(data);
-  if (v2.success) file = v2.data;
+  const v3 = contentFile.safeParse(data);
+  const v2 = contentFile.extend({ version: z.literal(2) }).safeParse(data);
+  if (v3.success) file = v3.data;
+  else if (v2.success)
+    // Version 2 files use the ids from before game data came from the database.
+    file = {
+      ...v2.data,
+      version: CONTENT_VERSION,
+      guides: v2.data.guides.map((g) => ({ ...migrateGuide(g), kind: "custom" as const })),
+    };
   else {
     const v1 = legacyContent.safeParse(data);
     if (v1.success) {
       file = {
         app: "dark-chronicles-companion",
         kind: "content",
-        version: 2,
+        version: CONTENT_VERSION,
         guides: [
           ...v1.data.guides
             .filter((g) => g.kind === "custom")
-            .map((g) => ({ ...fromLegacyGuide(g), kind: "custom" as const })),
+            .map((g) => ({ ...migrateGuide(fromLegacyGuide(g)), kind: "custom" as const })),
           ...v1.data.walkthroughs.map((w) => ({
-            ...fromLegacyWalkthrough(w),
+            ...migrateGuide(fromLegacyWalkthrough(w)),
             kind: "custom" as const,
           })),
         ],

@@ -165,7 +165,7 @@ describe("planner inputs", () => {
 describe("loadState", () => {
   const valid = () => {
     const p = createProfile("Alpha");
-    return { version: 2, activeProfile: p.id, profiles: { [p.id]: p } };
+    return { version: 3, activeProfile: p.id, profiles: { [p.id]: p } };
   };
 
   test("nothing stored is a fresh state without a problem", () => {
@@ -199,7 +199,7 @@ describe("loadState", () => {
 describe("profile import", () => {
   const state = () => {
     const p = createProfile("Alpha");
-    return { version: 2 as const, activeProfile: p.id, profiles: { [p.id]: p } };
+    return { version: 3 as const, activeProfile: p.id, profiles: { [p.id]: p } };
   };
 
   test("replace overwrites the profile with the same id", () => {
@@ -208,7 +208,7 @@ describe("profile import", () => {
     const fromFile = { ...mine, name: "Older backup", checks: {} };
     const next = importProfiles(s, {
       app: "dark-chronicles-companion",
-      version: 2,
+      version: 3,
       profiles: [fromFile],
     });
     expect(Object.keys(next.profiles)).toHaveLength(1);
@@ -222,12 +222,86 @@ describe("profile import", () => {
     const fromFile = { ...mine, checks: {} };
     const next = importProfilesAsCopies(
       s,
-      { app: "dark-chronicles-companion", version: 2, profiles: [fromFile] },
+      { app: "dark-chronicles-companion", version: 3, profiles: [fromFile] },
       () => "new-id",
       (n) => `${n} (imported)`,
     );
     expect(next.profiles[mine.id].checks).toEqual({ a: true });
     expect(next.profiles["new-id"]).toMatchObject({ name: "Alpha (imported)", checks: {} });
     expect(next.activeProfile).toBe("new-id");
+  });
+});
+
+describe("profile migration v2 -> v3 (game-data ids)", () => {
+  const v2 = () => {
+    const p = createProfile("Old ids", 7);
+    p.checks = {
+      "c1-scoop-brave-little-linda": true,
+      "c1-rats:timeAttack": true,
+      "c2-recruit-parn-julia": true,
+      "c1-powerup-fruit-of-eden": true,
+      "ridepod:cannonball-arm": true,
+      "monster:beast:badge": true,
+      "g:custom:s1:t1": true,
+      "something-unknown": true,
+    };
+    p.dashboard.currentChapter = "c3";
+    p.guides = [
+      {
+        id: "custom",
+        title: "Mine",
+        kind: "custom",
+        steps: [
+          {
+            id: "s1",
+            title: "Step",
+            notes: "",
+            chapterId: "c1",
+            sectionId: "c1-rats",
+            entries: [
+              { kind: "text", id: "t1", text: "Clock" },
+              { kind: "item", ref: "c2-recruit-parn-julia" },
+              { kind: "section", ref: "c1-rats" },
+            ],
+          },
+        ],
+      },
+    ];
+    return { version: 2, activeProfile: p.id, profiles: { [p.id]: p } };
+  };
+
+  test("ticks, guide references and chapter keys move to the new ids; unknown ticks stay", () => {
+    const { state, problem } = loadState(JSON.stringify(v2()));
+    expect(problem).toBeUndefined();
+    expect(state.version).toBe(3);
+    const p = Object.values(state.profiles)[0];
+    expect(Object.keys(p.checks).sort()).toEqual(
+      [
+        "photo:brave-little-linda",
+        "medal:battle-with-rats:time-attack",
+        "recruit:parn",
+        "recruit:julia",
+        "pickup:1",
+        "part:cannonball-arm",
+        "badge:beast",
+        "g:custom:s1:t1",
+        "something-unknown",
+      ].sort(),
+    );
+    expect(p.dashboard.currentChapter).toBe("3");
+    const step = p.guides[0].steps[0];
+    expect(step.chapterId).toBe("1");
+    expect(step.sectionId).toBe("battle-with-rats");
+    expect(step.entries).toEqual([
+      { kind: "text", id: "t1", text: "Clock" },
+      { kind: "item", ref: "recruit:parn" },
+      { kind: "item", ref: "recruit:julia" },
+      { kind: "section", ref: "battle-with-rats" },
+    ]);
+  });
+
+  test("migrating twice changes nothing", () => {
+    const once = loadState(JSON.stringify(v2())).state;
+    expect(loadState(JSON.stringify(once)).state).toEqual(once);
   });
 });
