@@ -4,9 +4,9 @@ import { go } from "./helpers";
 const pages = [
   "/",
   "/guides",
-  "/planner",
+  "/tools/planner",
   "/reference",
-  "/shopping",
+  "/tools/shopping",
   "/weapons",
   "/weapons/poison-wrench",
   "/items",
@@ -39,7 +39,7 @@ test.describe("phone layout", () => {
       page.locator("header").getByRole("button", { name: "Toggle Sidebar" }),
     ).toBeHidden();
     await expect(tabs.getByRole("link", { name: "Today" })).toHaveAttribute("aria-current", "page");
-    for (const name of ["Guides", "Planner", "Reference"]) {
+    for (const name of ["Guides", "Tools", "Reference"]) {
       await tabs.getByRole("link", { name }).click();
       await expect(page.getByRole("heading", { name, level: 1 })).toBeVisible();
       await expect(tabs.getByRole("link", { name })).toHaveAttribute("aria-current", "page");
@@ -77,7 +77,7 @@ test.describe("phone layout", () => {
     isMobile,
   }) => {
     test.skip(!isMobile, "phone layout only");
-    await go(page, "/planner");
+    await go(page, "/tools/planner");
     const steps = page.getByRole("navigation", { name: "Planner steps" });
     const generate = page.getByRole("button", { name: "Generate plan" });
     await expect(page.getByRole("region", { name: "Target weapon" })).toBeVisible();
@@ -95,7 +95,7 @@ test.describe("phone layout", () => {
 
 test("shopping list switches between “To buy” and “Making” on a phone", async ({ page }, info) => {
   test.skip(info.project.name !== "phone", "phone layout only");
-  await go(page, "/shopping");
+  await go(page, "/tools/shopping");
   await page.getByRole("button", { name: "Add", exact: true }).click();
   await page.getByLabel("Search items, inventions, Georama parts, builds…").fill("aquarium");
   await page.getByRole("button", { name: "Add Aquarium" }).click();

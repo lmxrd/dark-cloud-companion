@@ -49,7 +49,7 @@ function GuideMenu({ guide }: { guide: Guide }) {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-52">
         {mine && (
-          <DropdownMenuItem render={<a href={withBase(`/planner/editor?edit=${q}`)} />}>
+          <DropdownMenuItem render={<a href={withBase(`/tools/planner/editor?edit=${q}`)} />}>
             {t("guides.edit")}
           </DropdownMenuItem>
         )}
@@ -57,7 +57,7 @@ function GuideMenu({ guide }: { guide: Guide }) {
           onClick={() => {
             const copy = duplicateGuide(guide);
             saveGuide(copy);
-            location.href = withBase(`/planner/editor?edit=${encodeURIComponent(copy.id)}`);
+            location.href = withBase(`/tools/planner/editor?edit=${encodeURIComponent(copy.id)}`);
           }}
         >
           {t("guides.duplicate")}

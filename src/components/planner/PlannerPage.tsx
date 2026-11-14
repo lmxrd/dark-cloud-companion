@@ -11,7 +11,7 @@ import { GeneratorSection } from "./GeneratorSection";
 
 type Tab = "generate" | "create";
 
-const PATHS: Record<Tab, string> = { generate: "/planner", create: "/planner/editor" };
+const PATHS: Record<Tab, string> = { generate: "/tools/planner", create: "/tools/planner/editor" };
 
 /** Planner tab: one section generates a weapon build, the other hand-crafts guides (generated builds prefill it). */
 export function PlannerPage() {

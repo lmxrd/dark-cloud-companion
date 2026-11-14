@@ -66,24 +66,24 @@ test.describe("navigation state in the URL", () => {
   });
 
   test("the planner's editor tab is a path", async ({ page }) => {
-    await go(page, "/planner");
+    await go(page, "/tools/planner");
     await page.getByRole("tab", { name: /Create/ }).click();
-    await expect(page).toHaveURL(/\/planner\/editor$/);
+    await expect(page).toHaveURL(/\/tools\/planner\/editor$/);
     await page.reload();
     await expect(page.getByRole("tab", { name: /Create/ })).toHaveAttribute(
       "aria-selected",
       "true",
     );
-    await go(page, "/planner?new");
-    await expect(page).toHaveURL(/\/planner\/editor\?new$/);
+    await go(page, "/tools/planner?new");
+    await expect(page).toHaveURL(/\/tools\/planner\/editor\?new$/);
   });
 
   test("a weapon page's plan link picks the target, then leaves the URL clean", async ({
     page,
   }) => {
-    await go(page, "/planner?target=chronicle-2");
+    await go(page, "/tools/planner?target=chronicle-2");
     await expect(page.getByLabel("Choose the end weapon")).toHaveValue("chronicle-2");
-    await expect(page).toHaveURL(/\/planner$/);
+    await expect(page).toHaveURL(/\/tools\/planner$/);
   });
 
   test("a tracker jump is kept in the hash", async ({ page }) => {

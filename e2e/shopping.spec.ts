@@ -17,7 +17,7 @@ test.describe("shopping list", () => {
   test("adding an invention lists its materials by shop; ticks and counts persist", async ({
     page,
   }) => {
-    await go(page, "/shopping");
+    await go(page, "/tools/shopping");
     await expect(page.getByText("Your list is empty.")).toBeVisible();
     await page.getByLabel("Search items, inventions, Georama parts, builds…").fill("aquarium");
     await page.getByRole("button", { name: "Add Aquarium" }).click();
@@ -41,7 +41,7 @@ test.describe("shopping list", () => {
   });
 
   test("“Made” uses up the items, ticks the invention, and can be undone", async ({ page }) => {
-    await go(page, "/shopping");
+    await go(page, "/tools/shopping");
     await page.getByLabel("Search items, inventions, Georama parts, builds…").fill("aquarium");
     await page.getByRole("button", { name: "Add Aquarium" }).click();
     await page.getByRole("checkbox", { name: "Have all Glass Material" }).click();
@@ -60,7 +60,7 @@ test.describe("shopping list", () => {
   });
 
   test("invent instead replaces a component with its recipe", async ({ page }) => {
-    await go(page, "/shopping");
+    await go(page, "/tools/shopping");
     await page.getByRole("button", { name: "Inventions", exact: true }).click();
     await page.getByLabel("Search items, inventions, Georama parts, builds…").fill("grenade");
     await page.getByRole("button", { name: "Add Grenade Launcher", exact: true }).click();
@@ -83,7 +83,7 @@ test.describe("shopping list", () => {
     await go(page, "/guides/view?id=island-king-42c60d");
     await page.getByRole("button", { name: "Add remaining steps to list" }).click();
 
-    await go(page, "/shopping");
+    await go(page, "/tools/shopping");
     await expect(making(page).getByText("Gunpowder", { exact: true })).toBeVisible();
     await expect(making(page).getByText("Island King — Story")).toBeVisible();
     const p = await activeProfile(page);

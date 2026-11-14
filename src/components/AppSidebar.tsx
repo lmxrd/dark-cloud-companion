@@ -113,6 +113,11 @@ function NavLink({
               >
                 <span>{child.title}</span>
               </SidebarMenuSubButton>
+              {child.badge ? (
+                <SidebarMenuBadge className="border-sidebar-border bg-accent text-accent-foreground top-0.5 border font-mono">
+                  {child.badge}
+                </SidebarMenuBadge>
+              ) : null}
             </SidebarMenuSubItem>
           ))}
         </SidebarMenuSub>
@@ -296,9 +301,12 @@ export function AppSidebar({ pathname }: { pathname: string }) {
   const shoppingLeft = useShoppingLeft();
 
   // The shopping list shows how many lines are still to buy.
-  const items: NavItem[] = mainNav(t).map((item) =>
-    item.href === "/shopping" ? { ...item, badge: shoppingLeft } : item,
-  );
+  const items: NavItem[] = mainNav(t).map((item) => ({
+    ...item,
+    children: item.children?.map((c) =>
+      c.href === "/tools/shopping" ? { ...c, badge: shoppingLeft } : c,
+    ),
+  }));
 
   return (
     <Sidebar collapsible="icon" className="border-r-2">

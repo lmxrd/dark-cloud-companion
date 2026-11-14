@@ -8,7 +8,7 @@ test("the planner reports a worker that can't load instead of calculating foreve
   page,
 }) => {
   await page.route(/\/_astro\/worker[^/]*\.js/, (route) => route.abort());
-  await go(page, "/planner");
+  await go(page, "/tools/planner");
   await targetPicker(page).selectOption({ label: "Drill Wrench" });
   await page.getByRole("button", { name: "Generate plan" }).click();
   await expect(page.getByText(/the planner couldn't start/)).toBeVisible({ timeout: 15_000 });

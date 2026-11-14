@@ -359,7 +359,11 @@ export const en = {
   "nav.spheda": "Spheda",
   "nav.tools": "Tools",
   "nav.spheres": "Synth sphere calculator",
-  "reference.tools": "Tools: synth sphere calculator",
+  "tools.title": "Tools",
+  "tools.intro": "Plan weapon builds, make a shopping list and work out synth spheres.",
+  "tools.planner": "Generate an optimal weapon build, or write your own guide",
+  "tools.spheres": "See what a side weapon's synth sphere passes on",
+  "tools.shopping": "Everything to buy for your inventions, Georama and builds, by shop",
   "sphere.title": "Synth sphere calculator",
   "sphere.intro":
     "Pick a side weapon, level it, add items or stats, and see what its synth sphere passes on.",

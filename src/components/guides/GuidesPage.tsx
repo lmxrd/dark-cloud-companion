@@ -117,7 +117,10 @@ export function GuidesPage() {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            <Button nativeButton={false} render={<a href={withBase("/planner/editor?new")} />}>
+            <Button
+              nativeButton={false}
+              render={<a href={withBase("/tools/planner/editor?new")} />}
+            >
               <PlusIcon />
               {t("guides.new")}
             </Button>
@@ -163,7 +166,7 @@ export function GuidesPage() {
         {guides.length === 0 ? (
           <div className="flex flex-col items-start gap-3 rounded-lg border-2 border-dashed p-4">
             <p className="text-muted-foreground text-sm">{t("guides.customEmpty")}</p>
-            <Button nativeButton={false} render={<a href={withBase("/planner")} />}>
+            <Button nativeButton={false} render={<a href={withBase("/tools/planner")} />}>
               {t("guides.openPlanner")}
             </Button>
           </div>

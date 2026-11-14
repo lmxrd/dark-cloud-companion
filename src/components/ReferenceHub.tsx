@@ -37,8 +37,6 @@ export function ReferenceHub() {
       meta: t("reference.weapons", { count: weaponCount }),
     },
     { href: "/items", title: t("nav.items"), meta: t("reference.items", itemCounts) },
-    // Tools sit in the sidebar; the phone tab bar has no room, so they are reached from here too.
-    { href: "/tools/spheres", title: t("nav.tools"), meta: t("reference.tools") },
     tracker("ridepod", ridepodProgress(shown)),
     tracker("monsters", monsterProgress(shown)),
     tracker("spheda", sphedaProgress(shown)),

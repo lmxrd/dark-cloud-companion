@@ -28,7 +28,7 @@ test("the app works offline after the first visit", async ({ page, context }) =>
 });
 
 test("the planner still runs offline (solver bundled)", async ({ page, context }) => {
-  await go(page, "/planner");
+  await go(page, "/tools/planner");
   await page.evaluate(async () => {
     await navigator.serviceWorker.ready;
     for (let i = 0; i < 100; i++) {

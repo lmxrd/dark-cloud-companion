@@ -4,7 +4,7 @@ import { activeProfile, go, startPicker, targetPicker, typeTabs } from "./helper
 
 test.describe("guides, planner and editor", () => {
   test("generate a weapon build, save it as a guide and see it in My guides", async ({ page }) => {
-    await go(page, "/planner");
+    await go(page, "/tools/planner");
     await targetPicker(page).selectOption({ label: "Smash Wrench" });
     await page.getByRole("button", { name: "Generate plan" }).click();
     await expect(page.getByText(/Build-up route:/)).toBeVisible({ timeout: 60_000 });
@@ -23,7 +23,7 @@ test.describe("guides, planner and editor", () => {
   });
 
   test("the planner remembers its inputs", async ({ page }) => {
-    await go(page, "/planner");
+    await go(page, "/tools/planner");
     await targetPicker(page).selectOption({ label: "LEGEND" });
     await page.getByLabel("Optimise for").selectOption("gilda");
     await page.reload();
@@ -34,7 +34,7 @@ test.describe("guides, planner and editor", () => {
   test("create a guide by hand: text step, checklist items and a referenced collectable", async ({
     page,
   }) => {
-    await go(page, "/planner?new");
+    await go(page, "/tools/planner?new");
     await page.getByLabel("Guide title").fill("My e2e guide");
     await page.getByRole("button", { name: "Create" }).click();
     await page.getByLabel("Step title").fill("Photos in town");
@@ -76,7 +76,7 @@ test.describe("guides, planner and editor", () => {
   test("export and import round-trips; importing the same file again changes nothing", async ({
     page,
   }) => {
-    await go(page, "/planner?new");
+    await go(page, "/tools/planner?new");
     await page.getByLabel("Guide title").fill("Round trip");
     await page.getByRole("button", { name: "Create" }).click();
     await page.getByRole("button", { name: "Save guide" }).click();
@@ -153,14 +153,14 @@ test("remembered planner inputs that point at unknown weapons are ignored instea
       }),
     );
   });
-  await go(page, "/planner");
+  await go(page, "/tools/planner");
   await expect(targetPicker(page)).toBeVisible();
   await expect(page.getByRole("alert")).toHaveCount(0);
 });
 
 test.describe("custom start and end weapons, one tab per weapon type", () => {
   test("the target weapon is picked from weapon-type tabs", async ({ page }) => {
-    await go(page, "/planner");
+    await go(page, "/tools/planner");
     // Wrenches (the first tab) are active by default, with the type's final weapon selected.
     await expect(typeTabs(page).getByRole("tab").first()).toHaveAttribute("aria-selected", "true");
     await expect(targetPicker(page)).toHaveValue("grade-zero");
@@ -193,7 +193,7 @@ test.describe("custom start and end weapons, one tab per weapon type", () => {
   test("custom start weapon (specs + abilities) and custom end weapon (required specs)", async ({
     page,
   }) => {
-    await go(page, "/planner");
+    await go(page, "/tools/planner");
     await targetPicker(page).selectOption({ label: "Smash Wrench" });
     const startSection = page.getByRole("region", { name: "Start point" });
     const targetSection = page.getByRole("region", { name: "Target weapon" });
@@ -232,7 +232,7 @@ test.describe("custom start and end weapons, one tab per weapon type", () => {
   });
 
   test("opposing abilities are one three-way switch per pair", async ({ page }) => {
-    await go(page, "/planner");
+    await go(page, "/tools/planner");
     const target = page.getByRole("region", { name: "Target weapon" });
     const pair = target.getByRole("radiogroup", { name: "Critical / Dark" });
     await expect(pair.getByLabel("Neither Critical nor Dark")).toBeChecked();
