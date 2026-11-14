@@ -193,7 +193,7 @@ describe("optimal start search", () => {
 });
 
 describe("ability goals", () => {
-  test("coins are added so the finished weapon carries the wanted abilities", async () => {
+  test("side weapons' spheres, not coins, give the finished weapon the wanted abilities", async () => {
     const r = await planPath({
       start: start("battle-wrench"),
       targetId: "smash-wrench",
@@ -208,11 +208,33 @@ describe("ability goals", () => {
     expect(r.simulation!.state.abilities).toEqual(expect.arrayContaining(["poison", "dark"]));
     expect(r.abilitiesMissing).toBeUndefined();
     const last = r.plan!.stages.at(-1)!;
-    expect(last.synths.some((s) => s.kind === "item" && s.name === "Poison Coin")).toBe(true);
-    expect(last.synths.some((s) => s.kind === "item" && s.name === "Dark Coin")).toBe(true);
+    expect(last.synths.some((s) => s.kind === "item" && s.name.endsWith(" Coin"))).toBe(false);
+    const sphereAbilities = last.synths.flatMap((s) =>
+      s.kind === "sphere" ? getWeapon(s.recipe.stages.at(-1)!.weaponId).abilities : [],
+    );
+    expect(sphereAbilities).toEqual(expect.arrayContaining(["poison", "dark"]));
   }, 60000);
 
-  test("abilities whose coin isn't sold yet are reported as missing, the rest are still added", async () => {
+  test("with coins as the cheaper option, bought coins replace the spheres", async () => {
+    const r = await planPath({
+      start: start("battle-wrench"),
+      targetId: "smash-wrench",
+      objective: "abs",
+      goal: { kind: "reach" },
+      maxChapter: 8,
+      spBonus: 1,
+      abilities: ["poison", "dark"],
+      abilitySource: "cheapest",
+    });
+    expect(r.status).toBe("ok");
+    expect(r.simulation!.errors).toEqual([]);
+    const last = r.plan!.stages.at(-1)!;
+    expect(last.synths.some((s) => s.kind === "item" && s.name === "Poison Coin")).toBe(true);
+    expect(last.synths.some((s) => s.kind === "item" && s.name === "Dark Coin")).toBe(true);
+    expect(last.synths.some((s) => s.kind === "sphere")).toBe(false);
+  }, 60000);
+
+  test("abilities neither a sphere nor a coin can give yet are reported as missing, the rest are still added", async () => {
     const r = await planPath({
       start: start("battle-wrench"),
       targetId: "smash-wrench",
@@ -220,11 +242,11 @@ describe("ability goals", () => {
       goal: { kind: "reach" },
       maxChapter: 3,
       spBonus: 1,
-      abilities: ["poison", "dark"],
+      abilities: ["poison", "absorb"],
     });
     expect(r.status).toBe("ok");
-    expect(r.abilitiesMissing).toEqual(["poison"]);
-    expect(r.simulation!.state.abilities).toContain("dark");
+    expect(r.abilitiesMissing).toEqual(["absorb"]);
+    expect(r.simulation!.state.abilities).toContain("poison");
   }, 60000);
 
   test("an opposite ability on the weapon takes a second coin", async () => {

@@ -1,7 +1,7 @@
 // The planner's inputs (weapons, synth items, prices), built from the game data exported from
 // drizzle/game.db. The shapes are the planner's own (`Weapon`, `SynthItem` in lib/schemas), so the
 // verified mechanics and solver stay as they are.
-import { collectables, names, type Sources } from "@/lib/gamedata";
+import { collectables, core, names, type Sources } from "@/lib/gamedata";
 import { weapons as weaponsFile } from "@/lib/gamedata/weapons";
 import { items as itemsFile } from "@/lib/gamedata/items";
 import { shops as shopsFile } from "@/lib/gamedata/shops";
@@ -172,6 +172,28 @@ export function itemAvailability(name: string): ItemAvailability {
     : { kind: "found" };
 }
 export const coinFor = (ability: AbilityId) => coinSources.find((c) => c.ability === ability);
+
+const sectionChapter = new Map(core.sections.map((s) => [s.id, s.chapterNumber]));
+/**
+ * The earliest chapter an ability's coin can be had: bought, or won as a Spheda prize. Spheda is a
+ * slow and unreliable source (a floor to clear, a course that may not be winnable), so the planner
+ * only falls back on it when nothing else provides the ability; `viaSpheda` says when it does.
+ */
+export function coinChapter(
+  ability: AbilityId,
+): { chapter: number; viaSpheda: boolean } | undefined {
+  const coin = coinFor(ability);
+  if (!coin) return undefined;
+  const item = itemsFile.items.find((i) => i.name === coin.name);
+  const prizes = (item?.sources.sphedaPrizes ?? [])
+    .map((p) => sectionChapter.get(p.sectionId))
+    .filter((c): c is number => c !== undefined);
+  const shop = coin.fromChapter;
+  const spheda = prizes.length ? Math.min(...prizes) : undefined;
+  if (shop !== undefined && (spheda === undefined || shop <= spheda))
+    return { chapter: shop, viaSpheda: false };
+  return spheda !== undefined ? { chapter: spheda, viaSpheda: true } : undefined;
+}
 export const synthSourceByName = new Map(synthSources.map((s) => [s.name, s]));
 
 /** Chapter in which a photo (invention ingredient) first becomes available. */

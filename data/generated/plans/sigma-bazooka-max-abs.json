@@ -1,93 +1,54 @@
 {
-  "name": "Sigma Bazooka — Least ABS",
-  "hash": "e9efc9ab0c93b0ff278d2a2dc6b54ecaa19bd443ae244566a5eec018cb730d44",
+  "name": "Sigma Bazooka — Least ABS, spheres",
+  "hash": "7955a865387c44d359a526b834da85437637a3cea3dabb48ef7cb8e9555f2408",
   "guide": {
     "id": "sigma-bazooka-max-abs",
-    "title": "Sigma Bazooka — Least ABS",
-    "description": "Least ABS · maxed stats · 8 abilities · optimal start (Twin Buster) · done after Ultimate Snake (chapter 8) · no ABS grinding",
+    "title": "Sigma Bazooka — Least ABS, spheres",
+    "description": "Least ABS, spheres · maxed stats · 8 abilities (side-weapon spheres first) · optimal start (Dark Viper) · done after Mariner (chapter 8) · no ABS grinding",
     "kind": "builtin",
     "build": {
-      "weaponId": "twin-buster",
+      "weaponId": "dark-viper",
       "level": 0,
       "abs": 0,
       "stats": {
-        "at": 101,
-        "fl": 85,
+        "at": 44,
+        "fl": 45,
         "ch": 0,
         "li": 0,
-        "cy": 85,
-        "sm": 95,
+        "cy": 45,
+        "sm": 45,
         "ex": 0,
-        "be": 0,
+        "be": 30,
         "sc": 0
       },
       "du": 0,
       "sp": 2,
-      "abilities": [],
+      "abilities": [
+        "absorb"
+      ],
       "spBonus": 1,
       "acquire": {
         "kind": "invent",
-        "chapter": 7,
-        "gilda": 2500
+        "chapter": 4,
+        "gilda": 840
       }
     },
     "steps": [
       {
-        "id": "twin-buster+4",
-        "title": "Twin Buster → Sigma Bazooka",
+        "id": "dark-viper+4",
+        "title": "Dark Viper → Twin Buster",
         "notes": "",
         "chapterId": "8",
         "sectionId": "the-zelmite-mine",
         "entries": [],
         "build": {
-          "weaponId": "twin-buster",
+          "weaponId": "dark-viper",
           "levelTo": 4,
           "synths": [
             {
               "kind": "item",
-              "name": "Turquoise",
-              "count": 3
-            },
-            {
-              "kind": "sphere",
-              "recipe": {
-                "acquire": {
-                  "kind": "invent",
-                  "chapter": 8,
-                  "gilda": 13100
-                },
-                "stages": [
-                  {
-                    "weaponId": "sexy-panther",
-                    "levelTo": 5,
-                    "synths": []
-                  }
-                ]
-              }
-            }
-          ]
-        }
-      },
-      {
-        "id": "sigma-bazooka+3",
-        "title": "Sigma Bazooka",
-        "notes": "",
-        "chapterId": "8",
-        "sectionId": "ultimate-snake",
-        "entries": [],
-        "build": {
-          "weaponId": "sigma-bazooka",
-          "levelTo": 3,
-          "synths": [
-            {
-              "kind": "item",
               "name": "Peridot",
-              "count": 1
-            },
-            {
-              "kind": "item",
-              "name": "Turquoise",
-              "count": 6
+              "count": 4
             },
             {
               "kind": "sphere",
@@ -111,6 +72,82 @@
                   }
                 ]
               }
+            }
+          ]
+        }
+      },
+      {
+        "id": "twin-buster+4",
+        "title": "Twin Buster → Sigma Bazooka",
+        "notes": "",
+        "chapterId": "8",
+        "sectionId": "the-zelmite-mine",
+        "entries": [],
+        "build": {
+          "weaponId": "twin-buster",
+          "levelTo": 4,
+          "synths": [
+            {
+              "kind": "item",
+              "name": "Amethyst",
+              "count": 1
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "invent",
+                  "chapter": 8,
+                  "gilda": 13100
+                },
+                "stages": [
+                  {
+                    "weaponId": "sexy-panther",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 27
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "sigma-bazooka+4",
+        "title": "Sigma Bazooka",
+        "notes": "",
+        "chapterId": "8",
+        "sectionId": "mariner",
+        "entries": [],
+        "build": {
+          "weaponId": "sigma-bazooka",
+          "levelTo": 4,
+          "synths": [
+            {
+              "kind": "item",
+              "name": "Amethyst",
+              "count": 1
+            },
+            {
+              "kind": "item",
+              "name": "Garnet",
+              "count": 1
+            },
+            {
+              "kind": "item",
+              "name": "Peridot",
+              "count": 5
+            },
+            {
+              "kind": "item",
+              "name": "Turquoise",
+              "count": 1
             },
             {
               "kind": "sphere",
@@ -139,19 +176,44 @@
               "kind": "sphere",
               "recipe": {
                 "acquire": {
-                  "kind": "invent",
-                  "chapter": 5,
-                  "gilda": 800
+                  "kind": "shop",
+                  "shop": "Starlight Weapons",
+                  "price": 1800,
+                  "chapter": 6
                 },
                 "stages": [
                   {
-                    "weaponId": "heavy-hammer",
+                    "weaponId": "moon-armlet",
                     "levelTo": 5,
                     "synths": [
                       {
                         "kind": "item",
                         "name": "Scrap of Metal",
-                        "count": 37
+                        "count": 27
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "shop",
+                  "shop": "Starlight Weapons",
+                  "price": 1800,
+                  "chapter": 6
+                },
+                "stages": [
+                  {
+                    "weaponId": "moon-armlet",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 27
                       }
                     ]
                   }
@@ -164,17 +226,17 @@
                 "acquire": {
                   "kind": "invent",
                   "chapter": 5,
-                  "gilda": 800
+                  "gilda": 4400
                 },
                 "stages": [
                   {
-                    "weaponId": "heavy-hammer",
+                    "weaponId": "rulers-sword",
                     "levelTo": 5,
                     "synths": [
                       {
                         "kind": "item",
                         "name": "Scrap of Metal",
-                        "count": 37
+                        "count": 27
                       }
                     ]
                   }
@@ -182,44 +244,152 @@
               }
             },
             {
-              "kind": "item",
-              "name": "Poison Coin",
-              "count": 1
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "shop",
+                  "shop": "Jurak Arms",
+                  "price": 500,
+                  "chapter": 2
+                },
+                "stages": [
+                  {
+                    "weaponId": "bone-rapier",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 21
+                      }
+                    ]
+                  }
+                ]
+              }
             },
             {
-              "kind": "item",
-              "name": "Time Coin",
-              "count": 1
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "shop",
+                  "shop": "Jurak Arms",
+                  "price": 880,
+                  "chapter": 5
+                },
+                "stages": [
+                  {
+                    "weaponId": "antique-sword",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 27
+                      }
+                    ]
+                  }
+                ]
+              }
             },
             {
-              "kind": "item",
-              "name": "Experience Coin",
-              "count": 1
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "shop",
+                  "shop": "Milane's Weapon Shop",
+                  "price": 500,
+                  "chapter": 3
+                },
+                "stages": [
+                  {
+                    "weaponId": "kuberas-hand",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 17
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Bundle of Hay",
+                        "count": 4
+                      }
+                    ]
+                  }
+                ]
+              }
             },
             {
-              "kind": "item",
-              "name": "Bandit Coin",
-              "count": 1
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "shop",
+                  "shop": "Julia's Ringware",
+                  "price": 860,
+                  "chapter": 5
+                },
+                "stages": [
+                  {
+                    "weaponId": "pocklekul",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 27
+                      }
+                    ]
+                  }
+                ]
+              }
             },
             {
-              "kind": "item",
-              "name": "Wealth Coin",
-              "count": 1
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "invent",
+                  "chapter": 5,
+                  "gilda": 1890
+                },
+                "stages": [
+                  {
+                    "weaponId": "soul-breaker",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 27
+                      }
+                    ]
+                  }
+                ]
+              }
             },
             {
-              "kind": "item",
-              "name": "Dark Coin",
-              "count": 1
-            },
-            {
-              "kind": "item",
-              "name": "Indestructible Coin",
-              "count": 1
-            },
-            {
-              "kind": "item",
-              "name": "Absorption Coin",
-              "count": 1
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "shop",
+                  "shop": "G-Weapons",
+                  "price": 950,
+                  "chapter": 5
+                },
+                "stages": [
+                  {
+                    "weaponId": "cubic-hammer",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 27
+                      }
+                    ]
+                  }
+                ]
+              }
             }
           ]
         }

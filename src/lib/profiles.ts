@@ -36,6 +36,8 @@ const plannerInputsData = z.object({
   maxChapter: z.number().int().min(1).max(8),
   budget: z.string(),
   abilities: z.array(abilityId),
+  /** Where the abilities come from: side weapons' spheres first, or whichever is cheaper (see the planner's AbilitySource). */
+  abilitySource: z.enum(["spheres", "cheapest"]).default("spheres"),
   /** Whether the start weapon is chosen by the planner (the line's first weapon) or set by hand. */
   customStart: z.boolean().default(false),
   /** Minimum stats and level required for the finished weapon; the UI prefills the target's max stats. */

@@ -3,28 +3,23 @@
 // the planner benches.
 import { planResultToGuide } from "../../src/lib/guide/fromPlan.ts";
 import { guide as guideSchema, type Guide } from "../../src/lib/guide/types.ts";
-import { ancestorsOf } from "../../src/lib/planner/graph.ts";
 import { planPath, type PlanResult } from "../../src/lib/planner/plan.ts";
 import { placeStages, stageUnlockIndex, storyGilda } from "../../src/lib/planner/timeline.ts";
 import { names } from "../../src/lib/gamedata/index.ts";
-import { coinFor, getWeapon, weaponData } from "../../src/lib/planner/sources.ts";
+import { getWeapon, weaponData } from "../../src/lib/planner/sources.ts";
 import { freshState } from "../../src/lib/weapons/mechanics.ts";
 import type { PlanSpec } from "./plans-config.ts";
 
 const killChapter = new Map(weaponData.killEnemies.map((e) => [e.name, e.chapter]));
 
 /**
- * The earliest chapter a plan can possibly finish in: the target's own kill requirements, and the
- * coins for abilities that no weapon in its line carries. Searching below it would be wasted solves.
+ * The earliest chapter a plan can possibly finish in: the target's own kill requirements. (Abilities
+ * no longer bound it: side weapons that carry them come before coins.) Searching below it would be
+ * wasted solves.
  */
 function earliestPossibleChapter(spec: PlanSpec): number {
   const target = getWeapon(spec.targetId);
-  const carried = new Set([...ancestorsOf(spec.targetId)].flatMap((id) => getWeapon(id).abilities));
-  return Math.max(
-    1,
-    ...target.requiresKills.map((e) => killChapter.get(e) ?? 8),
-    ...spec.abilities.filter((a) => !carried.has(a)).map((a) => coinFor(a)?.fromChapter ?? 8),
-  );
+  return Math.max(1, ...target.requiresKills.map((e) => killChapter.get(e) ?? 8));
 }
 
 /** Solves one configured plan into a guide; `timeLimitSec` bounds each exact solve (wall clock). */
@@ -47,6 +42,7 @@ export async function planOne(
       // Never spend more than the story has paid out by the end of the chapter.
       maxGilda: Math.min(spec.maxGilda ?? Infinity, storyGilda(maxChapter)),
       abilities: spec.abilities,
+      abilitySource: spec.abilitySource,
       // Generation is one-off, so let the exact solves run longer than the interactive default.
       timeLimitSec,
     });
@@ -96,7 +92,11 @@ export async function planOne(
   const description = [
     spec.label,
     spec.goal === "max" ? "maxed stats" : "reach the weapon",
-    ...(spec.abilities.length ? [`${spec.abilities.length} abilities`] : []),
+    ...(spec.abilities.length
+      ? [
+          `${spec.abilities.length} abilities (${spec.abilitySource === "spheres" ? "side-weapon spheres first" : "cheapest of spheres and coins"})`,
+        ]
+      : []),
     `optimal start (${startName})`,
     `done after ${names.sections[done.sectionId]} (chapter ${done.chapter})`,
     grind ? `${grind.toLocaleString("en")} ABS to grind` : "no ABS grinding",

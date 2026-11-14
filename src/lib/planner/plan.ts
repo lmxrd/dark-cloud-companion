@@ -1,12 +1,12 @@
 // Top-level planner: enumerates build-up chains from the start weapon to the target, ranks them with the
 // LP relaxation, solves the best few exactly, and verifies the winner with the rule-checking simulator.
 import type { AbilityId, Stats } from "@/lib/schemas";
-import { freshState, type WeaponState } from "@/lib/weapons/mechanics";
+import { freshState, OPPOSITES, type WeaponState } from "@/lib/weapons/mechanics";
 import { itemCandidates } from "./candidates";
 import { simulatePlan, type SimOptions } from "./simulate";
 import { solveChain, type Objective, type SolveResult, type Template } from "./solve";
 import { ancestorsOf, rootWeaponIds } from "./graph";
-import { acquisitionOptions, coinFor, getWeapon, weaponData } from "./sources";
+import { acquisitionOptions, coinChapter, coinFor, getWeapon, weaponData } from "./sources";
 import { generateTemplates } from "./templates";
 import type { Acquire, Cost, Plan, SimulationResult } from "./types";
 
@@ -29,14 +29,25 @@ export interface PlanRequest {
   allowFound?: boolean;
   /** Optional cap on gilda spent on items and sphere weapons. */
   maxGilda?: number;
-  /** Abilities the finished weapon should carry; coins are added at the end where the chain doesn't provide them. */
+  /** Abilities the finished weapon should carry, added at the end where the chain doesn't provide them. */
   abilities?: AbilityId[];
+  /** Where those abilities come from (default `spheres`); see {@link AbilitySource}. */
+  abilitySource?: AbilitySource;
   /** Number of chains to solve exactly (the best by LP bound). */
   exactChains?: number;
   timeLimitSec?: number;
   /** Sphere recipes to choose from; built on the fly (and cached) when not given. */
   templates?: Template[];
 }
+
+/**
+ * Where a plan's abilities come from. `spheres`: +5 spheres of side weapons that carry them, as the
+ * weapon guide's recipes do, with coins only where no sphere fits. `cheapest`: a bought coin instead
+ * whenever it costs less for the objective than the cheapest such sphere (in ABS a coin costs
+ * nothing, so it nearly always wins once coins are on sale). Either way coins that can only be won
+ * at Spheda are a last resort.
+ */
+export type AbilitySource = "spheres" | "cheapest";
 
 /** Coarse progress reported while planning (phases run in this order). */
 export interface PlanProgress {
@@ -148,35 +159,179 @@ export function findChains(
   return out;
 }
 
-/** Appends ability coins to the last stage until the finished weapon carries every wanted ability. */
-function addCoins(
+/** Spheres usable for the abilities: available by then and carrying nothing that cancels a wanted one. */
+function usableSpheres(
+  spheres: AbilitySphere[],
+  wanted: AbilityId[],
+  maxChapter: number,
+): AbilitySphere[] {
+  return spheres.filter(
+    (s) =>
+      s.template.chapter <= maxChapter &&
+      !s.abilities.some((x) => OPPOSITES[x] && wanted.includes(OPPOSITES[x]!)),
+  );
+}
+
+/** Whether to take a bought coin for `ability` rather than a sphere (see {@link AbilitySource}). */
+function coinFirst(
+  ability: AbilityId,
+  source: AbilitySource,
+  usable: AbilitySphere[],
+  objective: Objective,
+  maxChapter: number,
+): boolean {
+  if (source !== "cheapest") return false;
+  const coin = coinFor(ability);
+  if (!coin || coin.fromChapter === undefined || coin.fromChapter > maxChapter) return false;
+  const coinCost = objective === "gilda" ? (coin.price ?? 0) : objective === "steps" ? 1 : 0;
+  const best = usable
+    .filter((s) => s.abilities.includes(ability))
+    .map((s) =>
+      objective === "gilda"
+        ? s.template.gilda
+        : objective === "steps"
+          ? s.template.level
+          : s.template.abs,
+    );
+  return !best.length || coinCost <= Math.min(...best);
+}
+
+/**
+ * Gives the finished weapon every wanted ability: from side weapons that carry it (synthed as +5
+ * spheres onto the last stage, as the weapon guide's recipes do) or from coins, as `source` says;
+ * coins also where no sphere is available or its SP doesn't fit, Spheda-only coins last.
+ */
+function addAbilities(
   start: PlanRequest["start"],
   plan: Plan,
   wanted: AbilityId[],
   maxChapter: number,
   opts: SimOptions,
+  spheres: AbilitySphere[],
+  objective: Objective,
+  source: AbilitySource,
+  /** Gilda the plan may still spend on top of what `plan` costs (undefined: no limit). */
+  gildaLeft: number | undefined,
 ): { plan: Plan; missing: AbilityId[] } {
-  const next: Plan = structuredClone(plan);
-  const last = next.stages[next.stages.length - 1];
+  const usable = usableSpheres(spheres, wanted, maxChapter);
+  let next: Plan = structuredClone(plan);
+  const lastOf = (p: Plan) => p.stages[p.stages.length - 1];
+  const baseGilda = simulatePlan(start, next, opts).cost.gilda;
   const missing: AbilityId[] = [];
-  const used = new Map<AbilityId, number>();
-  for (let guard = 0; guard < 32; guard++) {
+  const triedSphere = new Set<AbilityId>();
+  const coinsUsed = new Map<AbilityId, number>();
+  const cost = sphereCost(objective);
+  for (let guard = 0; guard < 48; guard++) {
     const sim = simulatePlan(start, next, opts);
+    const spent = sim.cost.gilda - baseGilda;
     const need = wanted.filter((a) => !sim.state.abilities.includes(a) && !missing.includes(a));
     if (!need.length) break;
     const a = need[0];
+    if (!triedSphere.has(a) && !coinFirst(a, source, usable, objective, maxChapter)) {
+      triedSphere.add(a);
+      // Spheres that carry the ability (and nothing that would cancel a wanted one); the ones that
+      // also bring other missing abilities first, then the cheapest.
+      const options = usable
+        .filter((s) => s.abilities.includes(a))
+        .filter((s) => gildaLeft === undefined || spent + s.template.gilda <= gildaLeft)
+        .sort(
+          (x, y) =>
+            y.abilities.filter((z) => need.includes(z)).length -
+              x.abilities.filter((z) => need.includes(z)).length || cost(x, y),
+        );
+      let placed = false;
+      for (const option of options) {
+        const trial = structuredClone(next);
+        lastOf(trial).synths.push({
+          kind: "sphere",
+          recipe: structuredClone(option.template.recipe),
+        });
+        if (!simulatePlan(start, trial, opts).errors.length) {
+          next = trial;
+          placed = true;
+          break;
+        }
+      }
+      if (placed) continue;
+    }
     const coin = coinFor(a);
+    const when = coinChapter(a);
     // A coin can cancel an opposite ability first, so up to two coins per ability may be needed.
-    if (!coin || (coin.fromChapter ?? 1) > maxChapter || (used.get(a) ?? 0) >= 2) {
+    if (!coin || !when || when.chapter > maxChapter || (coinsUsed.get(a) ?? 0) >= 2) {
       missing.push(a);
       continue;
     }
-    used.set(a, (used.get(a) ?? 0) + 1);
+    coinsUsed.set(a, (coinsUsed.get(a) ?? 0) + 1);
+    const last = lastOf(next);
     const existing = last.synths.find((s) => s.kind === "item" && s.name === coin.name);
     if (existing && existing.kind === "item") existing.count++;
     else last.synths.push({ kind: "item", name: coin.name, count: 1 });
   }
   return { plan: next, missing };
+}
+
+/**
+ * SP and gilda to set aside for the abilities: the coins (1 SP each) and spheres `addAbilities`
+ * would likely use (spheres covering the most missing abilities first, then the cheapest). Abilities
+ * the chain's weapons carry themselves need nothing. Estimating it up front saves re-solving the
+ * whole chain with ever larger reserves.
+ */
+function abilityReserve(
+  chain: string[],
+  wanted: AbilityId[],
+  spheres: AbilitySphere[],
+  maxChapter: number,
+  objective: Objective,
+  source: AbilitySource,
+): { sp: number; gilda: number } {
+  const carried = new Set(chain.flatMap((id) => getWeapon(id).abilities));
+  const usable = usableSpheres(spheres, wanted, maxChapter);
+  const missing = wanted.filter((a) => !carried.has(a));
+  const coins = missing.filter((a) => coinFirst(a, source, usable, objective, maxChapter));
+  let need = missing.filter((a) => !coins.includes(a));
+  let sp = coins.length;
+  let gilda = coins.reduce((n, a) => n + (coinFor(a)?.price ?? 0), 0);
+  while (need.length) {
+    const covers = (s: AbilitySphere) => s.abilities.filter((a) => need.includes(a)).length;
+    const pick = usable
+      .filter((s) => covers(s) > 0)
+      .sort((x, y) => covers(y) - covers(x) || sphereCost(objective)(x, y))[0];
+    if (!pick) {
+      sp += need.length;
+      gilda += need.reduce((n, a) => n + (coinFor(a)?.price ?? 0), 0);
+      break;
+    }
+    sp += pick.template.level;
+    gilda += pick.template.gilda;
+    need = need.filter((a) => !pick.abilities.includes(a));
+  }
+  return { sp, gilda };
+}
+
+/** Orders ability spheres by the plan's objective, then by gilda. */
+const sphereCost =
+  (objective: Objective) =>
+  (x: AbilitySphere, y: AbilitySphere): number => {
+    const of = (s: AbilitySphere) =>
+      objective === "gilda"
+        ? s.template.gilda
+        : objective === "steps"
+          ? s.template.level
+          : s.template.abs;
+    return of(x) - of(y) || x.template.gilda - y.template.gilda;
+  };
+
+/** A sphere recipe and the abilities its sphere passes on (from +5). */
+interface AbilitySphere {
+  template: Template;
+  abilities: AbilityId[];
+}
+
+/** The recipes whose spheres carry abilities. */
+function abilitySpheres(templates: Template[]): AbilitySphere[] {
+  return templates.flatMap((template) =>
+    template.abilities?.length ? [{ template, abilities: template.abilities }] : [],
+  );
 }
 
 interface Candidate {
@@ -190,10 +345,9 @@ export async function planPath(
 ): Promise<PlanResult> {
   const target = getWeapon(req.targetId);
   const wanted = req.abilities ?? [];
-  // Coins cost gilda too: take their (cheapest) price off the budget the optimiser may spend elsewhere.
-  const coinBudget = wanted.reduce((n, a) => n + (coinFor(a)?.price ?? 0), 0);
-  const itemBudget =
-    req.maxGilda === undefined ? undefined : Math.max(0, req.maxGilda - coinBudget);
+  const source = req.abilitySource ?? "spheres";
+  // The abilities' spheres and coins cost gilda too; that is taken off per chain (see abilityReserve).
+  const itemBudget = req.maxGilda;
 
   // Candidate starts: the given start, or every acquirable weapon in the target's build-up line.
   let candidates: Candidate[] = req.optimalStart
@@ -253,7 +407,6 @@ export async function planPath(
       : req.goal.kind === "stats"
         ? { finalStats: req.goal.stats, finalLevel: req.goal.level ?? 0 }
         : {};
-  const baseReserve = Math.min(16, wanted.length * 2);
   const base = {
     start: req.start,
     objective: req.objective,
@@ -261,10 +414,11 @@ export async function planPath(
     items,
     templates,
     maxGilda: itemBudget,
-    reserveSp: baseReserve,
+    reserveSp: 0,
     ...goalInputs,
   };
   const simOpts: SimOptions = { spBonus: req.spBonus };
+  const spheres = wanted.length ? abilitySpheres(templates) : [];
   const candidateByStart = new Map(candidates.map((c) => [c.state.weaponId, c]));
   // Per-start inputs: the start's own state, with the acquisition taken off the item budget.
   const baseFor = (c: Candidate) => ({
@@ -327,10 +481,19 @@ export async function planPath(
     let plan: Plan | undefined;
     let sim: ReturnType<typeof simulatePlan> | undefined;
     let missing: AbilityId[] = [];
-    for (const extra of wanted.length ? [0, 4, 8] : [0]) {
+    // SP for the ability spheres and coins is set aside up front; if they still don't fit (or a
+    // sphere is swapped for a coin), retry with more.
+    const reserve = wanted.length
+      ? abilityReserve(o.chain, wanted, spheres, req.maxChapter, req.objective, source)
+      : { sp: 0, gilda: 0 };
+    const chainBase = baseFor(candidate);
+    for (const extra of wanted.length ? [0, 10] : [0]) {
       r = await solveChain({
-        ...baseFor(candidate),
-        reserveSp: baseReserve + extra,
+        ...chainBase,
+        ...(chainBase.maxGilda !== undefined
+          ? { maxGilda: Math.max(0, chainBase.maxGilda - reserve.gilda) }
+          : {}),
+        reserveSp: reserve.sp + extra,
         chain: o.chain,
         // HiGHS finds a near-optimal incumbent early and spends minutes proving the last 1%:
         // cap the proof instead and keep whatever incumbent it has (still simulator-verified).
@@ -351,7 +514,24 @@ export async function planPath(
       plan = r.plan;
       missing = [];
       if (wanted.length) {
-        const withCoins = addCoins(candidate.state, r.plan, wanted, req.maxChapter, simOpts);
+        const withCoins = addAbilities(
+          candidate.state,
+          r.plan,
+          wanted,
+          req.maxChapter,
+          simOpts,
+          spheres,
+          req.objective,
+          source,
+          req.maxGilda === undefined
+            ? undefined
+            : Math.max(
+                0,
+                req.maxGilda -
+                  acquireGilda(candidate.acquire) -
+                  (r.plan ? simulatePlan(candidate.state, r.plan, simOpts).cost.gilda : 0),
+              ),
+        );
         plan = withCoins.plan;
         missing = withCoins.missing;
       }

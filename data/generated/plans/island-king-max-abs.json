@@ -1,24 +1,24 @@
 {
-  "name": "Island King — Least ABS",
-  "hash": "0886c99f9a6142b2a84a14e98f35699ece5b90a9236eedfade79278a6c1930aa",
+  "name": "Island King — Least ABS, spheres",
+  "hash": "f9715fc2e59bada1f3063bae8262dbba1b8c236a7a4a360f4fee794a45eb5846",
   "guide": {
     "id": "island-king-max-abs",
-    "title": "Island King — Least ABS",
-    "description": "Least ABS · maxed stats · 8 abilities · optimal start (Gladius) · done after Mr. Big Shot Shadow (chapter 8) · no ABS grinding",
+    "title": "Island King — Least ABS, spheres",
+    "description": "Least ABS, spheres · maxed stats · 8 abilities (side-weapon spheres first) · optimal start (Baselard) · done after Mr. Big Shot Shadow (chapter 8) · no ABS grinding",
     "kind": "builtin",
     "build": {
-      "weaponId": "gladius",
+      "weaponId": "baselard",
       "level": 0,
       "abs": 0,
       "stats": {
-        "at": 20,
+        "at": 21,
         "fl": 0,
         "ch": 0,
         "li": 0,
         "cy": 10,
         "sm": 0,
-        "ex": 0,
-        "be": 5,
+        "ex": 10,
+        "be": 0,
         "sc": 0
       },
       "du": 0,
@@ -31,25 +31,25 @@
     },
     "steps": [
       {
-        "id": "gladius+13",
-        "title": "Gladius → Cliff Knife",
+        "id": "baselard+11",
+        "title": "Baselard → Broad Sword",
         "notes": "",
         "chapterId": "8",
         "sectionId": "the-zelmite-mine",
         "entries": [],
         "build": {
-          "weaponId": "gladius",
-          "levelTo": 13,
+          "weaponId": "baselard",
+          "levelTo": 11,
           "synths": [
             {
               "kind": "item",
               "name": "Emerald",
-              "count": 2
+              "count": 1
             },
             {
               "kind": "item",
-              "name": "Hunter Crystal",
-              "count": 2
+              "name": "Scrap of Metal",
+              "count": 7
             },
             {
               "kind": "item",
@@ -60,119 +60,39 @@
         }
       },
       {
-        "id": "cliff-knife+5",
-        "title": "Cliff Knife → Chopper",
+        "id": "broad-sword+5",
+        "title": "Broad Sword → Kitchen Knife",
         "notes": "",
         "chapterId": "8",
         "sectionId": "the-zelmite-mine",
         "entries": [],
         "build": {
-          "weaponId": "cliff-knife",
+          "weaponId": "broad-sword",
           "levelTo": 5,
           "synths": [
             {
               "kind": "item",
-              "name": "Hunter Crystal",
+              "name": "Garnet",
               "count": 2
             },
             {
               "kind": "item",
-              "name": "Topaz",
+              "name": "Lightning Crystal",
               "count": 1
             }
           ]
         }
       },
       {
-        "id": "chopper+5",
-        "title": "Chopper → Choora",
+        "id": "kitchen-knife+5",
+        "title": "Kitchen Knife → Serpent Slicer",
         "notes": "",
         "chapterId": "8",
         "sectionId": "the-zelmite-mine",
         "entries": [],
         "build": {
-          "weaponId": "chopper",
+          "weaponId": "kitchen-knife",
           "levelTo": 5,
-          "synths": [
-            {
-              "kind": "item",
-              "name": "Emerald",
-              "count": 1
-            },
-            {
-              "kind": "sphere",
-              "recipe": {
-                "acquire": {
-                  "kind": "shop",
-                  "shop": "Gerald's Guns",
-                  "price": 900,
-                  "chapter": 5
-                },
-                "stages": [
-                  {
-                    "weaponId": "wild-cat",
-                    "levelTo": 5,
-                    "synths": [
-                      {
-                        "kind": "item",
-                        "name": "Scrap of Metal",
-                        "count": 27
-                      }
-                    ]
-                  }
-                ]
-              }
-            }
-          ]
-        }
-      },
-      {
-        "id": "choora+3",
-        "title": "Choora → Small Sword",
-        "notes": "",
-        "chapterId": "8",
-        "sectionId": "the-zelmite-mine",
-        "entries": [],
-        "build": {
-          "weaponId": "choora",
-          "levelTo": 3,
-          "synths": [
-            {
-              "kind": "sphere",
-              "recipe": {
-                "acquire": {
-                  "kind": "invent",
-                  "chapter": 5,
-                  "gilda": 800
-                },
-                "stages": [
-                  {
-                    "weaponId": "heavy-hammer",
-                    "levelTo": 5,
-                    "synths": [
-                      {
-                        "kind": "item",
-                        "name": "Scrap of Metal",
-                        "count": 37
-                      }
-                    ]
-                  }
-                ]
-              }
-            }
-          ]
-        }
-      },
-      {
-        "id": "small-sword+2",
-        "title": "Small Sword → Maneater",
-        "notes": "",
-        "chapterId": "8",
-        "sectionId": "the-zelmite-mine",
-        "entries": [],
-        "build": {
-          "weaponId": "small-sword",
-          "levelTo": 2,
           "synths": [
             {
               "kind": "sphere",
@@ -201,16 +121,39 @@
         }
       },
       {
-        "id": "maneater+3",
-        "title": "Maneater → Griffon Fork",
+        "id": "serpent-slicer+4",
+        "title": "Serpent Slicer → Sargatanas",
         "notes": "",
         "chapterId": "8",
-        "sectionId": "mr-big-shot-shadow",
+        "sectionId": "the-zelmite-mine",
         "entries": [],
         "build": {
-          "weaponId": "maneater",
-          "levelTo": 3,
+          "weaponId": "serpent-slicer",
+          "levelTo": 4,
           "synths": [
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "invent",
+                  "chapter": 8,
+                  "gilda": 13100
+                },
+                "stages": [
+                  {
+                    "weaponId": "sexy-panther",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 27
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
             {
               "kind": "sphere",
               "recipe": {
@@ -228,6 +171,73 @@
                         "kind": "item",
                         "name": "Scrap of Metal",
                         "count": 37
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "sargatanas+3",
+        "title": "Sargatanas → Dark Excalibur",
+        "notes": "",
+        "chapterId": "8",
+        "sectionId": "the-zelmite-mine",
+        "entries": [],
+        "build": {
+          "weaponId": "sargatanas",
+          "levelTo": 3,
+          "synths": [
+            {
+              "kind": "item",
+              "name": "Rolling Log",
+              "count": 1
+            }
+          ]
+        }
+      },
+      {
+        "id": "dark-excalibur+4",
+        "title": "Dark Excalibur → Griffon Fork",
+        "notes": "",
+        "chapterId": "8",
+        "sectionId": "mr-big-shot-shadow",
+        "entries": [],
+        "build": {
+          "weaponId": "dark-excalibur",
+          "levelTo": 4,
+          "synths": [
+            {
+              "kind": "item",
+              "name": "Holy Crystal",
+              "count": 2
+            },
+            {
+              "kind": "item",
+              "name": "Rolling Log",
+              "count": 1
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "shop",
+                  "shop": "Julia's Ringware",
+                  "price": 860,
+                  "chapter": 5
+                },
+                "stages": [
+                  {
+                    "weaponId": "pocklekul",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 27
                       }
                     ]
                   }
@@ -256,7 +266,7 @@
             {
               "kind": "item",
               "name": "Peridot",
-              "count": 2
+              "count": 5
             },
             {
               "kind": "sphere",
@@ -297,13 +307,13 @@
           "synths": [
             {
               "kind": "item",
-              "name": "Flame Crystal",
-              "count": 10
+              "name": "Knight Boots",
+              "count": 100
             },
             {
               "kind": "item",
-              "name": "Knight Boots",
-              "count": 111
+              "name": "Peridot",
+              "count": 1
             },
             {
               "kind": "sphere",
@@ -352,44 +362,151 @@
               }
             },
             {
-              "kind": "item",
-              "name": "Poison Coin",
-              "count": 1
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "shop",
+                  "shop": "Jurak Arms",
+                  "price": 500,
+                  "chapter": 2
+                },
+                "stages": [
+                  {
+                    "weaponId": "bone-rapier",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 21
+                      }
+                    ]
+                  }
+                ]
+              }
             },
             {
-              "kind": "item",
-              "name": "Time Coin",
-              "count": 1
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "shop",
+                  "shop": "Jurak Arms",
+                  "price": 880,
+                  "chapter": 5
+                },
+                "stages": [
+                  {
+                    "weaponId": "antique-sword",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 27
+                      }
+                    ]
+                  }
+                ]
+              }
             },
             {
-              "kind": "item",
-              "name": "Experience Coin",
-              "count": 1
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "invent",
+                  "chapter": 5,
+                  "gilda": 4400
+                },
+                "stages": [
+                  {
+                    "weaponId": "rulers-sword",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 27
+                      }
+                    ]
+                  }
+                ]
+              }
             },
             {
-              "kind": "item",
-              "name": "Bandit Coin",
-              "count": 1
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "shop",
+                  "shop": "Milane's Weapon Shop",
+                  "price": 500,
+                  "chapter": 3
+                },
+                "stages": [
+                  {
+                    "weaponId": "kuberas-hand",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 17
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Bundle of Hay",
+                        "count": 4
+                      }
+                    ]
+                  }
+                ]
+              }
             },
             {
-              "kind": "item",
-              "name": "Wealth Coin",
-              "count": 1
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "shop",
+                  "shop": "G-Weapons",
+                  "price": 950,
+                  "chapter": 5
+                },
+                "stages": [
+                  {
+                    "weaponId": "cubic-hammer",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 27
+                      }
+                    ]
+                  }
+                ]
+              }
             },
             {
-              "kind": "item",
-              "name": "Dark Coin",
-              "count": 2
-            },
-            {
-              "kind": "item",
-              "name": "Indestructible Coin",
-              "count": 1
-            },
-            {
-              "kind": "item",
-              "name": "Absorption Coin",
-              "count": 1
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "invent",
+                  "chapter": 4,
+                  "gilda": 840
+                },
+                "stages": [
+                  {
+                    "weaponId": "dark-viper",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 27
+                      }
+                    ]
+                  }
+                ]
+              }
             }
           ]
         }

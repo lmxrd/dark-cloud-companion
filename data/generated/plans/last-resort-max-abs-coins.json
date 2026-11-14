@@ -1,0 +1,274 @@
+{
+  "name": "Last Resort — Least ABS, coins",
+  "hash": "2ca95f0075797164db86f25ffe3f62b066c3087860b91366ba2102802b9e4450",
+  "guide": {
+    "id": "last-resort-max-abs-coins",
+    "title": "Last Resort — Least ABS, coins",
+    "description": "Least ABS, coins · maxed stats · 8 abilities (cheapest of spheres and coins) · optimal start (Sexy Panther) · done after Mariner (chapter 8) · no ABS grinding",
+    "kind": "builtin",
+    "build": {
+      "weaponId": "sexy-panther",
+      "level": 0,
+      "abs": 0,
+      "stats": {
+        "at": 77,
+        "fl": 80,
+        "ch": 0,
+        "li": 0,
+        "cy": 95,
+        "sm": 95,
+        "ex": 0,
+        "be": 85,
+        "sc": 95
+      },
+      "du": 0,
+      "sp": 2,
+      "abilities": [],
+      "spBonus": 1,
+      "acquire": {
+        "kind": "invent",
+        "chapter": 8,
+        "gilda": 13100
+      }
+    },
+    "steps": [
+      {
+        "id": "sexy-panther+3",
+        "title": "Sexy Panther → Desperado",
+        "notes": "",
+        "chapterId": "8",
+        "sectionId": "moon-mole",
+        "entries": [],
+        "build": {
+          "weaponId": "sexy-panther",
+          "levelTo": 3,
+          "synths": [
+            {
+              "kind": "item",
+              "name": "Emerald",
+              "count": 1
+            },
+            {
+              "kind": "item",
+              "name": "Flame Crystal",
+              "count": 1
+            },
+            {
+              "kind": "item",
+              "name": "Gunpowder",
+              "count": 3
+            },
+            {
+              "kind": "item",
+              "name": "Lightning Crystal",
+              "count": 1
+            },
+            {
+              "kind": "item",
+              "name": "Scrap of Metal",
+              "count": 1
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "invent",
+                  "chapter": 5,
+                  "gilda": 800
+                },
+                "stages": [
+                  {
+                    "weaponId": "heavy-hammer",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 37
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "shop",
+                  "shop": "Julia's Ringware",
+                  "price": 860,
+                  "chapter": 5
+                },
+                "stages": [
+                  {
+                    "weaponId": "pocklekul",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 27
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "desperado+4",
+        "title": "Desperado → Last Resort",
+        "notes": "",
+        "chapterId": "8",
+        "sectionId": "moon-mole",
+        "entries": [],
+        "build": {
+          "weaponId": "desperado",
+          "levelTo": 4,
+          "synths": [
+            {
+              "kind": "item",
+              "name": "Emerald",
+              "count": 1
+            },
+            {
+              "kind": "item",
+              "name": "Flour",
+              "count": 1
+            },
+            {
+              "kind": "item",
+              "name": "Peridot",
+              "count": 2
+            }
+          ]
+        }
+      },
+      {
+        "id": "last-resort+3",
+        "title": "Last Resort",
+        "notes": "",
+        "chapterId": "8",
+        "sectionId": "mariner",
+        "entries": [],
+        "build": {
+          "weaponId": "last-resort",
+          "levelTo": 3,
+          "synths": [
+            {
+              "kind": "item",
+              "name": "Amethyst",
+              "count": 2
+            },
+            {
+              "kind": "item",
+              "name": "Gunpowder",
+              "count": 1
+            },
+            {
+              "kind": "item",
+              "name": "Knight Boots",
+              "count": 19
+            },
+            {
+              "kind": "item",
+              "name": "Sea Dragon Crystal",
+              "count": 1
+            },
+            {
+              "kind": "item",
+              "name": "Turquoise",
+              "count": 4
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "invent",
+                  "chapter": 8,
+                  "gilda": 13100
+                },
+                "stages": [
+                  {
+                    "weaponId": "sexy-panther",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 27
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "invent",
+                  "chapter": 5,
+                  "gilda": 800
+                },
+                "stages": [
+                  {
+                    "weaponId": "heavy-hammer",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 37
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "kind": "item",
+              "name": "Poison Coin",
+              "count": 1
+            },
+            {
+              "kind": "item",
+              "name": "Time Coin",
+              "count": 1
+            },
+            {
+              "kind": "item",
+              "name": "Experience Coin",
+              "count": 1
+            },
+            {
+              "kind": "item",
+              "name": "Bandit Coin",
+              "count": 1
+            },
+            {
+              "kind": "item",
+              "name": "Dark Coin",
+              "count": 1
+            },
+            {
+              "kind": "item",
+              "name": "Indestructible Coin",
+              "count": 1
+            },
+            {
+              "kind": "item",
+              "name": "Absorption Coin",
+              "count": 1
+            }
+          ]
+        }
+      }
+    ],
+    "createdAt": 0,
+    "updatedAt": 0
+  }
+}

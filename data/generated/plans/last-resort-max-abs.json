@@ -1,10 +1,10 @@
 {
-  "name": "Last Resort — Least ABS",
-  "hash": "a434c245e5193536fe284c320798828dab16e60a8d0ce6524397f26700f99d57",
+  "name": "Last Resort — Least ABS, spheres",
+  "hash": "4d25463494f7709bdf9683b89dbee344ebf8f362bff2a205d87d52205da3f6c5",
   "guide": {
     "id": "last-resort-max-abs",
-    "title": "Last Resort — Least ABS",
-    "description": "Least ABS · maxed stats · 8 abilities · optimal start (Sexy Panther) · done after Seeping Light (chapter 8) · no ABS grinding",
+    "title": "Last Resort — Least ABS, spheres",
+    "description": "Least ABS, spheres · maxed stats · 8 abilities (side-weapon spheres first) · optimal start (Sexy Panther) · done after Anxiety (chapter 8) · no ABS grinding",
     "kind": "builtin",
     "build": {
       "weaponId": "sexy-panther",
@@ -33,7 +33,7 @@
     },
     "steps": [
       {
-        "id": "sexy-panther+4",
+        "id": "sexy-panther+3",
         "title": "Sexy Panther → Desperado",
         "notes": "",
         "chapterId": "8",
@@ -41,7 +41,7 @@
         "entries": [],
         "build": {
           "weaponId": "sexy-panther",
-          "levelTo": 4,
+          "levelTo": 3,
           "synths": [
             {
               "kind": "item",
@@ -50,37 +50,18 @@
             },
             {
               "kind": "item",
-              "name": "Flour",
+              "name": "Gunpowder",
               "count": 2
             },
             {
-              "kind": "sphere",
-              "recipe": {
-                "acquire": {
-                  "kind": "shop",
-                  "shop": "Jurak Arms",
-                  "price": 160,
-                  "chapter": 2
-                },
-                "stages": [
-                  {
-                    "weaponId": "dryer-gun",
-                    "levelTo": 5,
-                    "synths": [
-                      {
-                        "kind": "item",
-                        "name": "Scrap of Metal",
-                        "count": 15
-                      },
-                      {
-                        "kind": "item",
-                        "name": "Bundle of Hay",
-                        "count": 6
-                      }
-                    ]
-                  }
-                ]
-              }
+              "kind": "item",
+              "name": "Lightning Crystal",
+              "count": 1
+            },
+            {
+              "kind": "item",
+              "name": "Scrap of Metal",
+              "count": 1
             },
             {
               "kind": "sphere",
@@ -111,23 +92,18 @@
                 "acquire": {
                   "kind": "shop",
                   "shop": "Julia's Ringware",
-                  "price": 200,
-                  "chapter": 2
+                  "price": 860,
+                  "chapter": 5
                 },
                 "stages": [
                   {
-                    "weaponId": "magic-brassard",
+                    "weaponId": "pocklekul",
                     "levelTo": 5,
                     "synths": [
                       {
                         "kind": "item",
                         "name": "Scrap of Metal",
-                        "count": 17
-                      },
-                      {
-                        "kind": "item",
-                        "name": "Bundle of Hay",
-                        "count": 4
+                        "count": 27
                       }
                     ]
                   }
@@ -138,69 +114,54 @@
         }
       },
       {
-        "id": "desperado+3",
+        "id": "desperado+5",
         "title": "Desperado → Last Resort",
         "notes": "",
         "chapterId": "8",
-        "sectionId": "moon-mole",
+        "sectionId": "powerful-frog",
         "entries": [],
         "build": {
           "weaponId": "desperado",
-          "levelTo": 3,
+          "levelTo": 5,
           "synths": [
             {
               "kind": "item",
-              "name": "Bundle of Hay",
+              "name": "Emerald",
               "count": 1
             },
             {
               "kind": "item",
-              "name": "Glass Material",
-              "count": 1
-            },
-            {
-              "kind": "item",
-              "name": "Peridot",
+              "name": "Gunpowder",
               "count": 2
             },
             {
               "kind": "item",
-              "name": "Topaz",
+              "name": "Peridot",
               "count": 1
             }
           ]
         }
       },
       {
-        "id": "last-resort+3",
+        "id": "last-resort+4",
         "title": "Last Resort",
         "notes": "",
         "chapterId": "8",
-        "sectionId": "seeping-light",
+        "sectionId": "anxiety",
         "entries": [],
         "build": {
           "weaponId": "last-resort",
-          "levelTo": 3,
+          "levelTo": 4,
           "synths": [
             {
               "kind": "item",
               "name": "Amethyst",
-              "count": 4
+              "count": 5
             },
             {
               "kind": "item",
-              "name": "Flour",
-              "count": 1
-            },
-            {
-              "kind": "item",
-              "name": "Knight Boots",
-              "count": 2
-            },
-            {
-              "kind": "item",
-              "name": "Peridot",
-              "count": 2
+              "name": "Turquoise",
+              "count": 5
             },
             {
               "kind": "sphere",
@@ -214,7 +175,13 @@
                   {
                     "weaponId": "sexy-panther",
                     "levelTo": 5,
-                    "synths": []
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 27
+                      }
+                    ]
                   }
                 ]
               }
@@ -247,13 +214,37 @@
               "recipe": {
                 "acquire": {
                   "kind": "shop",
-                  "shop": "Starlight Weapons",
-                  "price": 1800,
-                  "chapter": 6
+                  "shop": "Jurak Arms",
+                  "price": 500,
+                  "chapter": 2
                 },
                 "stages": [
                   {
-                    "weaponId": "moon-armlet",
+                    "weaponId": "bone-rapier",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 21
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "shop",
+                  "shop": "Jurak Arms",
+                  "price": 880,
+                  "chapter": 5
+                },
+                "stages": [
+                  {
+                    "weaponId": "antique-sword",
                     "levelTo": 5,
                     "synths": [
                       {
@@ -267,44 +258,126 @@
               }
             },
             {
-              "kind": "item",
-              "name": "Poison Coin",
-              "count": 1
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "invent",
+                  "chapter": 5,
+                  "gilda": 4400
+                },
+                "stages": [
+                  {
+                    "weaponId": "rulers-sword",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 27
+                      }
+                    ]
+                  }
+                ]
+              }
             },
             {
-              "kind": "item",
-              "name": "Time Coin",
-              "count": 1
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "shop",
+                  "shop": "Milane's Weapon Shop",
+                  "price": 500,
+                  "chapter": 3
+                },
+                "stages": [
+                  {
+                    "weaponId": "kuberas-hand",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 17
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Bundle of Hay",
+                        "count": 4
+                      }
+                    ]
+                  }
+                ]
+              }
             },
             {
-              "kind": "item",
-              "name": "Experience Coin",
-              "count": 1
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "invent",
+                  "chapter": 5,
+                  "gilda": 1890
+                },
+                "stages": [
+                  {
+                    "weaponId": "soul-breaker",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 27
+                      }
+                    ]
+                  }
+                ]
+              }
             },
             {
-              "kind": "item",
-              "name": "Bandit Coin",
-              "count": 1
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "shop",
+                  "shop": "G-Weapons",
+                  "price": 950,
+                  "chapter": 5
+                },
+                "stages": [
+                  {
+                    "weaponId": "cubic-hammer",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 27
+                      }
+                    ]
+                  }
+                ]
+              }
             },
             {
-              "kind": "item",
-              "name": "Wealth Coin",
-              "count": 1
-            },
-            {
-              "kind": "item",
-              "name": "Dark Coin",
-              "count": 1
-            },
-            {
-              "kind": "item",
-              "name": "Indestructible Coin",
-              "count": 1
-            },
-            {
-              "kind": "item",
-              "name": "Absorption Coin",
-              "count": 1
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "invent",
+                  "chapter": 4,
+                  "gilda": 840
+                },
+                "stages": [
+                  {
+                    "weaponId": "dark-viper",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 27
+                      }
+                    ]
+                  }
+                ]
+              }
             }
           ]
         }

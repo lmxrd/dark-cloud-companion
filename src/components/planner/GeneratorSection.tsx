@@ -13,7 +13,12 @@ import { $draft } from "@/lib/guide/draft";
 import { planResultToGuide, stateToBuildStart } from "@/lib/guide/fromPlan";
 import { WORKER_FAILED, cancelPlanner, loadTemplates, runPlanner } from "@/lib/planner/client";
 import { ancestorsOf, finalWeaponIds, rootWeaponIds } from "@/lib/planner/graph";
-import { earliestChapter, type PlanProgress, type PlanResult } from "@/lib/planner/plan";
+import {
+  earliestChapter,
+  type AbilitySource,
+  type PlanProgress,
+  type PlanResult,
+} from "@/lib/planner/plan";
 import type { Objective } from "@/lib/planner/solve";
 import { getWeapon, weaponById, weaponData } from "@/lib/planner/sources";
 import { freshState, type WeaponState } from "@/lib/weapons/mechanics";
@@ -92,6 +97,9 @@ export function GeneratorSection({ onOpenEditor }: { onOpenEditor: () => void })
   );
   const [endLevel, setEndLevel] = useState(saved0?.endLevel ?? 0);
   const [abilities, setAbilities] = useState<AbilityId[]>(saved0?.abilities ?? []);
+  const [abilitySource, setAbilitySource] = useState<AbilitySource>(
+    saved0?.abilitySource ?? "spheres",
+  );
   const [customStart, setCustomStart] = useState(saved0?.customStart ?? false);
   const [start, setStart] = useState<WeaponState>(() =>
     saved0?.customStart
@@ -127,6 +135,7 @@ export function GeneratorSection({ onOpenEditor }: { onOpenEditor: () => void })
       maxChapter,
       budget,
       abilities,
+      abilitySource,
       customStart,
       endStats,
       endLevel,
@@ -138,6 +147,7 @@ export function GeneratorSection({ onOpenEditor }: { onOpenEditor: () => void })
     maxChapter,
     budget,
     abilities,
+    abilitySource,
     customStart,
     endStats,
     endLevel,
@@ -239,6 +249,7 @@ export function GeneratorSection({ onOpenEditor }: { onOpenEditor: () => void })
           allowFound,
           maxGilda: budget.trim() ? Math.max(0, Number(budget)) : undefined,
           abilities,
+          abilitySource,
         },
         setProgress,
       );
@@ -356,6 +367,19 @@ export function GeneratorSection({ onOpenEditor }: { onOpenEditor: () => void })
             onLevel={setEndLevel}
           />
           <AbilityPicker abilities={abilities} onChange={setAbilities} />
+          {abilities.length > 0 && (
+            <Label className="flex w-full flex-col items-start gap-1">
+              {t("planner.abilitySource")}
+              <select
+                className={selectClass}
+                value={abilitySource}
+                onChange={(e) => setAbilitySource(e.target.value as AbilitySource)}
+              >
+                <option value="spheres">{t("planner.abilitySource.spheres")}</option>
+                <option value="cheapest">{t("planner.abilitySource.cheapest")}</option>
+              </select>
+            </Label>
+          )}
         </section>
 
         <div className="flex min-w-0 flex-col gap-4">

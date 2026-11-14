@@ -1,10 +1,10 @@
 {
-  "name": "LEGEND — Least ABS",
-  "hash": "f2081bf0ee9af112faaa8c66b9e2e30c7e588dee03c6d60f2f68c539a6857fc7",
+  "name": "LEGEND — Least ABS, spheres",
+  "hash": "e060a8b4ae96a08451d08cfcb96b270b110afa5f326fc52fb2b055daf81d00a1",
   "guide": {
     "id": "legend-max-abs",
-    "title": "LEGEND — Least ABS",
-    "description": "Least ABS · maxed stats · 8 abilities · optimal start (Battle Wrench) · done after Ultimate Snake (chapter 8) · no ABS grinding",
+    "title": "LEGEND — Least ABS, spheres",
+    "description": "Least ABS, spheres · maxed stats · 8 abilities (side-weapon spheres first) · optimal start (Battle Wrench) · done after Omen (chapter 8) · no ABS grinding",
     "kind": "builtin",
     "build": {
       "weaponId": "battle-wrench",
@@ -31,92 +31,67 @@
     },
     "steps": [
       {
-        "id": "battle-wrench+15",
+        "id": "battle-wrench+18",
         "title": "Battle Wrench → True Battle Wrench",
         "notes": "",
-        "chapterId": "2",
-        "sectionId": "legendary-killer-snake",
+        "chapterId": "8",
+        "sectionId": "the-zelmite-mine",
         "entries": [],
         "build": {
           "weaponId": "battle-wrench",
-          "levelTo": 15,
+          "levelTo": 18,
           "synths": [
             {
               "kind": "item",
-              "name": "Sturdy Cloth",
+              "name": "Ruby",
               "count": 1
-            }
-          ]
-        }
-      },
-      {
-        "id": "true-battle-wrench+15",
-        "title": "True Battle Wrench → Drill Wrench",
-        "notes": "",
-        "chapterId": "3",
-        "sectionId": "earth-shaking-demon",
-        "entries": [],
-        "build": {
-          "weaponId": "true-battle-wrench",
-          "levelTo": 15,
-          "synths": [
-            {
-              "kind": "item",
-              "name": "Destruction Crystal",
-              "count": 2
-            },
-            {
-              "kind": "item",
-              "name": "Flame Crystal",
-              "count": 3
-            },
-            {
-              "kind": "item",
-              "name": "Gunpowder",
-              "count": 2
-            },
-            {
-              "kind": "item",
-              "name": "Hunter Crystal",
-              "count": 1
-            }
-          ]
-        }
-      },
-      {
-        "id": "drill-wrench+8",
-        "title": "Drill Wrench → Smash Wrench",
-        "notes": "",
-        "chapterId": "3",
-        "sectionId": "warrior-in-starlight-canyon",
-        "entries": [],
-        "build": {
-          "weaponId": "drill-wrench",
-          "levelTo": 8,
-          "synths": [
-            {
-              "kind": "item",
-              "name": "Antidote Drink",
-              "count": 1
-            },
-            {
-              "kind": "item",
-              "name": "Destruction Crystal",
-              "count": 2
-            },
-            {
-              "kind": "item",
-              "name": "Flame Crystal",
-              "count": 1
-            },
-            {
-              "kind": "item",
-              "name": "Scrap of Metal",
-              "count": 5
             },
             {
               "kind": "item",
               "name": "Sea Dragon Crystal",
+              "count": 2
+            }
+          ]
+        }
+      },
+      {
+        "id": "true-battle-wrench+18",
+        "title": "True Battle Wrench → Drill Wrench",
+        "notes": "",
+        "chapterId": "8",
+        "sectionId": "the-zelmite-mine",
+        "entries": [],
+        "build": {
+          "weaponId": "true-battle-wrench",
+          "levelTo": 18,
+          "synths": [
+            {
+              "kind": "item",
+              "name": "Lightning Crystal",
+              "count": 3
+            },
+            {
+              "kind": "item",
+              "name": "Sturdy Cloth",
+              "count": 3
+            }
+          ]
+        }
+      },
+      {
+        "id": "drill-wrench+6",
+        "title": "Drill Wrench → Smash Wrench",
+        "notes": "",
+        "chapterId": "8",
+        "sectionId": "the-zelmite-mine",
+        "entries": [],
+        "build": {
+          "weaponId": "drill-wrench",
+          "levelTo": 6,
+          "synths": [
+            {
+              "kind": "item",
+              "name": "Flame Crystal",
               "count": 1
             }
           ]
@@ -126,8 +101,8 @@
         "id": "smash-wrench+4",
         "title": "Smash Wrench → Cubic Hammer",
         "notes": "",
-        "chapterId": "5",
-        "sectionId": "heim-rada-rebuilding",
+        "chapterId": "8",
+        "sectionId": "the-zelmite-mine",
         "entries": [],
         "build": {
           "weaponId": "smash-wrench",
@@ -160,7 +135,7 @@
         }
       },
       {
-        "id": "cubic-hammer+2",
+        "id": "cubic-hammer+3",
         "title": "Cubic Hammer → Digi Hammer",
         "notes": "",
         "chapterId": "8",
@@ -168,12 +143,17 @@
         "entries": [],
         "build": {
           "weaponId": "cubic-hammer",
-          "levelTo": 2,
+          "levelTo": 3,
           "synths": [
             {
               "kind": "item",
+              "name": "Chill Crystal",
+              "count": 4
+            },
+            {
+              "kind": "item",
               "name": "Garnet",
-              "count": 2
+              "count": 1
             },
             {
               "kind": "sphere",
@@ -202,7 +182,7 @@
         }
       },
       {
-        "id": "digi-hammer+2",
+        "id": "digi-hammer+0",
         "title": "Digi Hammer → Heavy Hammer",
         "notes": "",
         "chapterId": "8",
@@ -210,11 +190,16 @@
         "entries": [],
         "build": {
           "weaponId": "digi-hammer",
-          "levelTo": 2,
+          "levelTo": 0,
           "synths": [
             {
               "kind": "item",
-              "name": "Flame Crystal",
+              "name": "Emerald",
+              "count": 1
+            },
+            {
+              "kind": "item",
+              "name": "Holy Crystal",
               "count": 1
             },
             {
@@ -257,8 +242,23 @@
           "synths": [
             {
               "kind": "item",
-              "name": "Emerald",
+              "name": "Antidote Drink",
               "count": 3
+            },
+            {
+              "kind": "item",
+              "name": "Emerald",
+              "count": 2
+            },
+            {
+              "kind": "item",
+              "name": "Flame Crystal",
+              "count": 1
+            },
+            {
+              "kind": "item",
+              "name": "Glass Material",
+              "count": 1
             },
             {
               "kind": "sphere",
@@ -291,7 +291,7 @@
         "title": "LEGEND",
         "notes": "",
         "chapterId": "8",
-        "sectionId": "ultimate-snake",
+        "sectionId": "omen",
         "entries": [],
         "build": {
           "weaponId": "legend",
@@ -299,46 +299,38 @@
           "synths": [
             {
               "kind": "item",
+              "name": "Amethyst",
+              "count": 1
+            },
+            {
+              "kind": "item",
+              "name": "Antidote Drink",
+              "count": 3
+            },
+            {
+              "kind": "item",
               "name": "Chill Crystal",
-              "count": 5
+              "count": 1
             },
             {
               "kind": "item",
               "name": "Flame Crystal",
-              "count": 2
+              "count": 10
             },
             {
               "kind": "item",
-              "name": "Holy Crystal",
-              "count": 9
+              "name": "Garnet",
+              "count": 1
             },
             {
               "kind": "item",
               "name": "Knight Boots",
-              "count": 129
+              "count": 119
             },
             {
-              "kind": "sphere",
-              "recipe": {
-                "acquire": {
-                  "kind": "invent",
-                  "chapter": 8,
-                  "gilda": 13100
-                },
-                "stages": [
-                  {
-                    "weaponId": "sexy-panther",
-                    "levelTo": 5,
-                    "synths": [
-                      {
-                        "kind": "item",
-                        "name": "Scrap of Metal",
-                        "count": 27
-                      }
-                    ]
-                  }
-                ]
-              }
+              "kind": "item",
+              "name": "Peridot",
+              "count": 3
             },
             {
               "kind": "sphere",
@@ -387,34 +379,174 @@
               }
             },
             {
-              "kind": "item",
-              "name": "Poison Coin",
-              "count": 1
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "shop",
+                  "shop": "G-Weapons",
+                  "price": 960,
+                  "chapter": 5
+                },
+                "stages": [
+                  {
+                    "weaponId": "choora",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 27
+                      }
+                    ]
+                  }
+                ]
+              }
             },
             {
-              "kind": "item",
-              "name": "Time Coin",
-              "count": 1
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "shop",
+                  "shop": "Jurak Arms",
+                  "price": 500,
+                  "chapter": 2
+                },
+                "stages": [
+                  {
+                    "weaponId": "bone-rapier",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 21
+                      }
+                    ]
+                  }
+                ]
+              }
             },
             {
-              "kind": "item",
-              "name": "Experience Coin",
-              "count": 1
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "shop",
+                  "shop": "Jurak Arms",
+                  "price": 880,
+                  "chapter": 5
+                },
+                "stages": [
+                  {
+                    "weaponId": "antique-sword",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 27
+                      }
+                    ]
+                  }
+                ]
+              }
             },
             {
-              "kind": "item",
-              "name": "Bandit Coin",
-              "count": 1
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "invent",
+                  "chapter": 5,
+                  "gilda": 4400
+                },
+                "stages": [
+                  {
+                    "weaponId": "rulers-sword",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 27
+                      }
+                    ]
+                  }
+                ]
+              }
             },
             {
-              "kind": "item",
-              "name": "Dark Coin",
-              "count": 1
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "shop",
+                  "shop": "Milane's Weapon Shop",
+                  "price": 500,
+                  "chapter": 3
+                },
+                "stages": [
+                  {
+                    "weaponId": "kuberas-hand",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 17
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Bundle of Hay",
+                        "count": 4
+                      }
+                    ]
+                  }
+                ]
+              }
             },
             {
-              "kind": "item",
-              "name": "Absorption Coin",
-              "count": 1
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "invent",
+                  "chapter": 5,
+                  "gilda": 1890
+                },
+                "stages": [
+                  {
+                    "weaponId": "soul-breaker",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 27
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "invent",
+                  "chapter": 4,
+                  "gilda": 840
+                },
+                "stages": [
+                  {
+                    "weaponId": "dark-viper",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 27
+                      }
+                    ]
+                  }
+                ]
+              }
             }
           ]
         }

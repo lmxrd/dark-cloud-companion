@@ -223,9 +223,12 @@ export const en = {
   "planner.wantAbilities": "Abilities on the finished weapon",
   "planner.abilitiesPreset": "Best abilities",
   "planner.abilitiesClear": "Clear",
-  "planner.abilitiesHint":
-    "Coins are added at the end where the build doesn't already provide an ability.",
-  "planner.abilitiesMissing": "Not added because the coin isn't sold yet: {list}.",
+  "planner.abilitiesHint": "Added at the end where the build doesn't already provide an ability.",
+  "planner.abilitySource": "Abilities from",
+  "planner.abilitySource.spheres": "Side-weapon spheres (coins only where none fits)",
+  "planner.abilitySource.cheapest": "Whichever is cheaper (usually coins)",
+  "planner.abilitiesMissing":
+    "Not added because no side weapon or coin for it is available yet: {list}.",
   "planner.budget": "Gilda budget (optional)",
   "planner.budgetPlaceholder": "No limit",
   "planner.found": "Only use items that can be bought",

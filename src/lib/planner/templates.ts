@@ -24,11 +24,15 @@ function cheapestAcquire(weaponId: string, maxChapter: number): Acquire | undefi
     .sort((a, b) => priceOf(a) - priceOf(b) || chapterOf(a) - chapterOf(b))[0];
 }
 
-type FillMode = "none" | "best" | "cheap";
+/**
+ * How a side weapon's SP is filled before it is spectrumized: with the items that add the most stats,
+ * or only cheap ones. Its SP is always used; an empty side weapon would waste what it was levelled for.
+ */
+type FillMode = "best" | "cheap";
+const FILL_MODES: FillMode[] = ["best", "cheap"];
 
 /** Greedy fill of leftover SP with the items that add the most stat points (respecting weapon caps). */
 function fillItems(state: WeaponState, weaponId: string, items: SynthSource[], mode: FillMode) {
-  if (mode === "none") return [];
   const w = getWeapon(weaponId);
   const cur: Stats = { ...state.stats };
   const pool = mode === "cheap" ? items.filter((i) => (i.price ?? 0) <= 60) : items;
@@ -70,12 +74,16 @@ function makeTemplate(
     abs: sim.cost.abs,
     gilda: sim.cost.gilda,
     chapter,
+    ...(sim.state.level >= MIN_SPHERE_LEVEL && sim.state.abilities.length
+      ? { abilities: [...sim.state.abilities] }
+      : {}),
   };
 }
 
-/** a dominates b: no worse everywhere and strictly better somewhere. */
+/** a dominates b: no worse everywhere (stats, costs, and every ability b passes on) and strictly better somewhere. */
 function dominates(a: Template, b: Template) {
   if (a.abs > b.abs || a.gilda > b.gilda || a.level > b.level) return false;
+  if ((b.abilities ?? []).some((x) => !(a.abilities ?? []).includes(x))) return false;
   let strict = a.abs < b.abs || a.gilda < b.gilda || a.level < b.level;
   for (const k of STAT_KEYS) {
     const ga = a.gains[k] ?? 0;
@@ -119,7 +127,7 @@ async function buildTemplates(opts: TemplateOptions): Promise<Template[]> {
     const acquire = cheapestAcquire(w.id, opts.maxChapter);
     if (!acquire) continue;
     for (const level of SPHERE_LEVELS) {
-      for (const mode of ["none", "best", "cheap"] as FillMode[]) {
+      for (const mode of FILL_MODES) {
         const base: Recipe = { acquire, stages: [{ weaponId: w.id, levelTo: level, synths: [] }] };
         const lvl = simulateRecipe(base, opts);
         const synths = fillItems(lvl.state, w.id, items, mode);
@@ -194,7 +202,7 @@ async function chainedTemplates(
         };
         const lvl = simulateRecipe(reached, opts);
         if (lvl.errors.length) continue;
-        for (const mode of ["none", "best", "cheap"] as FillMode[]) {
+        for (const mode of FILL_MODES) {
           const stages = reached.stages.map((s) =>
             s === reached.stages[reached.stages.length - 1]
               ? { ...s, synths: [...s.synths, ...fillItems(lvl.state, s.weaponId, items, mode)] }

@@ -1,19 +1,19 @@
 {
-  "name": "Falcon — Least ABS",
-  "hash": "f809b225d0f9be2c3aa01755b627388f332d69dfba8b68a15b4df238b3a5f1b5",
+  "name": "Falcon — Least ABS, spheres",
+  "hash": "144947ac8a79e2aa44dafe1c84789eb4641d8d80e6da9c77e78fde3bbaf50d25",
   "guide": {
     "id": "falcon-max-abs",
-    "title": "Falcon — Least ABS",
-    "description": "Least ABS · maxed stats · 8 abilities · optimal start (Turkey) · done after Omen (chapter 8) · no ABS grinding",
+    "title": "Falcon — Least ABS, spheres",
+    "description": "Least ABS, spheres · maxed stats · 8 abilities (side-weapon spheres first) · optimal start (Swan) · done after Mr. Big Shot Shadow (chapter 8) · no ABS grinding · 9,763 gilda to farm",
     "kind": "builtin",
     "build": {
-      "weaponId": "turkey",
+      "weaponId": "swan",
       "level": 0,
       "abs": 0,
       "stats": {
-        "at": 25,
-        "fl": 10,
-        "ch": 0,
+        "at": 24,
+        "fl": 0,
+        "ch": 10,
         "li": 0,
         "cy": 10,
         "sm": 0,
@@ -23,7 +23,9 @@
       },
       "du": 0,
       "sp": 1,
-      "abilities": [],
+      "abilities": [
+        "fragile"
+      ],
       "spBonus": 1,
       "acquire": {
         "kind": "have"
@@ -31,31 +33,31 @@
     },
     "steps": [
       {
-        "id": "turkey+4",
-        "title": "Turkey → Flamingo",
+        "id": "swan+4",
+        "title": "Swan → Flamingo",
         "notes": "",
         "chapterId": "8",
         "sectionId": "the-zelmite-mine",
         "entries": [],
         "build": {
-          "weaponId": "turkey",
+          "weaponId": "swan",
           "levelTo": 4,
           "synths": [
             {
               "kind": "item",
-              "name": "Topaz",
+              "name": "Emerald",
               "count": 3
             },
             {
               "kind": "item",
-              "name": "Turquoise",
+              "name": "Topaz",
               "count": 1
             }
           ]
         }
       },
       {
-        "id": "flamingo+3",
+        "id": "flamingo+6",
         "title": "Flamingo → Falcon",
         "notes": "",
         "chapterId": "8",
@@ -63,17 +65,12 @@
         "entries": [],
         "build": {
           "weaponId": "flamingo",
-          "levelTo": 3,
+          "levelTo": 6,
           "synths": [
             {
               "kind": "item",
-              "name": "Emerald",
-              "count": 1
-            },
-            {
-              "kind": "item",
-              "name": "Lightning Crystal",
-              "count": 1
+              "name": "Hunter Crystal",
+              "count": 2
             },
             {
               "kind": "item",
@@ -81,42 +78,81 @@
               "count": 1
             },
             {
-              "kind": "item",
-              "name": "Sapphire",
-              "count": 1
-            },
-            {
-              "kind": "item",
-              "name": "Scrap of Metal",
-              "count": 3
-            },
-            {
-              "kind": "item",
-              "name": "Turquoise",
-              "count": 2
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "shop",
+                  "shop": "Julia's Ringware",
+                  "price": 860,
+                  "chapter": 5
+                },
+                "stages": [
+                  {
+                    "weaponId": "pocklekul",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 27
+                      }
+                    ]
+                  }
+                ]
+              }
             }
           ]
         }
       },
       {
-        "id": "falcon+2",
+        "id": "falcon+5",
         "title": "Falcon",
-        "notes": "",
+        "notes": "Farm about 9,763 gilda more than the story pays by this point.",
         "chapterId": "8",
-        "sectionId": "omen",
+        "sectionId": "mr-big-shot-shadow",
         "entries": [],
         "build": {
           "weaponId": "falcon",
-          "levelTo": 2,
+          "levelTo": 5,
           "synths": [
             {
               "kind": "item",
+              "name": "Amethyst",
+              "count": 1
+            },
+            {
+              "kind": "item",
               "name": "Emerald",
+              "count": 1
+            },
+            {
+              "kind": "item",
+              "name": "Garnet",
+              "count": 5
+            },
+            {
+              "kind": "item",
+              "name": "Glass Material",
+              "count": 1
+            },
+            {
+              "kind": "item",
+              "name": "Lightning Crystal",
               "count": 2
             },
             {
               "kind": "item",
-              "name": "Pearl",
+              "name": "Opal",
+              "count": 3
+            },
+            {
+              "kind": "item",
+              "name": "Peridot",
+              "count": 1
+            },
+            {
+              "kind": "item",
+              "name": "Rolling Log",
               "count": 1
             },
             {
@@ -146,19 +182,119 @@
               "kind": "sphere",
               "recipe": {
                 "acquire": {
-                  "kind": "invent",
-                  "chapter": 5,
-                  "gilda": 800
+                  "kind": "shop",
+                  "shop": "Jurak Arms",
+                  "price": 500,
+                  "chapter": 2
                 },
                 "stages": [
                   {
-                    "weaponId": "heavy-hammer",
+                    "weaponId": "bone-rapier",
                     "levelTo": 5,
                     "synths": [
                       {
                         "kind": "item",
                         "name": "Scrap of Metal",
-                        "count": 37
+                        "count": 21
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "shop",
+                  "shop": "Jurak Arms",
+                  "price": 880,
+                  "chapter": 5
+                },
+                "stages": [
+                  {
+                    "weaponId": "antique-sword",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 27
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "invent",
+                  "chapter": 5,
+                  "gilda": 4400
+                },
+                "stages": [
+                  {
+                    "weaponId": "rulers-sword",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 27
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "shop",
+                  "shop": "Milane's Weapon Shop",
+                  "price": 500,
+                  "chapter": 3
+                },
+                "stages": [
+                  {
+                    "weaponId": "kuberas-hand",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 17
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Bundle of Hay",
+                        "count": 4
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "invent",
+                  "chapter": 5,
+                  "gilda": 1890
+                },
+                "stages": [
+                  {
+                    "weaponId": "soul-breaker",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 27
                       }
                     ]
                   }
@@ -167,33 +303,32 @@
             },
             {
               "kind": "item",
-              "name": "Poison Coin",
-              "count": 1
-            },
-            {
-              "kind": "item",
-              "name": "Time Coin",
-              "count": 1
-            },
-            {
-              "kind": "item",
-              "name": "Experience Coin",
-              "count": 1
-            },
-            {
-              "kind": "item",
-              "name": "Bandit Coin",
-              "count": 1
-            },
-            {
-              "kind": "item",
-              "name": "Wealth Coin",
-              "count": 1
-            },
-            {
-              "kind": "item",
               "name": "Dark Coin",
-              "count": 2
+              "count": 1
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "shop",
+                  "shop": "G-Weapons",
+                  "price": 950,
+                  "chapter": 5
+                },
+                "stages": [
+                  {
+                    "weaponId": "cubic-hammer",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 27
+                      }
+                    ]
+                  }
+                ]
+              }
             },
             {
               "kind": "item",

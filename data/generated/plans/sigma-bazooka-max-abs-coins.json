@@ -1,0 +1,237 @@
+{
+  "name": "Sigma Bazooka — Least ABS, coins",
+  "hash": "35e6f10002302009483bcbe5c9348d9b0104fb446664499a2c49e4cf584b70ab",
+  "guide": {
+    "id": "sigma-bazooka-max-abs-coins",
+    "title": "Sigma Bazooka — Least ABS, coins",
+    "description": "Least ABS, coins · maxed stats · 8 abilities (cheapest of spheres and coins) · optimal start (Twin Buster) · done after Ultimate Snake (chapter 8) · no ABS grinding",
+    "kind": "builtin",
+    "build": {
+      "weaponId": "twin-buster",
+      "level": 0,
+      "abs": 0,
+      "stats": {
+        "at": 101,
+        "fl": 85,
+        "ch": 0,
+        "li": 0,
+        "cy": 85,
+        "sm": 95,
+        "ex": 0,
+        "be": 0,
+        "sc": 0
+      },
+      "du": 0,
+      "sp": 2,
+      "abilities": [],
+      "spBonus": 1,
+      "acquire": {
+        "kind": "invent",
+        "chapter": 7,
+        "gilda": 2500
+      }
+    },
+    "steps": [
+      {
+        "id": "twin-buster+3",
+        "title": "Twin Buster → Sigma Bazooka",
+        "notes": "",
+        "chapterId": "8",
+        "sectionId": "the-zelmite-mine",
+        "entries": [],
+        "build": {
+          "weaponId": "twin-buster",
+          "levelTo": 3,
+          "synths": [
+            {
+              "kind": "item",
+              "name": "Turquoise",
+              "count": 1
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "invent",
+                  "chapter": 8,
+                  "gilda": 13100
+                },
+                "stages": [
+                  {
+                    "weaponId": "sexy-panther",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 27
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "sigma-bazooka+3",
+        "title": "Sigma Bazooka",
+        "notes": "",
+        "chapterId": "8",
+        "sectionId": "ultimate-snake",
+        "entries": [],
+        "build": {
+          "weaponId": "sigma-bazooka",
+          "levelTo": 3,
+          "synths": [
+            {
+              "kind": "item",
+              "name": "Peridot",
+              "count": 1
+            },
+            {
+              "kind": "item",
+              "name": "Turquoise",
+              "count": 8
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "invent",
+                  "chapter": 8,
+                  "gilda": 13100
+                },
+                "stages": [
+                  {
+                    "weaponId": "sexy-panther",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 27
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "invent",
+                  "chapter": 5,
+                  "gilda": 800
+                },
+                "stages": [
+                  {
+                    "weaponId": "heavy-hammer",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 37
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "invent",
+                  "chapter": 5,
+                  "gilda": 800
+                },
+                "stages": [
+                  {
+                    "weaponId": "heavy-hammer",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 37
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "invent",
+                  "chapter": 5,
+                  "gilda": 800
+                },
+                "stages": [
+                  {
+                    "weaponId": "heavy-hammer",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 37
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "kind": "item",
+              "name": "Poison Coin",
+              "count": 1
+            },
+            {
+              "kind": "item",
+              "name": "Time Coin",
+              "count": 1
+            },
+            {
+              "kind": "item",
+              "name": "Experience Coin",
+              "count": 1
+            },
+            {
+              "kind": "item",
+              "name": "Bandit Coin",
+              "count": 1
+            },
+            {
+              "kind": "item",
+              "name": "Wealth Coin",
+              "count": 1
+            },
+            {
+              "kind": "item",
+              "name": "Dark Coin",
+              "count": 1
+            },
+            {
+              "kind": "item",
+              "name": "Indestructible Coin",
+              "count": 1
+            },
+            {
+              "kind": "item",
+              "name": "Absorption Coin",
+              "count": 1
+            }
+          ]
+        }
+      }
+    ],
+    "createdAt": 0,
+    "updatedAt": 0
+  }
+}

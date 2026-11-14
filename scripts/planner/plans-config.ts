@@ -19,6 +19,8 @@ const variantSchema = z.object({
   maxGilda: z.number().optional(),
   maxChapter: z.number().optional(),
   abilities: z.array(abilityId).optional(),
+  /** Where the abilities come from: side weapons' spheres first, or whichever is cheaper (coins). */
+  abilitySource: z.enum(["spheres", "cheapest"]).optional(),
 });
 
 const groupSchema = z.object({
@@ -60,6 +62,7 @@ export interface PlanSpec {
   maxChapter: number;
   spBonus: number;
   abilities: AbilityId[];
+  abilitySource: "spheres" | "cheapest";
   maxGilda?: number;
 }
 
@@ -88,6 +91,7 @@ export function expandPlans(config: PlansConfig): PlanSpec[] {
           maxChapter: v.maxChapter ?? group.maxChapter ?? config.defaults.maxChapter,
           spBonus: config.defaults.spBonus,
           abilities: v.abilities ?? group.abilities ?? config.defaults.abilities,
+          abilitySource: v.abilitySource ?? "spheres",
           ...(maxGilda !== undefined ? { maxGilda } : {}),
         });
       }

@@ -1,10 +1,10 @@
 {
-  "name": "Five-Star Armlet — Least ABS",
-  "hash": "6ba47a79a184d6b19090ed0648e2ac9afed803f0d99c3297636b3a386200e870",
+  "name": "Five-Star Armlet — Least ABS, spheres",
+  "hash": "b5c2b9c31140ba2f434e6d08e022b50a11a18aaef6071e1882b4dadd00d98ebe",
   "guide": {
     "id": "five-star-armlet-max-abs",
-    "title": "Five-Star Armlet — Least ABS",
-    "description": "Least ABS · maxed stats · 8 abilities · optimal start (Magic Brassard) · done after Flotsam's Broken Army (chapter 8) · no ABS grinding",
+    "title": "Five-Star Armlet — Least ABS, spheres",
+    "description": "Least ABS, spheres · maxed stats · 8 abilities (side-weapon spheres first) · optimal start (Magic Brassard) · done after Firm Belief (chapter 8) · no ABS grinding",
     "kind": "builtin",
     "build": {
       "weaponId": "magic-brassard",
@@ -34,61 +34,25 @@
         "id": "magic-brassard+11",
         "title": "Magic Brassard → Bandit Brassard",
         "notes": "",
-        "chapterId": "8",
-        "sectionId": "the-zelmite-mine",
+        "chapterId": "5",
+        "sectionId": "heim-rada-rebuilding",
         "entries": [],
         "build": {
           "weaponId": "magic-brassard",
           "levelTo": 11,
           "synths": [
             {
-              "kind": "item",
-              "name": "Topaz",
-              "count": 1
-            },
-            {
-              "kind": "item",
-              "name": "Wind Crystal",
-              "count": 6
-            }
-          ]
-        }
-      },
-      {
-        "id": "bandit-brassard+5",
-        "title": "Bandit Brassard → Thorn Armlet",
-        "notes": "",
-        "chapterId": "8",
-        "sectionId": "the-zelmite-mine",
-        "entries": [],
-        "build": {
-          "weaponId": "bandit-brassard",
-          "levelTo": 5,
-          "synths": []
-        }
-      },
-      {
-        "id": "thorn-armlet+5",
-        "title": "Thorn Armlet → Pocklekul",
-        "notes": "",
-        "chapterId": "8",
-        "sectionId": "the-zelmite-mine",
-        "entries": [],
-        "build": {
-          "weaponId": "thorn-armlet",
-          "levelTo": 5,
-          "synths": [
-            {
               "kind": "sphere",
               "recipe": {
                 "acquire": {
-                  "kind": "invent",
-                  "chapter": 8,
-                  "gilda": 13100
+                  "kind": "shop",
+                  "shop": "G-Weapons",
+                  "price": 960,
+                  "chapter": 5
                 },
                 "stages": [
                   {
-                    "weaponId": "sexy-panther",
+                    "weaponId": "choora",
                     "levelTo": 5,
                     "synths": [
                       {
@@ -100,6 +64,44 @@
                   }
                 ]
               }
+            }
+          ]
+        }
+      },
+      {
+        "id": "bandit-brassard+6",
+        "title": "Bandit Brassard → Thorn Armlet",
+        "notes": "",
+        "chapterId": "8",
+        "sectionId": "the-zelmite-mine",
+        "entries": [],
+        "build": {
+          "weaponId": "bandit-brassard",
+          "levelTo": 6,
+          "synths": [
+            {
+              "kind": "item",
+              "name": "Topaz",
+              "count": 1
+            }
+          ]
+        }
+      },
+      {
+        "id": "thorn-armlet+6",
+        "title": "Thorn Armlet → Pocklekul",
+        "notes": "",
+        "chapterId": "8",
+        "sectionId": "the-zelmite-mine",
+        "entries": [],
+        "build": {
+          "weaponId": "thorn-armlet",
+          "levelTo": 6,
+          "synths": [
+            {
+              "kind": "item",
+              "name": "Wind Crystal",
+              "count": 3
             },
             {
               "kind": "sphere",
@@ -140,13 +142,13 @@
           "synths": [
             {
               "kind": "item",
-              "name": "Emerald",
-              "count": 2
+              "name": "Garnet",
+              "count": 1
             },
             {
               "kind": "item",
-              "name": "Glass Material",
-              "count": 5
+              "name": "Sea Dragon Crystal",
+              "count": 3
             }
           ]
         }
@@ -164,22 +166,17 @@
           "synths": [
             {
               "kind": "item",
+              "name": "Emerald",
+              "count": 5
+            },
+            {
+              "kind": "item",
               "name": "Flour",
-              "count": 2
+              "count": 1
             },
             {
               "kind": "item",
-              "name": "Holy Crystal",
-              "count": 10
-            },
-            {
-              "kind": "item",
-              "name": "Rolling Log",
-              "count": 2
-            },
-            {
-              "kind": "item",
-              "name": "Sturdy Cloth",
+              "name": "Topaz",
               "count": 1
             },
             {
@@ -221,37 +218,27 @@
           "synths": [
             {
               "kind": "item",
-              "name": "Destruction Crystal",
-              "count": 3
-            },
-            {
-              "kind": "item",
-              "name": "Garnet",
+              "name": "Emerald",
               "count": 1
             },
             {
               "kind": "item",
-              "name": "Hunter Crystal",
-              "count": 1
-            },
-            {
-              "kind": "item",
-              "name": "Peridot",
+              "name": "Ruby",
               "count": 1
             }
           ]
         }
       },
       {
-        "id": "five-star-armlet+4",
+        "id": "five-star-armlet+3",
         "title": "Five-Star Armlet",
         "notes": "",
         "chapterId": "8",
-        "sectionId": "flotsams-broken-army",
+        "sectionId": "firm-belief",
         "entries": [],
         "build": {
           "weaponId": "five-star-armlet",
-          "levelTo": 4,
+          "levelTo": 3,
           "synths": [
             {
               "kind": "item",
@@ -260,13 +247,8 @@
             },
             {
               "kind": "item",
-              "name": "Bundle of Hay",
-              "count": 1
-            },
-            {
-              "kind": "item",
               "name": "Knight Boots",
-              "count": 93
+              "count": 95
             },
             {
               "kind": "sphere",
@@ -384,34 +366,146 @@
               }
             },
             {
-              "kind": "item",
-              "name": "Poison Coin",
-              "count": 1
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "shop",
+                  "shop": "Jurak Arms",
+                  "price": 500,
+                  "chapter": 2
+                },
+                "stages": [
+                  {
+                    "weaponId": "bone-rapier",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 21
+                      }
+                    ]
+                  }
+                ]
+              }
             },
             {
-              "kind": "item",
-              "name": "Time Coin",
-              "count": 1
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "shop",
+                  "shop": "Jurak Arms",
+                  "price": 880,
+                  "chapter": 5
+                },
+                "stages": [
+                  {
+                    "weaponId": "antique-sword",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 27
+                      }
+                    ]
+                  }
+                ]
+              }
             },
             {
-              "kind": "item",
-              "name": "Wealth Coin",
-              "count": 1
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "shop",
+                  "shop": "Julia's Ringware",
+                  "price": 860,
+                  "chapter": 5
+                },
+                "stages": [
+                  {
+                    "weaponId": "pocklekul",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 27
+                      }
+                    ]
+                  }
+                ]
+              }
             },
             {
-              "kind": "item",
-              "name": "Dark Coin",
-              "count": 1
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "invent",
+                  "chapter": 5,
+                  "gilda": 1890
+                },
+                "stages": [
+                  {
+                    "weaponId": "soul-breaker",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 27
+                      }
+                    ]
+                  }
+                ]
+              }
             },
             {
-              "kind": "item",
-              "name": "Indestructible Coin",
-              "count": 1
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "shop",
+                  "shop": "G-Weapons",
+                  "price": 950,
+                  "chapter": 5
+                },
+                "stages": [
+                  {
+                    "weaponId": "cubic-hammer",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 27
+                      }
+                    ]
+                  }
+                ]
+              }
             },
             {
-              "kind": "item",
-              "name": "Absorption Coin",
-              "count": 1
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "invent",
+                  "chapter": 4,
+                  "gilda": 840
+                },
+                "stages": [
+                  {
+                    "weaponId": "dark-viper",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 27
+                      }
+                    ]
+                  }
+                ]
+              }
             }
           ]
         }

@@ -10,8 +10,11 @@
 //              when it runs out; earliest = finish in the earliest chapter possible, each stage as
 //              soon as it's unlocked, grinding what's missing.
 //   goal       max = maxed stats, reach = just get the weapon.
-//   abilities  carried by the finished weapon (coins are added where the chain doesn't provide
-//              them); set to [] for none.
+//   abilities  carried by the finished weapon, added where the chain doesn't provide them; set to
+//              [] for none.
+//   abilitySource  spheres = from +5 spheres of side weapons that carry them (the weapon guide's
+//              recipes), coins only where none fits; cheapest = a bought coin whenever it costs
+//              less (in ABS, nearly always once coins are sold). Spheda coins are a last resort.
 //   maxChapter shops/items/enemy kills available up to this chapter; spBonus is the support bonus.
 //
 // Group settings apply to all its variants; variant settings win. Variant ids must be unique
@@ -29,8 +32,22 @@ export const plansConfig = {
     {
       targets: ["finals", "falcon"],
       variants: [
-        { id: "max-abs", objective: "abs", flow: "story", label: "Least ABS" },
-        { id: "earliest", objective: "abs", flow: "earliest", label: "Earliest" },
+        { id: "max-abs", objective: "abs", flow: "story", label: "Least ABS, spheres" },
+        { id: "earliest", objective: "abs", flow: "earliest", label: "Earliest, spheres" },
+        {
+          id: "max-abs-coins",
+          objective: "abs",
+          flow: "story",
+          abilitySource: "cheapest",
+          label: "Least ABS, coins",
+        },
+        {
+          id: "earliest-coins",
+          objective: "abs",
+          flow: "earliest",
+          abilitySource: "cheapest",
+          label: "Earliest, coins",
+        },
       ],
     },
     // {

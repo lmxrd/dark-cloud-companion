@@ -153,6 +153,8 @@ describe("planner inputs", () => {
       }),
     ).profiles[p.id].planner;
     expect(legacy?.customStart).toBe(true);
+    // Inputs saved before the ability source existed take side-weapon spheres.
+    expect(legacy?.abilitySource).toBe("spheres");
     // Invalid inputs make the whole state fall back rather than corrupt the planner.
     const bad = {
       ...state,
