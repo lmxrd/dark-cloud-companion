@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "e502409f-b3a1-42e5-a051-cc6a9012f1a2",
+  "id": "8c0df159-3177-40cc-b7a1-f52948d670a9",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "abilities": {
@@ -1638,6 +1638,13 @@
           "notNull": false,
           "autoincrement": false
         },
+        "part_category": {
+          "name": "part_category",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
         "relation": {
           "name": "relation",
           "type": "text",
@@ -1801,7 +1808,7 @@
         },
         "georama_goals_link_matches_type": {
           "name": "georama_goals_link_matches_type",
-          "value": "CASE \"georama_goals\".\"type\"\n        WHEN 'parts-placed' THEN \"georama_goals\".\"georama_part_id\" IS NOT NULL AND \"georama_goals\".\"quantity\" IS NOT NULL\n        WHEN 'npc-resides' THEN \"georama_goals\".\"npc_id\" IS NOT NULL\n        WHEN 'residents' THEN \"georama_goals\".\"quantity\" IS NOT NULL\n        WHEN 'task-completed' THEN \"georama_goals\".\"required_task_id\" IS NOT NULL\n        WHEN 'culture-points' THEN \"georama_goals\".\"culture_points\" IS NOT NULL\n        WHEN 'story-event' THEN \"georama_goals\".\"section_id\" IS NOT NULL\n        ELSE 1\n      END"
+          "value": "(\"georama_goals\".\"type\" <> 'parts-placed' OR ((\"georama_goals\".\"georama_part_id\" IS NOT NULL OR \"georama_goals\".\"part_category\" IS NOT NULL) AND \"georama_goals\".\"quantity\" IS NOT NULL)) AND (\"georama_goals\".\"type\" <> 'npc-resides' OR (\"georama_goals\".\"npc_id\" IS NOT NULL)) AND (\"georama_goals\".\"type\" <> 'residents' OR (\"georama_goals\".\"quantity\" IS NOT NULL)) AND (\"georama_goals\".\"type\" <> 'task-completed' OR (\"georama_goals\".\"required_task_id\" IS NOT NULL)) AND (\"georama_goals\".\"type\" <> 'culture-points' OR (\"georama_goals\".\"culture_points\" IS NOT NULL)) AND (\"georama_goals\".\"type\" <> 'story-event' OR (\"georama_goals\".\"section_id\" IS NOT NULL))"
         }
       }
     },
@@ -3032,7 +3039,7 @@
         },
         "items_powerup_character": {
           "name": "items_powerup_character",
-          "value": "\"items\".\"powerup_character\" IN ('max', 'monica', 'both')"
+          "value": "\"items\".\"powerup_character\" IN ('max', 'monica', 'either')"
         },
         "items_powerup_stat": {
           "name": "items_powerup_stat",
@@ -3233,7 +3240,7 @@
         },
         "monster_class_unlocks_link_matches_method": {
           "name": "monster_class_unlocks_link_matches_method",
-          "value": "CASE \"monster_class_unlocks\".\"method\"\n        WHEN 'buy' THEN \"monster_class_unlocks\".\"enemy_id\" IS NULL AND \"monster_class_unlocks\".\"quantity\" IS NULL\n        WHEN 'gift' THEN \"monster_class_unlocks\".\"enemy_id\" IS NOT NULL AND \"monster_class_unlocks\".\"quantity\" IS NOT NULL\n        WHEN 'kill-with' THEN \"monster_class_unlocks\".\"enemy_id\" IS NOT NULL AND \"monster_class_unlocks\".\"quantity\" IS NULL\n      END"
+          "value": "(\"monster_class_unlocks\".\"method\" <> 'buy' OR (\"monster_class_unlocks\".\"enemy_id\" IS NULL AND \"monster_class_unlocks\".\"quantity\" IS NULL)) AND (\"monster_class_unlocks\".\"method\" <> 'gift' OR (\"monster_class_unlocks\".\"enemy_id\" IS NOT NULL AND \"monster_class_unlocks\".\"quantity\" IS NOT NULL)) AND (\"monster_class_unlocks\".\"method\" <> 'kill-with' OR (\"monster_class_unlocks\".\"enemy_id\" IS NOT NULL AND \"monster_class_unlocks\".\"quantity\" IS NULL))"
         }
       }
     },
@@ -3705,7 +3712,7 @@
         },
         "npc_housing_requirements_link_matches_type": {
           "name": "npc_housing_requirements_link_matches_type",
-          "value": "CASE \"npc_housing_requirements\".\"type\"\n        WHEN 'roof-color' THEN \"npc_housing_requirements\".\"color\" IS NOT NULL\n        WHEN 'minimum-stories' THEN \"npc_housing_requirements\".\"quantity\" IS NOT NULL\n        WHEN 'other' THEN \"npc_housing_requirements\".\"text\" IS NOT NULL\n        ELSE \"npc_housing_requirements\".\"georama_part_id\" IS NOT NULL\n      END"
+          "value": "(\"npc_housing_requirements\".\"type\" <> 'near-part' OR (\"npc_housing_requirements\".\"georama_part_id\" IS NOT NULL)) AND (\"npc_housing_requirements\".\"type\" <> 'in-part' OR (\"npc_housing_requirements\".\"georama_part_id\" IS NOT NULL)) AND (\"npc_housing_requirements\".\"type\" <> 'not-in-part' OR (\"npc_housing_requirements\".\"georama_part_id\" IS NOT NULL)) AND (\"npc_housing_requirements\".\"type\" <> 'roof-color' OR (\"npc_housing_requirements\".\"color\" IS NOT NULL)) AND (\"npc_housing_requirements\".\"type\" <> 'minimum-stories' OR (\"npc_housing_requirements\".\"quantity\" IS NOT NULL)) AND (\"npc_housing_requirements\".\"type\" <> 'other' OR (\"npc_housing_requirements\".\"text\" IS NOT NULL))"
         }
       }
     },
@@ -4615,7 +4622,7 @@
         },
         "recruit_requirements_link_matches_type": {
           "name": "recruit_requirements_link_matches_type",
-          "value": "CASE \"recruit_requirements\".\"type\"\n        WHEN 'give-item' THEN \"recruit_requirements\".\"item_id\" IS NOT NULL AND \"recruit_requirements\".\"quantity\" IS NOT NULL\n        WHEN 'show-item' THEN \"recruit_requirements\".\"item_id\" IS NOT NULL\n        WHEN 'show-weapon' THEN \"recruit_requirements\".\"weapon_id\" IS NOT NULL\n        WHEN 'show-photo' THEN \"recruit_requirements\".\"photo_id\" IS NOT NULL\n        WHEN 'catch-fish' THEN \"recruit_requirements\".\"fish_id\" IS NOT NULL\n        WHEN 'pay-gilda' THEN \"recruit_requirements\".\"quantity\" IS NOT NULL\n        WHEN 'win-spheda' THEN \"recruit_requirements\".\"quantity\" IS NOT NULL\n        WHEN 'beat-time' THEN \"recruit_requirements\".\"seconds\" IS NOT NULL\n        WHEN 'enter-code' THEN \"recruit_requirements\".\"text\" IS NOT NULL\n        WHEN 'story' THEN \"recruit_requirements\".\"text\" IS NOT NULL\n        WHEN 'other' THEN \"recruit_requirements\".\"text\" IS NOT NULL\n        ELSE 1\n      END"
+          "value": "(\"recruit_requirements\".\"type\" <> 'give-item' OR (\"recruit_requirements\".\"item_id\" IS NOT NULL AND \"recruit_requirements\".\"quantity\" IS NOT NULL)) AND (\"recruit_requirements\".\"type\" <> 'show-item' OR (\"recruit_requirements\".\"item_id\" IS NOT NULL)) AND (\"recruit_requirements\".\"type\" <> 'show-weapon' OR (\"recruit_requirements\".\"weapon_id\" IS NOT NULL)) AND (\"recruit_requirements\".\"type\" <> 'show-photo' OR (\"recruit_requirements\".\"photo_id\" IS NOT NULL)) AND (\"recruit_requirements\".\"type\" <> 'catch-fish' OR (\"recruit_requirements\".\"fish_id\" IS NOT NULL)) AND (\"recruit_requirements\".\"type\" <> 'pay-gilda' OR (\"recruit_requirements\".\"quantity\" IS NOT NULL)) AND (\"recruit_requirements\".\"type\" <> 'win-spheda' OR (\"recruit_requirements\".\"quantity\" IS NOT NULL)) AND (\"recruit_requirements\".\"type\" <> 'beat-time' OR (\"recruit_requirements\".\"seconds\" IS NOT NULL)) AND (\"recruit_requirements\".\"type\" <> 'enter-code' OR (\"recruit_requirements\".\"text\" IS NOT NULL)) AND (\"recruit_requirements\".\"type\" <> 'story' OR (\"recruit_requirements\".\"text\" IS NOT NULL)) AND (\"recruit_requirements\".\"type\" <> 'other' OR (\"recruit_requirements\".\"text\" IS NOT NULL))"
         }
       }
     },
@@ -6041,7 +6048,7 @@
         },
         "sections_restriction": {
           "name": "sections_restriction",
-          "value": "\"sections\".\"restriction\" IN ('white-seal', 'blue-seal', 'red-seal', 'ridepod-only')"
+          "value": "\"sections\".\"restriction\" IN ('white-seal', 'blue-seal', 'red-seal')"
         },
         "sections_time_limit_seconds": {
           "name": "sections_time_limit_seconds",
@@ -7531,7 +7538,7 @@
         },
         "weapons_sub_type_matches_type": {
           "name": "weapons_sub_type_matches_type",
-          "value": "\"weapons\".\"sub_type\" IS NULL OR CASE \"weapons\".\"type\" WHEN 'gun' THEN \"weapons\".\"sub_type\" IN ('normal', 'machine-gun', 'grenade', 'beam') WHEN 'wrench' THEN \"weapons\".\"sub_type\" IN ('wrench', 'hammer') ELSE 0 END"
+          "value": "\"weapons\".\"sub_type\" IS NULL OR (\"weapons\".\"type\" = 'gun' AND \"weapons\".\"sub_type\" IN ('normal', 'machine-gun', 'grenade', 'beam')) OR (\"weapons\".\"type\" = 'wrench' AND \"weapons\".\"sub_type\" IN ('wrench', 'hammer'))"
         }
       }
     }

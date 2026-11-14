@@ -237,6 +237,7 @@ CREATE TABLE `georama_goals` (
 	`name` text NOT NULL,
 	`type` text NOT NULL,
 	`georama_part_id` text,
+	`part_category` text,
 	`relation` text,
 	`related_georama_part_id` text,
 	`color` text,
@@ -256,15 +257,7 @@ CREATE TABLE `georama_goals` (
 	CONSTRAINT "georama_goals_related_part" CHECK(("georama_goals"."relation" IS NULL) + ("georama_goals"."related_georama_part_id" IS NULL) IN (0, 2)),
 	CONSTRAINT "georama_goals_quantity" CHECK("georama_goals"."quantity" >= 1),
 	CONSTRAINT "georama_goals_culture_points" CHECK("georama_goals"."culture_points" >= 1),
-	CONSTRAINT "georama_goals_link_matches_type" CHECK(CASE "georama_goals"."type"
-        WHEN 'parts-placed' THEN "georama_goals"."georama_part_id" IS NOT NULL AND "georama_goals"."quantity" IS NOT NULL
-        WHEN 'npc-resides' THEN "georama_goals"."npc_id" IS NOT NULL
-        WHEN 'residents' THEN "georama_goals"."quantity" IS NOT NULL
-        WHEN 'task-completed' THEN "georama_goals"."required_task_id" IS NOT NULL
-        WHEN 'culture-points' THEN "georama_goals"."culture_points" IS NOT NULL
-        WHEN 'story-event' THEN "georama_goals"."section_id" IS NOT NULL
-        ELSE 1
-      END)
+	CONSTRAINT "georama_goals_link_matches_type" CHECK(("georama_goals"."type" <> 'parts-placed' OR (("georama_goals"."georama_part_id" IS NOT NULL OR "georama_goals"."part_category" IS NOT NULL) AND "georama_goals"."quantity" IS NOT NULL)) AND ("georama_goals"."type" <> 'npc-resides' OR ("georama_goals"."npc_id" IS NOT NULL)) AND ("georama_goals"."type" <> 'residents' OR ("georama_goals"."quantity" IS NOT NULL)) AND ("georama_goals"."type" <> 'task-completed' OR ("georama_goals"."required_task_id" IS NOT NULL)) AND ("georama_goals"."type" <> 'culture-points' OR ("georama_goals"."culture_points" IS NOT NULL)) AND ("georama_goals"."type" <> 'story-event' OR ("georama_goals"."section_id" IS NOT NULL)))
 );
 --> statement-breakpoint
 CREATE TABLE `georama_part_items` (
@@ -442,7 +435,7 @@ CREATE TABLE `items` (
 	CONSTRAINT "items_synth_category" CHECK("items"."synth_category" IN ('attack', 'flame', 'chill', 'lightning', 'cyclone', 'smash', 'exorcism', 'beast', 'scale', 'gems', 'durable')),
 	CONSTRAINT "items_synth_point_cost" CHECK("items"."synth_point_cost" >= 0),
 	CONSTRAINT "items_max_stack" CHECK("items"."max_stack" >= 1),
-	CONSTRAINT "items_powerup_character" CHECK("items"."powerup_character" IN ('max', 'monica', 'both')),
+	CONSTRAINT "items_powerup_character" CHECK("items"."powerup_character" IN ('max', 'monica', 'either')),
 	CONSTRAINT "items_powerup_stat" CHECK("items"."powerup_stat" IN ('hp', 'defense')),
 	CONSTRAINT "items_powerup" CHECK(("items"."powerup_character" IS NULL) + ("items"."powerup_stat" IS NULL) + ("items"."powerup_amount" IS NULL) IN (0, 3)),
 	CONSTRAINT "items_powerup_amount" CHECK("items"."powerup_amount" >= 1)
@@ -473,11 +466,7 @@ CREATE TABLE `monster_class_unlocks` (
 	FOREIGN KEY (`enemy_id`) REFERENCES `enemies`(`id`) ON UPDATE no action ON DELETE no action,
 	CONSTRAINT "monster_class_unlocks_method" CHECK("monster_class_unlocks"."method" IN ('buy', 'gift', 'kill-with')),
 	CONSTRAINT "monster_class_unlocks_quantity" CHECK("monster_class_unlocks"."quantity" >= 1),
-	CONSTRAINT "monster_class_unlocks_link_matches_method" CHECK(CASE "monster_class_unlocks"."method"
-        WHEN 'buy' THEN "monster_class_unlocks"."enemy_id" IS NULL AND "monster_class_unlocks"."quantity" IS NULL
-        WHEN 'gift' THEN "monster_class_unlocks"."enemy_id" IS NOT NULL AND "monster_class_unlocks"."quantity" IS NOT NULL
-        WHEN 'kill-with' THEN "monster_class_unlocks"."enemy_id" IS NOT NULL AND "monster_class_unlocks"."quantity" IS NULL
-      END)
+	CONSTRAINT "monster_class_unlocks_link_matches_method" CHECK(("monster_class_unlocks"."method" <> 'buy' OR ("monster_class_unlocks"."enemy_id" IS NULL AND "monster_class_unlocks"."quantity" IS NULL)) AND ("monster_class_unlocks"."method" <> 'gift' OR ("monster_class_unlocks"."enemy_id" IS NOT NULL AND "monster_class_unlocks"."quantity" IS NOT NULL)) AND ("monster_class_unlocks"."method" <> 'kill-with' OR ("monster_class_unlocks"."enemy_id" IS NOT NULL AND "monster_class_unlocks"."quantity" IS NULL)))
 );
 --> statement-breakpoint
 CREATE TABLE `monster_classes` (
@@ -541,12 +530,7 @@ CREATE TABLE `npc_housing_requirements` (
 	FOREIGN KEY (`npc_id`) REFERENCES `npcs`(`id`) ON UPDATE no action ON DELETE no action,
 	FOREIGN KEY (`georama_part_id`) REFERENCES `georama_parts`(`id`) ON UPDATE no action ON DELETE no action,
 	CONSTRAINT "npc_housing_requirements_type" CHECK("npc_housing_requirements"."type" IN ('near-part', 'in-part', 'not-in-part', 'roof-color', 'minimum-stories', 'other')),
-	CONSTRAINT "npc_housing_requirements_link_matches_type" CHECK(CASE "npc_housing_requirements"."type"
-        WHEN 'roof-color' THEN "npc_housing_requirements"."color" IS NOT NULL
-        WHEN 'minimum-stories' THEN "npc_housing_requirements"."quantity" IS NOT NULL
-        WHEN 'other' THEN "npc_housing_requirements"."text" IS NOT NULL
-        ELSE "npc_housing_requirements"."georama_part_id" IS NOT NULL
-      END)
+	CONSTRAINT "npc_housing_requirements_link_matches_type" CHECK(("npc_housing_requirements"."type" <> 'near-part' OR ("npc_housing_requirements"."georama_part_id" IS NOT NULL)) AND ("npc_housing_requirements"."type" <> 'in-part' OR ("npc_housing_requirements"."georama_part_id" IS NOT NULL)) AND ("npc_housing_requirements"."type" <> 'not-in-part' OR ("npc_housing_requirements"."georama_part_id" IS NOT NULL)) AND ("npc_housing_requirements"."type" <> 'roof-color' OR ("npc_housing_requirements"."color" IS NOT NULL)) AND ("npc_housing_requirements"."type" <> 'minimum-stories' OR ("npc_housing_requirements"."quantity" IS NOT NULL)) AND ("npc_housing_requirements"."type" <> 'other' OR ("npc_housing_requirements"."text" IS NOT NULL)))
 );
 --> statement-breakpoint
 CREATE TABLE `npc_skills` (
@@ -670,20 +654,7 @@ CREATE TABLE `recruit_requirements` (
 	CONSTRAINT "recruit_requirements_quantity" CHECK("recruit_requirements"."quantity" >= 1),
 	CONSTRAINT "recruit_requirements_minimum_centimeters" CHECK("recruit_requirements"."minimum_centimeters" >= 1),
 	CONSTRAINT "recruit_requirements_seconds" CHECK("recruit_requirements"."seconds" >= 1),
-	CONSTRAINT "recruit_requirements_link_matches_type" CHECK(CASE "recruit_requirements"."type"
-        WHEN 'give-item' THEN "recruit_requirements"."item_id" IS NOT NULL AND "recruit_requirements"."quantity" IS NOT NULL
-        WHEN 'show-item' THEN "recruit_requirements"."item_id" IS NOT NULL
-        WHEN 'show-weapon' THEN "recruit_requirements"."weapon_id" IS NOT NULL
-        WHEN 'show-photo' THEN "recruit_requirements"."photo_id" IS NOT NULL
-        WHEN 'catch-fish' THEN "recruit_requirements"."fish_id" IS NOT NULL
-        WHEN 'pay-gilda' THEN "recruit_requirements"."quantity" IS NOT NULL
-        WHEN 'win-spheda' THEN "recruit_requirements"."quantity" IS NOT NULL
-        WHEN 'beat-time' THEN "recruit_requirements"."seconds" IS NOT NULL
-        WHEN 'enter-code' THEN "recruit_requirements"."text" IS NOT NULL
-        WHEN 'story' THEN "recruit_requirements"."text" IS NOT NULL
-        WHEN 'other' THEN "recruit_requirements"."text" IS NOT NULL
-        ELSE 1
-      END)
+	CONSTRAINT "recruit_requirements_link_matches_type" CHECK(("recruit_requirements"."type" <> 'give-item' OR ("recruit_requirements"."item_id" IS NOT NULL AND "recruit_requirements"."quantity" IS NOT NULL)) AND ("recruit_requirements"."type" <> 'show-item' OR ("recruit_requirements"."item_id" IS NOT NULL)) AND ("recruit_requirements"."type" <> 'show-weapon' OR ("recruit_requirements"."weapon_id" IS NOT NULL)) AND ("recruit_requirements"."type" <> 'show-photo' OR ("recruit_requirements"."photo_id" IS NOT NULL)) AND ("recruit_requirements"."type" <> 'catch-fish' OR ("recruit_requirements"."fish_id" IS NOT NULL)) AND ("recruit_requirements"."type" <> 'pay-gilda' OR ("recruit_requirements"."quantity" IS NOT NULL)) AND ("recruit_requirements"."type" <> 'win-spheda' OR ("recruit_requirements"."quantity" IS NOT NULL)) AND ("recruit_requirements"."type" <> 'beat-time' OR ("recruit_requirements"."seconds" IS NOT NULL)) AND ("recruit_requirements"."type" <> 'enter-code' OR ("recruit_requirements"."text" IS NOT NULL)) AND ("recruit_requirements"."type" <> 'story' OR ("recruit_requirements"."text" IS NOT NULL)) AND ("recruit_requirements"."type" <> 'other' OR ("recruit_requirements"."text" IS NOT NULL)))
 );
 --> statement-breakpoint
 CREATE TABLE `recruits` (
@@ -885,7 +856,7 @@ CREATE TABLE `sections` (
 	CONSTRAINT "sections_id" CHECK("sections"."id" GLOB '[a-z0-9]*' AND "sections"."id" NOT GLOB '*[^a-z0-9-]*'),
 	CONSTRAINT "sections_type" CHECK("sections"."type" IN ('story', 'dungeon', 'boss', 'interlude')),
 	CONSTRAINT "sections_medal_clear_goal" CHECK("sections"."medal_clear_goal" IN ('items-only', 'ridepod-only', 'no-healing', 'max-close-range-weapon-only', 'max-gun-only', 'monica-sword-only', 'monica-magic-only', 'monster-transformation-only')),
-	CONSTRAINT "sections_restriction" CHECK("sections"."restriction" IN ('white-seal', 'blue-seal', 'red-seal', 'ridepod-only')),
+	CONSTRAINT "sections_restriction" CHECK("sections"."restriction" IN ('white-seal', 'blue-seal', 'red-seal')),
 	CONSTRAINT "sections_time_limit_seconds" CHECK("sections"."time_limit_seconds" >= 1),
 	CONSTRAINT "sections_medal_time_attack_seconds" CHECK("sections"."medal_time_attack_seconds" >= 1),
 	CONSTRAINT "sections_medal_fishing_centimeters" CHECK("sections"."medal_fishing_centimeters" >= 1),
@@ -1087,7 +1058,7 @@ CREATE TABLE `weapons` (
 	CONSTRAINT "weapons_base_abs" CHECK("weapons"."base_abs" >= 0),
 	CONSTRAINT "weapons_synth_points_per_level" CHECK("weapons"."synth_points_per_level" >= 1),
 	CONSTRAINT "weapons_max_durability" CHECK("weapons"."max_durability" >= 1),
-	CONSTRAINT "weapons_sub_type_matches_type" CHECK("weapons"."sub_type" IS NULL OR CASE "weapons"."type" WHEN 'gun' THEN "weapons"."sub_type" IN ('normal', 'machine-gun', 'grenade', 'beam') WHEN 'wrench' THEN "weapons"."sub_type" IN ('wrench', 'hammer') ELSE 0 END)
+	CONSTRAINT "weapons_sub_type_matches_type" CHECK("weapons"."sub_type" IS NULL OR ("weapons"."type" = 'gun' AND "weapons"."sub_type" IN ('normal', 'machine-gun', 'grenade', 'beam')) OR ("weapons"."type" = 'wrench' AND "weapons"."sub_type" IN ('wrench', 'hammer')))
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX `weapons_name_unique` ON `weapons` (`name`);
