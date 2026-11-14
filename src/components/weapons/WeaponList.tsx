@@ -37,7 +37,10 @@ function useGuideWeapons(): Set<string> {
     const ids = new Set<string>();
     for (const g of allGuides(guides))
       if (activeGuides.includes(g.id))
-        for (const s of g.steps) if (s.build) ids.add(s.build.weaponId);
+        for (const s of g.steps) {
+          if (s.build) ids.add(s.build.weaponId);
+          if (s.buildUp) ids.add(s.buildUp.weaponId);
+        }
     return ids;
   }, [mounted, guides, activeGuides]);
 }

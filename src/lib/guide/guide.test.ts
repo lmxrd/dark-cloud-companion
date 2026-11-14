@@ -9,7 +9,7 @@ import { deriveBuild } from "./derive";
 import { fromLegacyGuide, fromLegacyWalkthrough, migrateTickId } from "./legacy";
 import { mainWalkthrough } from "./main";
 import { entryTickIds, knownItemIds, knownSectionIds } from "./refs";
-import { guide as guideSchema, textTickId } from "./types";
+import { guide as guideSchema, textTickId, type Guide } from "./types";
 import { emptyWalkthrough } from "@/lib/walkthroughs/types";
 
 describe("main walkthrough", () => {
@@ -159,7 +159,70 @@ describe("appendPlanToGuide", () => {
     const d = deriveBuild(combined);
     expect(d.errors).toEqual([]);
     for (const s of d.steps.values()) expect(s.errors).toEqual([]);
-    expect(combined.steps.at(-1)!.build!.weaponId).toBe("smash-wrench");
+    // The plans just reach the weapon: they end with the build-up into it.
+    expect(combined.steps.at(-1)!.buildUp!.weaponId).toBe("smash-wrench");
+    expect(combined.steps.some((s) => s.buildUp?.weaponId === "drill-wrench")).toBe(true);
     expect(d.final!.weaponId).toBe("smash-wrench");
   }, 120000);
+});
+
+describe("build-up steps", () => {
+  const base = async () => {
+    const { getWeapon } = await import("@/lib/planner/sources");
+    const { freshState } = await import("@/lib/weapons/mechanics");
+    const { stateToBuildStart } = await import("./fromPlan");
+    return stateToBuildStart(freshState(getWeapon("battle-wrench")), 1);
+  };
+  const work = (id: string, weaponId: string, levelTo: number) => ({
+    id,
+    title: id,
+    notes: "",
+    entries: [],
+    build: { weaponId, levelTo, synths: [] },
+  });
+  const up = (id: string, weaponId: string) => ({
+    id,
+    title: id,
+    notes: "",
+    entries: [],
+    buildUp: { weaponId },
+  });
+
+  test("a build-up step builds up between work steps and owns the build-up's checks", async () => {
+    const g: Guide = {
+      id: "g",
+      title: "T",
+      kind: "custom",
+      build: await base(),
+      steps: [
+        work("a", "battle-wrench", 3),
+        up("b", "true-battle-wrench"),
+        work("c", "true-battle-wrench", 2),
+      ],
+    };
+    const d = deriveBuild(g);
+    expect(d.errors).toEqual([]);
+    expect(d.final!.weaponId).toBe("true-battle-wrench");
+    expect(d.steps.get("b")!.nextWeaponId).toBe("true-battle-wrench");
+    expect(d.steps.get("b")!.stats).toEqual(d.steps.get("a")!.stats);
+    // The work step leaves the build-up to the build-up step.
+    expect(d.steps.get("a")!.nextWeaponId).toBeUndefined();
+    expect(d.steps.get("a")!.requirements).toBeDefined();
+  });
+
+  test("a build-up at the end still builds up; one into the wrong weapon is reported", async () => {
+    const ends: Guide = {
+      id: "g",
+      title: "T",
+      kind: "custom",
+      build: await base(),
+      steps: [work("a", "battle-wrench", 3), up("b", "true-battle-wrench")],
+    };
+    expect(deriveBuild(ends).final!.weaponId).toBe("true-battle-wrench");
+    const wrong: Guide = {
+      ...ends,
+      steps: [...ends.steps, work("c", "battle-wrench", 4)],
+    };
+    expect(deriveBuild(wrong).steps.get("b")!.errors.join(" ")).toMatch(/next step works on/);
+  });
 });

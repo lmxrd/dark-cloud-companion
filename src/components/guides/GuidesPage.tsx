@@ -26,12 +26,10 @@ import { toggleGuide } from "@/lib/store";
 
 const viewHref = (g: Guide) => withBase(`/guides/view?id=${encodeURIComponent(g.id)}`);
 
-/** The weapon a build guide ends in (its last stage builds up into it). */
+/** The weapon a build guide ends in: its last build step's weapon or build-up target. */
 function targetOf(g: Guide): string | undefined {
-  const last = g.steps.at(-1)?.build?.weaponId;
-  const prefix = g.id.replace(/-max-(abs|fast)$/, "");
-  // Built-in ids start with the target weapon's id; fall back to the last stage's weapon.
-  return prefix !== g.id ? prefix : last;
+  const last = g.steps.findLast((s) => s.build || s.buildUp);
+  return last?.buildUp?.weaponId ?? last?.build?.weaponId;
 }
 
 /** The variant part of a built-in title ("Grade Zero — Least ABS" → "Least ABS"). */

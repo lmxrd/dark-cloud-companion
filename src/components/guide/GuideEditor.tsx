@@ -450,15 +450,24 @@ export function GuideEditor({ initial, persisted, onSave }: Props) {
     update({ steps: draft.steps.map((x, n) => (n === i ? s : x)) });
   const derived = useMemo(() => deriveBuild(draft), [draft]);
 
-  // Which weapons a build step may use: the first stage can be any weapon the start state can reach; later ones follow the chain.
-  const buildSteps = draft.steps.filter((s) => s.build);
-  const lastBuildWeapon = buildSteps.at(-1)?.build?.weaponId ?? draft.build?.weaponId;
+  // The weapon the build is on after a step: its own weapon, or a build-up step's target.
+  const weaponAfter = (s: Step) => s.buildUp?.weaponId ?? s.build?.weaponId;
+  const lastBuildWeapon =
+    draft.steps.map(weaponAfter).filter(Boolean).at(-1) ?? draft.build?.weaponId;
+  // Which weapons a work step may use: the weapon in hand (after a build-up step, its target), or,
+  // as in guides from before build-up steps, a build-up target of it (an implied build-up).
   const allowedFor = (stepIndex: number): Set<string> => {
-    const before = draft.steps.slice(0, stepIndex).filter((s) => s.build);
-    const prev = before.at(-1)?.build?.weaponId;
-    // The first stage is the start weapon itself; every later stage is a build-up target of the previous one.
+    const prev = draft.steps.slice(0, stepIndex).findLast((s) => s.build || s.buildUp);
     if (!prev) return new Set(draft.build ? [draft.build.weaponId] : []);
-    return new Set(getWeapon(prev).buildsUpTo);
+    if (prev.buildUp) return new Set([prev.buildUp.weaponId]);
+    const w = prev.build!.weaponId;
+    return new Set([w, ...getWeapon(w).buildsUpTo]);
+  };
+  /** Which weapons a build-up step may build into: the targets of the weapon in hand before it. */
+  const targetsFor = (stepIndex: number): Set<string> => {
+    const prev = draft.steps.slice(0, stepIndex).findLast((s) => s.build || s.buildUp);
+    const w = prev ? weaponAfter(prev) : draft.build?.weaponId;
+    return new Set(w ? getWeapon(w).buildsUpTo : []);
   };
 
   const addBuild = () => {
@@ -532,7 +541,7 @@ export function GuideEditor({ initial, persisted, onSave }: Props) {
               onClick={() => {
                 if (!confirm(t("editor.removeBuildConfirm"))) return;
                 const { build: _b, ...rest } = draft;
-                setDraft({ ...rest, steps: draft.steps.filter((s) => !s.build) });
+                setDraft({ ...rest, steps: draft.steps.filter((s) => !s.build && !s.buildUp) });
                 setSaved(false);
               }}
             >
@@ -647,6 +656,20 @@ export function GuideEditor({ initial, persisted, onSave }: Props) {
                   <BuildStepBody step={s} derived={derived.steps.get(s.id)} />
                 </>
               )}
+              {s.buildUp && (
+                <>
+                  <Label className="flex flex-col items-start gap-1 text-xs">
+                    {t("editor.buildUpTo")}
+                    <WeaponSelect
+                      value={s.buildUp.weaponId}
+                      ids={new Set([s.buildUp.weaponId, ...targetsFor(i)])}
+                      className={`${selectClass} h-9`}
+                      onChange={(id) => setStep(i, { ...s, buildUp: { weaponId: id } })}
+                    />
+                  </Label>
+                  <BuildStepBody step={s} derived={derived.steps.get(s.id)} />
+                </>
+              )}
               <fieldset className="flex flex-col gap-2">
                 <legend className="text-muted-foreground mb-1 text-xs">
                   {t("editor.entries")}
@@ -699,9 +722,8 @@ export function GuideEditor({ initial, persisted, onSave }: Props) {
           <Button
             variant="outline"
             onClick={() => {
-              const w = lastBuildWeapon ?? draft.build!.weaponId;
-              // A new stage builds up from the previous one, so default to its first build-up target.
-              const weaponId = buildSteps.length ? (getWeapon(w).buildsUpTo[0] ?? w) : w;
+              // Work on the weapon in hand (after a build-up step, its target).
+              const weaponId = lastBuildWeapon ?? draft.build!.weaponId;
               const stage: Stage = { weaponId, levelTo: 0, synths: [] };
               const step: Step = {
                 ...emptyStep(draft.steps.at(-1)?.chapterId),
@@ -712,6 +734,23 @@ export function GuideEditor({ initial, persisted, onSave }: Props) {
             }}
           >
             {t("editor.addBuildStep")}
+          </Button>
+        )}
+        {draft.build && lastBuildWeapon && getWeapon(lastBuildWeapon).buildsUpTo.length > 0 && (
+          <Button
+            variant="outline"
+            onClick={() => {
+              const from = lastBuildWeapon;
+              const to = getWeapon(from).buildsUpTo[0];
+              const step: Step = {
+                ...emptyStep(draft.steps.at(-1)?.chapterId),
+                title: `${getWeapon(from).name} → ${getWeapon(to).name}`,
+                buildUp: { weaponId: to },
+              };
+              update({ steps: [...draft.steps, step] });
+            }}
+          >
+            {t("editor.addBuildUpStep")}
           </Button>
         )}
         <Button

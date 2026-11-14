@@ -52,8 +52,13 @@ export const step = z.object({
   chapterId: z.string().optional(),
   sectionId: z.string().optional(),
   entries: z.array(entry).max(300),
-  /** Present when this step is a stage of the guide's weapon build. */
+  /** Present when this step is a stage of the guide's weapon build (work on one weapon). */
   build: stage.optional(),
+  /**
+   * Present when this step builds the weapon up into another one. Without such a step, two build
+   * steps on different weapons still imply the build-up between them (guides from before it).
+   */
+  buildUp: z.object({ weaponId: z.string() }).optional(),
 });
 export type Step = z.infer<typeof step>;
 

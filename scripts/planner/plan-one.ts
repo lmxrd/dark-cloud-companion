@@ -83,7 +83,16 @@ export async function planOne(
       const c = result.simulation!.stages?.[j]?.cost;
       return { abs: c?.abs ?? 0, gilda: (c?.gilda ?? 0) + (j === 0 ? acquireGilda : 0) };
     }),
-    stages.map((st, j) => stageUnlockIndex(st, stages[j + 1], (w) => getWeapon(w).requiresKills)),
+    // A stage's own work waits only for what it uses; the first stage on a weapon also waits for
+    // the build-up into it (the enemies that weapon needs defeated). The build-up is its own step.
+    stages.map((st, j) =>
+      Math.max(
+        stageUnlockIndex(st, undefined, (w) => getWeapon(w).requiresKills),
+        j > 0 && stages[j - 1].weaponId !== st.weaponId
+          ? stageUnlockIndex(stages[j - 1], st, (w) => getWeapon(w).requiresKills)
+          : 0,
+      ),
+    ),
     result.acquire,
     // Following the story, each stage stays in the chapter the planner put it in.
     spec.flow === "progression" ? "story" : spec.flow,

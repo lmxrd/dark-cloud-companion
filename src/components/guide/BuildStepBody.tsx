@@ -69,6 +69,7 @@ export function BuildStepBody({
   buyableOnly?: boolean;
 }) {
   const t = useTranslations();
+  if (step.buildUp) return <BuildUpBody step={step} derived={derived} />;
   const stage = step.build;
   if (!stage) return null;
   const groups = groupSynths(stage);
@@ -83,18 +84,10 @@ export function BuildStepBody({
   const items = groups.filter((g) => g.kind === "item");
   const spheres = groups.filter((g) => g.kind === "sphere");
   const weapon = getWeapon(stage.weaponId);
-  const chapter = step.chapterId ? chapterById.get(step.chapterId) : undefined;
-  const section = step.sectionId ? sectionById.get(step.sectionId) : undefined;
   const next = derived?.nextWeaponId ? getWeapon(derived.nextWeaponId) : undefined;
   return (
     <div className="flex flex-col gap-2 text-sm">
-      {chapter?.phase === "main" && (
-        <p className="text-muted-foreground text-xs font-medium">
-          {section
-            ? t("planner.step.when", { section: section.title, n: chapter.number })
-            : t("planner.step.whenChapter", { n: chapter.number })}
-        </p>
-      )}
+      <When step={step} />
       {stage.levelTo > 0 && (
         <p>{t("planner.step.levelOnly", { weapon: name(stage.weaponId), to: stage.levelTo })}</p>
       )}
@@ -157,7 +150,7 @@ export function BuildStepBody({
             </summary>
             <p className="text-muted-foreground mt-1 text-[0.7rem]">
               {t(
-                derived.nextWeaponId ? "planner.step.statsLegendNeeds" : "planner.step.statsLegend",
+                derived.requirements ? "planner.step.statsLegendNeeds" : "planner.step.statsLegend",
               )}
             </p>
             <div className="mt-1.5 grid grid-cols-3 gap-x-3 gap-y-1.5 text-xs">
@@ -206,36 +199,7 @@ export function BuildStepBody({
           {next && (
             <p className="font-medium">{t("planner.step.buildup", { weapon: next.name })}</p>
           )}
-          {next && next.requiresKills.length > 0 && (
-            <div className="text-xs">
-              <p>{t("planner.step.kills", { weapon: next.name })}</p>
-              <ul
-                className="list-disc pl-5"
-                aria-label={t("planner.step.kills", { weapon: next.name })}
-              >
-                {next.requiresKills.map((enemy) => {
-                  const met = enemyFirstSection(enemy);
-                  const where = met ? sectionById.get(met) : undefined;
-                  const ch = where ? chapterById.get(where.chapterId) : undefined;
-                  return (
-                    <li key={enemy}>
-                      <span className="font-medium">{enemy}</span>
-                      {where && (
-                        <span className="text-muted-foreground">
-                          {" "}
-                          ·{" "}
-                          {t("planner.step.metAt", {
-                            section: where.title,
-                            n: ch?.number ?? where.chapterId,
-                          })}
-                        </span>
-                      )}
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          )}
+          {next && <KillList weapon={next} />}
           {derived.errors.length > 0 && (
             <div className="text-destructive text-xs">
               <p className="font-medium">{t("step.problems")}</p>
@@ -247,6 +211,102 @@ export function BuildStepBody({
             </div>
           )}
         </>
+      )}
+    </div>
+  );
+}
+
+/** When to do a step: after its section, or in its chapter. */
+function When({ step }: { step: Step }) {
+  const t = useTranslations();
+  const chapter = step.chapterId ? chapterById.get(step.chapterId) : undefined;
+  const section = step.sectionId ? sectionById.get(step.sectionId) : undefined;
+  if (chapter?.phase !== "main") return null;
+  return (
+    <p className="text-muted-foreground text-xs font-medium">
+      {section
+        ? t("planner.step.when", { section: section.title, n: chapter.number })
+        : t("planner.step.whenChapter", { n: chapter.number })}
+    </p>
+  );
+}
+
+/** The enemies a weapon needs defeated before building up into it, with where each is first met. */
+function KillList({ weapon }: { weapon: ReturnType<typeof getWeapon> }) {
+  const t = useTranslations();
+  if (!weapon.requiresKills.length) return null;
+  const next = weapon;
+  return (
+    <div className="text-xs">
+      <p>{t("planner.step.kills", { weapon: next.name })}</p>
+      <ul className="list-disc pl-5" aria-label={t("planner.step.kills", { weapon: next.name })}>
+        {next.requiresKills.map((enemy) => {
+          const met = enemyFirstSection(enemy);
+          const where = met ? sectionById.get(met) : undefined;
+          const ch = where ? chapterById.get(where.chapterId) : undefined;
+          return (
+            <li key={enemy}>
+              <span className="font-medium">{enemy}</span>
+              {where && (
+                <span className="text-muted-foreground">
+                  {" "}
+                  ·{" "}
+                  {t("planner.step.metAt", {
+                    section: where.title,
+                    n: ch?.number ?? where.chapterId,
+                  })}
+                </span>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+}
+
+/** A build-up step: the requirements of the next weapon against the weapon's stats, and its kills. */
+function BuildUpBody({ step, derived }: { step: Step; derived?: DerivedStep }) {
+  const t = useTranslations();
+  const target = getWeapon(step.buildUp!.weaponId);
+  const needs = derived?.requirements
+    ? STAT_KEYS.filter((k) => (derived.requirements![k] ?? 0) > 0)
+    : [];
+  return (
+    <div className="flex flex-col gap-2 text-sm">
+      <When step={step} />
+      <p className="font-medium">{t("planner.step.buildup", { weapon: target.name })}</p>
+      {derived && needs.length > 0 && (
+        <ul
+          className="flex flex-wrap gap-1.5 text-xs"
+          aria-label={t("planner.step.requirements", { weapon: target.name })}
+        >
+          {needs.map((k) => {
+            const short = derived.stats[k] < derived.requirements![k];
+            return (
+              <li
+                key={k}
+                className={cn(
+                  "rounded-full border-2 px-2 py-0.5 tabular-nums",
+                  short && "border-destructive text-destructive",
+                )}
+              >
+                {t(`stat.${k}` as const)} {derived.stats[k]} / {derived.requirements![k]}
+              </li>
+            );
+          })}
+        </ul>
+      )}
+      <KillList weapon={target} />
+      {derived && derived.errors.length > 0 && (
+        <div className="text-destructive text-xs">
+          <p className="font-medium">{t("step.problems")}</p>
+          <ul className="list-disc pl-5">
+            {derived.errors.map((e, i) => (
+              <li key={i}>{e}</li>
+            ))}
+          </ul>
+        </div>
       )}
     </div>
   );

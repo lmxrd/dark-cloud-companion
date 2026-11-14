@@ -6,6 +6,7 @@
 import { core, names } from "@/lib/gamedata";
 import { weapons as weaponsFile } from "@/lib/gamedata/weapons";
 import { stageResourceChapter } from "@/lib/guides/fromPlan";
+import { getWeapon } from "./sources";
 import type { Acquire, Stage } from "./types";
 
 /**
@@ -58,6 +59,21 @@ const meetings = (enemyName: string) =>
 function killIndex(enemyName: string): number {
   const found = meetings(enemyName);
   return found.length ? Math.min(...found) : lastIndex;
+}
+
+/**
+ * Where a build-up into `weaponId` happens: after the section of the work before it, and once every
+ * enemy the weapon needs defeated has been met.
+ */
+export function buildUpSection(
+  afterSectionId: string,
+  weaponId: string,
+): { sectionId: string; chapter: number } {
+  const i = Math.max(
+    indexOfSection.get(afterSectionId) ?? 0,
+    ...getWeapon(weaponId).requiresKills.map(killIndex),
+  );
+  return { sectionId: sections[i].id, chapter: sections[i].chapterNumber };
 }
 
 /** The section in which an enemy (by name) is first met, if known. */

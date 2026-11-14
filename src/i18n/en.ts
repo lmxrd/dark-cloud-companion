@@ -237,7 +237,9 @@ export const en = {
   "editor.blank": "Blank guide",
   "editor.create": "Create",
   "editor.addStep": "Add text step",
-  "editor.addBuildStep": "Add build step",
+  "editor.addBuildStep": "Add weapon step",
+  "editor.addBuildUpStep": "Add build-up step",
+  "editor.buildUpTo": "Build up to",
   "editor.step": "Step {n}",
   "editor.stepTitle": "Step title",
   "editor.notes": "Notes",
@@ -642,6 +644,7 @@ export const en = {
   "planner.step.whenChapter": "Do this in chapter {n}",
   "planner.step.metAt": "first met in {section} (chapter {n})",
   "planner.step.needs": "needs {n}",
+  "planner.step.requirements": "{weapon} needs (stat now / required):",
   "planner.step.statsLegend": "Stat after this stage / the weapon's maximum.",
   "planner.step.statsLegendNeeds":
     "Stat after this stage / the weapon's maximum. “Needs” (the tick on the bar) is what the next weapon requires.",

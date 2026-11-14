@@ -6,7 +6,8 @@ import { stepTickId, type Guide, type Step } from "./types";
  * entries use the data item's own ticks), plus the step's own tick when it has a build or no entries at all.
  */
 export function stepTickIds(guide: Guide, step: Step): string[] {
-  const own = step.build || step.entries.length === 0 ? [stepTickId(guide.id, step.id)] : [];
+  const own =
+    step.build || step.buildUp || step.entries.length === 0 ? [stepTickId(guide.id, step.id)] : [];
   return [...step.entries.flatMap((e) => entryTickIds(guide.id, step.id, e)), ...own];
 }
 

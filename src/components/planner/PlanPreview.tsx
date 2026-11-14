@@ -9,7 +9,13 @@ import { getWeapon } from "@/lib/planner/sources";
 export function PlanPreview({ guide }: { guide: Guide }) {
   const t = useTranslations();
   const derived = deriveBuild(guide);
-  const route = [...new Set(guide.steps.flatMap((s) => (s.build ? [s.build.weaponId] : [])))];
+  const route = [
+    ...new Set(
+      guide.steps.flatMap((s) =>
+        s.build ? [s.build.weaponId] : s.buildUp ? [s.buildUp.weaponId] : [],
+      ),
+    ),
+  ];
   const last = guide.steps.filter((s) => s.build).at(-1)?.build?.weaponId;
   if (last && !route.includes(last)) route.push(last);
   const acquire = guide.build?.acquire;

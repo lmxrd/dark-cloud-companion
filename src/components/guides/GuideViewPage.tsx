@@ -114,8 +114,8 @@ export function GuideViewPage() {
     buyableOnly: profile.view.buyableOnly,
     needle: needle.trim().toLowerCase(),
   };
-  // A weapon build reads as a timeline of stages; its steps share one chapter.
-  const isBuild = guide.steps.length > 0 && guide.steps.every((s) => s.build);
+  // A weapon build reads as a timeline of work and build-up steps.
+  const isBuild = guide.steps.length > 0 && guide.steps.every((s) => s.build || s.buildUp);
   const nextIndex = guide.steps.findIndex((s) => !isStepDone(guide, s, checks));
   const next = nextIndex >= 0 ? guide.steps[nextIndex] : undefined;
   const groupKey = (chapterId: string | undefined) => chapterId ?? "anytime";

@@ -102,12 +102,21 @@ export function StepCard({
     if (ready && collapseDone && complete) setFolded(true);
     // oxlint-disable-next-line react-hooks/exhaustive-deps
   }, [ready]);
-  if (step.entries.length > 0 && entries.length === 0 && !step.build && !step.notes) return null;
+  if (
+    step.entries.length > 0 &&
+    entries.length === 0 &&
+    !step.build &&
+    !step.buildUp &&
+    !step.notes
+  )
+    return null;
   // A category filter shows matching entries only, never steps without any.
   if (filters.category && entries.length === 0) return null;
 
   const ownTick =
-    step.build || step.entries.length === 0 ? stepTickId(guide.id, step.id) : undefined;
+    step.build || step.buildUp || step.entries.length === 0
+      ? stepTickId(guide.id, step.id)
+      : undefined;
   const chapter = step.chapterId ? chapterById.get(step.chapterId) : undefined;
   const section = step.sectionId ? sectionById.get(step.sectionId) : undefined;
   const showCounter = step.entries.length > 0 && progress.total > 0;
@@ -177,7 +186,7 @@ export function StepCard({
       </div>
       {!isFolded && (
         <CardContent className="flex flex-col gap-1 px-1 py-1">
-          {(step.notes || step.build) && (
+          {(step.notes || step.build || step.buildUp) && (
             <div className="flex flex-col gap-2 px-2 py-1">
               {step.notes && <p className="text-sm whitespace-pre-wrap">{step.notes}</p>}
               <BuildStepBody step={step} derived={derived} buyableOnly={filters.buyableOnly} />

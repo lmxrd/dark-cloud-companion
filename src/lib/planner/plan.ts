@@ -515,7 +515,7 @@ export async function planPath(
     const killChapter = (id: string) =>
       Math.max(1, ...getWeapon(id).requiresKills.map((e) => enemyChapter.get(e) ?? 8));
     const routeStages = req.goal.kind === "reach" ? route.length - 1 : route.length;
-    // When a build-up is locked two or more chapters after the weapon is obtained, the weapon gets
+    // When a build-up is locked until a later chapter than the weapon is obtained in, the weapon gets
     // an in-between stage first (a stage on the same weapon, no build-up), so it is strengthened
     // while the story catches up instead of waiting idle.
     const chain: string[] = [];
@@ -523,7 +523,7 @@ export async function planPath(
     let obtained = startChapter;
     for (let j = 0; j < routeStages; j++) {
       const unlock = Math.max(obtained, killChapter(route[Math.min(j + 1, route.length - 1)]));
-      if (unlock - obtained >= 2) {
+      if (unlock - obtained >= 1) {
         chain.push(route[j]);
         stageUnlock.push(obtained);
       }
