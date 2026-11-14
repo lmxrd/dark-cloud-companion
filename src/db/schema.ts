@@ -1085,7 +1085,8 @@ export const georamaStartingParts = sqliteTable(
 // ─── Items and shops ──────────────────────────────────────────────────────────────────────────────
 
 export const POWERUP_STATS = ["hp", "defense"] as const;
-export const POWERUP_CHARACTERS = ["max", "monica", "both"] as const;
+/** `either`: the player chooses who gets it (Fruit of Eden). */
+export const POWERUP_CHARACTERS = ["max", "monica", "either"] as const;
 export const ITEM_TYPES = [
   "material",
   "functional",
