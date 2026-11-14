@@ -87,7 +87,20 @@ export interface ProgressionOptions {
   startBy: number;
   /** See `Progression.earlyStatBonus` (0: off). */
   earlyStatBonus?: number;
+  /** See `Progression.mainItemCost` (0: off). */
+  mainItemCost?: number;
 }
+
+/** The story settings the built-in plans use (and the planner page's "follow the story"). */
+export const STORY_DEFAULTS: ProgressionOptions = {
+  grindShare: 0.2,
+  delayCost: 10000,
+  levelCap: 10,
+  finalLevelCap: 15,
+  startBy: 2,
+  earlyStatBonus: 0.5,
+  mainItemCost: 30,
+};
 
 /** ABS and gilda paid out by clearing every section once, by the end of each chapter (index 1…8). */
 const storyTotals = (() => {
@@ -631,6 +644,7 @@ export async function planPath(
       itemChapter: items.map((it) => it.fromChapter ?? 1),
       chapterWindow: 2,
       ...(prog.earlyStatBonus ? { earlyStatBonus: prog.earlyStatBonus } : {}),
+      ...(prog.mainItemCost ? { mainItemCost: prog.mainItemCost } : {}),
     };
     return {
       chain,

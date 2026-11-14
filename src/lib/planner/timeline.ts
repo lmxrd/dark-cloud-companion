@@ -148,3 +148,40 @@ export function placeStages(
     return { sectionId: s.id, chapter: s.chapterNumber, grindAbs, grindGilda };
   });
 }
+
+/**
+ * Places a planner result's stages on the story (see `placeStages`): each stage waits for what it
+ * uses, the first stage on a weapon also for the build-up into it (the enemies that weapon needs
+ * defeated). With the planner's own chapters (story plans), each stage stays in its chapter.
+ */
+export function placeResult(
+  result: {
+    plan?: { stages: Stage[] };
+    simulation?: { stages?: { cost: { abs: number; gilda: number } }[] };
+    acquire?: Acquire;
+    stageChapters?: number[];
+  },
+  flow: Flow,
+): PlacedStage[] {
+  const stages = result.plan?.stages ?? [];
+  const a = result.acquire;
+  const acquireGilda = a?.kind === "shop" ? a.price : a?.kind === "invent" ? a.gilda : 0;
+  const kills = (w: string) => getWeapon(w).requiresKills;
+  return placeStages(
+    stages.map((_, j) => {
+      const c = result.simulation?.stages?.[j]?.cost;
+      return { abs: c?.abs ?? 0, gilda: (c?.gilda ?? 0) + (j === 0 ? acquireGilda : 0) };
+    }),
+    stages.map((st, j) =>
+      Math.max(
+        stageUnlockIndex(st, undefined, kills),
+        j > 0 && stages[j - 1].weaponId !== st.weaponId
+          ? stageUnlockIndex(stages[j - 1], st, kills)
+          : 0,
+      ),
+    ),
+    a,
+    flow,
+    result.stageChapters,
+  );
+}

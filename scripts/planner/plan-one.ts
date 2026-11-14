@@ -4,7 +4,7 @@
 import { planResultToGuide } from "../../src/lib/guide/fromPlan.ts";
 import { guide as guideSchema, type Guide } from "../../src/lib/guide/types.ts";
 import { planPath, type PlanResult } from "../../src/lib/planner/plan.ts";
-import { placeStages, stageUnlockIndex, storyGilda } from "../../src/lib/planner/timeline.ts";
+import { placeResult, storyGilda } from "../../src/lib/planner/timeline.ts";
 import { names } from "../../src/lib/gamedata/index.ts";
 import { getWeapon, weaponData } from "../../src/lib/planner/sources.ts";
 import { freshState } from "../../src/lib/weapons/mechanics.ts";
@@ -73,32 +73,8 @@ export async function planOne(
   if (result.abilitiesMissing?.length)
     throw new Error(`${spec.id}: missing abilities ${result.abilitiesMissing.join(", ")}`);
   const stages = result.plan!.stages;
-  const acquireGilda =
-    result.acquire?.kind === "shop"
-      ? result.acquire.price
-      : result.acquire?.kind === "invent"
-        ? result.acquire.gilda
-        : 0;
-  const placement = placeStages(
-    stages.map((_, j) => {
-      const c = result.simulation!.stages?.[j]?.cost;
-      return { abs: c?.abs ?? 0, gilda: (c?.gilda ?? 0) + (j === 0 ? acquireGilda : 0) };
-    }),
-    // A stage's own work waits only for what it uses; the first stage on a weapon also waits for
-    // the build-up into it (the enemies that weapon needs defeated). The build-up is its own step.
-    stages.map((st, j) =>
-      Math.max(
-        stageUnlockIndex(st, undefined, (w) => getWeapon(w).requiresKills),
-        j > 0 && stages[j - 1].weaponId !== st.weaponId
-          ? stageUnlockIndex(stages[j - 1], st, (w) => getWeapon(w).requiresKills)
-          : 0,
-      ),
-    ),
-    result.acquire,
-    // Following the story, each stage stays in the chapter the planner put it in.
-    spec.flow === "progression" ? "story" : spec.flow,
-    result.stageChapters,
-  );
+  // Following the story, each stage stays in the chapter the planner put it in.
+  const placement = placeResult(result, spec.flow === "progression" ? "story" : spec.flow);
   const done = placement.at(-1)!;
   const grind = placement.reduce((n, p) => n + p.grindAbs, 0);
   const farm = placement.reduce((n, p) => n + p.grindGilda, 0);

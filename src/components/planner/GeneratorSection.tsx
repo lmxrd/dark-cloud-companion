@@ -16,12 +16,14 @@ import { WORKER_FAILED, cancelPlanner, loadTemplates, runPlanner } from "@/lib/p
 import { ancestorsOf, finalWeaponIds, rootWeaponIds } from "@/lib/planner/graph";
 import {
   earliestChapter,
+  STORY_DEFAULTS,
   type AbilitySource,
   type PlanProgress,
   type PlanResult,
 } from "@/lib/planner/plan";
 import type { Objective } from "@/lib/planner/solve";
 import { getWeapon, weaponById, weaponData } from "@/lib/planner/sources";
+import { placeResult } from "@/lib/planner/timeline";
 import { freshState, type WeaponState } from "@/lib/weapons/mechanics";
 import { $profile, addShoppingGoal, saveGuide, setPlannerInputs, setView } from "@/lib/store";
 import type { PlannerInputs } from "@/lib/profiles";
@@ -61,12 +63,18 @@ const isZero = (s: Stats) => STAT_KEYS.every((k) => s[k] === 0);
  */
 const defaultChapter = (start: string, id: string) => Math.max(2, earliestChapter(start, id));
 
-type SolveTime = "quick" | "thorough" | "best";
+type SolveTime = "quick" | "thorough" | "best" | "excellent";
 /**
- * Seconds the solver may spend on each route it solves exactly. Longer finds cheaper plans on hard
- * targets (the built-in plans use 120 s) but keeps the page busy for minutes.
+ * Seconds the solver may spend on each route it solves exactly (twice that when following the
+ * story). Measured over the built-in plans against 60 s: 10 s costs ~3% more ABS, 15 s ~2%, 30 s
+ * under 1%; below 10 s solves often end without any plan. The built-in plans use 120 s.
  */
-const SOLVE_SECONDS: Record<SolveTime, number> = { quick: 3, thorough: 15, best: 60 };
+const SOLVE_SECONDS: Record<SolveTime, number> = {
+  quick: 15,
+  thorough: 30,
+  best: 60,
+  excellent: 120,
+};
 
 function retarget(inputs: PlannerInputs, id: string): PlannerInputs {
   const w = getWeapon(id);
@@ -117,6 +125,7 @@ export function GeneratorSection({ onOpenEditor }: { onOpenEditor: () => void })
   );
   const [itemPool, setItemPool] = useState<"cheap" | "crystals">(saved0?.itemPool ?? "cheap");
   const [solveTime, setSolveTime] = useState<SolveTime>(saved0?.solveTime ?? "quick");
+  const [story, setStory] = useState(saved0?.story ?? false);
   const [customStart, setCustomStart] = useState(saved0?.customStart ?? false);
   const [start, setStart] = useState<WeaponState>(() =>
     saved0?.customStart
@@ -155,6 +164,7 @@ export function GeneratorSection({ onOpenEditor }: { onOpenEditor: () => void })
       abilitySource,
       itemPool,
       solveTime,
+      story,
       customStart,
       endStats,
       endLevel,
@@ -169,6 +179,7 @@ export function GeneratorSection({ onOpenEditor }: { onOpenEditor: () => void })
     abilitySource,
     itemPool,
     solveTime,
+    story,
     customStart,
     endStats,
     endLevel,
@@ -274,7 +285,9 @@ export function GeneratorSection({ onOpenEditor }: { onOpenEditor: () => void })
           abilities,
           abilitySource,
           itemPool,
-          timeLimitSec: SOLVE_SECONDS[solveTime],
+          // Following the story, the model is larger: give it twice the time.
+          timeLimitSec: SOLVE_SECONDS[solveTime] * (story ? 2 : 1),
+          ...(story ? { progression: STORY_DEFAULTS } : {}),
         },
         setProgress,
       );
@@ -305,6 +318,8 @@ export function GeneratorSection({ onOpenEditor }: { onOpenEditor: () => void })
       start: used.start,
       spBonus: used.spBonus,
       ...(result.acquire ? { acquire: result.acquire } : {}),
+      // Following the story, steps go after the sections the planner placed them in.
+      ...(result.stageChapters ? { placement: placeResult(result, "story") } : {}),
     });
     // The description should describe the request that produced the result, not later form edits.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -499,6 +514,15 @@ export function GeneratorSection({ onOpenEditor }: { onOpenEditor: () => void })
                 <option value="crystals">{t("planner.itemPool.crystals")}</option>
               </select>
             </Label>
+            <Label className="flex items-start gap-2 text-sm">
+              <Switch checked={story} onCheckedChange={setStory} />
+              <span className="flex flex-col gap-0.5">
+                {t("planner.story")}
+                <span className="text-muted-foreground text-xs font-normal">
+                  {t("planner.storyHint")}
+                </span>
+              </span>
+            </Label>
             <Label className="flex w-full flex-col items-start gap-1">
               {t("planner.solveTime")}
               <select
@@ -506,9 +530,11 @@ export function GeneratorSection({ onOpenEditor }: { onOpenEditor: () => void })
                 value={solveTime}
                 onChange={(e) => setSolveTime(e.target.value as SolveTime)}
               >
-                {(["quick", "thorough", "best"] as const).map((v) => (
+                {(["quick", "thorough", "best", "excellent"] as const).map((v) => (
                   <option key={v} value={v}>
-                    {t(`planner.solveTime.${v}` as const, { n: SOLVE_SECONDS[v] })}
+                    {t(`planner.solveTime.${v}` as const, {
+                      n: SOLVE_SECONDS[v] * (story ? 2 : 1),
+                    })}
                   </option>
                 ))}
               </select>

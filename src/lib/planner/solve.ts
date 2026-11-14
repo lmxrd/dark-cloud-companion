@@ -107,6 +107,11 @@ export interface Progression {
    * weapon is stronger sooner. Keep it well below what a stat point costs, or it buys extra spheres.
    */
   earlyStatBonus?: number;
+  /**
+   * Cost (in objective units) of each item synthed straight onto the main weapon: its SP is gone for
+   * good (SP carries over build-ups), while items inside spheres cost the main weapon nothing extra.
+   */
+  mainItemCost?: number;
 }
 
 export interface SolveResult {
@@ -342,6 +347,12 @@ export function buildModel(input: SolveInput) {
   }
 
   const p = input.progression;
+  if (p?.mainItemCost)
+    for (let j = 0; j < nStages; j++)
+      items.forEach((_, i) => {
+        const v = `vX${j}_${i}`;
+        model.objective.set(v, (model.objective.get(v) ?? 0) + SCALE * p.mainItemCost!);
+      });
   if (p?.earlyStatBonus)
     for (let j = 0; j < nStages; j++)
       for (const k of STAT_KEYS) {

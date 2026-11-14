@@ -4,6 +4,7 @@
 import { z } from "zod";
 import { type AbilityId, abilityId } from "../../src/lib/schemas.ts";
 import { finalWeaponIds } from "../../src/lib/planner/graph.ts";
+import { STORY_DEFAULTS } from "../../src/lib/planner/plan.ts";
 
 const variantSchema = z.object({
   /** With the target, the plan's config key <targetId>/<id> (unique; the guide id is a hash, see plan-files.ts). */
@@ -31,6 +32,8 @@ const variantSchema = z.object({
   startBy: z.number().optional(),
   /** Reward per stat point per stage for stats gained earlier (default 0.5; 0: off). */
   earlyStatBonus: z.number().optional(),
+  /** ABS each item synthed straight onto the main weapon counts as (its SP is gone; default 30). */
+  mainItemCost: z.number().optional(),
   /** A fixed build-up route (first weapon … target) instead of searching for one. */
   route: z.array(z.string()).optional(),
   /** Also offer built-up spheres with their earlier weapons this many levels higher (default 0). */
@@ -90,6 +93,7 @@ export interface PlanSpec {
     finalLevelCap: number;
     startBy: number;
     earlyStatBonus: number;
+    mainItemCost: number;
   };
   /** A fixed build-up route (first weapon … target). */
   route?: string[];
@@ -128,12 +132,13 @@ export function expandPlans(config: PlansConfig): PlanSpec[] {
           abilitySource: v.abilitySource ?? "spheres",
           itemPool: v.itemPool ?? "cheap",
           progression: {
-            grindShare: v.grindShare ?? 0.2,
-            delayCost: v.delayCost ?? 10000,
-            levelCap: v.levelCap ?? 10,
-            finalLevelCap: v.finalLevelCap ?? 15,
-            startBy: v.startBy ?? 2,
-            earlyStatBonus: v.earlyStatBonus ?? 0.5,
+            grindShare: v.grindShare ?? STORY_DEFAULTS.grindShare,
+            delayCost: v.delayCost ?? STORY_DEFAULTS.delayCost,
+            levelCap: v.levelCap ?? STORY_DEFAULTS.levelCap,
+            finalLevelCap: v.finalLevelCap ?? STORY_DEFAULTS.finalLevelCap,
+            startBy: v.startBy ?? STORY_DEFAULTS.startBy,
+            earlyStatBonus: v.earlyStatBonus ?? STORY_DEFAULTS.earlyStatBonus!,
+            mainItemCost: v.mainItemCost ?? STORY_DEFAULTS.mainItemCost!,
           },
           ...(v.route ? { route: v.route } : {}),
           ...(v.extraAuxLevels ? { extraAuxLevels: v.extraAuxLevels } : {}),
