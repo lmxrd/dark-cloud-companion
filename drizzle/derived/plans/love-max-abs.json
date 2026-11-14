@@ -1,0 +1,400 @@
+{
+  "name": "Love — Least ABS",
+  "hash": "816fad26b47748e8f8ad34ea009b77a502d8fd6b822210810b93df1ae69c1abe",
+  "guide": {
+    "id": "love-max-abs",
+    "title": "Love — Least ABS",
+    "description": "Least ABS · maxed stats · 8 abilities · optimal start (Magic Brassard) · done after Mr. Big Shot Shadow (chapter 8) · no ABS grinding",
+    "kind": "builtin",
+    "build": {
+      "weaponId": "magic-brassard",
+      "level": 0,
+      "abs": 0,
+      "stats": {
+        "at": 14,
+        "fl": 10,
+        "ch": 0,
+        "li": 0,
+        "cy": 0,
+        "sm": 0,
+        "ex": 0,
+        "be": 0,
+        "sc": 0
+      },
+      "du": 0,
+      "sp": 1,
+      "abilities": [],
+      "spBonus": 1,
+      "acquire": {
+        "kind": "have"
+      }
+    },
+    "steps": [
+      {
+        "id": "magic-brassard+10",
+        "title": "Magic Brassard → Bandit Brassard",
+        "notes": "",
+        "chapterId": "8",
+        "sectionId": "the-zelmite-mine",
+        "entries": [],
+        "build": {
+          "weaponId": "magic-brassard",
+          "levelTo": 10,
+          "synths": [
+            {
+              "kind": "item",
+              "name": "Sapphire",
+              "count": 1
+            },
+            {
+              "kind": "item",
+              "name": "Wind Crystal",
+              "count": 1
+            }
+          ]
+        }
+      },
+      {
+        "id": "bandit-brassard+5",
+        "title": "Bandit Brassard → Thorn Armlet",
+        "notes": "",
+        "chapterId": "8",
+        "sectionId": "the-zelmite-mine",
+        "entries": [],
+        "build": {
+          "weaponId": "bandit-brassard",
+          "levelTo": 5,
+          "synths": [
+            {
+              "kind": "item",
+              "name": "Topaz",
+              "count": 2
+            }
+          ]
+        }
+      },
+      {
+        "id": "thorn-armlet+5",
+        "title": "Thorn Armlet → Pocklekul",
+        "notes": "",
+        "chapterId": "8",
+        "sectionId": "the-zelmite-mine",
+        "entries": [],
+        "build": {
+          "weaponId": "thorn-armlet",
+          "levelTo": 5,
+          "synths": [
+            {
+              "kind": "item",
+              "name": "Wind Crystal",
+              "count": 4
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "invent",
+                  "chapter": 5,
+                  "gilda": 800
+                },
+                "stages": [
+                  {
+                    "weaponId": "heavy-hammer",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 37
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "pocklekul+3",
+        "title": "Pocklekul → Athena's Armlet",
+        "notes": "",
+        "chapterId": "8",
+        "sectionId": "the-zelmite-mine",
+        "entries": [],
+        "build": {
+          "weaponId": "pocklekul",
+          "levelTo": 3,
+          "synths": [
+            {
+              "kind": "item",
+              "name": "Emerald",
+              "count": 3
+            },
+            {
+              "kind": "item",
+              "name": "Flame Crystal",
+              "count": 3
+            },
+            {
+              "kind": "item",
+              "name": "Glass Material",
+              "count": 1
+            },
+            {
+              "kind": "item",
+              "name": "Hunter Crystal",
+              "count": 1
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "invent",
+                  "chapter": 8,
+                  "gilda": 13100
+                },
+                "stages": [
+                  {
+                    "weaponId": "sexy-panther",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 27
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "athenas-armlet+3",
+        "title": "Athena's Armlet → Sun Armlet",
+        "notes": "",
+        "chapterId": "8",
+        "sectionId": "the-zelmite-mine",
+        "entries": [],
+        "build": {
+          "weaponId": "athenas-armlet",
+          "levelTo": 3,
+          "synths": [
+            {
+              "kind": "item",
+              "name": "Glass Material",
+              "count": 1
+            },
+            {
+              "kind": "item",
+              "name": "Gunpowder",
+              "count": 1
+            }
+          ]
+        }
+      },
+      {
+        "id": "sun-armlet+3",
+        "title": "Sun Armlet → Angel Shooter",
+        "notes": "",
+        "chapterId": "8",
+        "sectionId": "the-zelmite-mine",
+        "entries": [],
+        "build": {
+          "weaponId": "sun-armlet",
+          "levelTo": 3,
+          "synths": [
+            {
+              "kind": "item",
+              "name": "Chill Crystal",
+              "count": 9
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "invent",
+                  "chapter": 8,
+                  "gilda": 13100
+                },
+                "stages": [
+                  {
+                    "weaponId": "sexy-panther",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 27
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "angel-shooter+3",
+        "title": "Angel Shooter → Love",
+        "notes": "",
+        "chapterId": "8",
+        "sectionId": "mr-big-shot-shadow",
+        "entries": [],
+        "build": {
+          "weaponId": "angel-shooter",
+          "levelTo": 3,
+          "synths": [
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "invent",
+                  "chapter": 8,
+                  "gilda": 13100
+                },
+                "stages": [
+                  {
+                    "weaponId": "sexy-panther",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 27
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "invent",
+                  "chapter": 5,
+                  "gilda": 800
+                },
+                "stages": [
+                  {
+                    "weaponId": "heavy-hammer",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 37
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "love+3",
+        "title": "Love",
+        "notes": "",
+        "chapterId": "8",
+        "sectionId": "mr-big-shot-shadow",
+        "entries": [],
+        "build": {
+          "weaponId": "love",
+          "levelTo": 3,
+          "synths": [
+            {
+              "kind": "item",
+              "name": "Knight Boots",
+              "count": 101
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "invent",
+                  "chapter": 8,
+                  "gilda": 13100
+                },
+                "stages": [
+                  {
+                    "weaponId": "sexy-panther",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 27
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "invent",
+                  "chapter": 5,
+                  "gilda": 800
+                },
+                "stages": [
+                  {
+                    "weaponId": "heavy-hammer",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 37
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "kind": "item",
+              "name": "Poison Coin",
+              "count": 1
+            },
+            {
+              "kind": "item",
+              "name": "Time Coin",
+              "count": 1
+            },
+            {
+              "kind": "item",
+              "name": "Wealth Coin",
+              "count": 1
+            },
+            {
+              "kind": "item",
+              "name": "Dark Coin",
+              "count": 1
+            },
+            {
+              "kind": "item",
+              "name": "Indestructible Coin",
+              "count": 1
+            },
+            {
+              "kind": "item",
+              "name": "Absorption Coin",
+              "count": 2
+            }
+          ]
+        }
+      }
+    ],
+    "createdAt": 0,
+    "updatedAt": 0
+  }
+}

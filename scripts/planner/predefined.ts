@@ -1,20 +1,20 @@
-// Generates the predefined plans (built-in guides) into src/generated/plans.json (git-ignored).
-// What gets generated is configured in scripts/planner/plans.config.ts.
-// Flow (see integrations/plans.ts): when the game data, the planning code or the config changed
-// (content hash vs the one stored in the file), this script runs. Each plan is cached on its own in
-// node_modules/.cache/dcc-plans (`plan-<hash>.json`, hash = game data + planning code + the plan's
-// settings), so only plans whose inputs changed are solved, spread over several processes.
+// Generates the predefined plans (built-in guides), configured in scripts/planner/plans.config.ts.
+// Each plan is committed as drizzle/derived/plans/<plan id>.json ({ name, hash, guide }); its hash
+// covers the game data, the planning code and the plan's settings. Only plans whose file is missing
+// or whose hash no longer matches are solved, spread over several processes, and files of plans
+// that are no longer configured are deleted. The app reads src/generated/plans.json (git-ignored),
+// assembled from these files (see integrations/plans.ts).
 // By hand:
 //   pnpm plans          regenerate only when stale
 //   pnpm plans:force    re-solve every plan
 // Internally the script runs itself with `--worker <ids>` to solve a share of the plans.
 import { spawn } from "node:child_process";
 import { createHash } from "node:crypto";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { availableParallelism } from "node:os";
 import { dirname, join } from "node:path";
 import type { Guide } from "../../src/lib/guide/types.ts";
-import { PLANS_CACHE_DIR, PLANS_OUT, ROOT, plansHash } from "../../integrations/plans.ts";
+import { PLANS_DIR, PLANS_OUT, ROOT, plansHash } from "../../integrations/plans.ts";
 import { plansConfig } from "./plans.config.ts";
 import { expandPlans, parsePlansConfig, type PlanSpec } from "./plans-config.ts";
 import { planOne } from "./plan-one.ts";
@@ -24,17 +24,30 @@ const codeHash = plansHash({ withConfig: false });
 /** A plan's own hash: the game data and planning code plus its settings. */
 const planHash = (spec: PlanSpec) =>
   createHash("sha256").update(codeHash).update(JSON.stringify(spec)).digest("hex");
-const cacheFile = (spec: PlanSpec) => join(PLANS_CACHE_DIR, `plan-${planHash(spec)}.json`);
+const planFile = (spec: PlanSpec) => join(PLANS_DIR, `${spec.id}.json`);
 
-/** Worker: solves the given plans and caches each one. */
+/** A committed plan: a readable name, the hash of its inputs, and the guide. */
+interface PlanFile {
+  name: string;
+  hash: string;
+  guide: Guide;
+}
+const readPlan = (spec: PlanSpec): PlanFile | undefined =>
+  existsSync(planFile(spec))
+    ? (JSON.parse(readFileSync(planFile(spec), "utf8")) as PlanFile)
+    : undefined;
+const isCurrent = (spec: PlanSpec) => readPlan(spec)?.hash === planHash(spec);
+
+/** Worker: solves the given plans and writes each one's file. */
 async function worker(ids: string[]) {
-  mkdirSync(PLANS_CACHE_DIR, { recursive: true });
+  mkdirSync(PLANS_DIR, { recursive: true });
   for (const id of ids) {
     const spec = specs.find((s) => s.id === id);
     if (!spec) throw new Error(`unknown plan: ${id}`);
     const t0 = Date.now();
     const { guide, log } = await planOne(spec);
-    writeFileSync(cacheFile(spec), JSON.stringify(guide));
+    const file: PlanFile = { name: guide.title, hash: planHash(spec), guide };
+    writeFileSync(planFile(spec), JSON.stringify(file, null, 2) + "\n");
     console.log(`  ${log} (${((Date.now() - t0) / 1000).toFixed(1)}s)`);
   }
 }
@@ -73,7 +86,7 @@ async function main() {
   const began = Date.now();
   // Earliest plans take several solves: start them first so they don't end up last on a worker.
   const missing = specs
-    .filter((s) => force || !existsSync(cacheFile(s)))
+    .filter((s) => force || !isCurrent(s))
     .sort((a, b) => Number(b.flow === "earliest") - Number(a.flow === "earliest"));
   if (missing.length) {
     // Each worker loads its own solver (~100 MB); leave a core for the rest of the build.
@@ -86,14 +99,18 @@ async function main() {
     await Promise.all(shares.map(runWorker));
   }
 
-  const guides = specs.map((s) => JSON.parse(readFileSync(cacheFile(s), "utf8")) as Guide);
+  // Plans that are no longer configured.
+  const known = new Set(specs.map((s) => `${s.id}.json`));
+  for (const f of existsSync(PLANS_DIR) ? readdirSync(PLANS_DIR) : [])
+    if (f.endsWith(".json") && !known.has(f)) rmSync(join(PLANS_DIR, f));
+
+  const guides = specs.map((s) => readPlan(s)!.guide);
   const json = JSON.stringify({ hash, guides }, null, 2) + "\n";
   mkdirSync(dirname(PLANS_OUT), { recursive: true });
   writeFileSync(PLANS_OUT, json);
-  writeFileSync(join(PLANS_CACHE_DIR, `${hash}.json`), json);
   console.log(
     `predefined plans: ${guides.length} guides written to src/generated/plans.json in ${((Date.now() - began) / 1000).toFixed(1)}s` +
-      (missing.length < specs.length ? ` (${specs.length - missing.length} from cache)` : ""),
+      (missing.length < specs.length ? ` (${specs.length - missing.length} unchanged)` : ""),
   );
 }
 

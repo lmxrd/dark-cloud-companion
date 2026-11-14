@@ -1,0 +1,401 @@
+{
+  "name": "Island King — Least ABS",
+  "hash": "b8d3f3d8c9ecea41f2769784d444e38699163c498d87a5d40e7fb3ba6dfc4238",
+  "guide": {
+    "id": "island-king-max-abs",
+    "title": "Island King — Least ABS",
+    "description": "Least ABS · maxed stats · 8 abilities · optimal start (Gladius) · done after Mr. Big Shot Shadow (chapter 8) · no ABS grinding",
+    "kind": "builtin",
+    "build": {
+      "weaponId": "gladius",
+      "level": 0,
+      "abs": 0,
+      "stats": {
+        "at": 20,
+        "fl": 0,
+        "ch": 0,
+        "li": 0,
+        "cy": 10,
+        "sm": 0,
+        "ex": 0,
+        "be": 5,
+        "sc": 0
+      },
+      "du": 0,
+      "sp": 1,
+      "abilities": [],
+      "spBonus": 1,
+      "acquire": {
+        "kind": "have"
+      }
+    },
+    "steps": [
+      {
+        "id": "gladius+13",
+        "title": "Gladius → Cliff Knife",
+        "notes": "",
+        "chapterId": "8",
+        "sectionId": "the-zelmite-mine",
+        "entries": [],
+        "build": {
+          "weaponId": "gladius",
+          "levelTo": 13,
+          "synths": [
+            {
+              "kind": "item",
+              "name": "Emerald",
+              "count": 2
+            },
+            {
+              "kind": "item",
+              "name": "Hunter Crystal",
+              "count": 2
+            },
+            {
+              "kind": "item",
+              "name": "Topaz",
+              "count": 1
+            }
+          ]
+        }
+      },
+      {
+        "id": "cliff-knife+5",
+        "title": "Cliff Knife → Chopper",
+        "notes": "",
+        "chapterId": "8",
+        "sectionId": "the-zelmite-mine",
+        "entries": [],
+        "build": {
+          "weaponId": "cliff-knife",
+          "levelTo": 5,
+          "synths": [
+            {
+              "kind": "item",
+              "name": "Hunter Crystal",
+              "count": 2
+            },
+            {
+              "kind": "item",
+              "name": "Topaz",
+              "count": 1
+            }
+          ]
+        }
+      },
+      {
+        "id": "chopper+5",
+        "title": "Chopper → Choora",
+        "notes": "",
+        "chapterId": "8",
+        "sectionId": "the-zelmite-mine",
+        "entries": [],
+        "build": {
+          "weaponId": "chopper",
+          "levelTo": 5,
+          "synths": [
+            {
+              "kind": "item",
+              "name": "Emerald",
+              "count": 1
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "shop",
+                  "shop": "Gerald's Guns",
+                  "price": 900,
+                  "chapter": 5
+                },
+                "stages": [
+                  {
+                    "weaponId": "wild-cat",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 27
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "choora+3",
+        "title": "Choora → Small Sword",
+        "notes": "",
+        "chapterId": "8",
+        "sectionId": "the-zelmite-mine",
+        "entries": [],
+        "build": {
+          "weaponId": "choora",
+          "levelTo": 3,
+          "synths": [
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "invent",
+                  "chapter": 5,
+                  "gilda": 800
+                },
+                "stages": [
+                  {
+                    "weaponId": "heavy-hammer",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 37
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "small-sword+2",
+        "title": "Small Sword → Maneater",
+        "notes": "",
+        "chapterId": "8",
+        "sectionId": "the-zelmite-mine",
+        "entries": [],
+        "build": {
+          "weaponId": "small-sword",
+          "levelTo": 2,
+          "synths": [
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "invent",
+                  "chapter": 8,
+                  "gilda": 13100
+                },
+                "stages": [
+                  {
+                    "weaponId": "sexy-panther",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 27
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "maneater+3",
+        "title": "Maneater → Griffon Fork",
+        "notes": "",
+        "chapterId": "8",
+        "sectionId": "mr-big-shot-shadow",
+        "entries": [],
+        "build": {
+          "weaponId": "maneater",
+          "levelTo": 3,
+          "synths": [
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "invent",
+                  "chapter": 5,
+                  "gilda": 800
+                },
+                "stages": [
+                  {
+                    "weaponId": "heavy-hammer",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 37
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "griffon-fork+3",
+        "title": "Griffon Fork → Island King",
+        "notes": "",
+        "chapterId": "8",
+        "sectionId": "mr-big-shot-shadow",
+        "entries": [],
+        "build": {
+          "weaponId": "griffon-fork",
+          "levelTo": 3,
+          "synths": [
+            {
+              "kind": "item",
+              "name": "Chill Crystal",
+              "count": 3
+            },
+            {
+              "kind": "item",
+              "name": "Peridot",
+              "count": 2
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "invent",
+                  "chapter": 8,
+                  "gilda": 13100
+                },
+                "stages": [
+                  {
+                    "weaponId": "sexy-panther",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 27
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "island-king+3",
+        "title": "Island King",
+        "notes": "",
+        "chapterId": "8",
+        "sectionId": "mr-big-shot-shadow",
+        "entries": [],
+        "build": {
+          "weaponId": "island-king",
+          "levelTo": 3,
+          "synths": [
+            {
+              "kind": "item",
+              "name": "Flame Crystal",
+              "count": 10
+            },
+            {
+              "kind": "item",
+              "name": "Knight Boots",
+              "count": 111
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "invent",
+                  "chapter": 8,
+                  "gilda": 13100
+                },
+                "stages": [
+                  {
+                    "weaponId": "sexy-panther",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 27
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "invent",
+                  "chapter": 5,
+                  "gilda": 800
+                },
+                "stages": [
+                  {
+                    "weaponId": "heavy-hammer",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 37
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "kind": "item",
+              "name": "Poison Coin",
+              "count": 1
+            },
+            {
+              "kind": "item",
+              "name": "Time Coin",
+              "count": 1
+            },
+            {
+              "kind": "item",
+              "name": "Experience Coin",
+              "count": 1
+            },
+            {
+              "kind": "item",
+              "name": "Bandit Coin",
+              "count": 1
+            },
+            {
+              "kind": "item",
+              "name": "Wealth Coin",
+              "count": 1
+            },
+            {
+              "kind": "item",
+              "name": "Dark Coin",
+              "count": 2
+            },
+            {
+              "kind": "item",
+              "name": "Indestructible Coin",
+              "count": 1
+            },
+            {
+              "kind": "item",
+              "name": "Absorption Coin",
+              "count": 1
+            }
+          ]
+        }
+      }
+    ],
+    "createdAt": 0,
+    "updatedAt": 0
+  }
+}

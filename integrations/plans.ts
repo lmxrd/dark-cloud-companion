@@ -1,20 +1,20 @@
-// Predefined plans (built-in guides) are generated into src/generated/plans.json (git-ignored)
-// whenever Astro starts (dev, build, `astro sync`) and before the tests, after the game data has been
-// exported. They only depend on the game data and the planning code, so a content hash over those
-// decides whether anything has to be solved: the file is reused when its hash matches, restored from
-// node_modules/.cache/dcc-plans when an earlier run produced the same hash, and generated otherwise.
-// Generation itself caches each plan by its own hash and solves the missing ones in parallel (see
-// scripts/planner/predefined.ts). The plans themselves are configured in scripts/planner/plans.config.ts.
+// Predefined plans (built-in guides) are committed, one file per plan, in drizzle/derived/plans/ and
+// assembled into src/generated/plans.json (git-ignored), which the app reads. Whenever Astro starts
+// (dev, build, `astro sync`) and before the tests, after the game data has been exported, the
+// assembled file is checked against a content hash over the game data, the planning code and the
+// config; when it is stale, scripts/planner/predefined.ts re-solves the plans whose inputs changed
+// (in parallel) and reassembles it. The plans themselves are configured in scripts/planner/plans.config.ts.
 import type { AstroIntegration } from "astro";
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, statSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 export const ROOT = fileURLToPath(new URL("..", import.meta.url));
 export const PLANS_OUT = join(ROOT, "src/generated/plans.json");
-export const PLANS_CACHE_DIR = join(ROOT, "node_modules/.cache/dcc-plans");
+/** The committed plans, one JSON file per plan. */
+export const PLANS_DIR = join(ROOT, "drizzle/derived/plans");
 
 /** Everything that can change what the plans contain. Tests are never inputs. */
 const INPUTS = [
@@ -57,13 +57,7 @@ export function ensurePlans(log: (m: string) => void = console.log): void {
     ? JSON.parse(readFileSync(PLANS_OUT, "utf8")).hash
     : undefined;
   if (stored === hash) return log("predefined plans are up to date");
-  const cached = join(PLANS_CACHE_DIR, `${hash}.json`);
-  if (existsSync(cached)) {
-    mkdirSync(dirname(PLANS_OUT), { recursive: true });
-    copyFileSync(cached, PLANS_OUT);
-    return log("predefined plans restored from cache");
-  }
-  log("predefined plans: inputs changed — generating");
+  log("predefined plans: inputs changed — updating");
   const r = spawnSync(
     "pnpm",
     ["exec", "vite-node", "--config", "vitest.config.ts", "scripts/planner/predefined.ts"],
