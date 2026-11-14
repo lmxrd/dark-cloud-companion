@@ -25,6 +25,7 @@ function useCrumbs(pathname: string): Crumb[] {
     {
       guides: t("nav.guides"),
       planner: t("nav.planner"),
+      shopping: t("nav.shopping"),
       weapons: t("nav.weapons"),
       items: t("nav.items"),
       ridepod: t("nav.ridepod"),

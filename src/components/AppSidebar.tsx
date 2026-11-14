@@ -8,6 +8,7 @@ import {
   LayoutDashboardIcon,
   MoonIcon,
   RouteIcon,
+  ShoppingCartIcon,
   SunIcon,
   type LucideIcon,
 } from "lucide-react";
@@ -29,6 +30,7 @@ import {
   SidebarGroupContent,
   SidebarHeader,
   SidebarMenu,
+  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarMenuSub,
@@ -39,10 +41,16 @@ import {
 } from "@/components/ui/sidebar";
 import { useTranslations } from "@/i18n";
 import { MAIN_GUIDE_ID } from "@/lib/guide/main";
-import { $ready, $state, switchProfile } from "@/lib/store";
+import { $profile, $ready, $state, switchProfile } from "@/lib/store";
 
 type NavChild = { title: string; href: string };
-type NavItem = { title: string; href: string; icon: LucideIcon; children?: NavChild[] };
+type NavItem = {
+  title: string;
+  href: string;
+  icon: LucideIcon;
+  children?: NavChild[];
+  badge?: number;
+};
 
 function applyTheme(dark: boolean) {
   document.documentElement.classList.toggle("dark", dark);
@@ -114,6 +122,11 @@ function NavLink({
   return (
     <SidebarMenuItem>
       {button}
+      {item.badge ? (
+        <SidebarMenuBadge className="border-sidebar-border bg-accent text-accent-foreground border font-mono">
+          {item.badge}
+        </SidebarMenuBadge>
+      ) : null}
       {item.children && (
         <SidebarMenuSub className="border-l-2">
           {item.children.map((child) => (
@@ -226,11 +239,40 @@ function NavUser() {
   );
 }
 
+/**
+ * Lines still to buy on the shopping list. Read after mounting (localStorage), and the shopping module (with its
+ * recipe data) is loaded lazily so it stays out of every page's first load.
+ */
+function useShoppingLeft(): number {
+  const ready = useStore($ready);
+  const profile = useStore($profile);
+  const [left, setLeft] = useState(0);
+  useEffect(() => {
+    if (!ready) return;
+    if (!profile.shopping.goals.length) return setLeft(0);
+    let live = true;
+    void Promise.all([import("@/lib/shopping"), import("@/lib/guide/builtin")]).then(
+      ([{ shoppingList }, { findGuide }]) => {
+        const list = shoppingList(profile.shopping, {
+          chapter: 8,
+          findGuide: (id) => findGuide(id, profile.guides),
+        });
+        if (live) setLeft(list.left);
+      },
+    );
+    return () => {
+      live = false;
+    };
+  }, [ready, profile.shopping, profile.guides]);
+  return left;
+}
+
 /** The flat, always-visible app navigation (collapses to an icon rail). */
 export function AppSidebar({ pathname }: { pathname: string }) {
   const t = useTranslations();
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
+  const shoppingLeft = useShoppingLeft();
 
   const items: NavItem[] = [
     { title: t("nav.dashboard"), href: "/", icon: LayoutDashboardIcon },
@@ -244,6 +286,7 @@ export function AppSidebar({ pathname }: { pathname: string }) {
       ],
     },
     { title: t("nav.planner"), href: "/planner", icon: RouteIcon },
+    { title: t("nav.shopping"), href: "/shopping", icon: ShoppingCartIcon, badge: shoppingLeft },
     {
       title: t("nav.reference"),
       href: "/weapons",
