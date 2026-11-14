@@ -14,13 +14,26 @@ const variantSchema = z.object({
    * weapon): `story` waits for the story's ABS and grinds only when it runs out; `earliest` finishes
    * in the earliest chapter possible, doing each stage as soon as it's unlocked and grinding the rest.
    */
-  flow: z.enum(["earliest", "story"]).default("story"),
+  flow: z.enum(["earliest", "story", "progression"]).default("story"),
   label: z.string().min(1),
   maxGilda: z.number().optional(),
   maxChapter: z.number().optional(),
   abilities: z.array(abilityId).optional(),
   /** Where the abilities come from: side weapons' spheres first, or whichever is cheaper (coins). */
   abilitySource: z.enum(["spheres", "cheapest"]).optional(),
+  /** Which bought items may be synthed: cheap +2 items (default), plus +3 crystals, or all. */
+  itemPool: z.enum(["cheap", "crystals", "all"]).optional(),
+  /** For the `progression` flow; see ProgressionOptions in src/lib/planner/plan.ts. */
+  grindShare: z.number().optional(),
+  delayCost: z.number().optional(),
+  levelCap: z.number().optional(),
+  finalLevelCap: z.number().optional(),
+  startBy: z.number().optional(),
+  /** A fixed build-up route (first weapon … target) instead of searching for one. */
+  route: z.array(z.string()).optional(),
+  /** Routes solved exactly, and seconds per exact solve (story plans are generated once: be thorough). */
+  exactChains: z.number().optional(),
+  timeLimitSec: z.number().optional(),
 });
 
 const groupSchema = z.object({
@@ -56,13 +69,27 @@ export interface PlanSpec {
   id: string;
   targetId: string;
   objective: "abs" | "gilda" | "steps";
-  flow: "earliest" | "story";
+  flow: "earliest" | "story" | "progression";
   label: string;
   goal: "max" | "reach";
   maxChapter: number;
   spBonus: number;
   abilities: AbilityId[];
   abilitySource: "spheres" | "cheapest";
+  itemPool: "cheap" | "crystals" | "all";
+  /** Settings for the `progression` flow. */
+  progression: {
+    grindShare: number;
+    delayCost: number;
+    levelCap: number;
+    finalLevelCap: number;
+    startBy: number;
+  };
+  /** A fixed build-up route (first weapon … target). */
+  route?: string[];
+  /** Routes solved exactly and seconds per exact solve (undefined: the planner's defaults). */
+  exactChains?: number;
+  timeLimitSec?: number;
   maxGilda?: number;
 }
 
@@ -92,6 +119,21 @@ export function expandPlans(config: PlansConfig): PlanSpec[] {
           spBonus: config.defaults.spBonus,
           abilities: v.abilities ?? group.abilities ?? config.defaults.abilities,
           abilitySource: v.abilitySource ?? "spheres",
+          itemPool: v.itemPool ?? "cheap",
+          progression: {
+            grindShare: v.grindShare ?? 0.2,
+            delayCost: v.delayCost ?? 10000,
+            levelCap: v.levelCap ?? 10,
+            finalLevelCap: v.finalLevelCap ?? 15,
+            startBy: v.startBy ?? 2,
+          },
+          ...(v.route ? { route: v.route } : {}),
+          ...(v.flow === "progression"
+            ? { exactChains: v.exactChains ?? 6, timeLimitSec: v.timeLimitSec ?? 120 }
+            : {
+                ...(v.exactChains !== undefined ? { exactChains: v.exactChains } : {}),
+                ...(v.timeLimitSec !== undefined ? { timeLimitSec: v.timeLimitSec } : {}),
+              }),
           ...(maxGilda !== undefined ? { maxGilda } : {}),
         });
       }

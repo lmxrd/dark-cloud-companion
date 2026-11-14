@@ -66,10 +66,10 @@ test.describe("guides, planner and editor", () => {
 
   test("a built-in guide can be duplicated into an editable copy", async ({ page }) => {
     await go(page, "/guides");
-    await page.getByRole("link", { name: "Grade Zero — Least ABS" }).click();
+    await page.getByRole("link", { name: "Island King — Story" }).click();
     await page.getByRole("button", { name: "More actions" }).click();
     await page.getByRole("menuitem", { name: "Duplicate to edit" }).click();
-    await expect(page.getByLabel("Guide title")).toHaveValue("Grade Zero — Least ABS (copy)");
+    await expect(page.getByLabel("Guide title")).toHaveValue("Island King — Story (copy)");
     await expect(page.getByText("Weapon build", { exact: true }).first()).toBeVisible();
   });
 
@@ -224,9 +224,11 @@ test.describe("custom start and end weapons, one tab per weapon type", () => {
       abilities: ["dark"],
     });
     expect(stored.planner.start).toMatchObject({ level: 3, abilities: ["poison"] });
-    // The route finishes in chapter 1, and the Dark Coin is only sold from chapter 2 (Jurak Mall),
-    // so the plan says why it can't add the Dark ability.
-    await expect(page.getByText("Not added because the coin isn't sold yet: Dark.")).toBeVisible();
+    // The route finishes in chapter 1: no side weapon with Dark is available then, so the plan
+    // falls back on the Dark Coin, a Spheda prize in chapter 1 (bought only from chapter 2).
+    await expect(
+      page.getByRole("list", { name: "Items to synth" }).getByText("Dark Coin"),
+    ).toBeVisible();
   });
 
   test("opposing abilities are one three-way switch per pair", async ({ page }) => {
@@ -250,11 +252,11 @@ test.describe("custom start and end weapons, one tab per weapon type", () => {
   }) => {
     await go(page, "/guides");
     const builds = page.getByRole("region", { name: "Weapon builds" });
-    const row = builds.getByRole("listitem").filter({ hasText: "Grade Zero" });
-    await expect(row.getByRole("link")).toHaveCount(2);
-    await row.getByRole("link", { name: /Earliest/ }).click();
+    const row = builds.getByRole("listitem").filter({ hasText: "Island King" });
+    await expect(row.getByRole("link")).toHaveCount(1);
+    await row.getByRole("link", { name: /Story/ }).click();
     await expect(
-      page.getByRole("heading", { name: "Grade Zero — Earliest", level: 1 }),
+      page.getByRole("heading", { name: "Island King — Story", level: 1 }),
     ).toBeVisible();
     await expect(page.getByText(/^0 \/ \d+ stages$/)).toBeVisible();
     await page.getByRole("button", { name: /Continue at stage 1/ }).click();
@@ -263,9 +265,9 @@ test.describe("custom start and end weapons, one tab per weapon type", () => {
     await go(page, "/guides");
     await expect(
       page.getByRole("region", { name: "On the dashboard" }).getByRole("link", {
-        name: /Grade Zero — Earliest/,
+        name: /Island King — Story/,
       }),
     ).toBeVisible();
-    await expect(row.getByRole("link", { name: /Earliest \(on the dashboard\)/ })).toBeVisible();
+    await expect(row.getByRole("link", { name: /Story \(on the dashboard\)/ })).toBeVisible();
   });
 });

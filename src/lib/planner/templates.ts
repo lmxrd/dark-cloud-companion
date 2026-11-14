@@ -15,7 +15,12 @@ const chapterOf = (a: Acquire) => (a.kind === "have" ? 1 : a.chapter);
 export interface TemplateOptions extends ItemFilter, SimOptions {
   /** Longest chain (in build-ups) used when a sphere weapon is itself built up from a cheaper one. */
   maxAuxBuildUps?: number;
+  /** Shells (levelled to +5, left empty) for the model to fill, instead of filled spheres. */
+  shells?: boolean;
 }
+
+/** Shells only need the cheapest sphere level: more levels cost the main weapon more SP. */
+const SHELL_LEVELS = [MIN_SPHERE_LEVEL];
 
 /** Cheapest acquisition available by `maxChapter`. */
 function cheapestAcquire(weaponId: string, maxChapter: number): Acquire | undefined {
@@ -61,11 +66,16 @@ function makeTemplate(
   recipe: Recipe,
   chapter: number,
   opts: SimOptions,
+  shell = false,
 ): Template | undefined {
   const sim = simulateRecipe(recipe, opts);
   if (sim.errors.length) return undefined;
   const sphere = sphereFromWeapon(sim.state, Number.MAX_SAFE_INTEGER);
+  const w = getWeapon(sim.state.weaponId);
   return {
+    ...(shell
+      ? { shell: { sp: sim.state.sp, stats: { ...sim.state.stats }, maxStats: { ...w.maxStats } } }
+      : {}),
     id,
     recipe,
     weaponId: sim.state.weaponId,
@@ -80,11 +90,24 @@ function makeTemplate(
   };
 }
 
-/** a dominates b: no worse everywhere (stats, costs, and every ability b passes on) and strictly better somewhere. */
+/** a dominates b: no worse everywhere (stats, costs, chapter, and every ability b passes on) and strictly better somewhere. */
 function dominates(a: Template, b: Template) {
-  if (a.abs > b.abs || a.gilda > b.gilda || a.level > b.level) return false;
+  if (a.abs > b.abs || a.gilda > b.gilda || a.level > b.level || a.chapter > b.chapter)
+    return false;
   if ((b.abilities ?? []).some((x) => !(a.abilities ?? []).includes(x))) return false;
-  let strict = a.abs < b.abs || a.gilda < b.gilda || a.level < b.level;
+  let strict = a.abs < b.abs || a.gilda < b.gilda || a.level < b.level || a.chapter < b.chapter;
+  // Shells also need as much room to fill: SP, and headroom under the side weapon's caps.
+  if (!!a.shell !== !!b.shell) return false;
+  if (a.shell && b.shell) {
+    if (a.shell.sp < b.shell.sp) return false;
+    if (a.shell.sp > b.shell.sp) strict = true;
+    for (const k of STAT_KEYS) {
+      const ra = a.shell.maxStats[k] - a.shell.stats[k];
+      const rb = b.shell.maxStats[k] - b.shell.stats[k];
+      if (ra < rb) return false;
+      if (ra > rb) strict = true;
+    }
+  }
   for (const k of STAT_KEYS) {
     const ga = a.gains[k] ?? 0;
     const gb = b.gains[k] ?? 0;
@@ -108,12 +131,29 @@ export function generateTemplates(opts: TemplateOptions): Promise<Template[]> {
     // Must match the default buildTemplates uses ("?? 2"), or an explicit 0 would poison the
     // cache entry that default calls share.
     opts.maxAuxBuildUps ?? 2,
+    opts.pool ?? "all",
+    !!opts.shells,
   ]);
   const hit = cache.get(key);
   if (hit) return hit;
   const promise = buildTemplates(opts);
   cache.set(key, promise);
   return promise;
+}
+
+/**
+ * Templates for plans that follow the story: the sets for every chapter up to `maxChapter` together,
+ * so an early stage still has the spheres that can be made by then (a later chapter's cheaper or
+ * better recipe doesn't replace them).
+ */
+export async function progressionTemplates(opts: TemplateOptions): Promise<Template[]> {
+  const byId = new Map<string, Template>();
+  for (let c = 1; c <= opts.maxChapter; c++)
+    for (const t of await generateTemplates({ ...opts, maxChapter: c })) {
+      const key = `${t.id}@${t.chapter}:${t.abs}:${t.gilda}`;
+      if (!byId.has(key)) byId.set(key, t);
+    }
+  return pareto([...byId.values()]);
 }
 
 async function buildTemplates(opts: TemplateOptions): Promise<Template[]> {
@@ -126,11 +166,11 @@ async function buildTemplates(opts: TemplateOptions): Promise<Template[]> {
     if (w.abilities.includes("poverty") || w.abilities.includes("fragile")) continue;
     const acquire = cheapestAcquire(w.id, opts.maxChapter);
     if (!acquire) continue;
-    for (const level of SPHERE_LEVELS) {
-      for (const mode of FILL_MODES) {
+    for (const level of opts.shells ? SHELL_LEVELS : SPHERE_LEVELS) {
+      for (const mode of opts.shells ? ["empty" as const] : FILL_MODES) {
         const base: Recipe = { acquire, stages: [{ weaponId: w.id, levelTo: level, synths: [] }] };
         const lvl = simulateRecipe(base, opts);
-        const synths = fillItems(lvl.state, w.id, items, mode);
+        const synths = mode === "empty" ? [] : fillItems(lvl.state, w.id, items, mode);
         const stage: Stage = { weaponId: w.id, levelTo: level, synths };
         const chapter = Math.max(chapterOf(acquire), ...synths.map((s) => itemChapter(s.name)));
         const t = makeTemplate(
@@ -138,6 +178,7 @@ async function buildTemplates(opts: TemplateOptions): Promise<Template[]> {
           { acquire, stages: [stage] },
           chapter,
           opts,
+          mode === "empty",
         );
         if (t) out.push(t);
       }
@@ -193,7 +234,7 @@ async function chainedTemplates(
         mipGap: 0.01,
       });
       if (!sol.plan) continue;
-      for (const level of SPHERE_LEVELS) {
+      for (const level of opts.shells ? SHELL_LEVELS : SPHERE_LEVELS) {
         const last = sol.plan.stages[sol.plan.stages.length - 1];
         if (level < last.levelTo) continue;
         const reached: Recipe = {
@@ -202,9 +243,9 @@ async function chainedTemplates(
         };
         const lvl = simulateRecipe(reached, opts);
         if (lvl.errors.length) continue;
-        for (const mode of FILL_MODES) {
+        for (const mode of opts.shells ? ["empty" as const] : FILL_MODES) {
           const stages = reached.stages.map((s) =>
-            s === reached.stages[reached.stages.length - 1]
+            s === reached.stages[reached.stages.length - 1] && mode !== "empty"
               ? { ...s, synths: [...s.synths, ...fillItems(lvl.state, s.weaponId, items, mode)] }
               : s,
           );
@@ -220,6 +261,7 @@ async function chainedTemplates(
             { acquire, stages },
             chapter,
             opts,
+            mode === "empty",
           );
           if (t) out.push(t);
         }

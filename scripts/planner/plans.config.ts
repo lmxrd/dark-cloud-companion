@@ -5,10 +5,16 @@
 //   targets    Weapon ids to plan for; the entry "finals" expands to every final-tier weapon
 //              and can be mixed with explicit ids.
 //   objective  abs | gilda | steps — what the optimiser minimises.
-//   flow       how stages are placed on the story; ABS comes from clearing each section once and all
-//              of it goes to the weapon being built. story = wait for the story's ABS, grind only
-//              when it runs out; earliest = finish in the earliest chapter possible, each stage as
-//              soon as it's unlocked, grinding what's missing.
+//   flow       how stages are placed on the story; ABS comes from clearing each section once.
+//              progression = like the weapon guide: each stage in the earliest chapter whose items,
+//              spheres, ABS and gilda (plus grindShare more) allow it, weapons on the way levelled to
+//              at most levelCap (the last to finalLevelCap), abilities from spheres along the way
+//              (delayCost: ABS a chapter's delay per stage is worth). story = optimise the whole
+//              build first, then wait for the story's ABS; earliest = finish in the earliest chapter
+//              possible, grinding what's missing.
+//   itemPool   cheap = the everyday +2 items (default: Conda's Goods and Antidote Drink), crystals = plus
+//              the crystals, all = anything sold.
+//   route      a fixed build-up route (first weapon … target) instead of the cheapest found.
 //   goal       max = maxed stats, reach = just get the weapon.
 //   abilities  carried by the finished weapon, added where the chain doesn't provide them; set to
 //              [] for none.
@@ -30,23 +36,26 @@ export const plansConfig = {
   },
   groups: [
     {
-      targets: ["finals", "falcon"],
+      // One plan per final weapon that follows the story, like the weapon guide's recipes. Island
+      // King first, until the plans are right; then "finals".
+      targets: ["island-king"],
       variants: [
-        { id: "max-abs", objective: "abs", flow: "story", label: "Least ABS, spheres" },
-        { id: "earliest", objective: "abs", flow: "earliest", label: "Earliest, spheres" },
         {
-          id: "max-abs-coins",
+          id: "story",
           objective: "abs",
-          flow: "story",
-          abilitySource: "cheapest",
-          label: "Least ABS, coins",
-        },
-        {
-          id: "earliest-coins",
-          objective: "abs",
-          flow: "earliest",
-          abilitySource: "cheapest",
-          label: "Earliest, coins",
+          flow: "progression",
+          label: "Story",
+          // The weapon guide's "evil sword" route: Poison, Absorb and Dark come with it, no slow
+          // 4-hit swords before the Island King, and Griffon Fork on the way is a fine stop.
+          route: [
+            "bone-rapier",
+            "evilcise",
+            "drain-seeker",
+            "sargatanas",
+            "dark-excalibur",
+            "griffon-fork",
+            "island-king",
+          ],
         },
       ],
     },

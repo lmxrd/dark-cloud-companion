@@ -40,3 +40,17 @@ describe("placing plan stages on the story", () => {
     expect(storyGilda(8)).toBeGreaterThan(storyGilda(1));
   });
 });
+
+describe("kill requirements on the story", () => {
+  it("an enemy met again later (two entries with one name) counts from its first meeting", async () => {
+    const { getWeapon } = await import("./sources");
+    const { stageUnlockIndex } = await import("./timeline");
+    // Griffon Fork needs Miss Gourgon, met in chapter 7 and again in chapter 8.
+    const at = stageUnlockIndex(
+      { weaponId: "dark-excalibur", levelTo: 0, synths: [] },
+      { weaponId: "griffon-fork", levelTo: 0, synths: [] },
+      (w) => getWeapon(w).requiresKills,
+    );
+    expect(core.sections[at].chapterNumber).toBe(7);
+  });
+});

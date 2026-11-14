@@ -38,17 +38,22 @@ export function storyGilda(chapter: number): number {
   return last < 0 ? 0 : gildaUpTo[last];
 }
 
-const enemyIdByName = new Map(Object.entries(names.enemies).map(([id, name]) => [name, id]));
+/** Every enemy id per name: some names are shared (e.g. a boss met again later on). */
+const enemyIdsByName = new Map<string, string[]>();
+for (const [id, name] of Object.entries(names.enemies))
+  enemyIdsByName.set(name, [...(enemyIdsByName.get(name) ?? []), id]);
 const lastIndex = sections.length - 1;
 
 /** The section index from which something available "in chapter n" can be done. */
 const fromChapter = (n: number) => chapterStart.get(Math.min(Math.max(n, 1), 8)) ?? lastIndex;
 
-/** The section after which the enemy has been met (and can be defeated). */
+/** The section after which the enemy has been met (and can be defeated): the earliest of its namesakes. */
 function killIndex(enemyName: string): number {
-  const id = enemyIdByName.get(enemyName);
-  const section = id ? weaponsFile.killEnemySections[id] : undefined;
-  return section !== undefined ? (indexOfSection.get(section) ?? lastIndex) : lastIndex;
+  const found = (enemyIdsByName.get(enemyName) ?? [])
+    .map((id) => weaponsFile.killEnemySections[id])
+    .map((section) => (section !== undefined ? indexOfSection.get(section) : undefined))
+    .filter((i): i is number => i !== undefined);
+  return found.length ? Math.min(...found) : lastIndex;
 }
 
 /** The earliest section index at which a stage's items, sphere weapons and the next build-up's kills are all available. */
@@ -82,6 +87,8 @@ export function placeStages(
   unlocks: number[],
   acquire: Acquire | undefined,
   flow: Flow,
+  /** Chapter each stage must be done by (the story flow stops waiting there and grinds the rest). */
+  deadlines?: number[],
 ): PlacedStage[] {
   let t = acquire && acquire.kind !== "have" ? fromChapter(acquire.chapter) : 0;
   // ABS from sections cleared after the weapon is obtained (the section it's obtained in counts).
@@ -94,9 +101,13 @@ export function placeStages(
   return cost.map(({ abs, gilda }, i) => {
     let at = Math.max(t, unlocks[i]);
     if (flow === "story") {
-      // Wait for the ABS and gilda, as long as the story has sections left.
-      while (at < lastIndex && (absPool + absBetween(counted, at) < abs || gildaAt(at) < gilda))
-        at++;
+      // Wait for the ABS and gilda, as long as the story (or the stage's chapter) has sections left.
+      const deadline = deadlines?.[i];
+      const last =
+        deadline === undefined
+          ? lastIndex
+          : Math.max(at, (chapterStart.get(deadline + 1) ?? lastIndex + 1) - 1);
+      while (at < last && (absPool + absBetween(counted, at) < abs || gildaAt(at) < gilda)) at++;
     }
     absPool += absBetween(counted, at);
     counted = at;

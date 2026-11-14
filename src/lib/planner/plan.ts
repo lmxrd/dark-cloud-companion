@@ -1,13 +1,25 @@
 // Top-level planner: enumerates build-up chains from the start weapon to the target, ranks them with the
 // LP relaxation, solves the best few exactly, and verifies the winner with the rule-checking simulator.
 import type { AbilityId, Stats } from "@/lib/schemas";
-import { freshState, OPPOSITES, type WeaponState } from "@/lib/weapons/mechanics";
-import { itemCandidates } from "./candidates";
+import { core } from "@/lib/gamedata";
+import {
+  addAbilities as mergeAbilities,
+  freshState,
+  OPPOSITES,
+  type WeaponState,
+} from "@/lib/weapons/mechanics";
+import { itemCandidates, type ItemPool } from "./candidates";
 import { simulatePlan, type SimOptions } from "./simulate";
-import { solveChain, type Objective, type SolveResult, type Template } from "./solve";
+import {
+  solveChain,
+  type Objective,
+  type Progression,
+  type SolveResult,
+  type Template,
+} from "./solve";
 import { ancestorsOf, rootWeaponIds } from "./graph";
 import { acquisitionOptions, coinChapter, coinFor, getWeapon, weaponData } from "./sources";
-import { generateTemplates } from "./templates";
+import { generateTemplates, progressionTemplates } from "./templates";
 import type { Acquire, Cost, Plan, SimulationResult } from "./types";
 
 export type Goal =
@@ -33,12 +45,49 @@ export interface PlanRequest {
   abilities?: AbilityId[];
   /** Where those abilities come from (default `spheres`); see {@link AbilitySource}. */
   abilitySource?: AbilitySource;
+  /** Only this build-up route (first weapon … target); its first weapon must be a possible start. */
+  route?: string[];
   /** Number of chains to solve exactly (the best by LP bound). */
   exactChains?: number;
   timeLimitSec?: number;
   /** Sphere recipes to choose from; built on the fly (and cached) when not given. */
   templates?: Template[];
+  /** Which bought items may be synthed (default `all`); see {@link ItemPool}. */
+  itemPool?: ItemPool;
+  /** Follow the story: see {@link ProgressionOptions}. */
+  progression?: ProgressionOptions;
 }
+
+/**
+ * A plan that follows the story, like the weapon guide's recipes: every stage is done in a chapter
+ * (as early as the story allows), using only the items and spheres available by then and the ABS and
+ * gilda the story has paid out by then plus a little grinding. Weapons on the way are not levelled
+ * past `levelCap` (the last one past `finalLevelCap`), and wanted abilities come from side-weapon
+ * spheres placed on whichever stage suits, not all at the end.
+ */
+export interface ProgressionOptions {
+  /** Grinding allowed on top of what the story pays by a chapter, as a share of it (e.g. 0.2). */
+  grindShare: number;
+  /** ABS (in objective units) worth avoiding to have every stage one chapter earlier. */
+  delayCost: number;
+  levelCap: number;
+  finalLevelCap: number;
+  /** The main weapon must be obtainable by this chapter, so it is used through the story. */
+  startBy: number;
+}
+
+/** ABS and gilda paid out by clearing every section once, by the end of each chapter (index 1…8). */
+const storyTotals = (() => {
+  const abs = Array<number>(9).fill(0);
+  const gilda = Array<number>(9).fill(0);
+  for (const s of core.sections) {
+    for (let c = s.chapterNumber; c <= 8; c++) {
+      abs[c] += s.abs ?? 0;
+      gilda[c] += s.gilda ?? 0;
+    }
+  }
+  return { abs, gilda };
+})();
 
 /**
  * Where a plan's abilities come from. `spheres`: +5 spheres of side weapons that carry them, as the
@@ -75,6 +124,8 @@ export interface PlanResult {
   acquire?: Acquire;
   /** Requested abilities that could not be provided (coin not yet available, or SP ran out). */
   abilitiesMissing?: AbilityId[];
+  /** With `progression`: the chapter each stage is done in. */
+  stageChapters?: number[];
 }
 
 const enemyChapter = new Map(weaponData.killEnemies.map((e) => [e.name, e.chapter ?? 8]));
@@ -360,6 +411,12 @@ export async function planPath(
   candidates = candidates.filter(
     (c) => itemBudget === undefined || acquireGilda(c.acquire) <= itemBudget,
   );
+  // Following the story, the main weapon is one you can have early on.
+  const startBy = req.progression?.startBy;
+  if (startBy !== undefined)
+    candidates = candidates.filter(
+      (c) => c.acquire.kind === "have" || c.acquire.chapter <= startBy,
+    );
 
   // Build-up chains from every start; the optimal search caps the enumeration, taking them
   // round-robin across starts (each start's own chains shortest-first) so no start family is
@@ -385,6 +442,12 @@ export async function planPath(
     for (const chain of findChains(req.start.weaponId, req.targetId, req.maxChapter))
       pairs.push({ candidate: candidates[0], chain });
   }
+  if (req.route) {
+    const route = req.route.join(">");
+    const only = pairs.filter((p) => p.chain.join(">") === route);
+    pairs.length = 0;
+    pairs.push(...only);
+  }
   if (!pairs.length)
     return {
       status: "no-path",
@@ -392,15 +455,30 @@ export async function planPath(
       message: "No build-up path to that weapon with the available content.",
     };
 
-  const items = itemCandidates({ maxChapter: req.maxChapter, allowFound: req.allowFound });
+  const items = itemCandidates({
+    maxChapter: req.maxChapter,
+    allowFound: req.allowFound,
+    pool: req.itemPool,
+  });
   onProgress?.({ phase: "templates", done: 0, total: 1 });
-  const templates =
+  const templateOpts = {
+    maxChapter: req.maxChapter,
+    allowFound: req.allowFound,
+    spBonus: req.spBonus,
+    pool: req.itemPool,
+  };
+  const prog = req.progression;
+  let templates =
     req.templates ??
-    (await generateTemplates({
-      maxChapter: req.maxChapter,
-      allowFound: req.allowFound,
-      spBonus: req.spBonus,
-    }));
+    (await (prog
+      ? progressionTemplates({ ...templateOpts, shells: true })
+      : generateTemplates(templateOpts)));
+  // Following the story, abilities are chosen inside the model: spheres that would cancel a wanted
+  // ability are never an option.
+  if (prog && wanted.length)
+    templates = templates.filter(
+      (t) => !(t.abilities ?? []).some((x) => OPPOSITES[x] && wanted.includes(OPPOSITES[x]!)),
+    );
   const goalInputs =
     req.goal.kind === "max"
       ? { finalStats: target.maxStats }
@@ -429,11 +507,72 @@ export async function planPath(
       : {}),
   });
 
+  /** Story constraints and sphere abilities for one chain (see ProgressionOptions). */
+  const progressionFor = (c: Candidate, chain: string[]) => {
+    if (!prog) return {};
+    const nStages = req.goal.kind === "reach" ? chain.length - 1 : chain.length;
+    const startChapter = c.acquire.kind === "have" ? 1 : c.acquire.chapter;
+    // A stage ends with the build-up to the next weapon: it can't be done before its kills.
+    const killChapter = (id: string) =>
+      Math.max(1, ...getWeapon(id).requiresKills.map((e) => enemyChapter.get(e) ?? 8));
+    const stageUnlock: number[] = [];
+    for (let j = 0; j < nStages; j++)
+      stageUnlock.push(
+        Math.max(
+          startChapter,
+          j > 0 ? stageUnlock[j - 1] : 1,
+          killChapter(chain[Math.min(j + 1, chain.length - 1)]),
+        ),
+      );
+    // Abilities the chain's own weapons bring (build-ups merge them in) need no sphere. A sphere
+    // must come on or after the last weapon that brings the opposite (that build-up would cancel
+    // it), and if the opposite is still there, a first sphere only cancels it: two are needed.
+    let carried = c.state.abilities;
+    for (const id of chain.slice(1)) carried = mergeAbilities(carried, getWeapon(id).abilities);
+    const sphereAbilities = wanted
+      .filter((a) => !carried.includes(a) && templates.some((t) => t.abilities?.includes(a)))
+      .map((ability) => {
+        const opposite = OPPOSITES[ability];
+        let fromStage = 0;
+        chain.forEach((id, m) => {
+          if (m > 0 && opposite && getWeapon(id).abilities.includes(opposite)) fromStage = m;
+        });
+        return {
+          ability,
+          fromStage: Math.min(fromStage, nStages - 1),
+          count: opposite && carried.includes(opposite) ? 2 : 1,
+        };
+      });
+    const progression: Progression = {
+      stageUnlock,
+      storyAbs: storyTotals.abs,
+      storyGilda: storyTotals.gilda,
+      grindAbs: storyTotals.abs.map((v) => Math.round(v * prog.grindShare)),
+      grindGilda: storyTotals.gilda.map((v) => Math.round(v * prog.grindShare)),
+      spentGilda: acquireGilda(c.acquire),
+      delayCost: prog.delayCost,
+      itemChapter: items.map((it) => it.fromChapter ?? 1),
+    };
+    return {
+      progression,
+      sphereAbilities,
+      stageMaxLevels: Array.from({ length: nStages }, (_, j) =>
+        j === nStages - 1 && req.goal.kind !== "reach" ? prog.finalLevelCap : prog.levelCap,
+      ),
+    };
+  };
+
   // Rank chains by the continuous relaxation, then solve the best few exactly.
   const ranked: ChainOutcome[] = [];
   for (const [n, { candidate, chain }] of pairs.entries()) {
     onProgress?.({ phase: "rank", done: n, total: pairs.length });
-    const r = await solveChain({ ...baseFor(candidate), chain, relax: true, timeLimitSec: 20 });
+    const r = await solveChain({
+      ...baseFor(candidate),
+      ...progressionFor(candidate, chain),
+      chain,
+      relax: true,
+      timeLimitSec: 20,
+    });
     ranked.push({
       chain,
       bound:
@@ -452,6 +591,7 @@ export async function planPath(
         simulation: PlanResult["simulation"];
         missing: AbilityId[];
         acquire: Acquire;
+        stageChapters?: number[];
       }
     | undefined;
   let bestKey = Infinity;
@@ -483,11 +623,13 @@ export async function planPath(
     let missing: AbilityId[] = [];
     // SP for the ability spheres and coins is set aside up front; if they still don't fit (or a
     // sphere is swapped for a coin), retry with more.
-    const reserve = wanted.length
-      ? abilityReserve(o.chain, wanted, spheres, req.maxChapter, req.objective, source)
-      : { sp: 0, gilda: 0 };
-    const chainBase = baseFor(candidate);
-    for (const extra of wanted.length ? [0, 10] : [0]) {
+    // Following the story, the model places the ability spheres itself.
+    const reserve =
+      wanted.length && !prog
+        ? abilityReserve(o.chain, wanted, spheres, req.maxChapter, req.objective, source)
+        : { sp: 0, gilda: 0 };
+    const chainBase = { ...baseFor(candidate), ...progressionFor(candidate, o.chain) };
+    for (const extra of wanted.length && !prog ? [0, 10] : [0]) {
       r = await solveChain({
         ...chainBase,
         ...(chainBase.maxGilda !== undefined
@@ -551,10 +693,23 @@ export async function planPath(
         : req.objective === "gilda"
           ? sim.cost.gilda
           : sim.cost.steps;
-    const key = primary + 1e-3 * (req.objective === "abs" ? sim.cost.gilda : sim.cost.abs);
+    // Following the story, later chapters cost as in the model.
+    const chapters = r?.stageChapters ?? [];
+    const delay =
+      prog && chapters.length
+        ? (prog.delayCost * chapters.reduce((n, c) => n + c, 0)) / chapters.length
+        : 0;
+    const key = primary + 1e-3 * (req.objective === "abs" ? sim.cost.gilda : sim.cost.abs) + delay;
     if (key < bestKey) {
       bestKey = key;
-      best = { chain: o.chain, plan, simulation: sim, missing, acquire: candidate.acquire };
+      best = {
+        chain: o.chain,
+        plan,
+        simulation: sim,
+        missing,
+        acquire: candidate.acquire,
+        ...(r?.stageChapters ? { stageChapters: r.stageChapters } : {}),
+      };
     }
   }
   onProgress?.({ phase: "finish", done: 1, total: 1 });

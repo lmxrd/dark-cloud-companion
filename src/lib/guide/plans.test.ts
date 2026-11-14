@@ -11,7 +11,7 @@ import { expandPlans, parsePlansConfig } from "../../../scripts/planner/plans-co
 import { deriveBuild } from "./derive";
 import { guide } from "./types";
 
-const file = z.object({ hash: z.string(), guides: z.array(guide) }).parse(plansJson);
+const file = z.object({ guides: z.array(guide) }).parse(plansJson);
 const specs = expandPlans(parsePlansConfig(plansConfig));
 const specById = new Map(specs.map((s) => [s.id, s]));
 

@@ -7,12 +7,17 @@
 //   e[j][k] ≤ cap(w_j, k)                                                              (weapon cap)
 //   e[j][k] ≥ requirement of the next weapon                                           (build-up gate)
 //   Σ SP gained from levelling (cumulative) ≥ Σ SP spent on items/spheres (cumulative)
+// With `progression`, each stage is also given a chapter (binary z[j][c], never earlier than the
+// stage before): it may only use items and spheres available by then, and the ABS and gilda spent up
+// to and including it must stay within what the story has paid by the end of that chapter (plus an
+// allowance to grind). Later chapters cost a little, so stages happen as early as the story allows.
 // ABS for levelling is the exact convex cost curve, linearised with secants (tight at integers).
 import { STAT_KEYS, type AbilityId, type StatKey, type Stats } from "@/lib/schemas";
 import {
   absBetween,
   buildUpBonus,
   buildUpRequirements,
+  SPECTRUMIZE_KEEP,
   type WeaponState,
 } from "@/lib/weapons/mechanics";
 import { solveLp, type LpModel, type LpRow } from "./highs";
@@ -34,6 +39,11 @@ export interface Template {
   chapter: number;
   /** Abilities the sphere passes on (spheres from +5 carry the weapon's abilities). */
   abilities?: AbilityId[];
+  /**
+   * A shell: the side weapon levelled but not filled; the model chooses the items it carries (`gains`
+   * are those of the empty sphere). `stats` are the side weapon's own, `sp` its SP to fill.
+   */
+  shell?: { sp: number; stats: Stats; maxStats: Stats };
 }
 
 export interface SolveInput {
@@ -54,6 +64,15 @@ export interface SolveInput {
   maxGilda?: number;
   /** Solver time limit in seconds. */
   timeLimitSec?: number;
+  /** Highest level per stage (overrides `maxLevel` where given). */
+  stageMaxLevels?: number[];
+  /**
+   * Abilities that must come from spheres: at least `count` spheres carrying each, on stage
+   * `fromStage` or later (a build-up into a weapon with the opposite ability would cancel earlier ones).
+   */
+  sphereAbilities?: { ability: AbilityId; fromStage: number; count: number }[];
+  /** Places every stage in a chapter of the story; see the model notes at the top. */
+  progression?: Progression;
   /** Relative optimality gap for exact solves (default 0.001). ~0.01 is far faster for high-tier chains. */
   mipGap?: number;
   /** Primal bound in objective units: solutions no better than this are pruned (used to skip chains). */
@@ -62,9 +81,29 @@ export interface SolveInput {
   relax?: boolean;
 }
 
+/** Story constraints for `SolveInput.progression`. Arrays by chapter are indexed 1…8. */
+export interface Progression {
+  /** Earliest chapter each stage can be done in (e.g. kills the next build-up needs). */
+  stageUnlock: number[];
+  /** ABS and gilda the story has paid out by the end of each chapter. */
+  storyAbs: number[];
+  storyGilda: number[];
+  /** ABS and gilda that may be ground or farmed on top, by chapter. */
+  grindAbs: number[];
+  grindGilda: number[];
+  /** Gilda already spent before the first stage (the first weapon's price). */
+  spentGilda: number;
+  /** Cost (in objective units) of every stage being one chapter later (spread over the stages). */
+  delayCost: number;
+  /** Chapter each item is first sold in (by item index); missing = chapter 1. */
+  itemChapter: number[];
+}
+
 export interface SolveResult {
   status: "optimal" | "infeasible" | "timedout" | "error";
   plan?: Plan;
+  /** With `progression`: the chapter each stage is done in. */
+  stageChapters?: number[];
   /** Objective value used by the solver (primary cost plus small tie-break terms). */
   value?: number;
 }
@@ -107,6 +146,51 @@ export function buildModel(input: SolveInput) {
   const gildaRow =
     input.maxGilda === undefined ? undefined : row("cBudget", { max: input.maxGilda });
 
+  // ----- shells: side weapons whose items the model chooses (see Template.shell) -----
+  // Items go in up to the shell's SP and its weapon's caps; the main weapon gets SPECTRUMIZE_KEEP
+  // of each stat. With r = frac(0.6·b), one sphere adds floor(r + 0.6·x) on top of its `gains`; n
+  // copies add at least n·r + 0.6·X − 0.8·n (stats move in steps of 0.2). The transfer per stat is
+  // an integer t ≤ 0.6·X + (r − 0.8)·n + 0.8: exact for one copy, and for several never more than
+  // that bound rounded up, which is still ≤ the truth. At items stay out (their transfer depends on
+  // the main weapon's At).
+  const shellItems = items
+    .map((it, i) => ({ it, i }))
+    .filter(({ it }) => !(it.gains.at ?? 0) && STAT_KEYS.some((k) => itemGain(it, k) > 0));
+  const addShell = (j: number, ti: number, sh: NonNullable<Template["shell"]>, y: string) => {
+    const spRow = `cShSp${j}_${ti}`;
+    row(spRow, { max: 0 });
+    coef(spRow, y, -sh.sp);
+    for (const k of STAT_KEYS) {
+      if (k === "at" || !shellItems.some(({ it }) => itemGain(it, k) > 0)) continue;
+      const room = Math.max(0, sh.maxStats[k] - sh.stats[k]);
+      const cap = `cShCap${j}_${ti}_${k}`;
+      row(cap, { max: 0 });
+      coef(cap, y, -room);
+      const kept = SPECTRUMIZE_KEEP * sh.stats[k];
+      const r = Math.round((kept - Math.floor(kept)) * 5) / 5;
+      const tVar = `vT${j}_${ti}_${k}`;
+      const tRow = `cShT${j}_${ti}_${k}`;
+      model.integers.push(tVar);
+      row(tRow, { max: 0.8 });
+      coef(tRow, tVar, 1);
+      coef(tRow, y, 0.8 - r);
+      coef(`cSt${j}_${k}`, tVar, -1);
+    }
+    for (const { it, i } of shellItems) {
+      const q = `vQ${j}_${ti}_${i}`;
+      model.integers.push(q);
+      cost(q, 0, it.price ?? 0, 0);
+      if (gildaRow) coef("cBudget", q, it.price ?? 0);
+      coef(spRow, q, 1);
+      for (const k of STAT_KEYS) {
+        const g = itemGain(it, k);
+        if (!g || k === "at") continue;
+        coef(`cShCap${j}_${ti}_${k}`, q, g);
+        coef(`cShT${j}_${ti}_${k}`, q, -SPECTRUMIZE_KEEP * g);
+      }
+    }
+  };
+
   const lStart: number[] = [];
   const spPerLevel: number[] = [];
   const spend: { v: string; amount: number }[][] = [];
@@ -125,11 +209,12 @@ export function buildModel(input: SolveInput) {
     cost(A, 1, 0);
     row(`cLmin${j}`, { min: ls });
     coef(`cLmin${j}`, L, 1);
-    row(`cLmax${j}`, { max: maxLevel });
+    const levelCap = Math.max(ls, input.stageMaxLevels?.[j] ?? maxLevel);
+    row(`cLmax${j}`, { max: levelCap });
     coef(`cLmax${j}`, L, 1);
     const stored = j === 0 ? start.abs : 0;
     const absAt = (m: number) => Math.max(0, absBetween(w.baseAbs, ls, m) - stored);
-    for (let m = ls; m < maxLevel; m++) {
+    for (let m = ls; m < levelCap; m++) {
       const slope = absAt(m + 1) - absAt(m);
       const c = `cCurve${j}_${m}`;
       row(c, { min: absAt(m) - slope * m });
@@ -186,6 +271,7 @@ export function buildModel(input: SolveInput) {
       if (gildaRow) coef("cBudget", v, t.gilda);
       spend[j].push({ v, amount: t.level });
       for (const k of STAT_KEYS) coef(`cSt${j}_${k}`, v, -(t.gains[k] ?? 0));
+      if (t.shell) addShell(j, ti, t.shell, v);
     });
   }
 
@@ -203,6 +289,78 @@ export function buildModel(input: SolveInput) {
     for (let i = 0; i <= j; i++) {
       coef(c, `vL${i}`, spPerLevel[i]);
       for (const s of spend[i]) coef(c, s.v, -s.amount);
+    }
+  }
+
+  // ----- abilities from spheres: at least one sphere carrying each, somewhere in the chain -----
+  for (const { ability, fromStage, count } of input.sphereAbilities ?? []) {
+    const c = `cAbility_${ability.replace(/\W/g, "_")}`;
+    row(c, { min: count });
+    for (let j = fromStage; j < nStages; j++)
+      templates.forEach((t, ti) => {
+        if (t.abilities?.includes(ability)) coef(c, `vY${j}_${ti}`, 1);
+      });
+  }
+
+  const p = input.progression;
+  if (p) {
+    const chapters = [1, 2, 3, 4, 5, 6, 7, 8];
+    /** A generous upper bound on how many of one item or sphere a stage can take. */
+    const MANY = 200;
+    for (let j = 0; j < nStages; j++) {
+      const open = chapters.filter((c) => c >= (p.stageUnlock[j] ?? 1));
+      const z = (c: number) => `vZ${j}_${c}`;
+      row(`cOne${j}`, { min: 1, max: 1 });
+      for (const c of open) {
+        model.integers.push(z(c));
+        coef(`cOne${j}`, z(c), 1);
+        // Averaged over the stages, so a chain isn't cheaper just for having fewer of them.
+        model.objective.set(
+          z(c),
+          (model.objective.get(z(c)) ?? 0) + (SCALE * p.delayCost * c) / nStages,
+        );
+      }
+      // Never earlier than the stage before.
+      if (j > 0) {
+        row(`cOrder${j}`, { min: 0 });
+        for (const c of open) coef(`cOrder${j}`, z(c), c);
+        for (const c of chapters.filter((c) => c >= (p.stageUnlock[j - 1] ?? 1)))
+          coef(`cOrder${j}`, `vZ${j - 1}_${c}`, -c);
+      }
+      // Items and spheres only once they are available: x ≤ MANY · Σ z[c] over chapters ≥ theirs.
+      const gate = (v: string, from: number) => {
+        if (from <= Math.min(...open)) return;
+        const c = `cAvail_${v}`;
+        row(c, { max: 0 });
+        coef(c, v, 1);
+        for (const ch of open) if (ch >= from) coef(c, z(ch), -MANY);
+      };
+      items.forEach((_, i) => gate(`vX${j}_${i}`, p.itemChapter[i] ?? 1));
+      templates.forEach((t, ti) => {
+        gate(`vY${j}_${ti}`, t.chapter);
+        if (t.shell)
+          for (const { i } of shellItems) gate(`vQ${j}_${ti}_${i}`, p.itemChapter[i] ?? 1);
+      });
+      // ABS and gilda spent so far within what the story (plus grinding) has paid by then.
+      const absRow = `cStoryAbs${j}`;
+      const gildaRow = `cStoryGilda${j}`;
+      row(absRow, { max: 0 });
+      row(gildaRow, { max: -p.spentGilda });
+      for (const c of open) {
+        coef(absRow, z(c), -(p.storyAbs[c] + p.grindAbs[c]));
+        coef(gildaRow, z(c), -(p.storyGilda[c] + p.grindGilda[c]));
+      }
+      for (let i = 0; i <= j; i++) {
+        coef(absRow, `vA${i}`, 1);
+        items.forEach((it, ii) => coef(gildaRow, `vX${i}_${ii}`, it.price ?? 0));
+        templates.forEach((t, ti) => {
+          coef(absRow, `vY${i}_${ti}`, t.abs);
+          coef(gildaRow, `vY${i}_${ti}`, t.gilda);
+          if (t.shell)
+            for (const { it, i: ii } of shellItems)
+              coef(gildaRow, `vQ${i}_${ti}_${ii}`, it.price ?? 0);
+        });
+      }
     }
   }
 
@@ -231,12 +389,45 @@ export async function solveChain(input: SolveInput): Promise<SolveResult> {
     });
     templates.forEach((t, ti) => {
       const n = get(`vY${j}_${ti}`);
-      for (let c = 0; c < n; c++) synths.push({ kind: "sphere", recipe: t.recipe });
+      if (!n) return;
+      if (!t.shell) {
+        for (let c = 0; c < n; c++) synths.push({ kind: "sphere", recipe: t.recipe });
+        return;
+      }
+      // Share the chosen items out over the copies, each unit to the copy with the most SP left.
+      const fills = Array.from({ length: n }, () => ({
+        sp: t.shell!.sp,
+        items: new Map<string, number>(),
+      }));
+      items.forEach((it, i) => {
+        for (let u = get(`vQ${j}_${ti}_${i}`); u > 0; u--) {
+          const copy = fills.reduce((a, b) => (b.sp > a.sp ? b : a));
+          copy.sp--;
+          copy.items.set(it.name, (copy.items.get(it.name) ?? 0) + 1);
+        }
+      });
+      for (const fill of fills) {
+        const recipe = structuredClone(t.recipe);
+        const last = recipe.stages[recipe.stages.length - 1];
+        for (const [name, count] of fill.items) last.synths.push({ kind: "item", name, count });
+        synths.push({ kind: "sphere", recipe });
+      }
     });
     stages.push({ weaponId: chain[j], levelTo: get(`vL${j}`), synths });
   }
   if (!hasFinal) stages.push({ weaponId: chain[chain.length - 1], levelTo: 0, synths: [] });
   // Undo the objective scaling (see SCALE); the value keeps the 1/1000 secondary tie-break weight.
   const value = sol.value === undefined ? undefined : sol.value / SCALE;
-  return { status: sol.status, plan: { stages }, value };
+  const stageChapters = input.progression
+    ? Array.from(
+        { length: nStages },
+        (_, j) => [1, 2, 3, 4, 5, 6, 7, 8].find((c) => get(`vZ${j}_${c}`) === 1) ?? 8,
+      )
+    : undefined;
+  return {
+    status: sol.status,
+    plan: { stages },
+    value,
+    ...(stageChapters ? { stageChapters } : {}),
+  };
 }

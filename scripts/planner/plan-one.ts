@@ -43,8 +43,12 @@ export async function planOne(
       maxGilda: Math.min(spec.maxGilda ?? Infinity, storyGilda(maxChapter)),
       abilities: spec.abilities,
       abilitySource: spec.abilitySource,
+      itemPool: spec.itemPool,
+      ...(spec.flow === "progression" ? { progression: spec.progression } : {}),
       // Generation is one-off, so let the exact solves run longer than the interactive default.
-      timeLimitSec,
+      timeLimitSec: spec.timeLimitSec ?? timeLimitSec,
+      ...(spec.exactChains !== undefined ? { exactChains: spec.exactChains } : {}),
+      ...(spec.route ? { route: spec.route } : {}),
     });
   const complete = (r: PlanResult) => r.status === "ok" && !r.abilitiesMissing?.length;
   let result = await solve(spec.maxChapter);
@@ -81,7 +85,9 @@ export async function planOne(
     }),
     stages.map((st, j) => stageUnlockIndex(st, stages[j + 1], (w) => getWeapon(w).requiresKills)),
     result.acquire,
-    spec.flow,
+    // Following the story, each stage stays in the chapter the planner put it in.
+    spec.flow === "progression" ? "story" : spec.flow,
+    result.stageChapters,
   );
   const done = placement.at(-1)!;
   const grind = placement.reduce((n, p) => n + p.grindAbs, 0);

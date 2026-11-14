@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { freshState } from "@/lib/weapons/mechanics";
+import { itemCandidates } from "./candidates";
 import { findChains, planPath, startOptions } from "./plan";
 import { getWeapon } from "./sources";
 
@@ -263,4 +264,46 @@ describe("ability goals", () => {
     expect(r.status).toBe("ok");
     expect(r.simulation!.state.abilities).toContain("wealth");
   }, 90000);
+});
+
+describe("item pools", () => {
+  test("cheap is the everyday +2 items (Conda's Goods and Antidote Drink); crystals adds the crystals", () => {
+    const cheap = itemCandidates({ maxChapter: 8, pool: "cheap" }).map((i) => i.name);
+    expect(cheap).toEqual(expect.arrayContaining(["Scrap of Metal", "Antidote Drink"]));
+    expect(cheap).not.toContain("Knight Boots");
+    expect(cheap.some((n) => n.endsWith("Crystal"))).toBe(false);
+    const crystals = itemCandidates({ maxChapter: 8, pool: "crystals" }).map((i) => i.name);
+    expect(crystals).toContain("Flame Crystal");
+  });
+});
+
+describe("following the story", () => {
+  test("stages get chapters in order, use only what is available by then, and simulate cleanly", async () => {
+    const r = await planPath({
+      start: start("battle-wrench"),
+      targetId: "smash-wrench",
+      objective: "abs",
+      goal: { kind: "max" },
+      maxChapter: 8,
+      spBonus: 1,
+      itemPool: "cheap",
+      progression: {
+        grindShare: 0.2,
+        delayCost: 10000,
+        levelCap: 10,
+        finalLevelCap: 15,
+        startBy: 2,
+      },
+      timeLimitSec: 20,
+    });
+    expect(r.status).toBe("ok");
+    expect(r.simulation!.errors).toEqual([]);
+    const chapters = r.stageChapters!;
+    expect(chapters).toHaveLength(r.plan!.stages.length);
+    expect([...chapters].sort((a, b) => a - b)).toEqual(chapters);
+    for (const s of r.plan!.stages.slice(0, -1)) expect(s.levelTo).toBeLessThanOrEqual(10);
+    const cheap = new Set(itemCandidates({ maxChapter: 8, pool: "cheap" }).map((i) => i.name));
+    for (const s of r.plan!.stages)
+      for (const u of s.synths) if (u.kind === "item") expect(cheap.has(u.name)).toBe(true);
+  }, 120000);
 });
