@@ -155,10 +155,16 @@ export function BuildStepBody({
             <summary className="text-muted-foreground cursor-pointer text-xs">
               {t("planner.step.stats")}
             </summary>
+            <p className="text-muted-foreground mt-1 text-[0.7rem]">
+              {t(
+                derived.nextWeaponId ? "planner.step.statsLegendNeeds" : "planner.step.statsLegend",
+              )}
+            </p>
             <div className="mt-1.5 grid grid-cols-3 gap-x-3 gap-y-1.5 text-xs">
               {STAT_KEYS.map((k) => {
                 const need = derived.requirements?.[k] ?? 0;
                 const max = weapon.maxStats[k] || 1;
+                const pct = (n: number) => `${Math.min(100, (100 * n) / max)}%`;
                 return (
                   <div
                     key={k}
@@ -169,17 +175,29 @@ export function BuildStepBody({
                   >
                     <span className="flex justify-between gap-1">
                       <span className="truncate">{t(`stat.${k}` as const)}</span>
-                      <span className="font-semibold tabular-nums">
-                        {derived.stats[k]}
-                        {need > 0 ? ` / ${need}` : ""}
+                      <span className="tabular-nums">
+                        <span className="font-semibold">{derived.stats[k]}</span>
+                        <span className="text-muted-foreground"> / {weapon.maxStats[k]}</span>
                       </span>
                     </span>
-                    <span aria-hidden className="bg-muted h-1 overflow-hidden rounded-full">
+                    {/* The bar fills to the stat; a tick marks what the next weapon needs. */}
+                    <span aria-hidden className="bg-muted relative h-1 rounded-full">
                       <span
-                        className="bg-primary block h-full"
-                        style={{ width: `${Math.min(100, (100 * derived.stats[k]) / max)}%` }}
+                        className="bg-primary block h-full rounded-full"
+                        style={{ width: pct(derived.stats[k]) }}
                       />
+                      {need > 0 && (
+                        <span
+                          className="bg-foreground absolute -top-0.5 h-2 w-0.5 -translate-x-1/2"
+                          style={{ left: pct(need) }}
+                        />
+                      )}
                     </span>
+                    {need > 0 && (
+                      <span className="text-muted-foreground text-[0.7rem] tabular-nums">
+                        {t("planner.step.needs", { n: need })}
+                      </span>
+                    )}
                   </div>
                 );
               })}

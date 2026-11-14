@@ -570,6 +570,10 @@ export const en = {
   "planner.step.when": "Do this after {section} (chapter {n})",
   "planner.step.whenChapter": "Do this in chapter {n}",
   "planner.step.metAt": "first met in {section} (chapter {n})",
+  "planner.step.needs": "needs {n}",
+  "planner.step.statsLegend": "Stat after this stage / the weapon's maximum.",
+  "planner.step.statsLegendNeeds":
+    "Stat after this stage / the weapon's maximum. “Needs” (the tick on the bar) is what the next weapon requires.",
   "planner.step.prepare": "How to prepare it",
   "planner.step.synths": "Items to synth",
   "planner.step.stats": "Stats after this stage",
