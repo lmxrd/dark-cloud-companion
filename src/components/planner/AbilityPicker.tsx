@@ -2,6 +2,8 @@ import { cn } from "cn";
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "@/i18n";
 import type { AbilityId } from "@/lib/schemas";
+import { HelpPopover } from "@/components/ui/help-popover";
+import { weapons } from "@/lib/gamedata/weapons";
 
 /** The four pairs that exclude each other, left / right. */
 const PAIRS: [AbilityId, AbilityId][] = [
@@ -55,8 +57,13 @@ export function AbilityPicker({
     <fieldset className="flex flex-col gap-2">
       <legend className="sr-only">{t("planner.wantAbilities")}</legend>
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <span aria-hidden className="text-sm font-semibold">
-          {t("planner.wantAbilities")}
+        <span className="flex items-center gap-1.5">
+          <span aria-hidden className="text-sm font-semibold">
+            {t("planner.wantAbilities")}
+          </span>
+          <HelpPopover label={t("planner.abilitiesHelp")}>
+            <AbilityHelp />
+          </HelpPopover>
         </span>
         <div className="flex gap-1">
           <Button type="button" variant="outline" size="xs" onClick={() => onChange(BEST)}>
@@ -138,5 +145,31 @@ export function AbilityPicker({
       </div>
       <p className="text-muted-foreground text-xs">{t("planner.abilitiesHint")}</p>
     </fieldset>
+  );
+}
+
+/** What each ability does (from the game data), opposing pairs side by side. */
+function AbilityHelp() {
+  const t = useTranslations();
+  const byId = new Map(weapons.abilities.map((a) => [a.id, a]));
+  const line = (id: AbilityId) => {
+    const a = byId.get(id);
+    return a ? (
+      <span key={id} className="block">
+        <span className="font-semibold">{a.name}</span>: {a.description}
+      </span>
+    ) : null;
+  };
+  return (
+    <span className="flex flex-col gap-2">
+      <span className="block">{t("planner.abilitiesHelpIntro")}</span>
+      {PAIRS.map(([l, r]) => (
+        <span key={l} className="bg-muted/50 block rounded p-1.5">
+          {line(l)}
+          {line(r)}
+        </span>
+      ))}
+      {SINGLES.map(line)}
+    </span>
   );
 }

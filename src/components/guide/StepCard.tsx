@@ -189,7 +189,12 @@ export function StepCard({
           {(step.notes || step.build || step.buildUp) && (
             <div className="flex flex-col gap-2 px-2 py-1">
               {step.notes && <p className="text-sm whitespace-pre-wrap">{step.notes}</p>}
-              <BuildStepBody step={step} derived={derived} buyableOnly={filters.buyableOnly} />
+              <BuildStepBody
+                step={step}
+                derived={derived}
+                buyableOnly={filters.buyableOnly}
+                spBonus={guide.build?.spBonus ?? 1}
+              />
               {/* Only saved guides: the shopping list follows the guide by id. */}
               {stageNeedsItems(step.build) && findGuide(guide.id, profile.guides) && (
                 <div>

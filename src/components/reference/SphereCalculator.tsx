@@ -7,14 +7,10 @@ import { Label } from "@/components/ui/label";
 import { selectClass, WeaponSelect } from "@/components/planner/WeaponSelect";
 import { useTranslations } from "@/i18n";
 import { STAT_KEYS, type Stats, type StatKey } from "@/lib/schemas";
-import { allyBonus, getWeapon, synthSources } from "@/lib/planner/sources";
-import {
-  attackTransfer,
-  freshState,
-  levelUpTo,
-  MIN_SPHERE_LEVEL,
-  SPECTRUMIZE_KEEP,
-} from "@/lib/weapons/mechanics";
+import { getWeapon, synthSources, weaponData } from "@/lib/planner/sources";
+import { simulateRecipe } from "@/lib/planner/simulate";
+import type { Recipe } from "@/lib/planner/types";
+import { attackTransfer, MIN_SPHERE_LEVEL, SPECTRUMIZE_KEEP } from "@/lib/weapons/mechanics";
 
 /** Items that add stats (coins and other ability items are left out). */
 const statItems = synthSources
@@ -23,6 +19,57 @@ const statItems = synthSources
 const itemByName = new Map(statItems.map((s) => [s.name, s]));
 
 const clampInt = (v: string, max: number) => Math.min(max, Math.max(0, Math.floor(Number(v) || 0)));
+
+/** Weapons that build up into each weapon. */
+const parents = new Map<string, string[]>();
+for (const w of weaponData.weapons)
+  for (const to of w.buildsUpTo) parents.set(to, [...(parents.get(to) ?? []), w.id]);
+
+/** Routes of up to two build-ups into a weapon (its earlier weapons, first first). */
+function routesInto(id: string): string[][] {
+  const out: string[][] = [];
+  const walk = (at: string, before: string[]) => {
+    if (before.length) out.push(before);
+    if (before.length >= 2) return;
+    for (const p of parents.get(at) ?? []) walk(p, [p, ...before]);
+  };
+  walk(id, []);
+  return out;
+}
+
+/** The recipe: the earlier weapons at their levels, then the weapon itself (no items here). */
+const recipeOf = (
+  earlier: string[],
+  levels: number[],
+  weaponId: string,
+  level: number,
+): Recipe => ({
+  acquire: { kind: "have" },
+  stages: [
+    ...earlier.map((id, i) => ({ weaponId: id, levelTo: levels[i] ?? 0, synths: [] })),
+    { weaponId, levelTo: level, synths: [] },
+  ],
+});
+
+/** For each earlier weapon, the lowest level from which the build-up after it works. */
+function lowestLevels(earlier: string[], weaponId: string, support: boolean): number[] {
+  const levels: number[] = [];
+  earlier.forEach((_, i) => {
+    const next = earlier[i + 1] ?? weaponId;
+    let found = 30;
+    for (let l = 0; l <= 30; l++) {
+      const r = simulateRecipe(recipeOf(earlier.slice(0, i + 1), [...levels, l], next, 0), {
+        spBonus: support ? 1 : 0,
+      });
+      if (!r.errors.length) {
+        found = l;
+        break;
+      }
+    }
+    levels.push(found);
+  });
+  return levels;
+}
 
 /**
  * Synth sphere calculator: a side weapon at a level, filled with items (or with stats typed in), and
@@ -40,12 +87,25 @@ export function SphereCalculator() {
   const [extra, setExtra] = useState<Partial<Stats>>({});
   const [receiverId, setReceiverId] = useState("island-king");
   const [receiverAt, setReceiverAt] = useState(() => getWeapon("island-king").baseStats.at);
+  /** Built up from these weapons first ("" = the weapon as bought), and their levels. */
+  const [route, setRoute] = useState("battle-wrench");
+  const [earlierLevels, setEarlierLevels] = useState<number[]>([3]);
 
   const weapon = getWeapon(weaponId);
-  const levelled = useMemo(
-    () => levelUpTo(freshState(weapon), weapon, level, allyBonus(weapon, support ? 1 : 0)),
-    [weapon, level, support],
+  const routes = useMemo(() => routesInto(weaponId), [weaponId]);
+  const earlier = route ? route.split(">") : [];
+  const made = useMemo(
+    () =>
+      simulateRecipe(recipeOf(route ? route.split(">") : [], earlierLevels, weaponId, level), {
+        spBonus: support ? 1 : 0,
+      }),
+    [route, earlierLevels, weaponId, level, support],
   );
+  const levelled = made.state;
+  const chooseRoute = (next: string, w = weaponId) => {
+    setRoute(next);
+    setEarlierLevels(next ? lowestLevels(next.split(">"), w, support) : []);
+  };
   const spUsed = items.reduce((n, i) => n + i.count, 0);
   const spLeft = levelled.sp - spUsed;
   // The side weapon's stats: levels, then items (capped at its maximum), then typed-in stats.
@@ -83,9 +143,48 @@ export function SphereCalculator() {
           {t("sphere.sideWeapon")}
           <WeaponSelect
             value={weaponId}
-            onChange={(id) => (setWeaponId(id), setItems([]), setExtra({}))}
+            onChange={(id) => {
+              setWeaponId(id);
+              setItems([]);
+              setExtra({});
+              chooseRoute("", id);
+            }}
           />
         </Label>
+        {routes.length > 0 && (
+          <Label className="flex flex-col items-start gap-1">
+            {t("sphere.builtFrom")}
+            <select
+              className={selectClass}
+              value={route}
+              onChange={(e) => chooseRoute(e.target.value)}
+            >
+              <option value="">{t("sphere.asBought")}</option>
+              {routes.map((r) => (
+                <option key={r.join(">")} value={r.join(">")}>
+                  {[...r, weaponId].map((id) => getWeapon(id).name).join(" → ")}
+                </option>
+              ))}
+            </select>
+          </Label>
+        )}
+        {earlier.map((id, i) => (
+          <Label key={id} className="flex flex-col items-start gap-1">
+            {t("sphere.levelOf", { weapon: getWeapon(id).name })}
+            <Input
+              type="number"
+              min={0}
+              max={99}
+              className="w-24"
+              value={earlierLevels[i] ?? 0}
+              onChange={(e) =>
+                setEarlierLevels((ls) =>
+                  earlier.map((_, n) => (n === i ? clampInt(e.target.value, 99) : (ls[n] ?? 0))),
+                )
+              }
+            />
+          </Label>
+        ))}
         <div className="flex flex-wrap items-end gap-4">
           <Label className="flex flex-col items-start gap-1">
             {t("planner.level")}
@@ -108,8 +207,16 @@ export function SphereCalculator() {
           </label>
         </div>
         <p className={cn("text-sm tabular-nums", spLeft < 0 && "text-destructive")}>
-          {t("sphere.sp", { used: spUsed, total: levelled.sp })}
+          {t("sphere.sp", { used: spUsed, total: levelled.sp })} ·{" "}
+          {t("sphere.absCost", { n: made.cost.abs.toLocaleString() })}
         </p>
+        {made.errors.length > 0 && (
+          <ul className="text-destructive list-disc pl-5 text-xs">
+            {made.errors.map((e, i) => (
+              <li key={i}>{e}</li>
+            ))}
+          </ul>
+        )}
 
         <div className="flex flex-wrap items-end gap-2">
           <Label className="flex min-w-48 flex-1 flex-col items-start gap-1">

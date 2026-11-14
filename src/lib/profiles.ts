@@ -36,6 +36,10 @@ const plannerInputsData = z.object({
   maxChapter: z.number().int().min(1).max(8),
   budget: z.string(),
   abilities: z.array(abilityId),
+  /** Which bought items the planner may use: everyday +2 items, or those plus crystals (and Knight Boots). */
+  itemPool: z.enum(["cheap", "crystals"]).default("cheap"),
+  /** How long the planner may work on each route (see SOLVE_SECONDS in the planner page). */
+  solveTime: z.enum(["quick", "thorough", "best"]).default("quick"),
   /** Where the abilities come from: side weapons' spheres first, or whichever is cheaper (see the planner's AbilitySource). */
   abilitySource: z.enum(["spheres", "cheapest"]).default("spheres"),
   /** Whether the start weapon is chosen by the planner (the line's first weapon) or set by hand. */

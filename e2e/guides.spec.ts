@@ -231,6 +231,16 @@ test.describe("custom start and end weapons, one tab per weapon type", () => {
     ).toBeVisible();
   });
 
+  test("the abilities help explains each ability, opposites together", async ({ page }) => {
+    await go(page, "/tools/planner");
+    await page.getByRole("button", { name: "About the abilities" }).click();
+    const help = page.getByRole("tooltip");
+    await expect(help.getByText(/1\.5x damage, but costs 1% of max HP/)).toBeVisible();
+    await expect(help.getByText(/15% chance of 1\.8x damage/)).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(help).toBeHidden();
+  });
+
   test("opposing abilities are one three-way switch per pair", async ({ page }) => {
     await go(page, "/tools/planner");
     const target = page.getByRole("region", { name: "Target weapon" });

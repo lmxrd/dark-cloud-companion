@@ -55,6 +55,19 @@ function defaultTargetOf(type: WeaponType): string {
 const isZero = (s: Stats) => STAT_KEYS.every((k) => s[k] === 0);
 
 /** Remembered inputs moved to another target, as if it had been picked in the form. */
+/**
+ * The chapter the planner starts at for a target: the earliest it can be built in, but not before
+ * chapter 2, when Conda's Goods opens (the everyday items for most stats are sold there).
+ */
+const defaultChapter = (start: string, id: string) => Math.max(2, earliestChapter(start, id));
+
+type SolveTime = "quick" | "thorough" | "best";
+/**
+ * Seconds the solver may spend on each route it solves exactly. Longer finds cheaper plans on hard
+ * targets (the built-in plans use 120 s) but keeps the page busy for minutes.
+ */
+const SOLVE_SECONDS: Record<SolveTime, number> = { quick: 3, thorough: 15, best: 60 };
+
 function retarget(inputs: PlannerInputs, id: string): PlannerInputs {
   const w = getWeapon(id);
   const keepStart = inputs.customStart && ancestorsOf(id).has(inputs.start.weaponId);
@@ -64,7 +77,7 @@ function retarget(inputs: PlannerInputs, id: string): PlannerInputs {
     endStats: { ...w.maxStats },
     endLevel: 0,
     customStart: keepStart,
-    maxChapter: earliestChapter(defaultStart(id), id),
+    maxChapter: defaultChapter(defaultStart(id), id),
   };
 }
 
@@ -102,6 +115,8 @@ export function GeneratorSection({ onOpenEditor }: { onOpenEditor: () => void })
   const [abilitySource, setAbilitySource] = useState<AbilitySource>(
     saved0?.abilitySource ?? "spheres",
   );
+  const [itemPool, setItemPool] = useState<"cheap" | "crystals">(saved0?.itemPool ?? "cheap");
+  const [solveTime, setSolveTime] = useState<SolveTime>(saved0?.solveTime ?? "quick");
   const [customStart, setCustomStart] = useState(saved0?.customStart ?? false);
   const [start, setStart] = useState<WeaponState>(() =>
     saved0?.customStart
@@ -111,7 +126,7 @@ export function GeneratorSection({ onOpenEditor }: { onOpenEditor: () => void })
   const [support, setSupport] = useState(saved0 ? saved0.start.spBonus === 1 : true);
   const [objective, setObjective] = useState<Objective>(saved0?.objective ?? "abs");
   const [maxChapter, setMaxChapter] = useState(
-    () => saved0?.maxChapter ?? earliestChapter(defaultStart(initialTarget), initialTarget),
+    () => saved0?.maxChapter ?? defaultChapter(defaultStart(initialTarget), initialTarget),
   );
   const [budget, setBudget] = useState(saved0?.budget ?? "");
   const [progress, setProgress] = useState<PlanProgress | null>(null);
@@ -138,6 +153,8 @@ export function GeneratorSection({ onOpenEditor }: { onOpenEditor: () => void })
       budget,
       abilities,
       abilitySource,
+      itemPool,
+      solveTime,
       customStart,
       endStats,
       endLevel,
@@ -150,6 +167,8 @@ export function GeneratorSection({ onOpenEditor }: { onOpenEditor: () => void })
     budget,
     abilities,
     abilitySource,
+    itemPool,
+    solveTime,
     customStart,
     endStats,
     endLevel,
@@ -193,7 +212,7 @@ export function GeneratorSection({ onOpenEditor }: { onOpenEditor: () => void })
     setEndLevel(0);
     const from = defaultStart(id);
     if (!ancestorsOf(id).has(start.weaponId)) setStart(freshState(getWeapon(from)));
-    setMaxChapter(earliestChapter(from, id));
+    setMaxChapter(defaultChapter(from, id));
     setResult(null);
   };
 
@@ -220,9 +239,11 @@ export function GeneratorSection({ onOpenEditor }: { onOpenEditor: () => void })
   // Warm the sphere-template cache for the current option set while the user fills in the form,
   // so the first "generate plan" doesn't pay for it (it all runs in the planner worker).
   useEffect(() => {
-    loadTemplates({ maxChapter, spBonus: support ? 1 : 0, allowFound }).catch(() => {});
+    loadTemplates({ maxChapter, spBonus: support ? 1 : 0, allowFound, pool: itemPool }).catch(
+      () => {},
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [maxChapter, support, allowFound]);
+  }, [maxChapter, support, allowFound, itemPool]);
 
   const goalLabel = STAT_KEYS.every((k) => endStats[k] >= target.maxStats[k])
     ? t("planner.goal.max")
@@ -252,6 +273,8 @@ export function GeneratorSection({ onOpenEditor }: { onOpenEditor: () => void })
           maxGilda: budget.trim() ? Math.max(0, Number(budget)) : undefined,
           abilities,
           abilitySource,
+          itemPool,
+          timeLimitSec: SOLVE_SECONDS[solveTime],
         },
         setProgress,
       );
@@ -464,6 +487,31 @@ export function GeneratorSection({ onOpenEditor }: { onOpenEditor: () => void })
                 value={budget}
                 onChange={(e) => setBudget(e.target.value)}
               />
+            </Label>
+            <Label className="flex w-full flex-col items-start gap-1">
+              {t("planner.itemPool")}
+              <select
+                className={selectClass}
+                value={itemPool}
+                onChange={(e) => setItemPool(e.target.value as "cheap" | "crystals")}
+              >
+                <option value="cheap">{t("planner.itemPool.cheap")}</option>
+                <option value="crystals">{t("planner.itemPool.crystals")}</option>
+              </select>
+            </Label>
+            <Label className="flex w-full flex-col items-start gap-1">
+              {t("planner.solveTime")}
+              <select
+                className={selectClass}
+                value={solveTime}
+                onChange={(e) => setSolveTime(e.target.value as SolveTime)}
+              >
+                {(["quick", "thorough", "best"] as const).map((v) => (
+                  <option key={v} value={v}>
+                    {t(`planner.solveTime.${v}` as const, { n: SOLVE_SECONDS[v] })}
+                  </option>
+                ))}
+              </select>
             </Label>
             <Label className="flex items-center gap-2 text-sm">
               <Switch

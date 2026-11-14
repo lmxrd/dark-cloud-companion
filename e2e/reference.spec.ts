@@ -125,10 +125,15 @@ test("a Gives filter with no matches says so", async ({ page }) => {
 
 test("the synth sphere calculator shows what a filled sphere passes on", async ({ page }) => {
   await go(page, "/tools/spheres");
-  // True Battle Wrench +5 with the support bonus: 21 SP; Scrap of Metal adds Lightning (capped at 19).
+  // The planner's recipe by default: Battle Wrench +3 → True Battle Wrench +5, 33 SP, 368 ABS.
+  await expect(page.getByText(/SP used: 0 \/ 33 · 368 ABS to make/)).toBeVisible();
+  // Scrap of Metal adds Lightning (capped at 19).
   await page.getByLabel("Add item").selectOption("Scrap of Metal");
   await page.getByRole("button", { name: "Fill SP" }).click();
-  await expect(page.getByText("SP used: 21 / 21")).toBeVisible();
+  await expect(page.getByText(/SP used: 33 \/ 33/)).toBeVisible();
+  // As bought, the same weapon has less to fill.
+  await page.getByLabel("Built up from").selectOption("");
+  await expect(page.getByText(/SP used: 33 \/ 21/)).toBeVisible();
   const lightning = page.getByRole("row").filter({ hasText: "Lightning" });
   await expect(lightning).toContainText("19 / 19");
   await expect(lightning).toContainText("+11");

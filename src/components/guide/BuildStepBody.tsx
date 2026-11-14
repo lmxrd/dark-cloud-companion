@@ -5,6 +5,9 @@ import type { DerivedStep } from "@/lib/guide/derive";
 import type { Step } from "@/lib/guide/types";
 import { chapterById, sectionById } from "@/lib/data";
 import { getWeapon, itemAvailability, supportAllyByType } from "@/lib/planner/sources";
+import { simulateRecipe } from "@/lib/planner/simulate";
+import { addShoppingGoal } from "@/lib/store";
+import { AddToListButton } from "@/components/shopping/AddToListButton";
 import { enemyFirstSection } from "@/lib/planner/timeline";
 import { cn } from "cn";
 import type { Acquire, Recipe, Stage } from "@/lib/planner/types";
@@ -49,23 +52,38 @@ export function GainsText({ gains }: { gains: Partial<Record<StatKey, number>> }
   return <>{parts.length ? parts.join(" · ") : "–"}</>;
 }
 
-export function RecipeView({ recipe }: { recipe: Recipe }) {
+export function RecipeView({ recipe, spBonus = 1 }: { recipe: Recipe; spBonus?: number }) {
   const t = useTranslations();
+  // SP per stage: what its items use, out of what the weapon has after levelling.
+  const snaps = simulateRecipe(recipe, { spBonus }).log.filter(
+    (l) => l.type === "state" && l.depth === 1,
+  );
   return (
     <ol className="text-muted-foreground mt-1 flex list-decimal flex-col gap-1 pl-5 text-xs">
       <li>
         {t("planner.step.acquire", { weapon: name(recipe.stages[0].weaponId) })}:{" "}
         {acquireText(t, recipe.acquire)}
       </li>
-      {recipe.stages.map((s, i) => (
-        <li key={i}>
-          {name(s.weaponId)} +{s.levelTo}
-          {s.synths.length > 0 &&
-            ` · ${s.synths.map((x) => (x.kind === "item" ? `${x.count}× ${x.name}` : "sphere")).join(", ")}`}
-          {i < recipe.stages.length - 1 &&
-            ` → ${t("planner.step.buildup", { weapon: name(recipe.stages[i + 1].weaponId) })}`}
-        </li>
-      ))}
+      {recipe.stages.map((s, i) => {
+        const used = s.synths.reduce((n, x) => n + (x.kind === "item" ? x.count : 0), 0);
+        const snap = snaps[i];
+        const left = snap?.type === "state" ? snap.sp : undefined;
+        return (
+          <li key={i}>
+            {name(s.weaponId)}{" "}
+            {left !== undefined && (
+              <span className="tabular-nums">
+                ({t("planner.step.spUsed", { used, total: left + used })}){" "}
+              </span>
+            )}
+            +{s.levelTo}
+            {s.synths.length > 0 &&
+              ` · ${s.synths.map((x) => (x.kind === "item" ? `${x.count}× ${x.name}` : "sphere")).join(", ")}`}
+            {i < recipe.stages.length - 1 &&
+              ` → ${t("planner.step.buildup", { weapon: name(recipe.stages[i + 1].weaponId) })}`}
+          </li>
+        );
+      })}
     </ol>
   );
 }
@@ -75,9 +93,12 @@ export function BuildStepBody({
   step,
   derived,
   buyableOnly = false,
+  spBonus = 1,
 }: {
   step: Step;
   derived?: DerivedStep;
+  /** The guide's support-ally setting (for the SP of the spheres' side weapons). */
+  spBonus?: number;
   /** When set, a warning is shown if the step uses items that can't be bought. */
   buyableOnly?: boolean;
 }) {
@@ -155,8 +176,9 @@ export function BuildStepBody({
               <summary className="text-muted-foreground cursor-pointer text-xs">
                 {t("planner.step.prepare")}
               </summary>
-              <RecipeView recipe={g.recipe} />
+              <RecipeView recipe={g.recipe} spBonus={spBonus} />
             </details>
+            <SphereMaterials recipe={g.recipe} count={g.count} />
           </div>
         );
       })}
@@ -366,5 +388,24 @@ function AllyNote({ weaponIds }: { weaponIds: string[] }) {
       {" "}
       · {t("planner.step.withAlly", { ally: allies.join(", ") })}
     </span>
+  );
+}
+
+/** Adds a sphere's materials (for all its copies) to the shopping list as plain items. */
+function SphereMaterials({ recipe, count }: { recipe: Recipe; count: number }) {
+  const t = useTranslations();
+  const needs = new Map<string, number>();
+  for (const st of recipe.stages) stageItems(st, needs);
+  if (!needs.size) return null;
+  return (
+    <div className="mt-1">
+      <AddToListButton
+        label={t(count > 1 ? "shopping.addSphereMaterialsAll" : "shopping.addSphereMaterials")}
+        onAdd={() => {
+          for (const [name, qty] of needs)
+            addShoppingGoal({ kind: "item", name, qty: qty * count });
+        }}
+      />
+    </div>
   );
 }
