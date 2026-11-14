@@ -18,7 +18,14 @@ import {
   type Template,
 } from "./solve";
 import { ancestorsOf, rootWeaponIds } from "./graph";
-import { acquisitionOptions, coinChapter, coinFor, getWeapon, weaponData } from "./sources";
+import {
+  acquisitionOptions,
+  coinChapter,
+  coinFor,
+  getWeapon,
+  supportAllyByType,
+  weaponData,
+} from "./sources";
 import { generateTemplates, progressionTemplates } from "./templates";
 import type { Acquire, Cost, Plan, SimulationResult } from "./types";
 
@@ -515,7 +522,12 @@ export async function planPath(
   /** Story constraints and sphere abilities for one chain (see ProgressionOptions). */
   const progressionFor = (c: Candidate, route: string[]) => {
     if (!prog) return {};
-    const startChapter = c.acquire.kind === "have" ? 1 : c.acquire.chapter;
+    // With the support allies' SP bonus, no work before they can be recruited (chapter 2): the
+    // levels counted with +1 SP would otherwise be done without them. ABS from before still counts.
+    const alliesFrom = req.spBonus
+      ? Math.max(1, ...[...supportAllyByType.values()].map((a) => a.chapter))
+      : 1;
+    const startChapter = Math.max(alliesFrom, c.acquire.kind === "have" ? 1 : c.acquire.chapter);
     // A stage ends with the build-up to the next weapon: it can't be done before its kills.
     const killChapter = (id: string) =>
       Math.max(1, ...getWeapon(id).requiresKills.map((e) => enemyChapter.get(e) ?? 8));

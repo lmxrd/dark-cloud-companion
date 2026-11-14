@@ -37,8 +37,8 @@ export const plansConfig = {
   },
   groups: [
     {
-      // One plan per final weapon that follows the story, like the weapon guide's recipes. Island
-      // King first, until the plans are right; then "finals".
+      // One plan per final weapon that follows the story, like the weapon guide's recipes, each on
+      // the guide's route.
       targets: ["island-king"],
       variants: [
         {
@@ -56,6 +56,50 @@ export const plansConfig = {
             "dark-excalibur",
             "griffon-fork",
             "island-king",
+          ],
+        },
+      ],
+    },
+    {
+      targets: ["grade-zero"],
+      variants: [
+        {
+          id: "story",
+          objective: "abs",
+          flow: "progression",
+          label: "Story",
+          // The weapon guide's Grade Zero route (recipe 7.2).
+          route: [
+            "battle-wrench",
+            "true-battle-wrench",
+            "drill-wrench",
+            "smash-wrench",
+            "stinger-wrench",
+            "poison-wrench",
+            "sigma-breaker",
+            "grade-zero",
+          ],
+        },
+      ],
+    },
+    {
+      targets: ["legend"],
+      variants: [
+        {
+          id: "story",
+          objective: "abs",
+          flow: "progression",
+          label: "Story",
+          // The weapon guide's LEGEND route (recipe 7.6): through the hammers.
+          route: [
+            "battle-wrench",
+            "true-battle-wrench",
+            "drill-wrench",
+            "smash-wrench",
+            "cubic-hammer",
+            "digi-hammer",
+            "heavy-hammer",
+            "legend",
           ],
         },
       ],
