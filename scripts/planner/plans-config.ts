@@ -6,7 +6,7 @@ import { type AbilityId, abilityId } from "../../src/lib/schemas.ts";
 import { finalWeaponIds } from "../../src/lib/planner/graph.ts";
 
 const variantSchema = z.object({
-  /** Becomes the guide id: <targetId>-<id>. Must be unique across all plans. */
+  /** With the target, the plan's config key <targetId>/<id> (unique; the guide id is a hash, see plan-files.ts). */
   id: z.string().min(1),
   objective: z.enum(["abs", "gilda", "steps"]),
   /**
@@ -66,6 +66,7 @@ export function parsePlansConfig(config: unknown): PlansConfig {
 
 /** One plan per target × variant; variant settings win over group settings over defaults. */
 export interface PlanSpec {
+  /** Config key: <targetId>/<variant id>. */
   id: string;
   targetId: string;
   objective: "abs" | "gilda" | "steps";
@@ -104,7 +105,7 @@ export function expandPlans(config: PlansConfig): PlanSpec[] {
     ];
     for (const targetId of targets) {
       for (const v of group.variants) {
-        const id = `${targetId}-${v.id}`;
+        const id = `${targetId}/${v.id}`;
         if (seen.has(id)) throw new Error(`duplicate plan id: ${id}`);
         seen.add(id);
         const maxGilda = v.maxGilda ?? group.maxGilda;

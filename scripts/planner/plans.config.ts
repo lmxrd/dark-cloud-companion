@@ -23,8 +23,9 @@
 //              less (in ABS, nearly always once coins are sold). Spheda coins are a last resort.
 //   maxChapter shops/items/enemy kills available up to this chapter; spBonus is the support bonus.
 //
-// Group settings apply to all its variants; variant settings win. Variant ids must be unique
-// across all plans (guide id = <targetId>-<variantId>).
+// Group settings apply to all its variants; variant settings win. Each plan's config key is
+// <targetId>/<variantId> (pnpm plans takes it). The guide's own id is <targetId>-<content hash>,
+// given when it is first generated and kept when it is re-generated (see plan-files.ts).
 import type { PlansConfigInput } from "./plans-config.ts";
 
 export const plansConfig = {

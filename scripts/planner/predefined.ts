@@ -1,45 +1,43 @@
 // Generates the predefined plans (built-in guides), configured in scripts/planner/plans.config.ts.
-// Each plan is committed as data/generated/plans/<plan id>.json ({ name, guide }). Plans are solved
-// only when asked: a generated plan is reviewed, committed and from then on independent of the
-// code (builds and tests only assemble the files, see integrations/plans.ts).
-//   pnpm plans                  solve the configured plans that have no file yet
-//   pnpm plans <id> [<id>…]     (re-)solve these plans
-//   pnpm plans --all            re-solve every configured plan
+// Each plan is committed as data/generated/plans/<guide id>.json ({ name, spec, guide }; see
+// plan-files.ts). Plans are solved only when asked: a generated plan is reviewed, committed and
+// from then on independent of the code (builds and tests only assemble the files, see
+// integrations/plans.ts). Re-generating a plan keeps its guide id.
+//   pnpm plans                        solve the configured plans that have no file yet
+//   pnpm plans <target>/<variant>…    re-solve these plans (same guide ids)
+//   pnpm plans <key>… --new           solve them as new guides (new ids) alongside the old ones,
+//                                     which are kept as standalone guides
+//   pnpm plans --all                  re-solve every configured plan
 // Several plans are solved in parallel worker processes (the script runs itself with --worker).
 import { spawn } from "node:child_process";
-import { existsSync, mkdirSync, readdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, writeFileSync } from "node:fs";
 import { availableParallelism } from "node:os";
-import { join } from "node:path";
-import type { Guide } from "../../src/lib/guide/types.ts";
 import { assemblePlans, PLANS_DIR, ROOT } from "../../integrations/plans.ts";
 import { plansConfig } from "./plans.config.ts";
 import { expandPlans, parsePlansConfig } from "./plans-config.ts";
 import { planOne } from "./plan-one.ts";
+import { newGuideId, planPath, readPlanFiles, type PlanFile } from "./plan-files.ts";
 
 const specs = expandPlans(parsePlansConfig(plansConfig));
-const planFile = (id: string) => join(PLANS_DIR, `${id}.json`);
+const fileFor = (key: string) => readPlanFiles().find((p) => p.spec === key);
+const write = (file: PlanFile) =>
+  writeFileSync(planPath(file.guide.id), JSON.stringify(file, null, 2) + "\n");
 
-/** A committed plan: a readable name and the guide. */
-interface PlanFile {
-  name: string;
-  guide: Guide;
-}
-
-/** Worker: solves the given plans and writes each one's file. */
-async function worker(ids: string[]) {
+/** Worker: solves the given plans and writes each one's file, keeping an existing guide id. */
+async function worker(keys: string[]) {
   mkdirSync(PLANS_DIR, { recursive: true });
-  for (const id of ids) {
-    const spec = specs.find((s) => s.id === id)!;
+  for (const key of keys) {
+    const spec = specs.find((s) => s.id === key)!;
     const t0 = Date.now();
     const { guide, log } = await planOne(spec);
-    const file: PlanFile = { name: guide.title, guide };
-    writeFileSync(planFile(id), JSON.stringify(file, null, 2) + "\n");
-    console.log(`  ${log} (${((Date.now() - t0) / 1000).toFixed(1)}s)`);
+    guide.id = fileFor(key)?.guide.id ?? newGuideId(spec.targetId, guide);
+    write({ name: guide.title, spec: key, guide });
+    console.log(`  ${guide.id}: ${log} (${((Date.now() - t0) / 1000).toFixed(1)}s)`);
   }
 }
 
 /** Runs this script as a worker process for a share of the plans. */
-function runWorker(ids: string[]): Promise<void> {
+function runWorker(keys: string[]): Promise<void> {
   return new Promise((resolve, reject) => {
     const child = spawn(
       "pnpm",
@@ -50,25 +48,37 @@ function runWorker(ids: string[]): Promise<void> {
         "vitest.config.ts",
         "scripts/planner/predefined.ts",
         "--worker",
-        ids.join(","),
+        keys.join(","),
       ],
       { stdio: "inherit", cwd: ROOT },
     );
     child.on("error", reject);
     child.on("exit", (code) =>
-      code === 0 ? resolve() : reject(new Error(`plan worker failed (${ids.join(", ")})`)),
+      code === 0 ? resolve() : reject(new Error(`plan worker failed (${keys.join(", ")})`)),
     );
   });
 }
 
 async function main(args: string[]) {
-  const unknown = args.filter((a) => a !== "--all" && !specs.some((s) => s.id === a));
-  if (unknown.length) throw new Error(`unknown plan(s): ${unknown.join(", ")}`);
+  const fresh = args.includes("--new");
+  const keys = args.filter((a) => !a.startsWith("--"));
+  const unknown = keys.filter((k) => !specs.some((s) => s.id === k));
+  if (unknown.length)
+    throw new Error(
+      `unknown plan(s): ${unknown.join(", ")} (configured: ${specs.map((s) => s.id).join(", ")})`,
+    );
   const todo = args.includes("--all")
     ? specs
-    : args.length
-      ? specs.filter((s) => args.includes(s.id))
-      : specs.filter((s) => !existsSync(planFile(s.id)));
+    : keys.length
+      ? specs.filter((s) => keys.includes(s.id))
+      : specs.filter((s) => !fileFor(s.id));
+
+  // New guides: the current ones stay as standalone guides (no longer tied to the config entry).
+  if (fresh)
+    for (const s of todo) {
+      const old = fileFor(s.id);
+      if (old) write({ name: old.name, guide: old.guide });
+    }
 
   const began = Date.now();
   if (todo.length) {
@@ -85,12 +95,11 @@ async function main(args: string[]) {
     console.log(`predefined plans: done in ${((Date.now() - began) / 1000).toFixed(1)}s`);
   } else console.log("predefined plans: every configured plan has a file");
 
-  const known = new Set(specs.map((s) => `${s.id}.json`));
-  const stray = (existsSync(PLANS_DIR) ? readdirSync(PLANS_DIR) : []).filter(
-    (f) => f.endsWith(".json") && !known.has(f),
-  );
-  if (stray.length)
-    console.log(`not configured (delete them if no longer wanted): ${stray.join(", ")}`);
+  const standalone = readPlanFiles().filter((p) => !p.spec || !specs.some((s) => s.id === p.spec));
+  if (standalone.length)
+    console.log(
+      `standalone guides (kept, not re-solved): ${standalone.map((p) => p.guide.id).join(", ")}`,
+    );
   assemblePlans();
 }
 
