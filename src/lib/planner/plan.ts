@@ -54,6 +54,8 @@ export interface PlanRequest {
   templates?: Template[];
   /** Which bought items may be synthed (default `all`); see {@link ItemPool}. */
   itemPool?: ItemPool;
+  /** See `TemplateOptions.extraAuxLevels`. */
+  extraAuxLevels?: number;
   /** Follow the story: see {@link ProgressionOptions}. */
   progression?: ProgressionOptions;
 }
@@ -466,6 +468,7 @@ export async function planPath(
     allowFound: req.allowFound,
     spBonus: req.spBonus,
     pool: req.itemPool,
+    extraAuxLevels: req.extraAuxLevels,
   };
   const prog = req.progression;
   let templates =

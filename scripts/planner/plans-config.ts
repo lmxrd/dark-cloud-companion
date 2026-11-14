@@ -31,6 +31,8 @@ const variantSchema = z.object({
   startBy: z.number().optional(),
   /** A fixed build-up route (first weapon … target) instead of searching for one. */
   route: z.array(z.string()).optional(),
+  /** Also offer built-up spheres with their earlier weapons this many levels higher (default 0). */
+  extraAuxLevels: z.number().optional(),
   /** Routes solved exactly, and seconds per exact solve (story plans are generated once: be thorough). */
   exactChains: z.number().optional(),
   timeLimitSec: z.number().optional(),
@@ -88,6 +90,7 @@ export interface PlanSpec {
   };
   /** A fixed build-up route (first weapon … target). */
   route?: string[];
+  extraAuxLevels?: number;
   /** Routes solved exactly and seconds per exact solve (undefined: the planner's defaults). */
   exactChains?: number;
   timeLimitSec?: number;
@@ -129,6 +132,7 @@ export function expandPlans(config: PlansConfig): PlanSpec[] {
             startBy: v.startBy ?? 2,
           },
           ...(v.route ? { route: v.route } : {}),
+          ...(v.extraAuxLevels ? { extraAuxLevels: v.extraAuxLevels } : {}),
           ...(v.flow === "progression"
             ? { exactChains: v.exactChains ?? 6, timeLimitSec: v.timeLimitSec ?? 120 }
             : {

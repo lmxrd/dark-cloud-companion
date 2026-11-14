@@ -17,6 +17,12 @@ export interface TemplateOptions extends ItemFilter, SimOptions {
   maxAuxBuildUps?: number;
   /** Shells (levelled to +5, left empty) for the model to fill, instead of filled spheres. */
   shells?: boolean;
+  /**
+   * Also offer spheres built up from other weapons with those weapons levelled up to this many
+   * levels past the minimum (e.g. Battle Wrench +4/+5 instead of +3 for True Battle Wrench): more
+   * ABS, but more SP to fill on the sphere at no extra SP on the main weapon. Default 0.
+   */
+  extraAuxLevels?: number;
 }
 
 /** Shells only need the cheapest sphere level: more levels cost the main weapon more SP. */
@@ -133,6 +139,7 @@ export function generateTemplates(opts: TemplateOptions): Promise<Template[]> {
     opts.maxAuxBuildUps ?? 2,
     opts.pool ?? "all",
     !!opts.shells,
+    opts.extraAuxLevels ?? 0,
   ]);
   const hit = cache.get(key);
   if (hit) return hit;
@@ -234,38 +241,42 @@ async function chainedTemplates(
         mipGap: 0.01,
       });
       if (!sol.plan) continue;
-      for (const level of opts.shells ? SHELL_LEVELS : SPHERE_LEVELS) {
-        const last = sol.plan.stages[sol.plan.stages.length - 1];
-        if (level < last.levelTo) continue;
-        const reached: Recipe = {
-          acquire,
-          stages: sol.plan.stages.map((s) => (s === last ? { ...s, levelTo: level } : s)),
-        };
-        const lvl = simulateRecipe(reached, opts);
-        if (lvl.errors.length) continue;
-        for (const mode of opts.shells ? ["empty" as const] : FILL_MODES) {
-          const stages = reached.stages.map((s) =>
-            s === reached.stages[reached.stages.length - 1] && mode !== "empty"
-              ? { ...s, synths: [...s.synths, ...fillItems(lvl.state, s.weaponId, items, mode)] }
-              : s,
-          );
-          const used = stages.flatMap((s) => s.synths).filter((s) => s.kind === "item");
-          const chapter = Math.max(
-            chapterOf(acquire),
-            ...used.map(
-              (s) => items.find((i) => i.name === (s as { name: string }).name)?.fromChapter ?? 1,
+      for (let extra = 0; extra <= (opts.extraAuxLevels ?? 0); extra++)
+        for (const level of opts.shells ? SHELL_LEVELS : SPHERE_LEVELS) {
+          const last = sol.plan.stages[sol.plan.stages.length - 1];
+          if (level < last.levelTo) continue;
+          // The weapons before the last one, `extra` levels past what the build-up needs.
+          const reached: Recipe = {
+            acquire,
+            stages: sol.plan.stages.map((s) =>
+              s === last ? { ...s, levelTo: level } : { ...s, levelTo: s.levelTo + extra },
             ),
-          );
-          const t = makeTemplate(
-            `${chain.join(">")}+${level}:${mode}`,
-            { acquire, stages },
-            chapter,
-            opts,
-            mode === "empty",
-          );
-          if (t) out.push(t);
+          };
+          const lvl = simulateRecipe(reached, opts);
+          if (lvl.errors.length) continue;
+          for (const mode of opts.shells ? ["empty" as const] : FILL_MODES) {
+            const stages = reached.stages.map((s) =>
+              s === reached.stages[reached.stages.length - 1] && mode !== "empty"
+                ? { ...s, synths: [...s.synths, ...fillItems(lvl.state, s.weaponId, items, mode)] }
+                : s,
+            );
+            const used = stages.flatMap((s) => s.synths).filter((s) => s.kind === "item");
+            const chapter = Math.max(
+              chapterOf(acquire),
+              ...used.map(
+                (s) => items.find((i) => i.name === (s as { name: string }).name)?.fromChapter ?? 1,
+              ),
+            );
+            const t = makeTemplate(
+              `${chain.join(">")}+${level}${extra ? `:aux+${extra}` : ""}:${mode}`,
+              { acquire, stages },
+              chapter,
+              opts,
+              mode === "empty",
+            );
+            if (t) out.push(t);
+          }
         }
-      }
     }
   }
   return out;

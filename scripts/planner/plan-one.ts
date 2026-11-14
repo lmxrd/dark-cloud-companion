@@ -49,6 +49,7 @@ export async function planOne(
       timeLimitSec: spec.timeLimitSec ?? timeLimitSec,
       ...(spec.exactChains !== undefined ? { exactChains: spec.exactChains } : {}),
       ...(spec.route ? { route: spec.route } : {}),
+      ...(spec.extraAuxLevels ? { extraAuxLevels: spec.extraAuxLevels } : {}),
     });
   const complete = (r: PlanResult) => r.status === "ok" && !r.abilitiesMissing?.length;
   let result = await solve(spec.maxChapter);
