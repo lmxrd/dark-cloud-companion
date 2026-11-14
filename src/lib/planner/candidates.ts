@@ -3,7 +3,8 @@ import { synthSources, type SynthSource } from "./sources";
 
 /**
  * Which bought items may be synthed: `cheap` = the everyday items worth +2 to a stat (as the weapon
- * guide's recipes use), `crystals` = those plus the crystals, `all` = anything sold, gems included.
+ * guide's recipes use), `crystals` = those plus the crystals (+3) and, for Attack, Knight Boots,
+ * `all` = anything sold, gems included.
  */
 export type ItemPool = "cheap" | "crystals" | "all";
 /** The everyday +2 items: Conda's Goods (Scrap of Metal, the 20-gilda goods) and Antidote Drink for Scale, as in the weapon guide. */
@@ -23,7 +24,7 @@ const hasStatGain = (s: SynthSource) => statGains(s).some((g) => g > 0);
 const inPool = (s: SynthSource, pool: ItemPool) =>
   pool === "all" ||
   (Math.max(...statGains(s)) <= 2 && (s.price ?? 0) <= CHEAP_PRICE) ||
-  (pool === "crystals" && s.name.endsWith("Crystal"));
+  (pool === "crystals" && (s.name.endsWith("Crystal") || s.name === "Knight Boots"));
 
 /** Items that can be synthed at this point, with dominated ones removed (never worse in any stat, never cheaper). */
 export function itemCandidates(filter: ItemFilter): SynthSource[] {

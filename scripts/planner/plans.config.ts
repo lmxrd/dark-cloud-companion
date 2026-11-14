@@ -104,6 +104,152 @@ export const plansConfig = {
         },
       ],
     },
+    {
+      targets: ["supernova"],
+      variants: [
+        {
+          id: "story",
+          objective: "abs",
+          flow: "progression",
+          label: "Story",
+          // The weapon guide's Supernova route (recipe 7.3).
+          route: [
+            "classic-gun",
+            "trumpet-gun",
+            "bell-trigger",
+            "magic-gun",
+            "question-shooter",
+            "steal-gun",
+            "supernova",
+          ],
+        },
+      ],
+    },
+    {
+      targets: ["griffon-fork"],
+      variants: [
+        {
+          id: "story",
+          objective: "abs",
+          flow: "progression",
+          label: "Story",
+          // The weapon guide's Griffon Fork route (recipe 7.4).
+          route: [
+            "bone-rapier",
+            "evilcise",
+            "drain-seeker",
+            "sargatanas",
+            "dark-excalibur",
+            "griffon-fork",
+          ],
+        },
+      ],
+    },
+    {
+      targets: ["five-star-armlet"],
+      variants: [
+        {
+          id: "story",
+          objective: "abs",
+          flow: "progression",
+          label: "Story",
+          // The weapon guide's Five-Star Armlet route (recipe 7.5).
+          route: [
+            "magic-brassard",
+            "bandit-brassard",
+            "thorn-armlet",
+            "pocklekul",
+            "moon-armlet",
+            "star-armlet",
+            "five-star-armlet",
+          ],
+        },
+      ],
+    },
+    {
+      targets: ["dark-cloud"],
+      variants: [
+        {
+          id: "story",
+          objective: "abs",
+          flow: "progression",
+          label: "Story",
+          // The weapon guide's Dark Cloud route (recipe 7.8).
+          route: [
+            "baselard",
+            "broad-sword",
+            "kitchen-knife",
+            "serpent-slicer",
+            "tsukikage",
+            "ama-no-murakumo",
+            "dark-cloud",
+          ],
+        },
+      ],
+    },
+    {
+      targets: ["love"],
+      variants: [
+        {
+          id: "story",
+          objective: "abs",
+          flow: "progression",
+          label: "Story",
+          // No guide recipe: the cheapest route the planner found (pinned for stable regeneration).
+          route: [
+            "magic-brassard",
+            "bandit-brassard",
+            "crystal-brassard",
+            "platinum-brassard",
+            "athenas-armlet",
+            "sun-armlet",
+            "mobius-bangle",
+            "love",
+          ],
+        },
+      ],
+    },
+    {
+      targets: ["last-resort"],
+      variants: [
+        {
+          id: "story",
+          objective: "abs",
+          flow: "progression",
+          label: "Story",
+          // No guide recipe: the cheapest route the planner found (pinned for stable regeneration).
+          route: [
+            "classic-gun",
+            "trumpet-gun",
+            "grenade-launcher",
+            "dark-viper",
+            "soul-breaker",
+            "desperado",
+            "last-resort",
+          ],
+        },
+      ],
+    },
+    {
+      targets: ["sigma-bazooka"],
+      variants: [
+        {
+          id: "story",
+          objective: "abs",
+          flow: "progression",
+          label: "Story",
+          // No guide recipe: the cheapest route the planner found (pinned for stable regeneration).
+          route: [
+            "classic-gun",
+            "trumpet-gun",
+            "grenade-launcher",
+            "dark-viper",
+            "twin-buster",
+            "sigma-bazooka",
+          ],
+        },
+      ],
+    },
     // {
     //   // The original curated guides (formerly scripts/planner/curated.ts → src/data/guides.json):
     //   // maxed stats without the ability preset, plus a budget variant. Variant ids are kept

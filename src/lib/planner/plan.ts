@@ -1,6 +1,6 @@
 // Top-level planner: enumerates build-up chains from the start weapon to the target, ranks them with the
 // LP relaxation, solves the best few exactly, and verifies the winner with the rule-checking simulator.
-import type { AbilityId, Stats } from "@/lib/schemas";
+import { STAT_KEYS, type AbilityId, type Stats } from "@/lib/schemas";
 import { core } from "@/lib/gamedata";
 import {
   addAbilities as mergeAbilities,
@@ -23,8 +23,10 @@ import {
   coinChapter,
   coinFor,
   getWeapon,
+  allyBonus,
   supportAllyByType,
   weaponData,
+  type SynthSource,
 } from "./sources";
 import { generateTemplates, progressionTemplates } from "./templates";
 import type { Acquire, Cost, Plan, SimulationResult } from "./types";
@@ -383,6 +385,54 @@ const sphereCost =
     return of(x) - of(y) || x.template.gilda - y.template.gilda;
   };
 
+/**
+ * Adds items to a plan's last stage for the final stats it still lacks (cheapest item per stat),
+ * levelling the finished weapon further for the SP when it has too little (to at most `maxLevel`);
+ * undefined when nothing is short or it can't be done.
+ */
+function topUpFinal(
+  plan: Plan,
+  state: WeaponState,
+  goal: Partial<Stats>,
+  items: SynthSource[],
+  spBonus: number,
+  maxLevel: number,
+): Plan | undefined {
+  const weapon = getWeapon(state.weaponId);
+  const add = new Map<string, number>();
+  let sp = 0;
+  for (const k of STAT_KEYS) {
+    const short = Math.min(goal[k] ?? 0, weapon.maxStats[k]) - state.stats[k];
+    if (short <= 0) continue;
+    const it = items
+      .filter((i) => !i.ability && (i.gains[k] ?? 0) > 0)
+      .sort((a, b) => (a.price ?? 0) / a.gains[k]! - (b.price ?? 0) / b.gains[k]!)[0];
+    if (!it) return undefined;
+    const n = Math.ceil(short / it.gains[k]!);
+    add.set(it.name, (add.get(it.name) ?? 0) + n);
+    sp += n;
+  }
+  if (!add.size) return undefined;
+  const perLevel = weapon.spPerLevel + allyBonus(weapon, spBonus);
+  const levels = sp > state.sp ? Math.ceil((sp - state.sp) / perLevel) : 0;
+  if (state.level + levels > maxLevel) return undefined;
+  const next = structuredClone(plan);
+  const last = next.stages[next.stages.length - 1];
+  last.levelTo = Math.max(last.levelTo, state.level + levels);
+  for (const [name, count] of add) last.synths.push({ kind: "item", name, count });
+  return next;
+}
+
+/** The top-up may level the finished weapon for SP, up to this level. */
+const TOP_UP_MAX_LEVEL = 5;
+
+/** Whether the finished weapon falls short of the stats the goal asks for. */
+function finalShort(state: WeaponState, goal: Partial<Stats> | undefined): boolean {
+  if (!goal) return false;
+  const weapon = getWeapon(state.weaponId);
+  return STAT_KEYS.some((k) => state.stats[k] < Math.min(goal[k] ?? 0, weapon.maxStats[k]));
+}
+
 /** A sphere recipe and the abilities its sphere passes on (from +5). */
 interface AbilitySphere {
   template: Template;
@@ -663,9 +713,11 @@ export async function planPath(
     // transfer and SP rounding can leave the simulator a point short of what the model expects).
     const tries = prog ? [1, 3] : wanted.length ? [0, 10] : [0];
     for (const [n, extraOrMargin] of tries.entries()) {
-      const extra = prog ? 0 : extraOrMargin;
-      if (prog && n > 0 && !sim?.errors.length) break;
-      r = await solveChain({
+      // Following the story, the retry also keeps a few SP free for topping up the final stats.
+      const extra = prog ? (n > 0 ? 4 : 0) : extraOrMargin;
+      if (prog && n > 0 && !sim?.errors.length && !finalShort(sim!.state, goalInputs.finalStats))
+        break;
+      const exactInput = {
         ...chainBase,
         ...(chainBase.maxGilda !== undefined
           ? { maxGilda: Math.max(0, chainBase.maxGilda - reserve.gilda) }
@@ -683,7 +735,12 @@ export async function planPath(
         ...(cutoff !== undefined
           ? { objectiveBound: cutoff - acquireOffset(candidate.acquire, req.objective) }
           : {}),
-      });
+      };
+      r = await solveChain(exactInput);
+      // A slow machine (or a hard chain) can run out of time before any plan is found: try once
+      // more with four times as long rather than report no plan.
+      if (!r.plan && r.status === "timedout")
+        r = await solveChain({ ...exactInput, timeLimitSec: 4 * (req.timeLimitSec ?? 3) });
       o.status = r.status;
       if (!r.plan) {
         // "Infeasible" under a cutoff only means "no improvement on the best chain already solved".
@@ -715,7 +772,25 @@ export async function planPath(
         missing = withCoins.missing;
       }
       sim = simulatePlan(candidate.state, plan, simOpts);
-      if (!sim.errors.length) break;
+      // The model's sphere-transfer estimate can leave the finished weapon a point short; top it up
+      // with items while it has SP left.
+      if (!sim.errors.length && goalInputs.finalStats) {
+        const lastChapter = r.stageChapters?.at(-1) ?? req.maxChapter;
+        const topped = topUpFinal(
+          plan,
+          sim.state,
+          goalInputs.finalStats,
+          items.filter((it) => (it.fromChapter ?? 1) <= lastChapter),
+          req.spBonus,
+          // Levelling the finished weapon for SP is fine, but not past +5.
+          TOP_UP_MAX_LEVEL,
+        );
+        if (topped) {
+          plan = topped;
+          sim = simulatePlan(candidate.state, plan, simOpts);
+        }
+      }
+      if (!sim.errors.length && !(prog && finalShort(sim.state, goalInputs.finalStats))) break;
     }
     if (!plan || !sim) continue;
     solved++;
