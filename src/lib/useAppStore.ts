@@ -9,7 +9,7 @@ const SERVER_PROFILE = SERVER_STATE.profiles[SERVER_STATE.activeProfile];
  * store's value. The stored state comes from localStorage, which the server can't see; without this
  * every island showing saved progress fails to hydrate.
  */
-function useHydrationSafe<T>(store: ReadableAtom<T>, server: T): T {
+export function useHydrationSafe<T>(store: ReadableAtom<T>, server: T): T {
   return useSyncExternalStore(
     (onChange) => store.listen(onChange),
     () => store.get(),

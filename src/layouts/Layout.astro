@@ -39,9 +39,10 @@ const pathname = stripBase(Astro.url.pathname);
     </AppShell>
     <script>
       import { withBase } from "@/lib/base";
+      import { registerServiceWorker } from "@/lib/sw";
       if ("serviceWorker" in navigator) {
         if (import.meta.env.PROD) {
-          navigator.serviceWorker.register(withBase("/sw.js")).catch(() => {});
+          registerServiceWorker(withBase("/sw.js"));
         } else {
           // A service worker left over from an earlier production preview on this origin would serve stale pages
           // in development; remove it.

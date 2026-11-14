@@ -6,11 +6,14 @@ const BASE = "__BASE__";
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches
-      .open(CACHE)
-      .then((cache) => cache.addAll(URLS))
-      .then(() => self.skipWaiting()),
+    caches.open(CACHE).then((cache) => cache.addAll(URLS)),
+    // No skipWaiting here: a new version waits until the user accepts the update prompt (or every tab
+    // is closed), so open tabs never lose the files they were loaded with.
   );
+});
+
+self.addEventListener("message", (event) => {
+  if (event.data?.type === "SKIP_WAITING") self.skipWaiting();
 });
 
 self.addEventListener("activate", (event) => {

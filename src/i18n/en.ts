@@ -87,6 +87,8 @@ export const en = {
   "storage.save-failed":
     "Changes can't be saved in this browser (storage is full or blocked, e.g. in private browsing). Export your profiles to keep them.",
   "storage.reload": "Reload",
+  "update.available": "A new version of the app is ready.",
+  "update.reload": "Reload",
   "storage.downloadBackup": "Download the backup",
   "storage.export": "Go to export",
   "storage.dismiss": "Dismiss",
@@ -247,6 +249,7 @@ export const en = {
     "No valid plan found with the available content. Try a later chapter or relax the goal.",
   "planner.error": "The planner failed: {message}",
   "planner.workerFailed":
+    "the planner couldn't start (a file may be missing offline). Check your connection and try again.",
   "planner.result": "Plan",
   "planner.total": "Total cost",
   "planner.totalAbs": "{n} ABS",

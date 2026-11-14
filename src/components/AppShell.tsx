@@ -13,6 +13,7 @@ import { SidebarInset, SidebarProvider, SidebarTrigger, useSidebar } from "@/com
 import { AppSidebar, ProfileButton } from "@/components/AppSidebar";
 import { BottomNav } from "@/components/BottomNav";
 import { StorageBanner } from "@/components/StorageBanner";
+import { UpdatePrompt } from "@/components/UpdatePrompt";
 import { crumbsFor } from "@/components/nav";
 import { withBase } from "@/lib/base";
 import { useTranslations } from "@/i18n";
@@ -92,6 +93,7 @@ export function AppShell({
           {children}
         </div>
         <BottomNav pathname={pathname} />
+        <UpdatePrompt />
       </SidebarInset>
     </SidebarProvider>
   );
