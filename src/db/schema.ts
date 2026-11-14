@@ -29,7 +29,7 @@
  *   `availability` (when a shop, its stock or a contest is there), `reward` (an item, weapon or
  *   Ridepod part, and how many).
  */
-import { sql } from "drizzle-orm";
+import { type SQL, sql } from "drizzle-orm";
 import {
   type AnySQLiteColumn,
   check,
@@ -87,6 +87,21 @@ const together = (name: string, ...columns: AnySQLiteColumn[]) =>
       columns.map((c) => sql`(${c} IS NULL)`),
       sql` + `,
     )} IN (0, ${sql.raw(String(columns.length))})`,
+  );
+
+/**
+ * A rule per value of a type column: for each listed value, its condition must hold (rows of other
+ * types are unaffected). Written as "type isn't X, or X's condition holds".
+ */
+const byType = (name: string, column: AnySQLiteColumn, rules: Record<string, SQL>) =>
+  check(
+    name,
+    sql.join(
+      Object.entries(rules).map(
+        ([value, rule]) => sql`(${column} <> ${sql.raw(literal(value))} OR (${rule}))`,
+      ),
+      sql` AND `,
+    ),
   );
 
 const bool = () => integer({ mode: "boolean" });
@@ -763,23 +778,19 @@ export const recruitRequirements = sqliteTable(
     inRange("recruit_requirements_quantity", t.quantity, 1),
     inRange("recruit_requirements_minimum_centimeters", t.minimumCentimeters, 1),
     inRange("recruit_requirements_seconds", t.seconds, 1),
-    check(
-      "recruit_requirements_link_matches_type",
-      sql`CASE ${t.type}
-        WHEN 'give-item' THEN ${t.itemId} IS NOT NULL AND ${t.quantity} IS NOT NULL
-        WHEN 'show-item' THEN ${t.itemId} IS NOT NULL
-        WHEN 'show-weapon' THEN ${t.weaponId} IS NOT NULL
-        WHEN 'show-photo' THEN ${t.photoId} IS NOT NULL
-        WHEN 'catch-fish' THEN ${t.fishId} IS NOT NULL
-        WHEN 'pay-gilda' THEN ${t.quantity} IS NOT NULL
-        WHEN 'win-spheda' THEN ${t.quantity} IS NOT NULL
-        WHEN 'beat-time' THEN ${t.seconds} IS NOT NULL
-        WHEN 'enter-code' THEN ${t.text} IS NOT NULL
-        WHEN 'story' THEN ${t.text} IS NOT NULL
-        WHEN 'other' THEN ${t.text} IS NOT NULL
-        ELSE 1
-      END`,
-    ),
+    byType("recruit_requirements_link_matches_type", t.type, {
+      "give-item": sql`${t.itemId} IS NOT NULL AND ${t.quantity} IS NOT NULL`,
+      "show-item": sql`${t.itemId} IS NOT NULL`,
+      "show-weapon": sql`${t.weaponId} IS NOT NULL`,
+      "show-photo": sql`${t.photoId} IS NOT NULL`,
+      "catch-fish": sql`${t.fishId} IS NOT NULL`,
+      "pay-gilda": sql`${t.quantity} IS NOT NULL`,
+      "win-spheda": sql`${t.quantity} IS NOT NULL`,
+      "beat-time": sql`${t.seconds} IS NOT NULL`,
+      "enter-code": sql`${t.text} IS NOT NULL`,
+      story: sql`${t.text} IS NOT NULL`,
+      other: sql`${t.text} IS NOT NULL`,
+    }),
   ],
 );
 
@@ -853,15 +864,14 @@ export const npcHousingRequirements = sqliteTable(
   },
   (t) => [
     oneOf("npc_housing_requirements_type", t.type, HOUSING_REQUIREMENT_TYPES),
-    check(
-      "npc_housing_requirements_link_matches_type",
-      sql`CASE ${t.type}
-        WHEN 'roof-color' THEN ${t.color} IS NOT NULL
-        WHEN 'minimum-stories' THEN ${t.quantity} IS NOT NULL
-        WHEN 'other' THEN ${t.text} IS NOT NULL
-        ELSE ${t.georamaPartId} IS NOT NULL
-      END`,
-    ),
+    byType("npc_housing_requirements_link_matches_type", t.type, {
+      "near-part": sql`${t.georamaPartId} IS NOT NULL`,
+      "in-part": sql`${t.georamaPartId} IS NOT NULL`,
+      "not-in-part": sql`${t.georamaPartId} IS NOT NULL`,
+      "roof-color": sql`${t.color} IS NOT NULL`,
+      "minimum-stories": sql`${t.quantity} IS NOT NULL`,
+      other: sql`${t.text} IS NOT NULL`,
+    }),
   ],
 );
 
@@ -954,6 +964,8 @@ export const georamaGoals = sqliteTable(
     type: text({ enum: GEORAMA_GOAL_TYPES }).notNull(),
     /** parts-placed: the part to place; npc-resides / residents: the part they must live in, if any. */
     georamaPartId: text().references(() => georamaParts.id),
+    /** parts-placed: a group of parts instead of one part ("10 Trees placed": any `tree`). */
+    partCategory: text(),
     /** parts-placed: how the part relates to `relatedGeoramaPartId`. */
     relation: text({ enum: PART_RELATIONS }),
     /** parts-placed: the other part ("on Brick House", "near River"). */
@@ -977,18 +989,14 @@ export const georamaGoals = sqliteTable(
     together("georama_goals_related_part", t.relation, t.relatedGeoramaPartId),
     inRange("georama_goals_quantity", t.quantity, 1),
     inRange("georama_goals_culture_points", t.culturePoints, 1),
-    check(
-      "georama_goals_link_matches_type",
-      sql`CASE ${t.type}
-        WHEN 'parts-placed' THEN ${t.georamaPartId} IS NOT NULL AND ${t.quantity} IS NOT NULL
-        WHEN 'npc-resides' THEN ${t.npcId} IS NOT NULL
-        WHEN 'residents' THEN ${t.quantity} IS NOT NULL
-        WHEN 'task-completed' THEN ${t.requiredTaskId} IS NOT NULL
-        WHEN 'culture-points' THEN ${t.culturePoints} IS NOT NULL
-        WHEN 'story-event' THEN ${t.sectionId} IS NOT NULL
-        ELSE 1
-      END`,
-    ),
+    byType("georama_goals_link_matches_type", t.type, {
+      "parts-placed": sql`(${t.georamaPartId} IS NOT NULL OR ${t.partCategory} IS NOT NULL) AND ${t.quantity} IS NOT NULL`,
+      "npc-resides": sql`${t.npcId} IS NOT NULL`,
+      residents: sql`${t.quantity} IS NOT NULL`,
+      "task-completed": sql`${t.requiredTaskId} IS NOT NULL`,
+      "culture-points": sql`${t.culturePoints} IS NOT NULL`,
+      "story-event": sql`${t.sectionId} IS NOT NULL`,
+    }),
   ],
 );
 
@@ -1464,13 +1472,13 @@ export const weapons = sqliteTable(
     inRange("weapons_max_durability", t.maxDurability, 1),
     check(
       "weapons_sub_type_matches_type",
-      sql`${t.subType} IS NULL OR CASE ${t.type} ${sql.join(
+      sql`${t.subType} IS NULL OR ${sql.join(
         Object.entries(WEAPON_SUB_TYPES).map(
           ([type, subs]) =>
-            sql`WHEN ${sql.raw(literal(type))} THEN ${t.subType} IN (${sql.raw(subs.map(literal).join(", "))})`,
+            sql`(${t.type} = ${sql.raw(literal(type))} AND ${t.subType} IN (${sql.raw(subs.map(literal).join(", "))}))`,
         ),
-        sql` `,
-      )} ELSE 0 END`,
+        sql` OR `,
+      )}`,
     ),
   ],
 );
@@ -1652,14 +1660,11 @@ export const monsterClassUnlocks = sqliteTable(
   (t) => [
     oneOf("monster_class_unlocks_method", t.method, UNLOCK_METHODS),
     inRange("monster_class_unlocks_quantity", t.quantity, 1),
-    check(
-      "monster_class_unlocks_link_matches_method",
-      sql`CASE ${t.method}
-        WHEN 'buy' THEN ${t.enemyId} IS NULL AND ${t.quantity} IS NULL
-        WHEN 'gift' THEN ${t.enemyId} IS NOT NULL AND ${t.quantity} IS NOT NULL
-        WHEN 'kill-with' THEN ${t.enemyId} IS NOT NULL AND ${t.quantity} IS NULL
-      END`,
-    ),
+    byType("monster_class_unlocks_link_matches_method", t.method, {
+      buy: sql`${t.enemyId} IS NULL AND ${t.quantity} IS NULL`,
+      gift: sql`${t.enemyId} IS NOT NULL AND ${t.quantity} IS NOT NULL`,
+      "kill-with": sql`${t.enemyId} IS NOT NULL AND ${t.quantity} IS NULL`,
+    }),
   ],
 );
 

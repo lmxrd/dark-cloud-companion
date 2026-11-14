@@ -22,6 +22,13 @@
       "when": 1794661251540,
       "tag": "0002_powerup_either",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1794662076232,
+      "tag": "0003_type_rules_without_case",
+      "breakpoints": true
     }
   ]
 }
