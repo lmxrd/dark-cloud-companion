@@ -30,7 +30,8 @@ function earliestPossibleChapter(spec: PlanSpec): number {
 /** Solves one configured plan into a guide; `timeLimitSec` bounds each exact solve (wall clock). */
 export async function planOne(
   spec: PlanSpec,
-  timeLimitSec = 10,
+  // 30 s per exact solve: within about 0.6% of 60 s across all plans (see bench-time-limits.ts).
+  timeLimitSec = 30,
 ): Promise<{ guide: Guide; log: string; result: PlanResult }> {
   const target = getWeapon(spec.targetId);
   const solve = (maxChapter: number) =>
