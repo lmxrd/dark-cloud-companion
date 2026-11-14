@@ -1,9 +1,9 @@
-import { useStore } from "@nanostores/react";
+import { useChecks } from "@/lib/useAppStore";
 import { cn } from "cn";
 import { useTranslations } from "@/i18n";
 import { monsterCheckIds, monsterClasses } from "@/lib/reference";
 import type { MonsterClass } from "@/lib/schemas";
-import { $checks, setChecked } from "@/lib/store";
+import { setChecked } from "@/lib/store";
 import { TrackerLayout, type TrackerGroup } from "./TrackerLayout";
 
 type Form = MonsterClass["forms"][number];
@@ -69,7 +69,7 @@ function ToggleTile({
 
 export function MonsterTracker() {
   const t = useTranslations();
-  const checks = useStore($checks);
+  const checks = useChecks();
   const count = (ids: string[]) => ({
     done: ids.filter((id) => checks[id]).length,
     total: ids.length,

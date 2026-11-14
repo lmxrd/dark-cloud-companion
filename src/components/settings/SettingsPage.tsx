@@ -1,4 +1,4 @@
-import { useStore } from "@nanostores/react";
+import { useAppState, useReady } from "@/lib/useAppStore";
 import { cn } from "cn";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { ChevronRightIcon, MoreHorizontalIcon, PlusIcon } from "lucide-react";
@@ -18,8 +18,6 @@ import { allGuides } from "@/lib/guide/builtin";
 import { firstIncompleteChapter, unionProgress } from "@/lib/guide/dashboard";
 import type { Profile } from "@/lib/profiles";
 import {
-  $ready,
-  $state,
   addProfile,
   buildExport,
   deleteProfile,
@@ -197,8 +195,8 @@ const rowClass =
 
 export function SettingsPage() {
   const t = useTranslations();
-  const state = useStore($state);
-  const ready = useStore($ready);
+  const state = useAppState();
+  const ready = useReady();
   // Profiles and the theme come from localStorage: render them after mounting (matches the server).
   const [mounted, setMounted] = useState(false);
   const [theme, setTheme] = useState<ThemePref>("system");

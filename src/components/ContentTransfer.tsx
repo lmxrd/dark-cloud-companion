@@ -1,9 +1,9 @@
-import { useStore } from "@nanostores/react";
+import { useProfile } from "@/lib/useAppStore";
 import { useRef, useState } from "react";
 import { buildContentExport } from "@/lib/content-file";
 import { useTranslations } from "@/i18n";
 import type { Guide } from "@/lib/guide/types";
-import { $profile, applyContent } from "@/lib/store";
+import { applyContent } from "@/lib/store";
 
 export function downloadGuides(filename: string, guides: Guide[]) {
   const blob = new Blob([JSON.stringify(buildContentExport(guides), null, 2)], {
@@ -29,7 +29,7 @@ export const fileSafe = (s: string) =>
  */
 export function useContentTransfer() {
   const t = useTranslations();
-  const { guides } = useStore($profile);
+  const { guides } = useProfile();
   const fileRef = useRef<HTMLInputElement>(null);
   const [message, setMessage] = useState<string | null>(null);
 

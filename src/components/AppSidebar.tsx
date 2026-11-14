@@ -1,4 +1,4 @@
-import { useStore } from "@nanostores/react";
+import { useAppState, useReady } from "@/lib/useAppStore";
 import { withBase } from "@/lib/base";
 import { useEffect, useState } from "react";
 import { ChevronsUpDownIcon, MoonIcon, SunIcon } from "lucide-react";
@@ -30,7 +30,7 @@ import {
 } from "@/components/ui/sidebar";
 import { useTranslations } from "@/i18n";
 import { isActive, isSectionActive, mainNav, type NavItem } from "@/components/nav";
-import { $ready, $state, switchProfile } from "@/lib/store";
+import { switchProfile } from "@/lib/store";
 import { setThemePref } from "@/lib/theme";
 
 const applyTheme = (dark: boolean) => setThemePref(dark ? "dark" : "light");
@@ -114,8 +114,8 @@ function NavLink({
 /** The active profile's name and initials; a placeholder until mounted (matches the server render). */
 function useProfileName() {
   const t = useTranslations();
-  const ready = useStore($ready);
-  const state = useStore($state);
+  const ready = useReady();
+  const state = useAppState();
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
   const current = state.profiles[state.activeProfile];
@@ -151,7 +151,7 @@ function ProfileMenuContent({
   className?: string;
 }) {
   const t = useTranslations();
-  const state = useStore($state);
+  const state = useAppState();
   const { name, initials, mounted } = useProfileName();
   const [dark, setDark] = useState(false);
   useEffect(() => setDark(document.documentElement.classList.contains("dark")), []);

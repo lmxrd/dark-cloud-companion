@@ -1,4 +1,4 @@
-import { useStore } from "@nanostores/react";
+import { useChecks, useProfile } from "@/lib/useAppStore";
 import { cn } from "cn";
 import { useMemo, useState } from "react";
 import { BookOpenIcon, MoreHorizontalIcon, PlusIcon, SearchIcon } from "lucide-react";
@@ -20,7 +20,7 @@ import { mainWalkthrough } from "@/lib/guide/main";
 import { guideProgress } from "@/lib/guide/progress";
 import type { Guide } from "@/lib/guide/types";
 import { getWeapon } from "@/lib/planner/sources";
-import { $checks, $profile, toggleGuide } from "@/lib/store";
+import { toggleGuide } from "@/lib/store";
 
 const viewHref = (g: Guide) => withBase(`/guides/view?id=${encodeURIComponent(g.id)}`);
 
@@ -38,8 +38,8 @@ const variantOf = (g: Guide) => g.title.split(" — ").at(-1) ?? g.title;
 /** A calm list row: title (opens the guide), a small bar and the dashboard switch at the right. */
 function GuideRow({ guide, icon }: { guide: Guide; icon?: React.ReactNode }) {
   const t = useTranslations();
-  const checks = useStore($checks);
-  const { activeGuides } = useStore($profile);
+  const checks = useChecks();
+  const { activeGuides } = useProfile();
   const p = guideProgress(guide, checks);
   const pct = p.total ? Math.round((p.done / p.total) * 100) : 0;
   return (
@@ -70,7 +70,7 @@ const heading = "font-heading text-base font-extrabold tracking-tight";
 
 export function GuidesPage() {
   const t = useTranslations();
-  const { guides, activeGuides } = useStore($profile);
+  const { guides, activeGuides } = useProfile();
   const transfer = useContentTransfer();
   const [q, setQ] = useState("");
   const needle = q.trim().toLowerCase();

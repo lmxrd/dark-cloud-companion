@@ -1,11 +1,11 @@
-import { useStore } from "@nanostores/react";
+import { useChecks } from "@/lib/useAppStore";
 import { CheckRow } from "@/components/chapter/CheckRow";
 import { TrackerLayout, type TrackerGroup } from "./TrackerLayout";
 import { ridepod, ridepodCoreCheckId, ridepodPartCheckId } from "@/lib/reference";
 import type { RidepodPart } from "@/lib/schemas";
 import { useTranslations } from "@/i18n";
 import { ingredientIdByName } from "@/lib/data";
-import { $checks, setChecked } from "@/lib/store";
+import { setChecked } from "@/lib/store";
 
 const data = ridepod;
 const categories = ["short", "long", "armor", "legs", "pack"] as const;
@@ -24,7 +24,7 @@ const recipeText = (list: RidepodPart["invent"]) =>
 
 export function RidepodTracker() {
   const t = useTranslations();
-  const checks = useStore($checks);
+  const checks = useChecks();
   const count = (ids: string[]) => ({
     done: ids.filter((id) => checks[id]).length,
     total: ids.length,

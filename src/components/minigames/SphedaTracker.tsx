@@ -1,4 +1,4 @@
-import { useStore } from "@nanostores/react";
+import { useChecks } from "@/lib/useAppStore";
 import { cn } from "cn";
 import { withBase } from "@/lib/base";
 import { CheckRow } from "@/components/chapter/CheckRow";
@@ -6,7 +6,7 @@ import { weaponData } from "@/lib/planner/sources";
 import { useTranslations } from "@/i18n";
 import { chapters, sectionById } from "@/lib/data";
 import { sphedaMedals } from "@/lib/reference";
-import { $checks, setChecked } from "@/lib/store";
+import { setChecked } from "@/lib/store";
 import { TrackerLayout, type TrackerGroup } from "./TrackerLayout";
 
 /** Owning a club is a plain tick, like any collectable. */
@@ -14,7 +14,7 @@ export const clubCheckId = (id: string) => `club:${id}`;
 
 export function SphedaTracker() {
   const t = useTranslations();
-  const checks = useStore($checks);
+  const checks = useChecks();
   const clubs = weaponData.weapons
     .filter((w) => w.type === "club")
     .sort((a, b) => a.name.localeCompare(b.name));

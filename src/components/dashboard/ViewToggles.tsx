@@ -1,13 +1,13 @@
-import { useStore } from "@nanostores/react";
+import { useProfile } from "@/lib/useAppStore";
 import { cn } from "cn";
 import { Switch } from "@/components/ui/switch";
 import { useTranslations } from "@/i18n";
-import { $profile, setView } from "@/lib/store";
+import { setView } from "@/lib/store";
 
 /** The view settings shared by the dashboard's filter sheet and Settings. */
 export function useViewToggles() {
   const t = useTranslations();
-  const { view } = useStore($profile);
+  const { view } = useProfile();
   const toggles = [
     { key: "showFacts", label: t("view.facts"), hint: undefined },
     { key: "buyableOnly", label: t("view.buyableOnly"), hint: t("view.buyableOnlyHint") },

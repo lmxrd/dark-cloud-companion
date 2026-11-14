@@ -1,0 +1,24 @@
+import { useSyncExternalStore } from "react";
+import type { ReadableAtom } from "nanostores";
+import { $checks, $profile, $ready, $state, SERVER_STATE } from "./store";
+
+const SERVER_PROFILE = SERVER_STATE.profiles[SERVER_STATE.activeProfile];
+
+/**
+ * Like `useStore`, but React renders `server` on the server and while hydrating, then switches to the
+ * store's value. The stored state comes from localStorage, which the server can't see; without this
+ * every island showing saved progress fails to hydrate.
+ */
+function useHydrationSafe<T>(store: ReadableAtom<T>, server: T): T {
+  return useSyncExternalStore(
+    (onChange) => store.listen(onChange),
+    () => store.get(),
+    () => server,
+  );
+}
+
+export const useAppState = () => useHydrationSafe($state, SERVER_STATE);
+export const useProfile = () => useHydrationSafe($profile, SERVER_PROFILE);
+export const useChecks = () => useHydrationSafe($checks, SERVER_PROFILE.checks);
+/** True once the stored state is in use (false on the server and while hydrating). */
+export const useReady = () => useHydrationSafe($ready, false);

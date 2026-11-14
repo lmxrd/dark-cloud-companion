@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
+import { useProfile } from "@/lib/useAppStore";
 import { cn } from "cn";
 import { withBase } from "@/lib/base";
-import { useStore } from "@nanostores/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -52,7 +52,7 @@ const isZero = (s: Stats) => STAT_KEYS.every((k) => s[k] === 0);
  */
 export function GeneratorSection({ onOpenEditor }: { onOpenEditor: () => void }) {
   const t = useTranslations();
-  const { view } = useStore($profile);
+  const { view } = useProfile();
   // The same setting as the dashboard toggle: plans only use buyable items unless it is switched off.
   const allowFound = !view.buyableOnly;
   // The last inputs are remembered per profile; ignore ones that point at weapons that no longer exist.

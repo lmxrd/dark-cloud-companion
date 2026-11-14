@@ -1,4 +1,4 @@
-import { useStore } from "@nanostores/react";
+import { useProfile } from "@/lib/useAppStore";
 import { cn } from "cn";
 import { useEffect, useMemo, useState } from "react";
 import { BookOpenIcon, SearchIcon, StarIcon } from "lucide-react";
@@ -8,7 +8,6 @@ import { useTranslations } from "@/i18n";
 import { allGuides } from "@/lib/guide/builtin";
 import { finalWeaponIds } from "@/lib/planner/graph";
 import { weaponData } from "@/lib/planner/sources";
-import { $profile } from "@/lib/store";
 
 type Sort = "name" | "attack" | "abs" | "sp";
 
@@ -27,7 +26,7 @@ const sorters: Record<Sort, (a: Weapon, b: Weapon) => number> = {
 
 /** Weapons that a switched-on guide builds or builds into. */
 function useGuideWeapons(): Set<string> {
-  const { guides, activeGuides } = useStore($profile);
+  const { guides, activeGuides } = useProfile();
   // Guide switches live in localStorage: mark nothing until mounted (matches the server render).
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);

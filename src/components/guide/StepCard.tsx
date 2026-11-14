@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
+import { useChecks, useProfile, useReady } from "@/lib/useAppStore";
 import { CheckIcon } from "lucide-react";
-import { useStore } from "@nanostores/react";
 import { CheckRow } from "@/components/chapter/CheckRow";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -13,7 +13,7 @@ import { stepProgress } from "@/lib/guide/progress";
 import { resolveEntry } from "@/lib/guide/refs";
 import type { Section } from "@/lib/schemas";
 import { stepTickId, textTickId, type Entry, type Guide, type Step } from "@/lib/guide/types";
-import { $checks, $profile, setChecked } from "@/lib/store";
+import { setChecked } from "@/lib/store";
 import { BuildStepBody } from "./BuildStepBody";
 import { ItemRow } from "./ItemRow";
 import { SectionFacts } from "./SectionFacts";
@@ -82,8 +82,8 @@ export function StepCard({
   collapseDone = false,
 }: Props) {
   const t = useTranslations();
-  const checks = useStore($checks);
-  useStore($profile); // re-render with the profile (guide edits)
+  const checks = useChecks();
+  useProfile(); // re-render with the profile (guide edits)
   const entries = useMemo(
     () => visibleEntries(guide, step, checks, filters),
     [guide, step, checks, filters],
@@ -91,12 +91,14 @@ export function StepCard({
   const progress = stepProgress(guide, step, checks);
   const complete = progress.total > 0 && progress.done === progress.total;
   // Finished steps start folded; ticking the last item of an open step doesn't fold it under you.
-  const [folded, setFolded] = useState(false);
+  // Cards mounted after hydration fold at once; while hydrating the ticks aren't loaded yet, so fold
+  // as soon as they are. Only that first state decides; later changes are the user's.
+  const ready = useReady();
+  const [folded, setFolded] = useState(() => ready && collapseDone && complete);
   useEffect(() => {
-    if (collapseDone && complete) setFolded(true);
-    // Only the state at first render decides; later changes are the user's.
+    if (ready && collapseDone && complete) setFolded(true);
     // oxlint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [ready]);
   if (step.entries.length > 0 && entries.length === 0 && !step.build && !step.notes) return null;
   // A category filter shows matching entries only, never steps without any.
   if (filters.category && entries.length === 0) return null;

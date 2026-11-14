@@ -1,4 +1,4 @@
-import { useStore } from "@nanostores/react";
+import { useChecks } from "@/lib/useAppStore";
 import { useEffect, useState } from "react";
 import { ChevronRightIcon } from "lucide-react";
 import { useTranslations } from "@/i18n";
@@ -11,14 +11,13 @@ import {
   weaponCount,
   type Progress,
 } from "@/lib/reference";
-import { $checks } from "@/lib/store";
 
 type Tile = { href: string; title: string; meta: string; progress?: Progress };
 
 /** Large tiles for the Reference pages; the trackers show the active profile's progress. */
 export function ReferenceHub() {
   const t = useTranslations();
-  const checks = useStore($checks);
+  const checks = useChecks();
   // Ticks come from localStorage: count them only after mounting so the first render matches the server.
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);

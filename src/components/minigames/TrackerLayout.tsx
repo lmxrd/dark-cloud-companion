@@ -3,6 +3,7 @@ import { cn } from "cn";
 import { ChevronDownIcon } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useTranslations } from "@/i18n";
+import { useReady } from "@/lib/useAppStore";
 
 export type Count = { done: number; total: number };
 
@@ -41,14 +42,18 @@ export function TrackerLayout({
   const [open, setOpen] = useState<Record<string, boolean>>(() =>
     Object.fromEntries(groups.map((g) => [g.id, !!g.defaultOpen])),
   );
-  // Ticks come from localStorage: fold finished groups after mounting, so the first render matches the server.
+  // Saved ticks arrive right after hydration: then fold finished groups and open the defaults
+  // computed from them. Once only; afterwards the user decides.
+  const ready = useReady();
   useEffect(() => {
+    if (!ready) return;
     setOpen((o) =>
-      Object.fromEntries(groups.map((g) => [g.id, finished(g.count) ? false : o[g.id]])),
+      Object.fromEntries(
+        groups.map((g) => [g.id, finished(g.count) ? false : o[g.id] || !!g.defaultOpen]),
+      ),
     );
-    // Only on mount; later the user decides.
     // oxlint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [ready]);
 
   const jump = (id: string) => {
     setOpen((o) => ({ ...o, [id]: true }));

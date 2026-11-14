@@ -1,8 +1,8 @@
-import { useStore } from "@nanostores/react";
+import { useProfile } from "@/lib/useAppStore";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useTranslations, type MessageKey } from "@/i18n";
-import { $profile, toggleGuide } from "@/lib/store";
+import { toggleGuide } from "@/lib/store";
 
 export function GuideToggle({
   guideId,
@@ -12,7 +12,7 @@ export function GuideToggle({
   labelKey?: MessageKey;
 }) {
   const t = useTranslations();
-  const { activeGuides } = useStore($profile);
+  const { activeGuides } = useProfile();
   return (
     <Label className="flex items-center gap-2 text-sm">
       <Switch

@@ -1,5 +1,5 @@
 import { PageHeader } from "@/components/PageHeader";
-import { useStore } from "@nanostores/react";
+import { useChecks, useProfile } from "@/lib/useAppStore";
 import { cn } from "cn";
 import { withBase } from "@/lib/base";
 import { useEffect, useMemo, useState } from "react";
@@ -25,7 +25,7 @@ import { isStepDone, stepsProgress } from "@/lib/guide/progress";
 import { derivedFor } from "@/lib/guide/useDerived";
 import type { Guide } from "@/lib/guide/types";
 import { getWeapon } from "@/lib/planner/sources";
-import { $checks, $profile, deleteGuide, saveGuide, toggleGuide } from "@/lib/store";
+import { deleteGuide, saveGuide, toggleGuide } from "@/lib/store";
 
 const pctOf = (p: { done: number; total: number }) =>
   p.total ? Math.round((p.done / p.total) * 100) : 0;
@@ -89,8 +89,8 @@ function GuideMenu({ guide }: { guide: Guide }) {
 /** One guide, all its steps: a build-up timeline for weapon builds, chapter groups otherwise. Client-only (`?id=`). */
 export function GuideViewPage() {
   const t = useTranslations();
-  const profile = useStore($profile);
-  const checks = useStore($checks);
+  const profile = useProfile();
+  const checks = useChecks();
   const [id, setId] = useState<string | null>(null);
   const [needle, setNeedle] = useState("");
   // Chapter groups the user opened or closed; the rest follow the default.

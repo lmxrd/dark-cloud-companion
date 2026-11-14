@@ -17,7 +17,14 @@ import {
   type ViewSettings,
 } from "./profiles";
 
-export const $state = atom<AppState>(initialState());
+/**
+ * The state every island renders on the server and during hydration: a fresh default profile. The
+ * client swaps in the stored state right after hydrating (see `useAppState` and friends), so the first
+ * client render always matches the server HTML.
+ */
+export const SERVER_STATE: AppState = initialState();
+
+export const $state = atom<AppState>(SERVER_STATE);
 /** False until localStorage has been read on the client (avoid hydration flashes). */
 export const $ready = atom(false);
 

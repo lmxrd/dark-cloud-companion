@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useProfile } from "@/lib/useAppStore";
 import { BuildStepBody } from "@/components/guide/BuildStepBody";
 import { StartSpecs } from "@/components/planner/StartSpecs";
 import { WeaponSelect, selectClass } from "@/components/planner/WeaponSelect";
@@ -16,8 +17,6 @@ import { getWeapon, itemAvailability, synthSources } from "@/lib/planner/sources
 import type { Stage } from "@/lib/planner/types";
 import { loadTemplates } from "@/lib/planner/client";
 import type { Template } from "@/lib/planner/solve";
-import { $profile } from "@/lib/store";
-import { useStore } from "@nanostores/react";
 import { freshState, type WeaponState } from "@/lib/weapons/mechanics";
 
 const itemSources = synthSources.filter(
@@ -210,7 +209,7 @@ function AddEntries({ chapterId, onAdd }: { chapterId?: string; onAdd: (e: Entry
 /** Adds a sphere weapon (a side weapon prepared and spectrumized onto this one) from the planner's templates. */
 function SphereAdder({ spBonus, onAdd }: { spBonus: number; onAdd: (t: Template) => void }) {
   const t = useTranslations();
-  const { view } = useStore($profile);
+  const { view } = useProfile();
   const [open, setOpen] = useState(false);
   const [maxChapter, setMaxChapter] = useState(8);
   const [templates, setTemplates] = useState<Template[] | null>(null);
