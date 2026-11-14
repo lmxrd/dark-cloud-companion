@@ -47,13 +47,23 @@ const lastIndex = sections.length - 1;
 /** The section index from which something available "in chapter n" can be done. */
 const fromChapter = (n: number) => chapterStart.get(Math.min(Math.max(n, 1), 8)) ?? lastIndex;
 
-/** The section after which the enemy has been met (and can be defeated): the earliest of its namesakes. */
-function killIndex(enemyName: string): number {
-  const found = (enemyIdsByName.get(enemyName) ?? [])
+/** Section indexes where an enemy (by name) is met: every namesake's. */
+const meetings = (enemyName: string) =>
+  (enemyIdsByName.get(enemyName) ?? [])
     .map((id) => weaponsFile.killEnemySections[id])
     .map((section) => (section !== undefined ? indexOfSection.get(section) : undefined))
     .filter((i): i is number => i !== undefined);
+
+/** The section after which the enemy has been met (and can be defeated): the earliest of its namesakes. */
+function killIndex(enemyName: string): number {
+  const found = meetings(enemyName);
   return found.length ? Math.min(...found) : lastIndex;
+}
+
+/** The section in which an enemy (by name) is first met, if known. */
+export function enemyFirstSection(enemyName: string): string | undefined {
+  const found = meetings(enemyName);
+  return found.length ? sections[Math.min(...found)].id : undefined;
 }
 
 /** The earliest section index at which a stage's items, sphere weapons and the next build-up's kills are all available. */

@@ -2,7 +2,9 @@ import { STAT_KEYS } from "@/lib/schemas";
 import { useTranslations, type Translate } from "@/i18n";
 import type { DerivedStep } from "@/lib/guide/derive";
 import type { Step } from "@/lib/guide/types";
+import { chapterById, sectionById } from "@/lib/data";
 import { getWeapon, itemAvailability } from "@/lib/planner/sources";
+import { enemyFirstSection } from "@/lib/planner/timeline";
 import { cn } from "cn";
 import type { Acquire, Recipe, Stage } from "@/lib/planner/types";
 
@@ -81,8 +83,18 @@ export function BuildStepBody({
   const items = groups.filter((g) => g.kind === "item");
   const spheres = groups.filter((g) => g.kind === "sphere");
   const weapon = getWeapon(stage.weaponId);
+  const chapter = step.chapterId ? chapterById.get(step.chapterId) : undefined;
+  const section = step.sectionId ? sectionById.get(step.sectionId) : undefined;
+  const next = derived?.nextWeaponId ? getWeapon(derived.nextWeaponId) : undefined;
   return (
     <div className="flex flex-col gap-2 text-sm">
+      {chapter?.phase === "main" && (
+        <p className="text-muted-foreground text-xs font-medium">
+          {section
+            ? t("planner.step.when", { section: section.title, n: chapter.number })
+            : t("planner.step.whenChapter", { n: chapter.number })}
+        </p>
+      )}
       {stage.levelTo > 0 && (
         <p>{t("planner.step.levelOnly", { weapon: name(stage.weaponId), to: stage.levelTo })}</p>
       )}
@@ -173,10 +185,38 @@ export function BuildStepBody({
               })}
             </div>
           </details>
-          {derived.nextWeaponId && (
-            <p className="font-medium">
-              {t("planner.step.buildup", { weapon: name(derived.nextWeaponId) })}
-            </p>
+          {next && (
+            <p className="font-medium">{t("planner.step.buildup", { weapon: next.name })}</p>
+          )}
+          {next && next.requiresKills.length > 0 && (
+            <div className="text-xs">
+              <p>{t("planner.step.kills", { weapon: next.name })}</p>
+              <ul
+                className="list-disc pl-5"
+                aria-label={t("planner.step.kills", { weapon: next.name })}
+              >
+                {next.requiresKills.map((enemy) => {
+                  const met = enemyFirstSection(enemy);
+                  const where = met ? sectionById.get(met) : undefined;
+                  const ch = where ? chapterById.get(where.chapterId) : undefined;
+                  return (
+                    <li key={enemy}>
+                      <span className="font-medium">{enemy}</span>
+                      {where && (
+                        <span className="text-muted-foreground">
+                          {" "}
+                          ·{" "}
+                          {t("planner.step.metAt", {
+                            section: where.title,
+                            n: ch?.number ?? where.chapterId,
+                          })}
+                        </span>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
           )}
           {derived.errors.length > 0 && (
             <div className="text-destructive text-xs">
