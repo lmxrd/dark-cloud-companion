@@ -234,25 +234,21 @@ export function acquisitionOptions(weaponId: string): Acquire[] {
 // ---------- support allies ----------
 
 /**
- * Allies who are only in the party for a while (Lin) can't be counted on while building a weapon, so
- * their per-level bonus is never assumed.
+ * The ally whose skill adds +1 SP per level to a weapon type (Cedric, Milane, Gerald), if any.
+ * Allies who are only along for a while (Lin, until the lighthouse in chapter 3: her recruit entry
+ * has a last chapter) can't be counted on while building a weapon, so their bonus is never assumed.
  */
-const TEMPORARY_ALLIES = new Set(["lin"]);
-
-/** The ally whose skill adds +1 SP per level to a weapon type (Cedric, Milane, Gerald), if any. */
 export const supportAllyByType = new Map<string, { npcId: string; name: string; chapter: number }>(
-  misc.npcs.flatMap((npc) =>
-    npc.skills
-      .filter((sk) => sk.weaponType && !TEMPORARY_ALLIES.has(npc.id))
+  misc.npcs.flatMap((npc) => {
+    const recruit = collectables.recruits.find((r) => r.npcId === npc.id);
+    if (recruit?.untilChapterNumber) return [];
+    return npc.skills
+      .filter((sk) => sk.weaponType)
       .map((sk) => [
         sk.weaponType!,
-        {
-          npcId: npc.id,
-          name: npc.name,
-          chapter: collectables.recruits.find((r) => r.npcId === npc.id)?.chapterNumber ?? 1,
-        },
-      ]),
-  ),
+        { npcId: npc.id, name: npc.name, chapter: recruit?.chapterNumber ?? 1 },
+      ]);
+  }),
 );
 
 /**
