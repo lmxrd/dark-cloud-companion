@@ -14,12 +14,17 @@ pnpm typecheck        # tsc --noEmit
 pnpm test             # vitest: logic + data cross-checks
 pnpm e2e              # Playwright (Chromium, desktop + Pixel 7): builds and serves the site itself
 pnpm test:all         # all of the above
+pnpm db:studio        # edit the game data in drizzle/game.db (Drizzle Studio)
+pnpm db:generate      # after changing src/db/schema.ts: write a migration in drizzle/
+pnpm db:migrate       # apply new migrations to drizzle/game.db
+pnpm db:check         # broken links and cross-row rules in drizzle/game.db
 ```
 
 Before finishing a change run `pnpm check && pnpm typecheck && pnpm test`, plus `pnpm e2e` when UI, routing, storage, the service worker or the planner changed. Mention in your summary anything you could not verify.
 
 ## Where things are
 
+- `src/db/schema.ts` – the game-data database schema (Drizzle, SQLite); `drizzle/` holds its migrations and `game.db`, the committed database and the single source of truth for game data. `scripts/db/` checks it. The app still reads `src/data/` until the export from `game.db` replaces it.
 - `src/data/` – the extracted static game data (JSON only; schemas live in `src/lib/schemas.ts`). The cross-check tests live in `scripts/extract/data.test.ts`. `INCONSISTENCIES.md` is generated (`node scripts/extract/crosscheck.ts && pnpm fmt`).
 - `src/lib/weapons/` – pure game mechanics (ABS curve, levelling, spectrumize, build-up). Verified against the weapon FAQ's worked examples; do not "simplify" the formulas.
 - `src/lib/planner/` – `simulate.ts` is the source of truth for rules; `solve.ts` builds a MILP (HiGHS wasm, `highs.ts`) per build-up chain; `plan.ts` ranks chains, solves the best, adds ability coins; `templates.ts` generates sphere-weapon templates; `worker.ts`/`client.ts` run it off the main thread.
@@ -30,6 +35,7 @@ Before finishing a change run `pnpm check && pnpm typecheck && pnpm test`, plus 
 
 ## Invariants and conventions
 
+- **Game data goes in `drizzle/game.db`**, edited with `pnpm db:studio`. Only facts go in (no guide advice), and nothing that can be calculated from them is stored. Schema changes: edit `src/db/schema.ts` (every column gets a doc comment), `pnpm db:generate`, `pnpm db:migrate`, commit the migration and `game.db` together; `scripts/db/rules.test.ts` fails if they drift apart. For readable `.db` diffs run once: `git config diff.sqlite.textconv "echo .dump | sqlite3"`.
 - **No guide prose in the repo.** Only facts (names, numbers, recipes, locations). Walkthrough text in the app is user-authored. Never commit `.local/`.
 - **Everything is a guide** (`Guide`/`Step`/entries `text | item | section`). Weapon builds are steps with a `build` stage; stats/costs are _derived_ by the simulator when shown. Built-in guides are read-only (`kind: "builtin"`); copy with `duplicateGuide`.
 - **Ticks** live in `profile.checks`: data items/medals by their own ids (shared by every guide), text entries and step ticks as `g:<guide>:<step>[:<entry>]`. Progress is always computed from _switched-on_ guides only (`profile.activeGuides`).

@@ -19,6 +19,10 @@
     "test": "vitest run",
     "typecheck": "astro sync && tsc --noEmit -p .",
     "e2e": "playwright test",
+    "db:studio": "drizzle-kit studio",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:check": "node scripts/db/check.ts",
     "test:all": "pnpm run check && pnpm test && pnpm e2e"
   },
   "dependencies": {
@@ -43,8 +47,11 @@
     "zod": "^4.6.5"
   },
   "devDependencies": {
+    "@libsql/client": "^0.18.0",
     "@playwright/test": "^1.63.0",
     "@types/node": "^26.6.4",
+    "drizzle-kit": "^0.31.11",
+    "drizzle-orm": "^0.45.4",
     "oxfmt": "^0.72.0",
     "oxlint": "^1.87.0",
     "sharp": "^0.35.5",
