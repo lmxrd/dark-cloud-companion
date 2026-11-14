@@ -4,7 +4,7 @@ import type { AbilityId, Stats } from "@/lib/schemas";
 import { freshState, type WeaponState } from "@/lib/weapons/mechanics";
 import { itemCandidates } from "./candidates";
 import { simulatePlan, type SimOptions } from "./simulate";
-import { solveChain, type Objective, type SolveResult } from "./solve";
+import { solveChain, type Objective, type SolveResult, type Template } from "./solve";
 import { ancestorsOf, rootWeaponIds } from "./graph";
 import { acquisitionOptions, coinFor, getWeapon, weaponData } from "./sources";
 import { generateTemplates } from "./templates";
@@ -34,6 +34,8 @@ export interface PlanRequest {
   /** Number of chains to solve exactly (the best by LP bound). */
   exactChains?: number;
   timeLimitSec?: number;
+  /** Sphere recipes to choose from; built on the fly (and cached) when not given. */
+  templates?: Template[];
 }
 
 /** Coarse progress reported while planning (phases run in this order). */
@@ -238,11 +240,13 @@ export async function planPath(
 
   const items = itemCandidates({ maxChapter: req.maxChapter, allowFound: req.allowFound });
   onProgress?.({ phase: "templates", done: 0, total: 1 });
-  const templates = await generateTemplates({
-    maxChapter: req.maxChapter,
-    allowFound: req.allowFound,
-    spBonus: req.spBonus,
-  });
+  const templates =
+    req.templates ??
+    (await generateTemplates({
+      maxChapter: req.maxChapter,
+      allowFound: req.allowFound,
+      spBonus: req.spBonus,
+    }));
   const goalInputs =
     req.goal.kind === "max"
       ? { finalStats: target.maxStats }

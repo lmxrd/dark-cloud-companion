@@ -2,8 +2,9 @@
 // whenever Astro starts (dev, build, `astro sync`) and before the tests, after the game data has been
 // exported. They only depend on the game data and the planning code, so a content hash over those
 // decides whether anything has to be solved: the file is reused when its hash matches, restored from
-// node_modules/.cache/dcc-plans when an earlier run produced the same hash, and generated otherwise
-// (about a minute). The plans themselves are configured in scripts/planner/plans.config.ts.
+// node_modules/.cache/dcc-plans when an earlier run produced the same hash, and generated otherwise.
+// Generation itself caches each plan by its own hash and solves the missing ones in parallel (see
+// scripts/planner/predefined.ts). The plans themselves are configured in scripts/planner/plans.config.ts.
 import type { AstroIntegration } from "astro";
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
@@ -34,10 +35,15 @@ function walk(path: string): string[] {
     : [path];
 }
 
-/** Content hash over every input; stored in the generated file to detect staleness. */
-export function plansHash(): string {
+/**
+ * Content hash over every input; stored in the generated file to detect staleness. Without the
+ * config it covers only the game data and the planning code: each plan's own hash adds its settings
+ * to that, so editing one variant re-solves only that plan.
+ */
+export function plansHash({ withConfig = true } = {}): string {
   const files = INPUTS.flatMap((p) => walk(join(ROOT, p)))
     .filter((f) => /\.(ts|tsx|json|db)$/.test(f) && !/\.test\.tsx?$/.test(f))
+    .filter((f) => withConfig || !f.endsWith("plans.config.ts"))
     .sort();
   const hash = createHash("sha256");
   for (const f of files) hash.update(f.slice(ROOT.length)).update(readFileSync(f));
