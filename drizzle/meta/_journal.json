@@ -8,6 +8,13 @@
       "when": 1794660572703,
       "tag": "0000_game_data",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1794661115180,
+      "tag": "0001_seals_only",
+      "breakpoints": true
     }
   ]
 }

@@ -180,7 +180,7 @@ export const CLEAR_GOALS = [
  * blue = Max and the Ridepod only, red = Monica only. A seal lifts once every enemy on the floor is
  * defeated.
  */
-export const RESTRICTIONS = ["white-seal", "blue-seal", "red-seal", "ridepod-only"] as const;
+export const RESTRICTIONS = ["white-seal", "blue-seal", "red-seal"] as const;
 
 /**
  * A part of a chapter in play order: a dungeon floor, a boss fight, a story beat or an interlude.
@@ -215,7 +215,7 @@ export const sections = sqliteTable(
     medalClearGoal: text({ enum: CLEAR_GOALS }),
     /** Dungeon medal: length of the fish to catch for the fishing medal, in centimeters. */
     medalFishingCentimeters: integer(),
-    /** What limits how the section can be played: a seal (a limited zone) or Ridepod only. */
+    /** The seal on the floor, if any (a limited zone). */
     restriction: text({ enum: RESTRICTIONS }),
     /** Whether the floor has a geostone. The georama parts it unlocks are in `sectionGeostoneParts`. */
     hasGeostone: bool().notNull().default(false),
