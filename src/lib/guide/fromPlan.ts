@@ -44,6 +44,16 @@ export function planResultToGuide(args: {
   if (!result.plan || !result.chain) throw new Error("no plan to convert");
   const stages = result.plan.stages;
   let chapter = 1;
+  // Step ids name the stage itself (weapon and level), not its position, so a step's tick stays
+  // with what was done when the plan is regenerated, and drops away when that stage is gone.
+  const used = new Set<string>();
+  const stepId = (stage: (typeof stages)[number]) => {
+    const base = `${stage.weaponId}+${stage.levelTo}`;
+    let id = base;
+    for (let n = 2; used.has(id); n++) id = `${base}-${n}`;
+    used.add(id);
+    return id;
+  };
   const steps: Step[] = stages.map((stage, i) => {
     const next = stages[i + 1];
     const kills = next ? getWeapon(next.weaponId).requiresKills : [];
@@ -54,7 +64,7 @@ export function planResultToGuide(args: {
     );
     const placed = args.placement?.[i];
     return {
-      id: `s${i + 1}`,
+      id: stepId(stage),
       title: getWeapon(stage.weaponId).name + (next ? ` → ${getWeapon(next.weaponId).name}` : ""),
       notes: [
         placed?.grindAbs &&
