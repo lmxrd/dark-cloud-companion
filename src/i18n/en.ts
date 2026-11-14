@@ -292,7 +292,8 @@ export const en = {
   "planner.goal.max": "Maxed stats",
   "planner.chapter": "Content available up to",
   "planner.chapterOption": "Chapter {n}",
-  "planner.support": "Support character bonus (+1 SP per level)",
+  "planner.support":
+    "Support ally bonus (+1 SP per level: Cedric for wrenches, Milane for swords, Gerald for guns)",
   "planner.wantAbilities": "Abilities on the finished weapon",
   "planner.abilitiesPreset": "Best abilities",
   "planner.abilitiesClear": "Clear",
@@ -674,6 +675,7 @@ export const en = {
   "planner.step.metAt": "first met in {section} (chapter {n})",
   "planner.step.needs": "needs {n}",
   "planner.step.passesOn": "Passes on:",
+  "planner.step.withAlly": "with {ally} along (+1 SP per level)",
   "planner.step.passesOnEach": "Each passes on:",
   "planner.step.allItems": "Items for this step (spheres included):",
   "planner.step.requirements": "{weapon} needs (stat now / required):",

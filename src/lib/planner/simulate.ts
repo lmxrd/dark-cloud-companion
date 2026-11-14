@@ -13,11 +13,11 @@ import {
   type WeaponState,
 } from "@/lib/weapons/mechanics";
 import { STAT_KEYS, type AbilityId } from "@/lib/schemas";
-import { getWeapon, synthSourceByName } from "./sources";
+import { allyBonus, getWeapon, synthSourceByName } from "./sources";
 import type { Acquire, Cost, LogEntry, Plan, Recipe, SimulationResult, Stage } from "./types";
 
 export interface SimOptions {
-  /** Extra SP per level from the matching support character (Cedric/Gerald/Milane/Lin). */
+  /** 1: the support ally for each weapon type is along (+1 SP per level where one exists; see allyBonus). */
   spBonus: number;
   /** Enemy types already killed; undefined means "assume all requirements are met". */
   killed?: ReadonlySet<string>;
@@ -54,7 +54,7 @@ function runStages(
     if (stage.levelTo > run.state.level) {
       const from = run.state.level;
       const abs = Math.max(0, absBetween(weapon.baseAbs, from, stage.levelTo) - run.state.abs);
-      run.state = levelUpTo(run.state, weapon, stage.levelTo, opts.spBonus);
+      run.state = levelUpTo(run.state, weapon, stage.levelTo, allyBonus(weapon, opts.spBonus));
       run.cost.abs += abs;
       run.cost.steps += 1;
       run.log.push({ type: "level", weaponId: weapon.id, from, to: stage.levelTo, abs, depth });

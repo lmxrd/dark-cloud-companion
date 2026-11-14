@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { selectClass, WeaponSelect } from "@/components/planner/WeaponSelect";
 import { useTranslations } from "@/i18n";
 import { STAT_KEYS, type Stats, type StatKey } from "@/lib/schemas";
-import { getWeapon, synthSources } from "@/lib/planner/sources";
+import { allyBonus, getWeapon, synthSources } from "@/lib/planner/sources";
 import {
   attackTransfer,
   freshState,
@@ -43,7 +43,7 @@ export function SphereCalculator() {
 
   const weapon = getWeapon(weaponId);
   const levelled = useMemo(
-    () => levelUpTo(freshState(weapon), weapon, level, support ? 1 : 0),
+    () => levelUpTo(freshState(weapon), weapon, level, allyBonus(weapon, support ? 1 : 0)),
     [weapon, level, support],
   );
   const spUsed = items.reduce((n, i) => n + i.count, 0);

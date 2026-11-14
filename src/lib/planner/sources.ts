@@ -4,6 +4,7 @@
 import { collectables, core, names, type Sources } from "@/lib/gamedata";
 import { weapons as weaponsFile } from "@/lib/gamedata/weapons";
 import { items as itemsFile } from "@/lib/gamedata/items";
+import { misc } from "@/lib/gamedata/misc";
 import { shops as shopsFile } from "@/lib/gamedata/shops";
 import {
   STAT_KEYS,
@@ -229,3 +230,34 @@ export function acquisitionOptions(weaponId: string): Acquire[] {
   }
   return out;
 }
+
+// ---------- support allies ----------
+
+/**
+ * Allies who are only in the party for a while (Lin) can't be counted on while building a weapon, so
+ * their per-level bonus is never assumed.
+ */
+const TEMPORARY_ALLIES = new Set(["lin"]);
+
+/** The ally whose skill adds +1 SP per level to a weapon type (Cedric, Milane, Gerald), if any. */
+export const supportAllyByType = new Map<string, { npcId: string; name: string; chapter: number }>(
+  misc.npcs.flatMap((npc) =>
+    npc.skills
+      .filter((sk) => sk.weaponType && !TEMPORARY_ALLIES.has(npc.id))
+      .map((sk) => [
+        sk.weaponType!,
+        {
+          npcId: npc.id,
+          name: npc.name,
+          chapter: collectables.recruits.find((r) => r.npcId === npc.id)?.chapterNumber ?? 1,
+        },
+      ]),
+  ),
+);
+
+/**
+ * SP per level a weapon gets on top of its own with the support allies along (`spBonus` 1): +1 for
+ * weapon types an ally boosts (wrenches/hammers, swords, guns), nothing for armbands and clubs.
+ */
+export const allyBonus = (weapon: { type: string }, spBonus: number) =>
+  spBonus && supportAllyByType.has(weapon.type) ? 1 : 0;

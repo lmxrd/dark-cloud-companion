@@ -6,6 +6,7 @@ import { z } from "zod";
 
 const curatedGuides: LegacyGuide[] = z.array(legacyGuideSchema).parse(legacyCuratedRaw);
 import { deriveBuild } from "./derive";
+import { weaponData } from "@/lib/planner/sources";
 import { fromLegacyGuide, fromLegacyWalkthrough, migrateTickId } from "./legacy";
 import { mainWalkthrough } from "./main";
 import { entryTickIds, knownItemIds, knownSectionIds } from "./refs";
@@ -69,7 +70,17 @@ describe("legacy conversion", () => {
       expect(guideSchema.safeParse(g).success, g.id).toBe(true);
       const derived = deriveBuild(g);
       expect(derived.errors, g.id).toEqual([]);
-      for (const d of derived.steps.values()) expect(d.errors, `${g.id} ${d.stepId}`).toEqual([]);
+      // These guides were generated when every weapon was assumed to get a support ally's +1 SP per
+      // level; armbands (Lin is only temporary) and clubs (no ally) don't, so their side weapons can
+      // now come up short on SP. Nothing else may be wrong.
+      const sp = /^(.+): needs \d+ SP for /;
+      for (const d of derived.steps.values())
+        for (const e of d.errors) {
+          const weapon = sp.exec(e)?.[1];
+          expect(weapon, `${g.id} ${d.stepId}: ${e}`).toBeDefined();
+          const type = weaponData.weapons.find((w) => w.name === weapon)?.type;
+          expect(["armband", "club"], `${g.id} ${d.stepId}: ${e}`).toContain(type);
+        }
       // The legacy total also counts the start weapon's purchase price; ABS must match exactly.
       expect(derived.total.abs, g.id).toBe(legacy.totals.abs);
       expect(g.steps).toHaveLength(legacy.steps.length);

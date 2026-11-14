@@ -91,3 +91,24 @@ describe("simulator", () => {
     expect(r.cost.abs).toBe(368 + 32 + 32 + 48 + 64 + 80 + 96 + 112);
   });
 });
+
+describe("support allies", () => {
+  test("+1 SP per level only for weapon types an ally boosts (not armbands: Lin is temporary)", async () => {
+    const { allyBonus, supportAllyByType } = await import("./sources");
+    expect(supportAllyByType.get("sword")?.name).toBe("Milane");
+    expect(supportAllyByType.get("wrench")?.name).toBe("Cedric");
+    expect(supportAllyByType.get("gun")?.name).toBe("Gerald");
+    expect(allyBonus(getWeapon("moon-armlet"), 1)).toBe(0);
+    expect(allyBonus(getWeapon("bone-rapier"), 1)).toBe(1);
+    expect(allyBonus(getWeapon("bone-rapier"), 0)).toBe(0);
+    const armlet = simulateRecipe(
+      { acquire: { kind: "have" }, stages: [{ weaponId: "moon-armlet", levelTo: 5, synths: [] }] },
+      { spBonus: 1 },
+    );
+    const without = simulateRecipe(
+      { acquire: { kind: "have" }, stages: [{ weaponId: "moon-armlet", levelTo: 5, synths: [] }] },
+      { spBonus: 0 },
+    );
+    expect(armlet.state.sp).toBe(without.state.sp);
+  });
+});

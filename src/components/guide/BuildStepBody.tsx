@@ -4,7 +4,7 @@ import { useTranslations, type Translate } from "@/i18n";
 import type { DerivedStep } from "@/lib/guide/derive";
 import type { Step } from "@/lib/guide/types";
 import { chapterById, sectionById } from "@/lib/data";
-import { getWeapon, itemAvailability } from "@/lib/planner/sources";
+import { getWeapon, itemAvailability, supportAllyByType } from "@/lib/planner/sources";
 import { enemyFirstSection } from "@/lib/planner/timeline";
 import { cn } from "cn";
 import type { Acquire, Recipe, Stage } from "@/lib/planner/types";
@@ -102,7 +102,10 @@ export function BuildStepBody({
     <div className="flex flex-col gap-2 text-sm">
       <When step={step} />
       {stage.levelTo > 0 && (
-        <p>{t("planner.step.levelOnly", { weapon: name(stage.weaponId), to: stage.levelTo })}</p>
+        <p>
+          {t("planner.step.levelOnly", { weapon: name(stage.weaponId), to: stage.levelTo })}
+          <AllyNote weaponIds={[stage.weaponId]} />
+        </p>
       )}
       {items.length > 0 && (
         <ul className="flex flex-wrap gap-1.5" aria-label={t("planner.step.synths")}>
@@ -136,6 +139,9 @@ export function BuildStepBody({
                 level: last(g.recipe).levelTo,
                 sp: last(g.recipe).levelTo,
               })}
+              <AllyNote
+                weaponIds={g.recipe.stages.filter((st) => st.levelTo > 0).map((st) => st.weaponId)}
+              />
             </p>
             {passed && (
               <p className="text-muted-foreground text-xs">
@@ -342,5 +348,23 @@ function BuildUpBody({ step, derived }: { step: Step; derived?: DerivedStep }) {
         </div>
       )}
     </div>
+  );
+}
+
+/**
+ * " · with Cedric": the support ally to have along while levelling these weapons (+1 SP per level),
+ * for the weapon types that have one.
+ */
+function AllyNote({ weaponIds }: { weaponIds: string[] }) {
+  const t = useTranslations();
+  const allies = [
+    ...new Set(weaponIds.flatMap((id) => supportAllyByType.get(getWeapon(id).type)?.name ?? [])),
+  ];
+  if (!allies.length) return null;
+  return (
+    <span className="text-muted-foreground text-xs">
+      {" "}
+      · {t("planner.step.withAlly", { ally: allies.join(", ") })}
+    </span>
   );
 }

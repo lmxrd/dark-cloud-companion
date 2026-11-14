@@ -21,7 +21,7 @@ import {
   type WeaponState,
 } from "@/lib/weapons/mechanics";
 import { solveLp, type LpModel, type LpRow } from "./highs";
-import { getWeapon, type SynthSource } from "./sources";
+import { allyBonus, getWeapon, type SynthSource } from "./sources";
 import type { Plan, Recipe, Stage, SynthUse } from "./types";
 
 export type Objective = "abs" | "gilda" | "steps";
@@ -219,7 +219,7 @@ export function buildModel(input: SolveInput) {
     const first = runStart[j];
     const ls = first === 0 ? start.level : 0;
     lStart.push(cont ? 0 : ls);
-    spPerLevel.push(w.spPerLevel + spBonus);
+    spPerLevel.push(w.spPerLevel + allyBonus(w, spBonus));
     spend.push([]);
 
     // ----- level variable and its ABS curve -----
