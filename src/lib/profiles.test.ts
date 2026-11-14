@@ -153,3 +153,45 @@ describe("planner inputs", () => {
     expect(parseState(JSON.stringify(bad)).profiles[p.id]?.planner).toBeUndefined();
   });
 });
+
+describe("shopping list state", () => {
+  test("older v2 profiles without a shopping list load with an empty one", () => {
+    const p = createProfile("Old v2");
+    const { shopping: _drop, ...older } = p;
+    const raw = JSON.stringify({ version: 2, activeProfile: p.id, profiles: { [p.id]: older } });
+    expect(parseState(raw).profiles[p.id].shopping).toEqual({
+      goals: [],
+      have: {},
+      invent: [],
+      group: "stops",
+    });
+  });
+
+  test("new and migrated profiles start empty; goals round-trip", async () => {
+    expect(createProfile("New").shopping.goals).toEqual([]);
+    expect(migrateProfile(await legacyProfile()).shopping.goals).toEqual([]);
+    const p = createProfile("Shopper");
+    p.shopping = {
+      goals: [
+        { id: "a", kind: "georama", name: "River", qty: 15 },
+        { id: "b", kind: "build", guideId: "x", stepIds: ["s1"] },
+      ],
+      have: { "Water Element": 3 },
+      invent: ["Bomb"],
+      group: "az",
+    };
+    const state = { version: 2 as const, activeProfile: p.id, profiles: { [p.id]: p } };
+    expect(appState.parse(JSON.parse(JSON.stringify(state)))).toEqual(state);
+    // A broken goal makes the state fall back instead of reaching the UI.
+    const bad = JSON.stringify({
+      ...state,
+      profiles: {
+        [p.id]: {
+          ...p,
+          shopping: { ...p.shopping, goals: [{ id: "c", kind: "item", name: "X", qty: 0 }] },
+        },
+      },
+    });
+    expect(parseState(bad).profiles[p.id]).toBeUndefined();
+  });
+});
