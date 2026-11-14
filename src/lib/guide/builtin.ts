@@ -6,9 +6,7 @@ import { z } from "zod";
 import { mainWalkthrough } from "./main";
 import { guide, type Guide } from "./types";
 
-export const weaponGuides: Guide[] = z
-  .object({ hash: z.string(), guides: z.array(guide) })
-  .parse(plansJson).guides;
+export const weaponGuides: Guide[] = z.object({ guides: z.array(guide) }).parse(plansJson).guides;
 export const builtinGuides: Guide[] = [mainWalkthrough, ...weaponGuides];
 export const builtinGuideById = new Map(builtinGuides.map((g) => [g.id, g]));
 
