@@ -6,6 +6,7 @@ import {
   STORAGE_KEY,
   createProfile,
   importProfiles,
+  importProfilesAsCopies,
   initialState,
   parseProfileExport,
   loadState,
@@ -247,8 +248,18 @@ export function buildExport(ids?: string[]): ExportFile {
   return { app: "dark-chronicles-companion", version: STATE_VERSION, profiles };
 }
 
-/** Returns an error message, or null on success. Accepts exports of the current and the previous format. */
-export async function importFromJson(json: string): Promise<string | null> {
+/** A checked profile export, and which existing profiles it would replace. */
+export interface ProfileImport {
+  file: ExportFile;
+  /** Names of profiles here with the same id as one in the file. */
+  replaces: string[];
+}
+
+/**
+ * Reads and validates a profile export without changing anything. Returns an error message, or the
+ * import to confirm. Accepts exports of the current and the previous format.
+ */
+export async function readProfileImport(json: string): Promise<string | ProfileImport> {
   let data: unknown;
   try {
     data = JSON.parse(json);
@@ -263,6 +274,23 @@ export async function importFromJson(json: string): Promise<string | null> {
     p.guides.flatMap((g) => validateGuide(g).map((e) => `${p.name} / ${g.title}: ${e}`)),
   );
   if (errors.length) return errors.slice(0, 5).join("\n");
-  $state.set(importProfiles($state.get(), parsed));
-  return null;
+  const current = $state.get().profiles;
+  return {
+    file: parsed,
+    replaces: parsed.profiles.flatMap((p) => (current[p.id] ? [current[p.id].name] : [])),
+  };
+}
+
+/** Applies a read import: replace same-id profiles, or add everything as copies. */
+export function applyProfileImport(
+  imp: ProfileImport,
+  mode: "replace" | "copy",
+  copyName: (n: string) => string,
+) {
+  const s = $state.get();
+  $state.set(
+    mode === "replace"
+      ? importProfiles(s, imp.file)
+      : importProfilesAsCopies(s, imp.file, () => createProfile("").id, copyName),
+  );
 }

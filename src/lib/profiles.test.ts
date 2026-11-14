@@ -10,7 +10,15 @@ import { getWeapon } from "@/lib/planner/sources";
 import { freshState } from "@/lib/weapons/mechanics";
 import { emptyWalkthrough } from "@/lib/walkthroughs/types";
 import { deriveBuild } from "@/lib/guide/derive";
-import { appState, createProfile, loadState, migrateProfile, parseState } from "./profiles";
+import {
+  appState,
+  createProfile,
+  importProfiles,
+  importProfilesAsCopies,
+  loadState,
+  migrateProfile,
+  parseState,
+} from "./profiles";
 
 async function legacyProfile() {
   const p = createProfileV1("Old", 5);
@@ -185,5 +193,41 @@ describe("loadState", () => {
     expect(r.problem).toBeUndefined();
     expect(r.state.activeProfile).toBe(Object.keys(s.profiles)[0]);
     expect(r.state.profiles).toEqual(s.profiles);
+  });
+});
+
+describe("profile import", () => {
+  const state = () => {
+    const p = createProfile("Alpha");
+    return { version: 2 as const, activeProfile: p.id, profiles: { [p.id]: p } };
+  };
+
+  test("replace overwrites the profile with the same id", () => {
+    const s = state();
+    const mine = s.profiles[s.activeProfile];
+    const fromFile = { ...mine, name: "Older backup", checks: {} };
+    const next = importProfiles(s, {
+      app: "dark-chronicles-companion",
+      version: 2,
+      profiles: [fromFile],
+    });
+    expect(Object.keys(next.profiles)).toHaveLength(1);
+    expect(next.profiles[mine.id].name).toBe("Older backup");
+  });
+
+  test("copies keep the existing profile and add the file's under a new id", () => {
+    const s = state();
+    const mine = { ...s.profiles[s.activeProfile], checks: { a: true as const } };
+    s.profiles[mine.id] = mine;
+    const fromFile = { ...mine, checks: {} };
+    const next = importProfilesAsCopies(
+      s,
+      { app: "dark-chronicles-companion", version: 2, profiles: [fromFile] },
+      () => "new-id",
+      (n) => `${n} (imported)`,
+    );
+    expect(next.profiles[mine.id].checks).toEqual({ a: true });
+    expect(next.profiles["new-id"]).toMatchObject({ name: "Alpha (imported)", checks: {} });
+    expect(next.activeProfile).toBe("new-id");
   });
 });

@@ -96,6 +96,12 @@ export const en = {
   "settings.activeProfile": "active",
   "settings.profileActions": "Actions for {name}",
   "settings.cancel": "Cancel",
+  "settings.importConfirmTitle": "Replace profiles?",
+  "settings.importConfirm":
+    "This file contains profiles you already have here: {names}. Replacing them overwrites their progress with the file's. Import as copies to keep both.",
+  "settings.importAsCopies": "Import as copies",
+  "settings.importReplace": "Replace",
+  "settings.importedName": "{name} (imported)",
   "settings.create": "Create",
   "settings.deleteForGood": "Delete for good",
   "settings.appearance": "Appearance",

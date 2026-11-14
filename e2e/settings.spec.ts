@@ -56,4 +56,27 @@ test.describe("settings", () => {
     await page.getByRole("button", { name: "View" }).click();
     await expect(page.getByRole("switch", { name: "Hide completed" })).toBeChecked();
   });
+
+  test("an import that would replace a profile asks first", async ({ page }) => {
+    await go(page, "/settings");
+    const [download] = await Promise.all([
+      page.waitForEvent("download"),
+      page.getByRole("button", { name: "Export all profiles" }).click(),
+    ]);
+    const path = await download.path();
+
+    await page.locator('input[type="file"]').setInputFiles(path);
+    const confirm = page.getByRole("alertdialog", { name: "Replace profiles?" });
+    await expect(confirm).toContainText("Playthrough 1");
+    await confirm.getByRole("button", { name: "Import as copies" }).click();
+    await expect(
+      page.getByRole("button", { name: "Switch to Playthrough 1 (imported)" }),
+    ).toBeVisible();
+    expect(Object.keys((await readState(page)).profiles)).toHaveLength(2);
+
+    await page.locator('input[type="file"]').setInputFiles(path);
+    await confirm.getByRole("button", { name: "Cancel" }).click();
+    await expect(confirm).toHaveCount(0);
+    expect(Object.keys((await readState(page)).profiles)).toHaveLength(2);
+  });
 });

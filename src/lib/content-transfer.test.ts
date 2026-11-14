@@ -168,6 +168,14 @@ describe("mergeGuides", () => {
     expect(clash.guides[1].title).toMatch(/\(imported\)$/);
   });
 
+  test("duplicate ids inside one file never produce two guides with the same id", () => {
+    const g = sampleTextGuide();
+    const merged = mergeGuides([], [g, g, { ...g, title: "Other" }], makeId);
+    expect(merged.summary).toEqual({ added: 1, copied: 1, skipped: 1 });
+    const ids = merged.guides.map((x) => x.id);
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+
   test("timestamps alone don't make two copies differ", () => {
     const g = sampleTextGuide();
     expect(mergeGuides([g], [{ ...g, updatedAt: 99 }], makeId).summary.skipped).toBe(1);

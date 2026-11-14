@@ -219,3 +219,21 @@ export function importProfiles(state: AppState, file: ExportFile): AppState {
   for (const p of file.profiles) profiles[p.id] = p;
   return { ...state, profiles, activeProfile: file.profiles[0].id };
 }
+
+/** Adds the file's profiles next to the existing ones (new ids), never replacing anything. */
+export function importProfilesAsCopies(
+  state: AppState,
+  file: ExportFile,
+  makeId: () => string,
+  copyName: (name: string) => string,
+): AppState {
+  const profiles = { ...state.profiles };
+  let first: string | undefined;
+  for (const p of file.profiles) {
+    const clash = !!profiles[p.id];
+    const id = clash ? makeId() : p.id;
+    profiles[id] = { ...p, id, name: clash ? copyName(p.name) : p.name };
+    first ??= id;
+  }
+  return { ...state, profiles, activeProfile: first ?? state.activeProfile };
+}

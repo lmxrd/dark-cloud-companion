@@ -21,7 +21,9 @@ import {
   addProfile,
   buildExport,
   deleteProfile,
-  importFromJson,
+  applyProfileImport,
+  readProfileImport,
+  type ProfileImport,
   renameProfile,
   switchProfile,
 } from "@/lib/store";
@@ -212,11 +214,22 @@ export function SettingsPage() {
   const active = state.profiles[state.activeProfile];
   const [dangerConfirm, setDangerConfirm] = useState(false);
 
+  // An import that would replace profiles waits here until the user picks replace or copy.
+  const [pendingImport, setPendingImport] = useState<ProfileImport | null>(null);
+  const copyName = (name: string) => t("settings.importedName", { name });
+  const finishImport = (imp: ProfileImport, mode: "replace" | "copy") => {
+    applyProfileImport(imp, mode, copyName);
+    setPendingImport(null);
+    setMessage(t("profiles.importOk"));
+  };
   const onImport = async (file: File | undefined) => {
     if (!file) return;
-    const err = await importFromJson(await file.text());
-    setMessage(err ?? t("profiles.importOk"));
+    setMessage(null);
+    const read = await readProfileImport(await file.text());
     if (fileRef.current) fileRef.current.value = "";
+    if (typeof read === "string") setMessage(read);
+    else if (read.replaces.length === 0) finishImport(read, "replace");
+    else setPendingImport(read);
   };
 
   return (
@@ -323,8 +336,32 @@ export function SettingsPage() {
           hidden
           onChange={(e) => onImport(e.target.files?.[0])}
         />
+        {pendingImport && (
+          <div
+            role="alertdialog"
+            aria-label={t("settings.importConfirmTitle")}
+            className="border-destructive bg-destructive/5 flex flex-col gap-2 rounded-lg border-2 p-3 text-sm"
+          >
+            <p>{t("settings.importConfirm", { names: pendingImport.replaces.join(", ") })}</p>
+            <div className="flex flex-wrap gap-2">
+              <Button size="sm" onClick={() => finishImport(pendingImport, "copy")}>
+                {t("settings.importAsCopies")}
+              </Button>
+              <Button
+                size="sm"
+                variant="destructive"
+                onClick={() => finishImport(pendingImport, "replace")}
+              >
+                {t("settings.importReplace")}
+              </Button>
+              <Button size="sm" variant="ghost" onClick={() => setPendingImport(null)}>
+                {t("settings.cancel")}
+              </Button>
+            </div>
+          </div>
+        )}
         {message && (
-          <p className="text-sm" role="status">
+          <p className="text-sm whitespace-pre-line" role="status">
             {message}
           </p>
         )}
