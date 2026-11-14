@@ -38,7 +38,10 @@ test.describe("phone layout", () => {
     await expect(
       page.locator("header").getByRole("button", { name: "Toggle Sidebar" }),
     ).toBeHidden();
-    await expect(tabs.getByRole("link", { name: "Today" })).toHaveAttribute("aria-current", "page");
+    await expect(tabs.getByRole("link", { name: "Dashboard" })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
     for (const name of ["Guides", "Tools", "Reference"]) {
       await tabs.getByRole("link", { name }).click();
       await expect(page.getByRole("heading", { name, level: 1 })).toBeVisible();

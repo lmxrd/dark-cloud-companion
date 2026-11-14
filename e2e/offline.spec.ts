@@ -17,7 +17,7 @@ test("the app works offline after the first visit", async ({ page, context }) =>
   });
   await context.setOffline(true);
   await page.reload();
-  await expect(page.getByRole("heading", { name: "Today", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Dashboard", exact: true })).toBeVisible();
   await go(page, "/guides");
   await expect(page.getByRole("heading", { name: "Guides", exact: true })).toBeVisible();
   await go(page, "/weapons/poison-wrench");

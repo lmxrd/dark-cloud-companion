@@ -5,8 +5,8 @@ import { activeChild, crumbsFor, isSectionActive, mainNav } from "./nav";
 const t = useTranslations();
 
 describe("crumbsFor", () => {
-  it("names the dashboard Today", () => {
-    expect(crumbsFor(t, "/")).toEqual([{ label: "Today" }]);
+  it("names the dashboard", () => {
+    expect(crumbsFor(t, "/")).toEqual([{ label: "Dashboard" }]);
   });
 
   it("puts Reference before its sub-pages", () => {
@@ -45,7 +45,7 @@ describe("mainNav", () => {
 
   it("has the four main sections; planner, shopping list and calculator are tools", () => {
     expect([today, guides, reference, tools].map((i) => i.title)).toEqual([
-      "Today",
+      "Dashboard",
       "Guides",
       "Reference",
       "Tools",
