@@ -11,7 +11,7 @@ import { STAT_KEYS, type AbilityId, type Stats, type Weapon, type WeaponType } f
 import { startToState } from "@/lib/guide/derive";
 import { $draft } from "@/lib/guide/draft";
 import { planResultToGuide, stateToBuildStart } from "@/lib/guide/fromPlan";
-import { cancelPlanner, loadTemplates, runPlanner } from "@/lib/planner/client";
+import { WORKER_FAILED, cancelPlanner, loadTemplates, runPlanner } from "@/lib/planner/client";
 import { ancestorsOf, finalWeaponIds, rootWeaponIds } from "@/lib/planner/graph";
 import { earliestChapter, type PlanProgress, type PlanResult } from "@/lib/planner/plan";
 import type { Objective } from "@/lib/planner/solve";
@@ -233,7 +233,8 @@ export function GeneratorSection({ onOpenEditor }: { onOpenEditor: () => void })
       setUsed({ start: startUsed, spBonus: support ? 1 : 0, goalLabel });
     } catch (e) {
       if (String(e).includes("cancelled")) return;
-      setError(String(e instanceof Error ? e.message : e));
+      const message = String(e instanceof Error ? e.message : e);
+      setError(message === WORKER_FAILED ? t("planner.workerFailed") : message);
     } finally {
       setRunning(false);
     }

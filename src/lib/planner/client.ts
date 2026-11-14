@@ -12,9 +12,26 @@ interface Pending {
 }
 const pending = new Map<number, Pending>();
 
+/** Rejects everything in flight and drops the worker, so the next request starts a fresh one. */
+function failAll(error: Error) {
+  worker?.terminate();
+  worker = undefined;
+  for (const p of pending.values()) p.reject(error);
+  pending.clear();
+}
+
+/** Error message when the worker (or the solver it loads) can't run, e.g. offline with a file missing. */
+export const WORKER_FAILED = "worker-failed";
+
 function getWorker(): Worker {
   if (!worker) {
     worker = new Worker(new URL("./worker.ts", import.meta.url), { type: "module" });
+    // Without these a failed load leaves every request pending forever ("Calculating…" never ends).
+    worker.onerror = (e) => {
+      e.preventDefault();
+      failAll(new Error(WORKER_FAILED));
+    };
+    worker.onmessageerror = () => failAll(new Error(WORKER_FAILED));
     worker.onmessage = (e: MessageEvent<WorkerResponse>) => {
       const m = e.data;
       const p = pending.get(m.id);
@@ -42,7 +59,12 @@ function send<T>(msg: RequestBody, onProgress?: (p: PlanProgress) => void): Prom
   return new Promise<T>((resolve, reject) => {
     const id = nextId++;
     pending.set(id, { resolve: resolve as (r: never) => void, reject, onProgress });
-    getWorker().postMessage({ ...msg, id } as WorkerRequest);
+    try {
+      getWorker().postMessage({ ...msg, id } as WorkerRequest);
+    } catch {
+      // Workers unsupported, or the script URL is blocked.
+      failAll(new Error(WORKER_FAILED));
+    }
   });
 }
 
@@ -56,8 +78,5 @@ export const loadTemplates = (opts: TemplateOptions) =>
 
 /** Drops the worker (e.g. to cancel a long solve); pending promises reject. */
 export function cancelPlanner() {
-  worker?.terminate();
-  worker = undefined;
-  for (const p of pending.values()) p.reject(new Error("cancelled"));
-  pending.clear();
+  failAll(new Error("cancelled"));
 }

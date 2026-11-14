@@ -246,6 +246,7 @@ export const en = {
   "planner.infeasible":
     "No valid plan found with the available content. Try a later chapter or relax the goal.",
   "planner.error": "The planner failed: {message}",
+  "planner.workerFailed":
   "planner.result": "Plan",
   "planner.total": "Total cost",
   "planner.totalAbs": "{n} ABS",
