@@ -126,16 +126,8 @@ export const effortWeights: number[] = ABS_PER_FLOOR.map((v, c) =>
 );
 
 /**
- * Story styles (see docs/planning.md): `balanced` weighs ABS by the square root of the effort of
- * earning it in its chapter, so it works from chapter 2 without heavy early levelling and puts the
- * effort where ABS comes fast; `effort` weighs it in full: the least earning effort and the
- * strongest mid-game weapon for some targets, but it may leave the first chapters to later.
- */
-export type StoryStyle = "balanced" | "effort";
-
-/**
- * The fixed story rules (docs/planning.md, "Story rules"): measured and the same for every plan,
- * not settings. Only `StoryChoices` vary.
+ * The fixed story rules (docs/planning.md, "Rules and choices"): measured and the same for every
+ * plan, not settings. Only `StoryChoices` vary.
  */
 export const STORY_RULES = {
   grindShare: 0.3,
@@ -143,6 +135,7 @@ export const STORY_RULES = {
   levelCap: 10,
   finalLevelCap: 15,
   startBy: 2,
+  effortPower: 0.5,
   earlyStatBonus: 2,
   mainItemCost: 30,
   statFloor: 0.5,
@@ -151,27 +144,18 @@ export const STORY_RULES = {
   buildUpLevelCost: 3000,
 } as const satisfies Partial<ProgressionOptions>;
 
-/** What a story plan may choose: its style and the least level before each build-up (4 or 5). */
+/** What a story plan may choose: the least level before each build-up (4 or 5). */
 export interface StoryChoices {
-  style?: StoryStyle;
   buildUpLevel?: number;
 }
 
 /** The story rules with a plan's choices. */
 export function storyOptions(c: StoryChoices = {}): ProgressionOptions {
-  return {
-    ...STORY_RULES,
-    effortPower: c.style === "effort" ? 1 : 0.5,
-    buildUpLevel: c.buildUpLevel ?? 4,
-  };
+  return { ...STORY_RULES, buildUpLevel: c.buildUpLevel ?? 4 };
 }
 
-export const STORY_PRESETS: Record<StoryStyle, ProgressionOptions> = {
-  balanced: storyOptions(),
-  effort: storyOptions({ style: "effort" }),
-};
-/** The story settings the built-in plans use by default. */
-export const STORY_DEFAULTS: ProgressionOptions = STORY_PRESETS.balanced;
+/** The story settings the planner page and the built-in plans use by default. */
+export const STORY_DEFAULTS: ProgressionOptions = storyOptions();
 
 /** ABS and gilda paid out by clearing every section once, by the end of each chapter (index 1…8). */
 const storyTotals = (() => {

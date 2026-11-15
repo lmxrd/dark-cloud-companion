@@ -39,8 +39,10 @@ export async function planOne(
       goal: spec.goal === "max" ? { kind: "max" } : { kind: "reach" },
       maxChapter,
       spBonus: spec.spBonus,
-      // Never spend more than the story has paid out by the end of the chapter.
-      maxGilda: Math.min(spec.maxGilda ?? Infinity, storyGilda(maxChapter)),
+      // Never spend more than the story has paid out by the end of the chapter (unless any gilda goes).
+      maxGilda: spec.anyGilda
+        ? (spec.maxGilda ?? Infinity)
+        : Math.min(spec.maxGilda ?? Infinity, storyGilda(maxChapter)),
       abilities: spec.abilities,
       abilitySource: spec.abilitySource,
       itemPool: spec.itemPool,

@@ -68,7 +68,7 @@ added for a reason measured below. Only a few things are a plan's choice.
 | Chapter delay (`delayCost`)      | 10,000 over all stages                                              | work happens as early as the story allows           |
 | Level caps                       | +10 on the way, +15 last                                            | no over-levelling mid-game                          |
 | Start weapon                     | obtainable by chapter 2                                             | the weapon is used through the story                |
-| Effort weighting (`effortPower`) | 0.5 (the style can make it 1)                                       | ABS counts by how hard it is to earn in its chapter |
+| Effort weighting (`effortPower`) | 0.5                                                                 | ABS counts by how hard it is to earn in its chapter |
 | Early stats (`earlyStatBonus`)   | 2 per point per stage                                               | stats above the floor come earlier                  |
 | Items on the main weapon         | 30 each (`mainItemCost`)                                            | SP stays for spheres                                |
 | Stat floor                       | 0.5 of the weapon's maximum (0.3 on the first), 150 per point short | every stat rises along the way                      |
@@ -80,18 +80,17 @@ added for a reason measured below. Only a few things are a plan's choice.
 | Item set                                       | both                                         | everyday +2 items, or crystals too           |
 | Least level before a build-up (`buildUpLevel`) | `plans.config.ts`                            | 4; 5 for LEGEND, Supernova, Five-Star Armlet |
 | Prepare steps (`prepareSpheres`)               | `plans.config.ts`                            | Five-Star Armlet only                        |
-| Story style                                    | both                                         | balanced (default) or least effort           |
 
 **Which rules matter (switched off one at a time).** The solver alone varies by
 about ±3% ABS between runs (same settings, re-solved), so smaller differences are noise.
 
-| Switched off                                             | Effect                                                                                             |
-| -------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| Early stats                                              | Dark Cloud 7% less ABS, but stats only just over the floor (lowest 47–56% instead of 51–97%): kept |
-| Items on the main weapon                                 | the same ABS, but Island King got a stray stage with a stat at 0%: kept                            |
-| Floor cost 60 (was Grade Zero's and Five-Star Armlet's)  | within noise of 150: one value for all                                                             |
-| Least effort style                                       | within noise on Island King and Dark Cloud, the same level pattern                                 |
-| Extra levels on built-up side weapons (`extraAuxLevels`) | no gain (measured earlier): removed                                                                |
+| Switched off                                                     | Effect                                                                                             |
+| ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| Early stats                                                      | Dark Cloud 7% less ABS, but stats only just over the floor (lowest 47–56% instead of 51–97%): kept |
+| Items on the main weapon                                         | the same ABS, but Island King got a stray stage with a stat at 0%: kept                            |
+| Floor cost 60 (was Grade Zero's and Five-Star Armlet's)          | within noise of 150: one value for all                                                             |
+| Effort weighting in full (power 1, was the "least effort" style) | within noise on Island King and Dark Cloud, the same level pattern: removed                        |
+| Extra levels on built-up side weapons (`extraAuxLevels`)         | no gain (measured earlier): removed                                                                |
 
 ### What a story plan minimises
 
@@ -112,17 +111,11 @@ per floor relative to chapter 4 (chapter 2 ≈ 4.8, chapter 7 ≈ 0.3), raised t
 Without weighting (power 0) the cheapest plan levels the first weapon hard (Baselard +7) because a
 level there costs few ABS, even though those ABS are slow to earn.
 
-### Story styles
+### Why effort power 0.5
 
-Two presets (`STORY_PRESETS` in `plan.ts`; `storyStyle` in `plans.config.ts`; "Story style" on the
-planner page):
-
-- **Balanced** (default, the built-in plans): `effortPower` 0.5. Works from chapter 2 without heavy
-  early levelling and puts the effort where ABS comes fast.
-- **Least effort**: `effortPower` 1. The least earning effort and, for some weapons, the strongest
-  mid-game weapon, but it may leave chapters 2–3 to later (an unlevelled first weapon meanwhile).
-
-Measured on two weapons (ABS · earning effort in floors' worth · first step · stats along the route
+There used to be two story styles: "balanced" (`effortPower` 0.5) and "least effort" (1, the least
+earning effort, but it could leave chapters 2–3 to later with an unlevelled first weapon). Measured
+on two weapons (ABS · earning effort in floors' worth · first step · stats along the route
 as % of the weapon's maximum):
 
 | Dark Cloud                   | ABS    | Effort | First | Stats                                  |
@@ -139,8 +132,8 @@ as % of the weapon's maximum):
 
 (Effort weighting in full without the stronger early-stats term skipped chapters 2–3 for both.)
 
-Since the stat floor and the least level before a build-up, the two styles barely differ (within
-the solver's noise on Island King and Dark Cloud).
+Since the stat floor and the least level before a build-up, the two barely differ (within the
+solver's noise on Island King and Dark Cloud), so only 0.5 is left.
 
 ### Stat floor
 
@@ -166,15 +159,14 @@ Lowest stat after each work step (% of that weapon's maximum) and total ABS:
 | Five-Star Armlet | 56,200 · 3 2 2 12 45 68           | 56,840 · 44 40 58 45 46 73 63 (60)    |
 | Love             | 45,592 · 0 0 3 2 2 1 84           | 48,144 · 38 51 52 56 56 48 100        |
 
-Grade Zero and Five-Star Armlet use 60 (`plans.config.ts`): at 150 they cost 38,024 and 60,968 ABS
-for no evener stats. The cost is part of both story styles (0.5 at 150), so "Follow the story" on
-the planner page uses it too.
+Grade Zero and Five-Star Armlet were generated at 60; re-solved at 150 they are within the solver's
+noise, so 150 is the rule for every plan, and for "Follow the story" on the planner page.
 
 ### First weapon and build-up levels
 
 With the floor in full the first weapon is levelled hard while ABS is slow to earn (Island King:
-Bone Rapier +6 for 2,880 ABS in chapter 2, then +3, +3, +2, +2, +5, +4). Two settings, part of both
-story styles, spread the levels out:
+Bone Rapier +6 for 2,880 ABS in chapter 2, then +3, +3, +2, +2, +5, +4). Two rules spread the levels
+out:
 
 - `firstStatFloor` 0.3: the floor on the first weapon (instead of 0.5);
 - `buildUpLevel` 4: every weapon on the way is levelled to at least +4 before its build-up. Soft:
@@ -244,9 +236,16 @@ weapon guide's recipes have the same shape (Island King: +6, +5, +3, +2, +2, +2,
 
 ## Built-in plans
 
-Configured in `scripts/planner/plans.config.ts` (one story plan per final weapon, keyed
-`<target>/<variant>`, mostly on the weapon guide's route; Love, Last Resort and Sigma Bazooka on the
-route a free search found). Each is committed as `data/generated/plans/<guide id>.json`
+Configured in `scripts/planner/plans.config.ts`, keyed `<target>/<variant>`, two per final weapon:
+
+- **Story** (`<target>/story`): follows the story by the rules above, mostly on the weapon guide's
+  route (Love, Last Resort and Sigma Bazooka on the route a free search found).
+- **Fastest** (`<target>/fastest`): finishes in the earliest chapter possible, with no regard to
+  gilda or grinding: any items sold (gems included), any gilda, a free route search, the same
+  abilities; the ABS the story hasn't paid by then is grinding (the guide says how much). A coin
+  counts from the chapter it can first be won at Spheda, which is often before any shop sells it.
+
+Each is committed as `data/generated/plans/<guide id>.json`
 (`{ name, spec, guide }`); the guide id is the target plus a hash of its first content and never
 changes. Builds and tests only assemble the files into `src/data/plans.json`; they never re-solve.
 
@@ -279,4 +278,5 @@ that every plan is simulator-valid and reaches its goal.
 `/tools/planner` runs the same planner in a worker: target and start, required stats, abilities
 (with a help popup), item set (everyday or crystals), buyable-only, solve time (Quick 15 s,
 Thorough 30 s, Best 60 s, Excellent 120 s per route; twice that when following the story), and
-"Follow the story" with its story style. It starts at chapter 2 or later (Conda's Goods).
+"Follow the story" (the story rules, at least +4 before each build-up). It starts at chapter 2 or
+later (Conda's Goods).

@@ -1,12 +1,12 @@
 import { buildUpRequirements } from "@/lib/weapons/mechanics";
 import type { PlanResult } from "@/lib/planner/plan";
-import { getWeapon, synthSourceByName, weaponData } from "@/lib/planner/sources";
+import { getWeapon, itemFirstChapter, weaponData } from "@/lib/planner/sources";
 import type { Acquire, Recipe, Stage } from "@/lib/planner/types";
 import type { Guide, GuideStep } from "./types";
 
 export const enemyChapter = new Map(weaponData.killEnemies.map((e) => [e.name, e.chapter ?? 8]));
 
-const itemChapter = (name: string) => synthSourceByName.get(name)?.fromChapter ?? 1;
+const itemChapter = (name: string) => itemFirstChapter(name);
 
 function recipeChapter(r: Recipe): number {
   const acq = r.acquire.kind === "have" ? 1 : r.acquire.chapter;

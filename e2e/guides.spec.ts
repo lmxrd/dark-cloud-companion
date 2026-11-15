@@ -263,7 +263,9 @@ test.describe("custom start and end weapons, one tab per weapon type", () => {
     await go(page, "/guides");
     const builds = page.getByRole("region", { name: "Weapon builds" });
     const row = builds.getByRole("listitem").filter({ hasText: "Island King" });
-    await expect(row.getByRole("link")).toHaveCount(1);
+    // A story plan and a fastest plan per final weapon.
+    await expect(row.getByRole("link")).toHaveCount(2);
+    await expect(row.getByRole("link", { name: /Fastest/ })).toBeVisible();
     await row.getByRole("link", { name: /Story/ }).click();
     await expect(
       page.getByRole("heading", { name: "Island King — Story", level: 1 }),

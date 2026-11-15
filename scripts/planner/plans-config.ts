@@ -28,13 +28,14 @@ const variantSchema = z.object({
    * For the `progression` flow (see docs/planning.md and ProgressionOptions in
    * src/lib/planner/plan.ts): a story style preset (default `balanced`), and overrides of its settings.
    */
-  storyStyle: z.enum(["balanced", "effort"]).optional(),
   /** Least level before each build-up (default 4). The other story rules are fixed (STORY_RULES). */
   buildUpLevel: z.number().optional(),
   /** A fixed build-up route (first weapon … target) instead of searching for one. */
   route: z.array(z.string()).optional(),
   /** Level the side weapons for spheres in earlier chapters ("prepare" steps, docs/planning.md). */
   prepareSpheres: z.boolean().optional(),
+  /** Spend any gilda, not only what the story has paid by the chapter (the fastest plans). */
+  anyGilda: z.boolean().optional(),
   /** Routes solved exactly, and seconds per exact solve (story plans are generated once: be thorough). */
   exactChains: z.number().optional(),
   timeLimitSec: z.number().optional(),
@@ -88,6 +89,8 @@ export interface PlanSpec {
   route?: string[];
   /** The guide gets prepare steps (see `prepareSpheresEarly`). */
   prepareSpheres?: boolean;
+  /** No cap on gilda (otherwise: what the story has paid by the chapter). */
+  anyGilda?: boolean;
   /** Routes solved exactly and seconds per exact solve (undefined: the planner's defaults). */
   exactChains?: number;
   timeLimitSec?: number;
@@ -96,10 +99,7 @@ export interface PlanSpec {
 
 /** A variant's story settings: the fixed rules with its choices. */
 function storySettings(v: z.infer<typeof variantSchema>): ProgressionOptions {
-  return storyOptions({
-    ...(v.storyStyle ? { style: v.storyStyle } : {}),
-    ...(v.buildUpLevel ? { buildUpLevel: v.buildUpLevel } : {}),
-  });
+  return storyOptions(v.buildUpLevel ? { buildUpLevel: v.buildUpLevel } : {});
 }
 
 export function expandPlans(config: PlansConfig): PlanSpec[] {
@@ -132,6 +132,7 @@ export function expandPlans(config: PlansConfig): PlanSpec[] {
           progression: storySettings(v),
           ...(v.route ? { route: v.route } : {}),
           ...(v.prepareSpheres ? { prepareSpheres: true } : {}),
+          ...(v.anyGilda ? { anyGilda: true } : {}),
           ...(v.flow === "progression"
             ? { exactChains: v.exactChains ?? 6, timeLimitSec: v.timeLimitSec ?? 120 }
             : {

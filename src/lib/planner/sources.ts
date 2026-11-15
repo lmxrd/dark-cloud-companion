@@ -197,6 +197,19 @@ export function coinChapter(
 }
 export const synthSourceByName = new Map(synthSources.map((s) => [s.name, s]));
 
+/**
+ * The first chapter an item can be had in: sold, or won at Spheda (coins are often a Spheda prize
+ * chapters before a shop sells them, as `coinChapter` counts them).
+ */
+export function itemFirstChapter(name: string): number {
+  const shop = synthSourceByName.get(name)?.fromChapter;
+  const item = itemsFile.items.find((i) => i.name === name);
+  const prizes = (item?.sources.sphedaPrizes ?? [])
+    .map((p) => sectionChapter.get(p.sectionId))
+    .filter((c): c is number => c !== undefined);
+  return Math.min(shop ?? (prizes.length ? 8 : 1), ...prizes);
+}
+
 /** Chapter in which a photo (invention ingredient) first becomes available. */
 const photoChapter = new Map(collectables.photos.map((p) => [p.id, p.chapterNumber]));
 

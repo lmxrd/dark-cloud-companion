@@ -16,8 +16,7 @@ import { WORKER_FAILED, cancelPlanner, loadTemplates, runPlanner } from "@/lib/p
 import { ancestorsOf, finalWeaponIds, rootWeaponIds } from "@/lib/planner/graph";
 import {
   earliestChapter,
-  STORY_PRESETS,
-  type StoryStyle,
+  STORY_DEFAULTS,
   type AbilitySource,
   type PlanProgress,
   type PlanResult,
@@ -127,7 +126,6 @@ export function GeneratorSection({ onOpenEditor }: { onOpenEditor: () => void })
   const [itemPool, setItemPool] = useState<"cheap" | "crystals">(saved0?.itemPool ?? "cheap");
   const [solveTime, setSolveTime] = useState<SolveTime>(saved0?.solveTime ?? "quick");
   const [story, setStory] = useState(saved0?.story ?? false);
-  const [storyStyle, setStoryStyle] = useState<StoryStyle>(saved0?.storyStyle ?? "balanced");
   const [customStart, setCustomStart] = useState(saved0?.customStart ?? false);
   const [start, setStart] = useState<WeaponState>(() =>
     saved0?.customStart
@@ -167,7 +165,6 @@ export function GeneratorSection({ onOpenEditor }: { onOpenEditor: () => void })
       itemPool,
       solveTime,
       story,
-      storyStyle,
       customStart,
       endStats,
       endLevel,
@@ -183,7 +180,6 @@ export function GeneratorSection({ onOpenEditor }: { onOpenEditor: () => void })
     itemPool,
     solveTime,
     story,
-    storyStyle,
     customStart,
     endStats,
     endLevel,
@@ -291,7 +287,7 @@ export function GeneratorSection({ onOpenEditor }: { onOpenEditor: () => void })
           itemPool,
           // Following the story, the model is larger: give it twice the time.
           timeLimitSec: SOLVE_SECONDS[solveTime] * (story ? 2 : 1),
-          ...(story ? { progression: STORY_PRESETS[storyStyle] } : {}),
+          ...(story ? { progression: STORY_DEFAULTS } : {}),
         },
         setProgress,
       );
@@ -527,19 +523,6 @@ export function GeneratorSection({ onOpenEditor }: { onOpenEditor: () => void })
                 </span>
               </span>
             </Label>
-            {story && (
-              <Label className="flex w-full flex-col items-start gap-1">
-                {t("planner.storyStyle")}
-                <select
-                  className={selectClass}
-                  value={storyStyle}
-                  onChange={(e) => setStoryStyle(e.target.value as StoryStyle)}
-                >
-                  <option value="balanced">{t("planner.storyStyle.balanced")}</option>
-                  <option value="effort">{t("planner.storyStyle.effort")}</option>
-                </select>
-              </Label>
-            )}
             <Label className="flex w-full flex-col items-start gap-1">
               {t("planner.solveTime")}
               <select

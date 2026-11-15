@@ -258,6 +258,22 @@ export const plansConfig = {
         },
       ],
     },
+    {
+      // The fastest way to each final weapon: finished in the earliest chapter possible, with any
+      // items (gems included) and any gilda, grinding whatever ABS the story hasn't paid by then.
+      targets: ["finals"],
+      variants: [
+        {
+          id: "fastest",
+          objective: "abs",
+          flow: "earliest",
+          label: "Fastest",
+          itemPool: "all",
+          anyGilda: true,
+          timeLimitSec: 120,
+        },
+      ],
+    },
     // {
     //   // The original curated guides (formerly scripts/planner/curated.ts → src/data/guides.json):
     //   // maxed stats without the ability preset, plus a budget variant. Variant ids are kept
