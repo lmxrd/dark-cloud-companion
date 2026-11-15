@@ -314,6 +314,11 @@ export const en = {
   "planner.story": "Follow the story",
   "planner.storyHint":
     "Like the built-in guides: each step in the earliest chapter it can be done, within the ABS and gilda the story has given by then, with spheres instead of over-levelling.",
+  "planner.storyStyle": "Story style",
+  "planner.storyStyle.balanced":
+    "Balanced: from chapter 2, without heavy early levelling (like the built-in guides)",
+  "planner.storyStyle.effort":
+    "Least effort: the least earning effort and strongest mid-game, but may start later",
   "planner.solveTime": "Solve time",
   "planner.solveTime.quick": "Quick ({n} s per route)",
   "planner.solveTime.thorough": "Thorough ({n} s per route)",

@@ -42,6 +42,8 @@ const plannerInputsData = z.object({
   solveTime: z.enum(["quick", "thorough", "best", "excellent"]).default("quick"),
   /** Plan like the built-in guides: each step in a chapter, within what the story pays by then. */
   story: z.boolean().default(false),
+  /** With `story`: the story style preset (see docs/planning.md). */
+  storyStyle: z.enum(["balanced", "effort"]).default("balanced"),
   /** Where the abilities come from: side weapons' spheres first, or whichever is cheaper (see the planner's AbilitySource). */
   abilitySource: z.enum(["spheres", "cheapest"]).default("spheres"),
   /** Whether the start weapon is chosen by the planner (the line's first weapon) or set by hand. */

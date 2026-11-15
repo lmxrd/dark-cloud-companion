@@ -9,6 +9,8 @@
 //                                     which are kept as standalone guides
 //   pnpm plans --all                  re-solve every configured plan
 //   --runs <n>                        solve each plan n times (default 2)
+//   --replace                         keep the ids but don't compare with the committed plans
+//                                     (after a change of settings, to take the new runs' best)
 // Each plan is solved `--runs` times (the solver stops at a time limit, so runs differ a little);
 // the best run and the committed plan are compared (plan-score.ts: valid, earliest finish, least
 // ABS, earliest pace, least gilda) and the committed file only changes when a run is better.
@@ -76,6 +78,7 @@ function runWorker(tasks: string[], out: string): Promise<void> {
 
 async function main(args: string[]) {
   const fresh = args.includes("--new");
+  const replace = args.includes("--replace");
   const runsAt = args.indexOf("--runs");
   const runs = runsAt >= 0 ? Math.max(1, Number(args[runsAt + 1]) || 1) : 2;
   const keys = args.filter((a, i) => !a.startsWith("--") && args[i - 1] !== "--runs");
@@ -118,7 +121,7 @@ async function main(args: string[]) {
     for (const spec of order) {
       const current = fresh ? undefined : fileFor(spec.id);
       const candidates: { label: string; guide: Guide }[] = [];
-      if (current) candidates.push({ label: "committed", guide: current.guide });
+      if (current && !replace) candidates.push({ label: "committed", guide: current.guide });
       for (let run = 0; run < runs; run++) {
         const path = candidatePath(out, spec.id, run);
         if (existsSync(path))

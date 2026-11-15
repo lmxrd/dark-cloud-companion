@@ -17,11 +17,12 @@ describe("scoring generated plans", () => {
     expect(scorePlan(file.guide, other).problems.length).toBeGreaterThan(0);
   });
 
-  test("valid beats invalid, then the earlier finish, then less ABS", () => {
+  test("valid beats invalid, then the earlier finish, then less effort, then less ABS", () => {
     const s = (over: Partial<PlanScore>): PlanScore => ({
       problems: [],
       finish: 7,
       abs: 40000,
+      effort: 20,
       gilda: 40000,
       pace: 50,
       ...over,
@@ -31,12 +32,14 @@ describe("scoring generated plans", () => {
       s({ finish: 8, abs: 30000 }),
       s({ abs: 41000 }),
       s({}),
+      s({ abs: 50000, effort: 15 }),
     ].sort(compareScores);
-    expect(order.map((x) => [x.problems.length, x.finish, x.abs])).toEqual([
-      [0, 7, 40000],
-      [0, 7, 41000],
-      [0, 8, 30000],
-      [1, 7, 1],
+    expect(order.map((x) => [x.problems.length, x.finish, x.effort, x.abs])).toEqual([
+      [0, 7, 15, 50000],
+      [0, 7, 20, 40000],
+      [0, 7, 20, 41000],
+      [0, 8, 20, 30000],
+      [1, 7, 20, 1],
     ]);
   });
 });

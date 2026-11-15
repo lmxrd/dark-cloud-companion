@@ -4,6 +4,7 @@
 import { deriveBuild } from "../../src/lib/guide/derive.ts";
 import type { Guide } from "../../src/lib/guide/types.ts";
 import { getWeapon } from "../../src/lib/planner/sources.ts";
+import { ABS_PER_FLOOR } from "../../src/lib/planner/plan.ts";
 import { STAT_KEYS } from "../../src/lib/schemas.ts";
 import type { PlanSpec } from "./plans-config.ts";
 
@@ -13,6 +14,8 @@ export interface PlanScore {
   /** Chapter of its last step. */
   finish: number;
   abs: number;
+  /** Earning effort: each step's ABS in floors' worth of its chapter (ABS / ABS per floor). */
+  effort: number;
   gilda: number;
   /** Sum of the chapters of its steps: lower means the build progresses earlier. */
   pace: number;
@@ -33,20 +36,29 @@ export function scorePlan(guide: Guide, spec: PlanSpec): PlanScore {
     for (const a of spec.abilities) if (!final.abilities.includes(a)) problems.push(`no ${a}`);
   }
   const chapters = guide.steps.map((s) => Number(s.chapterId ?? 8));
+  const effort = guide.steps.reduce((n, s, i) => {
+    const abs = d.steps.get(s.id)?.cost.abs ?? 0;
+    return n + abs / (ABS_PER_FLOOR[chapters[i]] || ABS_PER_FLOOR[8]);
+  }, 0);
   return {
     problems,
     finish: Math.max(0, ...chapters),
     abs: d.total.abs,
+    effort,
     gilda: d.total.gilda,
     pace: chapters.reduce((n, c) => n + c, 0),
   };
 }
 
-/** Better first: valid, then the earliest finish, least ABS, earliest pace, least gilda. */
+/**
+ * Better first: valid, then the earliest finish, the least earning effort (rounded to a tenth of a
+ * floor), least ABS, earliest pace, least gilda.
+ */
 export function compareScores(a: PlanScore, b: PlanScore): number {
   return (
     Number(a.problems.length > 0) - Number(b.problems.length > 0) ||
     a.finish - b.finish ||
+    Math.round(a.effort * 10) - Math.round(b.effort * 10) ||
     a.abs - b.abs ||
     a.pace - b.pace ||
     a.gilda - b.gilda
@@ -54,4 +66,4 @@ export function compareScores(a: PlanScore, b: PlanScore): number {
 }
 
 export const scoreText = (s: PlanScore) =>
-  `${s.problems.length ? `INVALID (${s.problems.slice(0, 3).join("; ")})` : "valid"} · ch${s.finish} · ${Math.round(s.abs).toLocaleString("en")} ABS · ${s.gilda.toLocaleString("en")} gilda · pace ${s.pace}`;
+  `${s.problems.length ? `INVALID (${s.problems.slice(0, 3).join("; ")})` : "valid"} · ch${s.finish} · ${s.effort.toFixed(1)} floors' effort · ${Math.round(s.abs).toLocaleString("en")} ABS · ${s.gilda.toLocaleString("en")} gilda · pace ${s.pace}`;

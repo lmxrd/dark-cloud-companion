@@ -101,25 +101,41 @@ export interface ProgressionOptions {
  * ABS an ABS-paying floor or fight pays there on average (about 230 in chapter 2, 1,100 in chapter
  * 4, 3,500 in chapter 7).
  */
-const effortWeights: number[] = (() => {
+/** ABS an ABS-paying floor or fight pays on average in each chapter (index 1…8). */
+export const ABS_PER_FLOOR: number[] = (() => {
   const perSection = Array<number>(9).fill(0);
   for (let c = 1; c <= 8; c++) {
     const paying = core.sections.filter((s) => s.chapterNumber === c && (s.abs ?? 0) > 0);
     perSection[c] = paying.reduce((n, s) => n + (s.abs ?? 0), 0) / Math.max(1, paying.length);
   }
-  return perSection.map((v, c) => (c === 0 || !v ? 1 : perSection[4] / v));
+  return perSection;
 })();
+const effortWeights: number[] = ABS_PER_FLOOR.map((v, c) =>
+  c === 0 || !v ? 1 : ABS_PER_FLOOR[4] / v,
+);
 
-/** The story settings the built-in plans use (and the planner page's "follow the story"). */
-export const STORY_DEFAULTS: ProgressionOptions = {
-  grindShare: 0.2,
+/**
+ * Story styles (see docs/planning.md): `balanced` weighs ABS by the square root of the effort of
+ * earning it in its chapter, so it works from chapter 2 without heavy early levelling and puts the
+ * effort where ABS comes fast; `effort` weighs it in full: the least earning effort and the
+ * strongest mid-game weapon for some targets, but it may leave the first chapters to later.
+ */
+export type StoryStyle = "balanced" | "effort";
+const STORY_BASE = {
+  grindShare: 0.3,
   delayCost: 10000,
   levelCap: 10,
   finalLevelCap: 15,
   startBy: 2,
-  earlyStatBonus: 0.5,
+  earlyStatBonus: 2,
   mainItemCost: 30,
 };
+export const STORY_PRESETS: Record<StoryStyle, ProgressionOptions> = {
+  balanced: { ...STORY_BASE, effortPower: 0.5 },
+  effort: { ...STORY_BASE, effortPower: 1 },
+};
+/** The story settings the built-in plans use by default. */
+export const STORY_DEFAULTS: ProgressionOptions = STORY_PRESETS.balanced;
 
 /** ABS and gilda paid out by clearing every section once, by the end of each chapter (index 1…8). */
 const storyTotals = (() => {

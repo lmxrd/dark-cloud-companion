@@ -4,7 +4,7 @@
 import { z } from "zod";
 import { type AbilityId, abilityId } from "../../src/lib/schemas.ts";
 import { finalWeaponIds } from "../../src/lib/planner/graph.ts";
-import { STORY_DEFAULTS } from "../../src/lib/planner/plan.ts";
+import { STORY_PRESETS, type ProgressionOptions } from "../../src/lib/planner/plan.ts";
 
 const variantSchema = z.object({
   /** With the target, the plan's config key <targetId>/<id> (unique; the guide id is a hash, see plan-files.ts). */
@@ -24,14 +24,20 @@ const variantSchema = z.object({
   abilitySource: z.enum(["spheres", "cheapest"]).optional(),
   /** Which bought items may be synthed: cheap +2 items (default), plus +3 crystals, or all. */
   itemPool: z.enum(["cheap", "crystals", "all"]).optional(),
-  /** For the `progression` flow; see ProgressionOptions in src/lib/planner/plan.ts. */
+  /**
+   * For the `progression` flow (see docs/planning.md and ProgressionOptions in
+   * src/lib/planner/plan.ts): a story style preset (default `balanced`), and overrides of its settings.
+   */
+  storyStyle: z.enum(["balanced", "effort"]).optional(),
   grindShare: z.number().optional(),
   delayCost: z.number().optional(),
   levelCap: z.number().optional(),
   finalLevelCap: z.number().optional(),
   startBy: z.number().optional(),
-  /** Reward per stat point per stage for stats gained earlier (default 0.5; 0: off). */
+  /** Reward per stat point per stage for stats gained earlier (preset: 2; 0: off). */
   earlyStatBonus: z.number().optional(),
+  /** Weigh ABS by the effort of earning it in its chapter, to this power (preset: 0.5 or 1; 0: off). */
+  effortPower: z.number().optional(),
   /** ABS each item synthed straight onto the main weapon counts as (its SP is gone; default 30). */
   mainItemCost: z.number().optional(),
   /** A fixed build-up route (first weapon … target) instead of searching for one. */
@@ -86,15 +92,7 @@ export interface PlanSpec {
   abilitySource: "spheres" | "cheapest";
   itemPool: "cheap" | "crystals" | "all";
   /** Settings for the `progression` flow. */
-  progression: {
-    grindShare: number;
-    delayCost: number;
-    levelCap: number;
-    finalLevelCap: number;
-    startBy: number;
-    earlyStatBonus: number;
-    mainItemCost: number;
-  };
+  progression: ProgressionOptions;
   /** A fixed build-up route (first weapon … target). */
   route?: string[];
   extraAuxLevels?: number;
@@ -102,6 +100,23 @@ export interface PlanSpec {
   exactChains?: number;
   timeLimitSec?: number;
   maxGilda?: number;
+}
+
+/** A variant's story settings: its style's preset with the variant's own overrides. */
+function storySettings(v: z.infer<typeof variantSchema>): ProgressionOptions {
+  const preset = STORY_PRESETS[v.storyStyle ?? "balanced"];
+  const pick = <K extends keyof ProgressionOptions>(k: K) =>
+    (v[k as keyof typeof v] as ProgressionOptions[K] | undefined) ?? preset[k];
+  return {
+    grindShare: pick("grindShare"),
+    delayCost: pick("delayCost"),
+    levelCap: pick("levelCap"),
+    finalLevelCap: pick("finalLevelCap"),
+    startBy: pick("startBy"),
+    earlyStatBonus: pick("earlyStatBonus"),
+    mainItemCost: pick("mainItemCost"),
+    effortPower: pick("effortPower"),
+  };
 }
 
 export function expandPlans(config: PlansConfig): PlanSpec[] {
@@ -131,15 +146,7 @@ export function expandPlans(config: PlansConfig): PlanSpec[] {
           abilities: v.abilities ?? group.abilities ?? config.defaults.abilities,
           abilitySource: v.abilitySource ?? "spheres",
           itemPool: v.itemPool ?? "cheap",
-          progression: {
-            grindShare: v.grindShare ?? STORY_DEFAULTS.grindShare,
-            delayCost: v.delayCost ?? STORY_DEFAULTS.delayCost,
-            levelCap: v.levelCap ?? STORY_DEFAULTS.levelCap,
-            finalLevelCap: v.finalLevelCap ?? STORY_DEFAULTS.finalLevelCap,
-            startBy: v.startBy ?? STORY_DEFAULTS.startBy,
-            earlyStatBonus: v.earlyStatBonus ?? STORY_DEFAULTS.earlyStatBonus!,
-            mainItemCost: v.mainItemCost ?? STORY_DEFAULTS.mainItemCost!,
-          },
+          progression: storySettings(v),
           ...(v.route ? { route: v.route } : {}),
           ...(v.extraAuxLevels ? { extraAuxLevels: v.extraAuxLevels } : {}),
           ...(v.flow === "progression"
