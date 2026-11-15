@@ -12,6 +12,7 @@ import { finalWeaponIds } from "@/lib/planner/graph";
 import { weaponData } from "@/lib/planner/sources";
 import { dbHref } from "@/lib/db/routes";
 import { byTier } from "@/lib/weapons/info";
+import { BuildUpMap } from "./BuildUpMap";
 import {
   directed,
   FilterChips,
@@ -73,7 +74,7 @@ export function WeaponList() {
   const finalsOnly = finals === "1";
   const [sort, setSort] = useQueryChoice<Sort>("sort", SORTS, "tier");
   const [dir, setDir] = useQueryChoice<SortDir>("dir", ["asc", "desc"], "asc");
-  const [view, setView] = useQueryChoice("view", ["list", "table"], "list");
+  const [view, setView] = useQueryChoice("view", ["list", "table", "map"], "list");
   const [level, setLevel] = useQueryChoice("stats", ["max", "base"], "max");
   const inGuides = useGuideWeapons();
 
@@ -86,6 +87,15 @@ export function WeaponList() {
         .map((ty) => ({
           owner,
           type: ty,
+          // The map shows the whole tree; a search lights up what it finds instead of filtering.
+          all: weaponData.weapons.filter((w) => w.type === ty),
+          matches: new Set(
+            needle
+              ? weaponData.weapons
+                  .filter((w) => w.type === ty && w.name.toLowerCase().includes(needle))
+                  .map((w) => w.id)
+              : [],
+          ),
           weapons: weaponData.weapons
             .filter(
               (w) =>
@@ -95,9 +105,9 @@ export function WeaponList() {
             )
             .sort(cmp),
         }))
-        .filter((g) => g.weapons.length),
+        .filter((g) => (view === "map" ? g.all.length : g.weapons.length)),
     );
-  }, [q, type, finalsOnly, sort, dir, level]);
+  }, [q, type, finalsOnly, sort, dir, level, view]);
 
   // A header click sorts by that column; clicking the sorted column again flips the direction.
   const sortBy = (s: Sort) => (s === sort ? setDir(dir === "asc" ? "desc" : "asc") : setSort(s));
@@ -113,6 +123,7 @@ export function WeaponList() {
             options={[
               { value: "list", label: t("db.view.list") },
               { value: "table", label: t("db.view.table") },
+              { value: "map", label: t("db.view.map") },
             ]}
           />
           {view === "table" && (
@@ -136,35 +147,38 @@ export function WeaponList() {
             label: ty === "all" ? t("weapons.all") : t(`weapon.type.${ty}` as const),
           }))}
         />
-        <div className="flex items-start gap-1.5">
-          <div className="min-w-0 flex-1">
-            <SortChips
-              value={sort}
-              onChange={setSort}
-              dir={dir}
-              onDir={setDir}
-              options={(["tier", "name", "at", "abs", "sp"] as const).map((s) => ({
-                value: s,
-                label: t(`db.sort.${s === "at" ? "attack" : s}` as const),
-              }))}
-            />
+        {view !== "map" && (
+          <div className="flex items-start gap-1.5">
+            <div className="min-w-0 flex-1">
+              <SortChips
+                value={sort}
+                onChange={setSort}
+                dir={dir}
+                onDir={setDir}
+                options={(["tier", "name", "at", "abs", "sp"] as const).map((s) => ({
+                  value: s,
+                  label: t(`db.sort.${s === "at" ? "attack" : s}` as const),
+                }))}
+              />
+            </div>
+            <button
+              type="button"
+              aria-pressed={finalsOnly}
+              onClick={() => setFinals(finalsOnly ? "" : "1")}
+              className={cn(
+                "flex shrink-0 items-center gap-1 rounded-full border-2 px-3 py-1 text-xs font-semibold whitespace-nowrap",
+                finalsOnly
+                  ? "border-border bg-accent text-accent-foreground shadow-sticker-sm"
+                  : "border-border/40 text-muted-foreground hover:border-border",
+              )}
+            >
+              <StarIcon className="size-3" aria-hidden />
+              {t("weapons.finalsOnly")}
+            </button>
           </div>
-          <button
-            type="button"
-            aria-pressed={finalsOnly}
-            onClick={() => setFinals(finalsOnly ? "" : "1")}
-            className={cn(
-              "flex shrink-0 items-center gap-1 rounded-full border-2 px-3 py-1 text-xs font-semibold whitespace-nowrap",
-              finalsOnly
-                ? "border-border bg-accent text-accent-foreground shadow-sticker-sm"
-                : "border-border/40 text-muted-foreground hover:border-border",
-            )}
-          >
-            <StarIcon className="size-3" aria-hidden />
-            {t("weapons.finalsOnly")}
-          </button>
-        </div>
+        )}
       </StickyBar>
+      {view === "map" && <p className="text-muted-foreground text-xs">{t("db.mapHint")}</p>}
 
       {groups.length === 0 && (
         <p className="text-muted-foreground text-sm">{t("weapons.noMatch")}</p>
@@ -188,7 +202,14 @@ export function WeaponList() {
               {t(`weapons.${g.owner}` as const)} · {t(`weapon.type.${g.type}` as const)}
             </span>
           </h2>
-          {view === "table" ? (
+          {view === "map" ? (
+            <BuildUpMap
+              weapons={g.all}
+              interactive
+              matches={g.matches}
+              label={`${t(`weapons.${g.owner}` as const)} · ${t(`weapon.type.${g.type}` as const)}`}
+            />
+          ) : view === "table" ? (
             <WeaponTable weapons={g.weapons} level={level} sort={sort} dir={dir} onSort={sortBy} />
           ) : (
             <ul

@@ -50,6 +50,7 @@ function runStages(
       );
       return;
     }
+    const start = { level: run.state.level, stats: { ...run.state.stats }, du: run.state.du };
 
     if (stage.levelTo > run.state.level) {
       const from = run.state.level;
@@ -131,6 +132,7 @@ function runStages(
           level: aux.level,
           sp: sphere.sp,
           gains: sphere.gains,
+          du: sphere.du,
           depth,
         });
       }
@@ -142,7 +144,9 @@ function runStages(
       level: run.state.level,
       sp: run.state.sp,
       stats: { ...run.state.stats },
+      du: run.state.du,
       abilities: [...run.state.abilities],
+      start,
       depth,
     });
 

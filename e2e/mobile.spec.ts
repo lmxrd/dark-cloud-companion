@@ -23,6 +23,8 @@ const pages = [
   "/db/abilities",
   "/db/trophies",
   "/db/weapons?view=table",
+  "/db/weapons?type=sword&view=map",
+  "/guides/view?id=island-king-42c60d&view=detailed",
   "/db/items/treasure-chest-key",
   "/db/bestiary/arthur",
   "/db/floors/frightening-forest",

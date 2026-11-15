@@ -4,7 +4,14 @@ import { useChecks, useProfile } from "@/lib/useAppStore";
 import { cn } from "cn";
 import { withBase } from "@/lib/base";
 import { useMemo, useState } from "react";
-import { queryParam, useQueryText } from "@/lib/url";
+import { queryParam, useQueryChoice, useQueryText } from "@/lib/url";
+import {
+  PLAN_VIEWS,
+  PlanDetailedMap,
+  PlanStepMap,
+  type PlanView,
+} from "@/components/guide/PlanMaps";
+import { Segments } from "@/components/db/kit";
 import { MoreHorizontalIcon, PlayIcon, StarIcon } from "lucide-react";
 import { downloadGuides, fileSafe } from "@/components/ContentTransfer";
 import { StepCard, type StepFilters } from "@/components/guide/StepCard";
@@ -97,6 +104,7 @@ export function GuideViewPage() {
   // Client-only island: the URL is there from the first render.
   const [id] = useState(() => queryParam("id") ?? "");
   const [needle, setNeedle] = useQueryText("q");
+  const [view, setView] = useQueryChoice<PlanView>("view", PLAN_VIEWS, "steps");
   // Chapter groups the user opened or closed; the rest follow the default.
   const [opened, setOpened] = useState<Record<string, boolean>>({});
   const guide = id ? findGuide(id, profile.guides) : undefined;
@@ -129,6 +137,19 @@ export function GuideViewPage() {
       document
         .getElementById(stepAnchor(next.id))
         ?.scrollIntoView({ behavior: "smooth", block: "start" }),
+    );
+  };
+  // From a map: back to the steps, at this one.
+  const openStep = (stepId: string) => {
+    setView("steps");
+    const step = guide.steps.find((s) => s.id === stepId);
+    if (step) setOpened((o) => ({ ...o, [groupKey(step.chapterId)]: true }));
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() =>
+        document
+          .getElementById(stepAnchor(stepId))
+          ?.scrollIntoView({ behavior: "smooth", block: "start" }),
+      ),
     );
   };
   const nextChapter = next?.chapterId ? chapterById.get(next.chapterId) : undefined;
@@ -226,7 +247,27 @@ export function GuideViewPage() {
         </ul>
       )}
 
-      {isBuild ? (
+      {isBuild && guide.build && (
+        <div className="flex flex-col gap-2">
+          <Segments
+            label={t("plan.view")}
+            value={view}
+            onChange={setView}
+            options={PLAN_VIEWS.map((v) => ({ value: v, label: t(`plan.view.${v}` as const) }))}
+          />
+          {view !== "steps" && (
+            <p className="text-muted-foreground text-xs">
+              {view === "map" ? t("plan.mapHint") : t("plan.detailedHint")}
+            </p>
+          )}
+        </div>
+      )}
+
+      {isBuild && guide.build && view === "map" ? (
+        <PlanStepMap guide={guide} derived={derived} onOpenStep={openStep} />
+      ) : isBuild && guide.build && view === "detailed" ? (
+        <PlanDetailedMap guide={guide} derived={derived} onOpenStep={openStep} />
+      ) : isBuild ? (
         <ol className="relative flex flex-col gap-3 pl-7">
           {/* The timeline's spine. */}
           <span aria-hidden className="bg-border absolute top-2 bottom-2 left-[9px] w-0.5" />

@@ -25,6 +25,10 @@ export interface DerivedStep {
   level: number;
   sp: number;
   stats: Stats;
+  /** Durability at the same point. */
+  du?: number;
+  /** Work steps: the weapon when the step begins (after the build-up into it). */
+  start?: { level: number; stats: Stats; du: number };
   abilities: string[];
   /** Requirements of the weapon the build builds up into next, when there is one. */
   requirements?: Stats;
@@ -34,7 +38,7 @@ export interface DerivedStep {
    */
   nextWeaponId?: string;
   /** Work steps: what each sphere synthed in the step passed on, in the step's order. */
-  spheres: { weaponId: string; level: number; gains: Partial<Stats> }[];
+  spheres: { weaponId: string; level: number; gains: Partial<Stats>; du: number }[];
   cost: Cost;
   errors: string[];
 }
@@ -87,13 +91,21 @@ export function deriveBuild(guide: Guide): DerivedBuild {
   for (const l of sim.log) {
     if (l.depth !== 0) continue;
     if (l.type === "sphere")
-      spheresByStage.at(-1)!.push({ weaponId: l.weaponId, level: l.level, gains: l.gains });
+      spheresByStage
+        .at(-1)!
+        .push({ weaponId: l.weaponId, level: l.level, gains: l.gains, du: l.du });
     if (l.type === "state") spheresByStage.push([]);
   }
   const snapAt = (i: number) => {
     const snap = snapshots[i];
     return snap?.type === "state"
-      ? { level: snap.level, sp: snap.sp, stats: snap.stats, abilities: snap.abilities }
+      ? {
+          level: snap.level,
+          sp: snap.sp,
+          stats: snap.stats,
+          du: snap.du,
+          abilities: snap.abilities,
+        }
       : { level: 0, sp: 0, stats: {} as Stats, abilities: [] };
   };
   /** Simulator errors about the build-up a stage ends with ("A → B: …"). */
@@ -110,9 +122,11 @@ export function deriveBuild(guide: Guide): DerivedBuild {
       // A build-up step right after this one shows the build-up; otherwise this step does.
       const explicit = buildSteps.slice(i + 1).find((x) => x.build || x.buildUp)?.buildUp;
       const errors = sim.stages?.[at]?.errors ?? [];
+      const snap = snapshots[at];
       steps.set(s.id, {
         stepId: s.id,
         ...snapAt(at),
+        ...(snap?.type === "state" ? { start: snap.start } : {}),
         ...(upgrade ? { requirements: buildUpRequirements(getWeapon(upgrade)) } : {}),
         ...(upgrade && !explicit ? { nextWeaponId: upgrade } : {}),
         spheres: spheresByStage[at] ?? [],

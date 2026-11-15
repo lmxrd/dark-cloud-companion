@@ -2,13 +2,13 @@ import type { ReactNode } from "react";
 import { useTranslations } from "@/i18n";
 import { STAT_KEYS } from "@/lib/schemas";
 import type { Weapon } from "@/lib/gamedata/types";
-import { builtFrom, names, trophiesFor, weapons } from "@/lib/db/data";
+import { names, trophiesFor, weapons } from "@/lib/db/data";
 import { dbHref } from "@/lib/db/routes";
-import { weaponById } from "@/lib/planner/sources";
+import { weaponById, weaponData } from "@/lib/planner/sources";
 import { finalWeaponIds } from "@/lib/planner/graph";
 import { weaponGuides } from "@/lib/guide/builtin";
-import { lineTo } from "@/lib/weapons/info";
-import { withBase } from "@/lib/base";
+import { familyOf } from "@/lib/weapons/map";
+import { BuildUpMap } from "@/components/weapons/BuildUpMap";
 import { cn } from "cn";
 import {
   Chip,
@@ -38,10 +38,14 @@ export function WeaponPage({
   const pw = weaponById.get(w.id)!;
   const isFinal = finalWeaponIds.includes(w.id);
   const scale = Math.max(1, ...STAT_KEYS.map((k) => pw.maxStats[k]));
-  const line = lineTo(w.id);
-  const hidden = line.length > 5 ? line.length - 4 : 0;
-  const shownLine = hidden ? [line[0], null, ...line.slice(-3)] : line;
-  const parents = builtFrom.get(w.id) ?? [];
+  // Everything this weapon is built from or into, on one map.
+  const mapWeapons = weaponData.weapons.map((x) => ({
+    id: x.id,
+    tier: x.tier ?? 1,
+    buildsInto: x.buildsUpTo,
+  }));
+  const related = familyOf(w.id, mapWeapons);
+  const family = weaponData.weapons.filter((x) => related.has(x.id));
   const guides = weaponGuides.filter((g) =>
     g.steps.some((s) => s.build?.weaponId === w.id || s.buildUp?.weaponId === w.id),
   );
@@ -117,72 +121,8 @@ export function WeaponPage({
         </ul>
       </DetailBlock>
 
-      <DetailBlock title={t("weapons.lineTitle")}>
-        <ol className="relative flex flex-col gap-2 pl-7">
-          <span aria-hidden className="bg-border absolute top-2 bottom-2 left-[9px] w-0.5" />
-          {shownLine.map((x, i) =>
-            x === null ? (
-              <li key="more" className="text-muted-foreground relative text-xs">
-                <span
-                  aria-hidden
-                  className="bg-background absolute top-0.5 -left-[22px] size-3 rounded-full border-2 border-dashed"
-                />
-                {t("weapons.lineMore", { n: hidden })}
-              </li>
-            ) : (
-              <li key={x.id + i} className="relative">
-                <span
-                  aria-hidden
-                  className={cn(
-                    "absolute top-1 -left-7 size-5 rounded-full border-2",
-                    x.id === w.id ? "bg-accent" : "bg-background",
-                  )}
-                />
-                {x.id === w.id ? (
-                  <span className="font-heading font-extrabold" aria-current="page">
-                    {x.name}
-                  </span>
-                ) : (
-                  <Ref href={dbHref("weapon", x.id)} className="text-sm">
-                    {x.name}
-                  </Ref>
-                )}
-              </li>
-            ),
-          )}
-          {w.buildsInto.length > 0 && (
-            <li className="relative flex flex-col gap-1">
-              <span
-                aria-hidden
-                className="bg-background absolute top-1 -left-7 size-5 rounded-full border-2 border-dashed"
-              />
-              <span className="text-muted-foreground text-xs">{t("weapons.buildsInto")}</span>
-              <span className="flex flex-wrap gap-1.5">
-                {w.buildsInto.map((id) => (
-                  <a
-                    key={id}
-                    className="bg-card hover:bg-accent rounded-full border-2 px-2.5 py-0.5 text-sm font-semibold"
-                    href={withBase(dbHref("weapon", id))}
-                  >
-                    {finalWeaponIds.includes(id) ? "★ " : ""}
-                    {names.weapons[id]}
-                  </a>
-                ))}
-              </span>
-            </li>
-          )}
-        </ol>
-        {parents.length > 1 && (
-          <Detail>
-            {t("db.alsoBuiltFrom")}{" "}
-            {parents.map((p, i) => (
-              <span key={p.id}>
-                {i > 0 && ", "}
-                <Ref href={dbHref("weapon", p.id)}>{p.name}</Ref>
-              </span>
-            ))}
-          </Detail>
-        )}
+      <DetailBlock title={t("db.buildUpMap")} meta={t("db.buildUpMapMeta")}>
+        <BuildUpMap weapons={family} current={w.id} label={t("db.buildUpMap")} />
       </DetailBlock>
 
       <DetailSection

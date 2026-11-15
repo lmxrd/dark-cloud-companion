@@ -4,6 +4,14 @@ import { useTranslations } from "@/i18n";
 import { deriveBuild } from "@/lib/guide/derive";
 import type { Guide } from "@/lib/guide/types";
 import { getWeapon } from "@/lib/planner/sources";
+import { useState } from "react";
+import { Segments } from "@/components/db/kit";
+import {
+  PLAN_VIEWS,
+  PlanDetailedMap,
+  PlanStepMap,
+  type PlanView,
+} from "@/components/guide/PlanMaps";
 
 /** Read-only preview of a generated guide's build steps (nothing is saved). */
 export function PlanPreview({ guide }: { guide: Guide }) {
@@ -19,6 +27,15 @@ export function PlanPreview({ guide }: { guide: Guide }) {
   const last = guide.steps.filter((s) => s.build).at(-1)?.build?.weaponId;
   if (last && !route.includes(last)) route.push(last);
   const acquire = guide.build?.acquire;
+  const [view, setView] = useState<PlanView>("steps");
+  const openStep = (stepId: string) => {
+    setView("steps");
+    requestAnimationFrame(() =>
+      document
+        .getElementById(`preview-${stepId}`)
+        ?.scrollIntoView({ behavior: "smooth", block: "start" }),
+    );
+  };
   return (
     <div className="flex flex-col gap-4">
       <dl className="grid grid-cols-3 gap-2">
@@ -48,9 +65,21 @@ export function PlanPreview({ guide }: { guide: Guide }) {
           {acquireText(t, acquire)}
         </p>
       )}
-      <ol className="flex flex-col gap-3">
+      {guide.build && (
+        <Segments
+          label={t("plan.view")}
+          value={view}
+          onChange={setView}
+          options={PLAN_VIEWS.map((v) => ({ value: v, label: t(`plan.view.${v}` as const) }))}
+        />
+      )}
+      {view === "map" && <PlanStepMap guide={guide} derived={derived} onOpenStep={openStep} />}
+      {view === "detailed" && (
+        <PlanDetailedMap guide={guide} derived={derived} onOpenStep={openStep} />
+      )}
+      <ol className={view === "steps" ? "flex flex-col gap-3" : "hidden"}>
         {guide.steps.map((s, i) => (
-          <li key={s.id}>
+          <li key={s.id} id={`preview-${s.id}`} className="scroll-mt-20">
             <Card size="sm">
               <CardHeader>
                 <CardTitle>

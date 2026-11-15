@@ -108,3 +108,21 @@ describe("tiers", () => {
     expect(stageOf("geron")).toEqual({ stage: 2, level: 26 });
   });
 });
+
+describe("plan views data", () => {
+  it("gives each work step its stats and durability at the start and the end", async () => {
+    const { builtinGuideById } = await import("@/lib/guide/builtin");
+    const { deriveBuild } = await import("@/lib/guide/derive");
+    const g = [...builtinGuideById.values()].find(
+      (x) => x.id.startsWith("island-king") && x.title.includes("Story"),
+    )!;
+    const d = deriveBuild(g);
+    const work = g.steps.filter((s) => s.build).map((s) => d.steps.get(s.id)!);
+    expect(work[0].start).toMatchObject({ level: 0, du: 0 });
+    for (const s of work) {
+      expect(s.start).toBeDefined();
+      expect(s.du).toBeGreaterThanOrEqual(s.start!.du);
+      for (const sp of s.spheres) expect(sp.du).toBeGreaterThanOrEqual(0);
+    }
+  });
+});

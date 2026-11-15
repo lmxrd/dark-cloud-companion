@@ -239,6 +239,24 @@ export const enDb = {
   "db.sort.sp": "SP",
   "db.weaponTableHint": "Highest in each column is marked.",
   "db.tier": "Tier",
+  "db.view.map": "Map",
+  "db.mapShowAll": "Show all",
+  "db.mapHint":
+    "Columns are tiers; each card has its stats as base/max (durability starts at 0). Tap a weapon to light up everything it's built from and into; tap it again to open it.",
+  "db.buildUpMap": "Build-up map",
+  "db.buildUpMapMeta": "everything it comes from and becomes",
+  "db.abilityShort.abs-up": "ABS",
+  "db.abilityShort.absorb": "Asb",
+  "db.abilityShort.critical": "Crit",
+  "db.abilityShort.dark": "Dk",
+  "db.abilityShort.durable": "Dur",
+  "db.abilityShort.fragile": "Frg",
+  "db.abilityShort.heal": "Hea",
+  "db.abilityShort.poison": "Psn",
+  "db.abilityShort.poverty": "Pvrt",
+  "db.abilityShort.steal": "Stl",
+  "db.abilityShort.stop": "Stp",
+  "db.abilityShort.wealth": "We",
 
   // Enemies
   "db.damageTaken": "Damage taken",
@@ -435,6 +453,30 @@ export const enDb = {
   "db.intro.abilities":
     "What each ability does, the weapons with it and the coins that pass it on.",
   "db.intro.trophies": "Every trophy and what it takes, lowest tier first.",
+
+  // Plan views
+  "plan.view": "View",
+  "plan.view.steps": "Steps",
+  "plan.view.map": "Map",
+  "plan.view.detailed": "Detailed map",
+  "plan.mapHint":
+    "One card per step: each stat when the step starts and when it ends (bars run to the weapon's maximum; the lighter part is what the step adds). Tap a weapon to open its step.",
+  "plan.detailedHint":
+    "Everything synthed in each step: items put straight on the weapon, and each sphere with how to get its weapon, the items to synth into it and what it passes on. The cart buttons add items to the shopping list.",
+  "plan.buildsUp": "builds up into",
+  "plan.absN": "{n} ABS",
+  "plan.spheresN": "Spheres: {n}",
+  "plan.itemsStraightN": "Items straight on: {n}",
+  "plan.start": "start",
+  "plan.end": "end",
+  "plan.straightOn": "Straight onto the weapon",
+  "plan.itemsToSynth": "Items to synth",
+  "plan.itemsFor": "items for {what}",
+  "plan.passesOn": "Passes on",
+  "plan.spheresAdd": "Spheres add",
+  "plan.madeEarlier": "Made in an earlier step",
+  "plan.levelledOnly": "No items: levelled only",
+  "plan.nothingSynthed": "Nothing synthed: levelled only",
 
   // Offline
   "db.offline.title": "Offline database",

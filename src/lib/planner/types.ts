@@ -63,6 +63,8 @@ export type LogEntry =
       level: number;
       sp: number;
       gains: Partial<Stats>;
+      /** Durability it passes on. */
+      du: number;
       depth: number;
     }
   | { type: "buildup"; from: string; to: string; depth: number }
@@ -73,7 +75,10 @@ export type LogEntry =
       level: number;
       sp: number;
       stats: Stats;
+      du: number;
       abilities: string[];
+      /** The weapon when the stage began (after any build-up into it). */
+      start: { level: number; stats: Stats; du: number };
       depth: number;
     };
 

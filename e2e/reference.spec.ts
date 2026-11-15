@@ -179,3 +179,33 @@ test("the synth sphere calculator shows what a filled sphere passes on", async (
   await expect(lightning).toContainText("+11");
   await expect(page.getByText("Costs 5 SP on the receiving weapon")).toBeVisible();
 });
+
+test("the weapon map shows a type's tree and lights up a weapon's family", async ({ page }) => {
+  await go(page, "/db/weapons?type=sword&view=map");
+  const map = page.getByRole("group", { name: "Monica · Swords" });
+  const card = map.getByRole("link", { name: /^Chronicle Sword/ });
+  await expect(card).toContainText("At 111/152");
+  await card.click();
+  // The first tap lights up its family; the page stays.
+  await expect(page).toHaveURL(/view=map/);
+  await expect(page.getByRole("button", { name: "Show all" })).toBeVisible();
+  await card.click();
+  await expect(page.getByRole("heading", { name: "Chronicle Sword", level: 1 })).toBeVisible();
+  // A weapon's page maps everything it comes from and becomes.
+  await expect(page.getByRole("link", { name: /^Chronicle 2/ })).toBeVisible();
+  await expect(page.getByRole("link", { name: /^Ruler's Sword/ })).toBeVisible();
+});
+
+test("a weapon guide has a map and a detailed map", async ({ page }) => {
+  await go(page, "/guides/view?id=island-king-42c60d");
+  const views = page.getByRole("radiogroup", { name: "View" });
+  await views.getByRole("radio", { name: "Map", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Bone Rapier", exact: true })).toBeVisible();
+  await expect(page.getByText("start").first()).toBeVisible();
+  await views.getByRole("radio", { name: "Detailed map" }).click();
+  await expect(page.getByText("Passes on").first()).toBeVisible();
+  await expect(page.getByText("Spheres add").first()).toBeVisible();
+  // A weapon in a map opens its step.
+  await page.getByRole("button", { name: "Bone Rapier", exact: true }).click();
+  await expect(views.getByRole("radio", { name: "Steps" })).toHaveAttribute("aria-checked", "true");
+});
