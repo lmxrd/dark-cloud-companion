@@ -112,11 +112,6 @@ test("the database home finds anything by name", async ({ page }) => {
   await expect(page.getByRole("navigation", { name: "breadcrumb" })).toContainText("Aquatic");
 });
 
-test("old reference links redirect", async ({ page }) => {
-  await go(page, "/weapons/poison-wrench");
-  await expect(page).toHaveURL(/\/db\/weapons\/poison-wrench/);
-});
-
 test.describe("trackers", () => {
   test("the jump chips open a group and the hero counts ticks", async ({ page }) => {
     await go(page, "/db/ridepod");

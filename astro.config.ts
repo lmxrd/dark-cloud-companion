@@ -23,17 +23,6 @@ export default defineConfig({
   // The site is served from the repo subpath on GitHub Pages.
   base: base,
   output: "static",
-  // The reference pages moved under /db; old links (bookmarks, shared URLs) still work.
-  redirects: {
-    "/reference": "/db",
-    "/weapons": "/db/weapons",
-    "/weapons/[id]": "/db/weapons/[id]",
-    ...Object.fromEntries(
-      ["items", "bestiary", "shops", "fishing", "people", "ridepod", "monsters", "spheda"].map(
-        (p) => [`/${p}`, `/db/${p}`],
-      ),
-    ),
-  },
   integrations: [react(), gamedata(), plans(), pwa()],
   vite: {
     plugins: [tailwindcss()],

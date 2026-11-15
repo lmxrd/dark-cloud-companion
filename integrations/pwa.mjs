@@ -31,11 +31,10 @@ export default function pwa() {
         const all = walk(root)
           .map((f) => relative(root, f).split(sep).join("/"))
           .filter((f) => f !== "sw.js" && !f.endsWith(".map"));
-        // Detail pages of the database, and the redirects from the old weapon pages.
-        const lazy = (f) =>
-          /^db\/[^/]+\/.+\/index\.html$/.test(f) || /^weapons\/.+\/index\.html$/.test(f);
+        // Pages of single database things.
+        const lazy = (f) => /^db\/[^/]+\/.+\/index\.html$/.test(f);
         const files = all.filter((f) => !lazy(f));
-        const pages = all.filter((f) => f.startsWith("db/") && lazy(f));
+        const pages = all.filter(lazy);
         // Pages are precached under the URL the server answers for them: `/guides/` normally,
         // `/guides` with trailingSlash "never" (the home page is always the base with a slash).
         const pageUrl = (dir) =>
