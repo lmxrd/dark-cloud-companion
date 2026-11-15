@@ -57,8 +57,6 @@ export const plansConfig = {
             "griffon-fork",
             "island-king",
           ],
-          firstStatFloor: 0.3,
-          buildUpLevel: 4,
         },
       ],
     },

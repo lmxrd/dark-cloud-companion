@@ -131,21 +131,24 @@ Grade Zero and Five-Star Armlet use 60 (`plans.config.ts`): at 150 they cost 38,
 for no evener stats. The cost is part of both story styles (0.5 at 150), so "Follow the story" on
 the planner page uses it too.
 
-### First weapon and build-up levels (Island King so far)
+### First weapon and build-up levels
 
 With the floor in full the first weapon is levelled hard while ABS is slow to earn (Island King:
-Bone Rapier +6 for 2,880 ABS in chapter 2, then +3, +3, +2, +2, +5, +4). Two per-plan settings
-spread the levels out:
+Bone Rapier +6 for 2,880 ABS in chapter 2, then +3, +3, +2, +2, +5, +4). Two settings, part of both
+story styles, spread the levels out:
 
-- `firstStatFloor`: the floor on the first weapon (0.3 instead of 0.5);
-- `buildUpLevel`: every weapon on the way is levelled to at least this before its build-up (4).
+- `firstStatFloor` 0.3: the floor on the first weapon (instead of 0.5);
+- `buildUpLevel` 4: every weapon on the way is levelled to at least +4 before its build-up.
 
 | Island King        | ABS    | Effort | Levels               | Last step ABS | Finishes |
 | ------------------ | ------ | ------ | -------------------- | ------------- | -------- |
 | Floor 0.5          | 46,640 | 31.5   | +6 +3 +3 +2 +2 +5 +4 | 17,648        | ch7      |
 | First 0.3, min. +4 | 45,792 | 24.5   | +4 +4 +4 +4 +4 +4 +2 | 15,168        | ch8      |
 
-Stats start lower (the lowest at 27% on Bone Rapier) and are at 65% or more from Evilcise on.
+Over all plans: total ABS from 6% less (Five-Star Armlet) to 15% more (LEGEND); every weapon on
+the way at +4 or +5 (a `+0` step is a weapon's first chapter, spheres only, levelled in the next);
+stats start lower on the first weapon (16–32% of its maximum) and are about half or more after.
+Supernova now finishes in chapter 8 (was 7).
 
 ### Uneven levels are expected
 
