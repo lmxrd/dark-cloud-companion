@@ -30,3 +30,4 @@ pnpm-debug.log*
 # playwright
 test-results/
 playwright-report/
+.claude
