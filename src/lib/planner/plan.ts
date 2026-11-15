@@ -133,6 +133,8 @@ const STORY_BASE = {
   startBy: 2,
   earlyStatBonus: 2,
   mainItemCost: 30,
+  statFloor: 0.5,
+  statFloorCost: 150,
 };
 export const STORY_PRESETS: Record<StoryStyle, ProgressionOptions> = {
   balanced: { ...STORY_BASE, effortPower: 0.5 },

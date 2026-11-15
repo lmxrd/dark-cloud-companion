@@ -57,8 +57,6 @@ export const plansConfig = {
             "griffon-fork",
             "island-king",
           ],
-          statFloor: 0.5,
-          statFloorCost: 60,
         },
       ],
     },
@@ -70,6 +68,8 @@ export const plansConfig = {
           objective: "abs",
           flow: "progression",
           label: "Story",
+          // 150 per point (the default) cost this plan far more ABS for no evener stats.
+          statFloorCost: 60,
           // The weapon guide's Grade Zero route (recipe 7.2).
           route: [
             "battle-wrench",
@@ -155,6 +155,8 @@ export const plansConfig = {
           objective: "abs",
           flow: "progression",
           label: "Story",
+          // 150 per point (the default) cost this plan far more ABS for no evener stats.
+          statFloorCost: 60,
           // The weapon guide's Five-Star Armlet route (recipe 7.5).
           route: [
             "magic-brassard",

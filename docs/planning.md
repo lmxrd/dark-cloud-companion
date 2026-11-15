@@ -61,13 +61,13 @@ plan you can follow while playing:
 
 The objective adds up (in ABS-equivalent units):
 
-| Term                        | What it does                                                  | Setting            |
-| --------------------------- | ------------------------------------------------------------- | ------------------ |
-| ABS, weighted by **effort** | ABS spent in a chapter counts by how hard it is to earn there | `effortPower`      |
-| Chapter delay               | every stage one chapter later costs this much in all          | `delayCost` 10,000 |
-| Early stats                 | each stat point at the end of each stage is worth this        | `earlyStatBonus` 2 |
-| Items on the main weapon    | each costs this (its SP is gone for good)                     | `mainItemCost` 30  |
-| Stat floor (per plan)       | each point a stat is below its floor after a stage            | `statFloorCost`    |
+| Term                        | What it does                                                  | Setting             |
+| --------------------------- | ------------------------------------------------------------- | ------------------- |
+| ABS, weighted by **effort** | ABS spent in a chapter counts by how hard it is to earn there | `effortPower`       |
+| Chapter delay               | every stage one chapter later costs this much in all          | `delayCost` 10,000  |
+| Early stats                 | each stat point at the end of each stage is worth this        | `earlyStatBonus` 2  |
+| Items on the main weapon    | each costs this (its SP is gone for good)                     | `mainItemCost` 30   |
+| Stat floor                  | each point a stat is below its floor after a stage            | `statFloorCost` 150 |
 
 **Effort.** The story pays far more ABS later: an ABS-paying floor or fight pays about 230 ABS in
 chapter 2, 540 in 3, 1,100 in 4, 1,600 in 5, 1,750 in 6, 3,500 in 7. So 1,000 ABS is about four
@@ -111,15 +111,25 @@ until Griffon Fork in chapter 8 filled it from 18 to 200 with spheres full of Sc
 carry over every build-up, so adding them late is cheapest, but the weapon is lopsided all game.
 
 `statFloor` asks for every stat to be at least that share of the stage weapon's maximum (capped by
-the final target) after each stage; it is soft, each point short costs `statFloorCost` per stage.
-Island King with floor 0.5 at 60 per point (stats as % of each weapon's maximum, lowest stat):
+the final target) after each stage. It is soft: each point short costs `statFloorCost` per stage,
+so early on, when SP is scarce, a stat can stay below it. At 60 per point some plans still left a
+stat near 0 (LEGEND's Scale, Supernova's Charge): raising it needed extra levels whose ABS cost
+more than the shortfall. At 150 every plan keeps its stats at about half of the maximum or more.
 
-| Island King | ABS    | Effort | Lightning along the route         | Lowest stat per stage            |
-| ----------- | ------ | ------ | --------------------------------- | -------------------------------- |
-| No floor    | 44,328 | 22.7   | 36 → 28 → 16 → 14 → 12 → 100      | 4 → 28 → 16 → 14 → 12 → 91       |
-| Floor 0.5   | 46,224 | 26.5   | 58 → 57 → 59 → 57 → 81 → 67 → 100 | 31 → 57 → 59 → 57 → 81 → 67 → 99 |
+Lowest stat after each work step (% of that weapon's maximum) and total ABS:
 
-Set per plan in `plans.config.ts` (Island King only so far); off in the presets.
+| Plan             | No floor                          | Floor 0.5 at 150 (60 where marked)    |
+| ---------------- | --------------------------------- | ------------------------------------- |
+| Island King      | 44,328 · 4 28 16 14 12 91         | 46,640 · 51 62 53 54 81 98            |
+| LEGEND           | 87,488 · 11 21 24 18 12 10 100 85 | 46,752 · 42 42 65 52 51 50 50 52      |
+| Supernova        | 51,200 · 0 0 0 0 40 42            | 52,558 · 52 56 56 58 51 61            |
+| Grade Zero       | 27,608 · 0 11 6 13 15 13 11       | 29,472 · 53 53 47 65 51 47 70 64 (60) |
+| Five-Star Armlet | 56,200 · 3 2 2 12 45 68           | 56,840 · 44 40 58 45 46 73 63 (60)    |
+| Love             | 45,592 · 0 0 3 2 2 1 84           | 48,144 · 38 51 52 56 56 48 100        |
+
+Grade Zero and Five-Star Armlet use 60 (`plans.config.ts`): at 150 they cost 38,024 and 60,968 ABS
+for no evener stats. The cost is part of both story styles (0.5 at 150), so "Follow the story" on
+the planner page uses it too.
 
 ### Uneven levels are expected
 
