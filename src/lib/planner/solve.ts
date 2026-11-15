@@ -27,6 +27,25 @@ import type { Plan, Recipe, Stage, SynthUse } from "./types";
 export type Objective = "abs" | "gilda" | "steps";
 
 /**
+ * The stat floor's target and minimum (shares of the weapon's maximum) for the weapon at position
+ * `at` of `n` in the chain: flat, or rising along the chain with `risingFloor`.
+ */
+export function floorShares(
+  p: {
+    statFloor?: number;
+    minStatFloor?: number;
+    risingFloor?: { from: number; to: number; gap: number };
+  },
+  at: number,
+  n: number,
+): { target: number; min: number } {
+  if (!p.risingFloor) return { target: p.statFloor ?? 0, min: p.minStatFloor ?? 0 };
+  const { from, to, gap } = p.risingFloor;
+  const target = at >= n - 1 ? to : from + ((to - from) * at) / Math.max(1, n - 2);
+  return { target, min: Math.max(0, target - gap) };
+}
+
+/**
  * The cost of an item synthed straight onto the main weapon at stage `j` of `n`: `full` for the first
  * half of the stages, then falling evenly to `last` on the last stage.
  */
@@ -141,6 +160,11 @@ export interface Progression {
    */
   minStatFloor?: number;
   minStatFloorCost?: number;
+  /**
+   * A floor that rises along the chain instead of `statFloor` / `minStatFloor`: the target goes from
+   * `from` on the first weapon to `to` on the weapon before the final one, the minimum `gap` below.
+   */
+  risingFloor?: { from: number; to: number; gap: number };
   /**
    * Weight of an ABS spent in each chapter (index 1…8): how hard it is to earn there. When set (and
    * minimising ABS), stage ABS counts at its chapter's weight instead of 1.
@@ -416,24 +440,24 @@ export function buildModel(input: SolveInput) {
         const v = `vE${j}_${k}`;
         model.objective.set(v, (model.objective.get(v) ?? 0) - SCALE * p.earlyStatBonus);
       }
-  if (p?.statFloor && p.statFloorCost)
+  if (p?.statFloor && p.statFloorCost) {
+    const weapons = chain.filter((id, j) => j === 0 || id !== chain[j - 1]);
     for (let j = 0; j < nStages; j++) {
       // Only where the plan leaves the weapon (a build-up follows) and on the final stage.
       if (j < nStages - 1 && chain[j + 1] === chain[j]) continue;
       const max = getWeapon(chain[j]).maxStats;
+      const at = weapons.lastIndexOf(chain[j]);
+      const share = floorShares(p, at, weapons.length);
       for (const k of STAT_KEYS) {
-        const want = Math.min(Math.round(p.statFloor * max[k]), input.finalStats?.[k] ?? max[k]);
+        const want = Math.min(Math.round(share.target * max[k]), input.finalStats?.[k] ?? max[k]);
         if (want <= 0) continue;
         const short = `vS${j}_${k}`;
         row(`cFloor${j}_${k}`, { min: want });
         coef(`cFloor${j}_${k}`, `vE${j}_${k}`, 1);
         coef(`cFloor${j}_${k}`, short, 1);
         model.objective.set(short, SCALE * p.statFloorCost);
-        if (p.minStatFloor && p.minStatFloorCost) {
-          const low = Math.min(
-            Math.round(p.minStatFloor * max[k]),
-            input.finalStats?.[k] ?? max[k],
-          );
+        if (share.min && p.minStatFloorCost) {
+          const low = Math.min(Math.round(share.min * max[k]), input.finalStats?.[k] ?? max[k]);
           if (low > 0) {
             const under = `vT${j}_${k}`;
             row(`cMinFloor${j}_${k}`, { min: low });
@@ -444,6 +468,7 @@ export function buildModel(input: SolveInput) {
         }
       }
     }
+  }
   if (p) {
     const chapters = [1, 2, 3, 4, 5, 6, 7, 8].filter((c) => c <= (p.lastChapter ?? 8));
     // There is no story cap: a stage may wait as long as it needs (for kills, items, gilda or the

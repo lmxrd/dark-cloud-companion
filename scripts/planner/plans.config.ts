@@ -46,6 +46,9 @@ export const plansConfig = {
           objective: "abs",
           flow: "progression",
           label: "Balanced",
+          // Trying a floor that rises along the chain (30% → 80%), with up to 15 minutes a solve.
+          risingFloor: true,
+          timeLimitSec: 900,
           // The weapon guide's "evil sword" route: Poison, Absorb and Dark come with it, no slow
           // 4-hit swords before the Island King, and Griffon Fork on the way is a fine stop.
           route: [

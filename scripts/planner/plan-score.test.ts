@@ -55,11 +55,24 @@ describe("scoring generated plans", () => {
   });
 
   test("the story cost charges a stat below its floor and a level short before a build-up", () => {
-    const file = readPlanFiles().find((f) => f.spec === "island-king/balanced")!;
-    const spec = specs.find((s) => s.id === "island-king/balanced")!;
+    // LEGEND has the flat floor (Island King tries the rising one).
+    const file = readPlanFiles().find((f) => f.spec === "legend/balanced")!;
+    const spec = specs.find((s) => s.id === "legend/balanced")!;
     const cost = storyCost(file.guide, spec.progression);
     expect(storyCost(file.guide, { ...spec.progression, statFloor: 0.99 })).toBeGreaterThan(cost);
     expect(storyCost(file.guide, { ...spec.progression, buildUpLevel: 9 })).toBeGreaterThan(cost);
+  });
+});
+
+test("a rising floor goes from 30% on the first weapon to 80% before the final one", async () => {
+  const { floorShares } = await import("../../src/lib/planner/solve.ts");
+  const p = { risingFloor: { from: 0.3, to: 0.8, gap: 0.1 } };
+  const t = [0, 1, 2, 3, 4, 5, 6].map((i) => Math.round(100 * floorShares(p, i, 7).target));
+  expect(t).toEqual([30, 40, 50, 60, 70, 80, 80]);
+  expect(Math.round(100 * floorShares(p, 0, 7).min)).toBe(20);
+  expect(floorShares({ statFloor: 0.5, minStatFloor: 0.4 }, 3, 7)).toEqual({
+    target: 0.5,
+    min: 0.4,
   });
 });
 

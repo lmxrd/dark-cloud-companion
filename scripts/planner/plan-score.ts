@@ -1,7 +1,7 @@
 // Scores a generated plan so runs can be compared (the generator keeps the best of several runs and
 // the committed plan). Everything is derived from the guide itself with the simulator, so a plan
 // from an older generator version is scored the same way.
-import { mainItemCostAt } from "../../src/lib/planner/solve.ts";
+import { floorShares, mainItemCostAt } from "../../src/lib/planner/solve.ts";
 import { deriveBuild } from "../../src/lib/guide/derive.ts";
 import type { Guide } from "../../src/lib/guide/types.ts";
 import { getWeapon } from "../../src/lib/planner/sources.ts";
@@ -44,6 +44,8 @@ export function storyCost(guide: Guide, prog: ProgressionOptions): number {
     const abs = d.steps.get(s.id)?.cost.abs ?? 0;
     cost += abs * (prog.effortPower ? effortWeights[c] ** prog.effortPower : 1);
   }
+  const ids = work.map((s) => s.build!.weaponId);
+  const chainWeapons = ids.filter((id, i) => i === 0 || id !== ids[i - 1]);
   work.forEach((s, i) => {
     const st = d.steps.get(s.id);
     if (!st) return;
@@ -54,16 +56,15 @@ export function storyCost(guide: Guide, prog: ProgressionOptions): number {
     const next = work[i + 1]?.build?.weaponId;
     // The stat floor counts where the plan leaves the weapon, and on the last step.
     const leaving = next !== w.id;
+    const share = floorShares(prog, chainWeapons.lastIndexOf(w.id), chainWeapons.length);
     for (const k of STAT_KEYS) {
       cost -= (prog.earlyStatBonus ?? 0) * st.stats[k];
       if (leaving && prog.statFloor && prog.statFloorCost)
         cost +=
-          prog.statFloorCost *
-          Math.max(0, Math.round(prog.statFloor * w.maxStats[k]) - st.stats[k]);
-      if (leaving && prog.minStatFloor && prog.minStatFloorCost)
+          prog.statFloorCost * Math.max(0, Math.round(share.target * w.maxStats[k]) - st.stats[k]);
+      if (leaving && share.min && prog.minStatFloorCost)
         cost +=
-          prog.minStatFloorCost *
-          Math.max(0, Math.round(prog.minStatFloor * w.maxStats[k]) - st.stats[k]);
+          prog.minStatFloorCost * Math.max(0, Math.round(share.min * w.maxStats[k]) - st.stats[k]);
     }
     if (next && next !== w.id && prog.buildUpLevel)
       cost += (prog.buildUpLevelCost ?? 0) * Math.max(0, prog.buildUpLevel - st.level);

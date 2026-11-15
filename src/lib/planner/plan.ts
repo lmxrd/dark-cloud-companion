@@ -98,6 +98,8 @@ export interface ProgressionOptions {
   /** See `Progression.minStatFloor` / `minStatFloorCost` (Balanced only). */
   minStatFloor?: number;
   minStatFloorCost?: number;
+  /** See `Progression.risingFloor`. */
+  risingFloor?: { from: number; to: number; gap: number };
   /**
    * Every weapon on the way is levelled to at least this before its build-up (0 or unset: off), so
    * the SP comes along the story instead of from long ABS farming on the last weapons.
@@ -159,10 +161,14 @@ export interface StoryChoices {
    * grinding as much ABS as it takes; gilda keeps the grind allowance.
    */
   earliestSteps?: boolean;
+  /** A stat floor rising along the chain (30% → 80%, minimum 10 points lower) instead of a flat one. */
+  risingFloor?: boolean;
 }
 
 /** "As much as it takes": an ABS grind allowance far beyond any plan's needs. */
 export const UNLIMITED_GRIND = 1000;
+/** The rising stat floor: 30% on the first weapon to 80% on the one before the final, minimum 10 points lower. */
+export const RISING_FLOOR = { from: 0.3, to: 0.8, gap: 0.1 };
 /** The Earliest plans' delay cost: a chapter's delay outweighs any plan's whole ABS. */
 export const EARLIEST_DELAY_COST = 1_000_000;
 
@@ -171,6 +177,7 @@ export function storyOptions(c: StoryChoices = {}): ProgressionOptions {
   return {
     ...STORY_RULES,
     buildUpLevel: c.buildUpLevel ?? 4,
+    ...(c.risingFloor ? { risingFloor: RISING_FLOOR } : {}),
     // Earliest: speed first, so no 40% minimum (only the cheap 50% target).
     ...(c.earliestSteps
       ? { absGrindShare: UNLIMITED_GRIND, delayCost: EARLIEST_DELAY_COST, minStatFloor: 0 }
@@ -735,6 +742,7 @@ export async function planPath(
       ...(prog.minStatFloor && prog.minStatFloorCost
         ? { minStatFloor: prog.minStatFloor, minStatFloorCost: prog.minStatFloorCost }
         : {}),
+      ...(prog.risingFloor ? { risingFloor: prog.risingFloor } : {}),
       ...(prog.effortPower ? { absWeights: effortWeights.map((w) => w ** prog.effortPower!) } : {}),
     };
     return {

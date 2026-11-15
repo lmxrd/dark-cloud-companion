@@ -39,6 +39,8 @@ const variantSchema = z.object({
    * takes (gilda keeps the story's limit). The "Earliest" plans.
    */
   earliestSteps: z.boolean().optional(),
+  /** With the `progression` flow: a stat floor rising along the chain (30% → 80%) instead of 50%. */
+  risingFloor: z.boolean().optional(),
   /** Spend any gilda, not only what the story has paid by the chapter (the fastest plans). */
   anyGilda: z.boolean().optional(),
   /** Routes solved exactly, and seconds per exact solve (story plans are generated once: be thorough). */
@@ -108,6 +110,7 @@ function storySettings(v: z.infer<typeof variantSchema>): ProgressionOptions {
   return storyOptions({
     ...(v.buildUpLevel ? { buildUpLevel: v.buildUpLevel } : {}),
     ...(v.earliestSteps ? { earliestSteps: true } : {}),
+    ...(v.risingFloor ? { risingFloor: true } : {}),
   });
 }
 
