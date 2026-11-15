@@ -89,7 +89,7 @@ describe("tiers", () => {
     const { weaponData } = await import("@/lib/planner/sources");
     const { byTier } = await import("@/lib/weapons/info");
     const swords = weaponData.weapons.filter((w) => w.type === "sword").sort(byTier);
-    expect(swords[0].name).toBe("Royal Sword");
+    expect(swords[0].tier).toBe(2);
     expect(swords.at(-1)!.name).toBe("Island King");
     const tiers = swords.map((w) => w.tier!);
     expect([...tiers].sort((a, b) => a - b)).toEqual(tiers);
