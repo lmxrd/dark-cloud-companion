@@ -1,4 +1,4 @@
-import { stageNeedsItems } from "@/lib/guide/buildItems";
+import { stepNeedsItems } from "@/lib/guide/buildItems";
 import { useEffect, useMemo, useState } from "react";
 import { useProfile } from "@/lib/useAppStore";
 import { cn } from "cn";
@@ -651,7 +651,7 @@ export function GeneratorSection({ onOpenEditor }: { onOpenEditor: () => void })
             >
               {t("planner.openInEditor")}
             </Button>
-            {draft.steps.some((s) => stageNeedsItems(s.build)) && (
+            {draft.steps.some((s) => stepNeedsItems(s)) && (
               <AddToListButton
                 size="sm"
                 label={t("shopping.saveAndAdd")}
@@ -664,7 +664,7 @@ export function GeneratorSection({ onOpenEditor }: { onOpenEditor: () => void })
                   addShoppingGoal({
                     kind: "build",
                     guideId: draft.id,
-                    stepIds: draft.steps.filter((s) => stageNeedsItems(s.build)).map((s) => s.id),
+                    stepIds: draft.steps.filter((s) => stepNeedsItems(s)).map((s) => s.id),
                   });
                 }}
               />

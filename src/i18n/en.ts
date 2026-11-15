@@ -713,6 +713,11 @@ export const en = {
   "planner.step.statsLegendNeeds":
     "Stat after this stage / the weapon's maximum. “Needs” (the tick on the bar) is what the next weapon requires.",
   "planner.step.prepare": "How to prepare it",
+  "planner.step.prepared": "made earlier",
+  "planner.step.prepareFor":
+    "Level these side weapons now and keep them: {weapon} synths them as spheres later.",
+  "planner.step.make": "Make one {weapon} +{level}",
+  "planner.step.makeCount": "Make {count}× {weapon} +{level}",
   "planner.step.synths": "Items to synth",
   "planner.step.stats": "Stats after this stage",
   "planner.step.acquire": "Get {weapon}",

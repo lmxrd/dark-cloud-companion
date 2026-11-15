@@ -1,5 +1,5 @@
 import { STAT_KEYS, type StatKey } from "@/lib/schemas";
-import { stageItems } from "@/lib/guide/buildItems";
+import { recipeItems, stageItems, stepItems } from "@/lib/guide/buildItems";
 import { useTranslations, type Translate } from "@/i18n";
 import type { DerivedStep } from "@/lib/guide/derive";
 import type { Step } from "@/lib/guide/types";
@@ -23,7 +23,7 @@ export function acquireText(t: Translate, a: Acquire) {
 type Group =
   | { kind: "item"; name: string; count: number }
   /** `first`: the position of its first sphere among the stage's spheres. */
-  | { kind: "sphere"; recipe: Recipe; count: number; first: number };
+  | { kind: "sphere"; recipe: Recipe; count: number; first: number; prepared: boolean };
 
 /** Merges identical sphere recipes so "3 × Heavy Hammer +5" reads as one line. */
 function groupSynths(stage: Stage): Group[] {
@@ -35,9 +35,12 @@ function groupSynths(stage: Stage): Group[] {
       continue;
     }
     const key = JSON.stringify(s.recipe);
-    const same = groups.find((g) => g.kind === "sphere" && JSON.stringify(g.recipe) === key);
+    const prepared = !!s.prepared;
+    const same = groups.find(
+      (g) => g.kind === "sphere" && g.prepared === prepared && JSON.stringify(g.recipe) === key,
+    );
     if (same) same.count++;
-    else groups.push({ kind: "sphere", recipe: s.recipe, count: 1, first: sphere });
+    else groups.push({ kind: "sphere", recipe: s.recipe, count: 1, first: sphere, prepared });
     sphere++;
   }
   return groups;
@@ -104,6 +107,7 @@ export function BuildStepBody({
 }) {
   const t = useTranslations();
   if (step.buildUp) return <BuildUpBody step={step} derived={derived} />;
+  if (step.prepare) return <PrepareBody step={step} derived={derived} spBonus={spBonus} />;
   const stage = step.build;
   if (!stage) return null;
   const groups = groupSynths(stage);
@@ -160,9 +164,18 @@ export function BuildStepBody({
                 level: last(g.recipe).levelTo,
                 sp: last(g.recipe).levelTo,
               })}
-              <AllyNote
-                weaponIds={g.recipe.stages.filter((st) => st.levelTo > 0).map((st) => st.weaponId)}
-              />
+              {g.kind === "sphere" && g.prepared ? (
+                <span className="text-muted-foreground text-xs">
+                  {" "}
+                  · {t("planner.step.prepared")}
+                </span>
+              ) : (
+                <AllyNote
+                  weaponIds={g.recipe.stages
+                    .filter((st) => st.levelTo > 0)
+                    .map((st) => st.weaponId)}
+                />
+              )}
             </p>
             {passed && (
               <p className="text-muted-foreground text-xs">
@@ -172,13 +185,17 @@ export function BuildStepBody({
                 </span>
               </p>
             )}
-            <details>
-              <summary className="text-muted-foreground cursor-pointer text-xs">
-                {t("planner.step.prepare")}
-              </summary>
-              <RecipeView recipe={g.recipe} spBonus={spBonus} />
-            </details>
-            <SphereMaterials recipe={g.recipe} count={g.count} />
+            {g.kind === "sphere" && !g.prepared && (
+              <>
+                <details>
+                  <summary className="text-muted-foreground cursor-pointer text-xs">
+                    {t("planner.step.prepare")}
+                  </summary>
+                  <RecipeView recipe={g.recipe} spBonus={spBonus} />
+                </details>
+                <SphereMaterials recipe={g.recipe} count={g.count} />
+              </>
+            )}
           </div>
         );
       })}
@@ -272,6 +289,81 @@ export function BuildStepBody({
             </div>
           )}
         </>
+      )}
+    </div>
+  );
+}
+
+/** A prepare step: side weapons levelled (and filled) now, kept for a later step's spheres. */
+function PrepareBody({
+  step,
+  derived,
+  spBonus,
+}: {
+  step: Step;
+  derived?: DerivedStep;
+  spBonus: number;
+}) {
+  const t = useTranslations();
+  const prep = step.prepare!;
+  const groups: { recipe: Recipe; count: number }[] = [];
+  for (const r of prep.recipes) {
+    const same = groups.find((g) => JSON.stringify(g.recipe) === JSON.stringify(r));
+    if (same) same.count++;
+    else groups.push({ recipe: r, count: 1 });
+  }
+  const items = stepItems(step);
+  return (
+    <div className="flex flex-col gap-2 text-sm">
+      <When step={step} />
+      <p className="text-muted-foreground text-xs">
+        {t("planner.step.prepareFor", { weapon: name(prep.weaponId) })}
+      </p>
+      {groups.map((g, i) => {
+        const last = g.recipe.stages[g.recipe.stages.length - 1];
+        return (
+          <div key={i}>
+            <p>
+              {t(g.count > 1 ? "planner.step.makeCount" : "planner.step.make", {
+                count: g.count,
+                weapon: name(last.weaponId),
+                level: last.levelTo,
+              })}
+              <AllyNote
+                weaponIds={g.recipe.stages.filter((st) => st.levelTo > 0).map((st) => st.weaponId)}
+              />
+            </p>
+            <RecipeView recipe={g.recipe} spBonus={spBonus} />
+            <SphereMaterials recipe={g.recipe} count={g.count} />
+          </div>
+        );
+      })}
+      {items.size > 0 && (
+        <p className="text-xs">
+          <span className="text-muted-foreground">{t("planner.step.allItems")} </span>
+          {[...items]
+            .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+            .map(([n, c]) => `${c}× ${n}`)
+            .join(", ")}
+        </p>
+      )}
+      {derived && (
+        <p className="text-muted-foreground text-xs">
+          {t("planner.step.cost", {
+            abs: Math.round(derived.cost.abs).toLocaleString(),
+            gilda: Math.round(derived.cost.gilda).toLocaleString(),
+          })}
+        </p>
+      )}
+      {derived && derived.errors.length > 0 && (
+        <div className="text-destructive text-xs">
+          <p className="font-medium">{t("step.problems")}</p>
+          <ul className="list-disc pl-5">
+            {derived.errors.map((e, i) => (
+              <li key={i}>{e}</li>
+            ))}
+          </ul>
+        </div>
       )}
     </div>
   );
@@ -394,8 +486,7 @@ function AllyNote({ weaponIds }: { weaponIds: string[] }) {
 /** Adds a sphere's materials (for all its copies) to the shopping list as plain items. */
 function SphereMaterials({ recipe, count }: { recipe: Recipe; count: number }) {
   const t = useTranslations();
-  const needs = new Map<string, number>();
-  for (const st of recipe.stages) stageItems(st, needs);
+  const needs = recipeItems(recipe);
   if (!needs.size) return null;
   return (
     <div className="mt-1">

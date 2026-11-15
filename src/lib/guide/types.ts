@@ -2,7 +2,7 @@
 // carries a checklist of entries, and may be one stage of a weapon build.
 import { z } from "zod";
 import { abilityId, STAT_KEYS, type StatKey } from "@/lib/schemas";
-import type { Stage } from "@/lib/planner/types";
+import type { Recipe, Stage } from "@/lib/planner/types";
 
 const stat = z.number().int().min(0).max(999);
 const stats = z.object(
@@ -59,6 +59,24 @@ export const step = z.object({
    * steps on different weapons still imply the build-up between them (guides from before it).
    */
   buildUp: z.object({ weaponId: z.string() }).optional(),
+  /**
+   * Present when this step prepares side weapons for spheres ahead of time: they are levelled (and
+   * filled) here and kept until a later work step on `weaponId` synths them (marked `prepared`).
+   */
+  prepare: z
+    .object({
+      weaponId: z.string(),
+      recipes: z.array(
+        z.custom<Recipe>(
+          (v) =>
+            typeof v === "object" &&
+            v !== null &&
+            "acquire" in v &&
+            Array.isArray((v as Recipe).stages),
+        ),
+      ),
+    })
+    .optional(),
 });
 export type Step = z.infer<typeof step>;
 

@@ -5,7 +5,7 @@ import { georama } from "@/lib/gamedata/georama";
 import { checklist } from "@/lib/data";
 import type { Guide } from "@/lib/guide/types";
 import { stepTickId } from "@/lib/guide/types";
-import { stageItems } from "@/lib/guide/buildItems";
+import { stepItems } from "@/lib/guide/buildItems";
 import { shopItems, synthSources } from "@/lib/planner/sources";
 import type { Shopping, ShoppingGoal } from "@/lib/profiles";
 
@@ -71,7 +71,7 @@ export function goalSteps(goal: Extract<ShoppingGoal, { kind: "build" }>, findGu
   const guide = findGuide(goal.guideId);
   if (!guide) return { guide: undefined, steps: [] };
   const wanted = new Set(goal.stepIds);
-  return { guide, steps: guide.steps.filter((s) => wanted.has(s.id) && s.build) };
+  return { guide, steps: guide.steps.filter((s) => wanted.has(s.id) && (s.build || s.prepare)) };
 }
 
 /** What one goal needs, before "invent instead" expansion. `null` when the goal no longer resolves. */
@@ -86,7 +86,7 @@ export function goalRecipe(goal: ShoppingGoal, findGuide: FindGuide): Ingredient
   if (!steps.length) return null;
   // Sphere contents count too: the side weapons are made as part of the step.
   const out = new Map<string, number>();
-  for (const s of steps) stageItems(s.build!, out);
+  for (const s of steps) stepItems(s, out);
   return [...out].map(([name, qty]) => ({ name, qty }));
 }
 

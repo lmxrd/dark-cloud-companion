@@ -5,6 +5,7 @@ import { getWeapon } from "@/lib/planner/sources";
 import { buildUpSection, type PlacedStage } from "@/lib/planner/timeline";
 import type { Acquire } from "@/lib/planner/types";
 import type { WeaponState } from "@/lib/weapons/mechanics";
+import { prepareSpheresEarly } from "./prepare";
 import { newId, type BuildStart, type Guide, type Step } from "./types";
 
 const chapterIdOf = (n: number) => chapters.find((c) => c.number === n)?.id;
@@ -123,7 +124,7 @@ export function planResultToGuide(args: {
       buildUp: { weaponId: next.weaponId },
     });
   });
-  return {
+  const guide: Guide = {
     id: args.id ?? `g-${Date.now().toString(36)}-${newId()}`,
     title: args.title,
     ...(args.description ? { description: args.description } : {}),
@@ -133,6 +134,8 @@ export function planResultToGuide(args: {
     createdAt: args.createdAt ?? Date.now(),
     updatedAt: args.createdAt ?? Date.now(),
   };
+  // Following the story: side weapons for spheres are levelled in earlier chapters where they can be.
+  return args.placement ? prepareSpheresEarly(guide) : guide;
 }
 
 /**

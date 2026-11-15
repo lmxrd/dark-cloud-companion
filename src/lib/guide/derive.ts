@@ -1,7 +1,7 @@
 // Derived data for a guide's weapon-build steps. Stats, costs and requirement checks are never stored: they are
 // recomputed with the rule-checking simulator so edited or imported guides always show the truth.
 import type { Stats } from "@/lib/schemas";
-import { simulatePlan } from "@/lib/planner/simulate";
+import { simulatePlan, simulateRecipe } from "@/lib/planner/simulate";
 import { getWeapon, weaponById } from "@/lib/planner/sources";
 import type { Cost, Stage } from "@/lib/planner/types";
 import { buildUpRequirements, type WeaponState } from "@/lib/weapons/mechanics";
@@ -141,6 +141,60 @@ export function deriveBuild(guide: Guide): DerivedBuild {
       ],
     });
   });
+  // Prepare steps: side weapons made ahead of time for spheres a later work step synths (marked
+  // `prepared`, so the simulator didn't count them there). Each prepared sphere needs one.
+  const prepCost: Cost = { ...noCost };
+  const waiting = new Map<string, number>();
+  const keyOf = (r: unknown) => JSON.stringify(r);
+  let before = -1;
+  for (const s of guide.steps) {
+    if (s.build) {
+      before = stageOf.get(s.id) ?? before;
+      const errors: string[] = [];
+      for (const u of s.build.synths) {
+        if (u.kind !== "sphere" || !u.prepared) continue;
+        const k = keyOf(u.recipe);
+        const n = waiting.get(k) ?? 0;
+        if (n > 0) waiting.set(k, n - 1);
+        else {
+          const last = u.recipe.stages[u.recipe.stages.length - 1];
+          errors.push(
+            `${getWeapon(last.weaponId).name} +${last.levelTo} sphere: no earlier step prepares it.`,
+          );
+        }
+      }
+      if (errors.length) steps.get(s.id)?.errors.push(...errors);
+      continue;
+    }
+    if (!s.prepare) continue;
+    const cost: Cost = { ...noCost };
+    const errors: string[] = [];
+    for (const r of s.prepare.recipes) {
+      const sub = simulateRecipe(r, { spBonus: guide.build.spBonus });
+      cost.abs += sub.cost.abs;
+      cost.gilda += sub.cost.gilda;
+      cost.steps += sub.cost.steps;
+      errors.push(...sub.errors);
+      waiting.set(keyOf(r), (waiting.get(keyOf(r)) ?? 0) + 1);
+    }
+    prepCost.abs += cost.abs;
+    prepCost.gilda += cost.gilda;
+    prepCost.steps += cost.steps;
+    const state = before >= 0 ? snapAt(before) : undefined;
+    steps.set(s.id, {
+      stepId: s.id,
+      ...(state ?? {
+        level: guide.build.level,
+        sp: guide.build.sp,
+        stats: { ...guide.build.stats },
+        abilities: [...guide.build.abilities],
+      }),
+      spheres: [],
+      cost,
+      errors,
+    });
+  }
+  const unused = [...waiting.values()].reduce((n, v) => n + v, 0);
   const attributed = new Set((sim.stages ?? []).flatMap((st) => st.errors));
   // The simulator starts from an already-owned weapon; obtaining it (shop purchase, invention)
   // is part of the guide's cost when the start says how it was acquired.
@@ -150,11 +204,14 @@ export function deriveBuild(guide: Guide): DerivedBuild {
   return {
     steps,
     total: {
-      abs: sim.cost.abs,
-      gilda: sim.cost.gilda + acquireGilda,
-      steps: sim.cost.steps + (acquire && acquire.kind !== "have" ? 1 : 0),
+      abs: sim.cost.abs + prepCost.abs,
+      gilda: sim.cost.gilda + prepCost.gilda + acquireGilda,
+      steps: sim.cost.steps + prepCost.steps + (acquire && acquire.kind !== "have" ? 1 : 0),
     },
-    errors: sim.errors.filter((e) => !attributed.has(e)),
+    errors: [
+      ...sim.errors.filter((e) => !attributed.has(e)),
+      ...(unused ? [`${unused} prepared side weapon(s) are never used as spheres.`] : []),
+    ],
     final: sim.state,
   };
 }

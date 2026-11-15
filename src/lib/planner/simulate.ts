@@ -100,9 +100,12 @@ function runStages(
         });
       } else {
         const sub = simulateRecipe(use.recipe, opts, depth + 1);
-        run.cost.abs += sub.cost.abs;
-        run.cost.gilda += sub.cost.gilda;
-        run.cost.steps += sub.cost.steps + 1;
+        if (!use.prepared) {
+          run.cost.abs += sub.cost.abs;
+          run.cost.gilda += sub.cost.gilda;
+          run.cost.steps += sub.cost.steps;
+        }
+        run.cost.steps += 1;
         run.log.push(...sub.log);
         run.errors.push(...sub.errors);
         const aux = sub.state;

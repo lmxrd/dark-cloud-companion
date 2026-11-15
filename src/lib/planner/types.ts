@@ -16,6 +16,11 @@ export interface ItemUse {
 export interface SphereUse {
   kind: "sphere";
   recipe: Recipe;
+  /**
+   * Made earlier (in a guide's prepare step) and kept until now: its levelling and items are counted
+   * there, so here it only costs the SP to synth it.
+   */
+  prepared?: boolean;
 }
 
 export type SynthUse = ItemUse | SphereUse;

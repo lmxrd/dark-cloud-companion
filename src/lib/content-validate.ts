@@ -62,6 +62,9 @@ export function validateGuide(g: Guide): string[] {
         errors.push(`${at}: unknown section "${e.ref}"`);
     }
     if (s.build) checkStage(s.build, at, errors);
+    for (const r of s.prepare?.recipes ?? []) for (const st of r.stages) checkStage(st, at, errors);
+    if (s.prepare && !weaponById.has(s.prepare.weaponId))
+      errors.push(`${at}: unknown weapon "${s.prepare.weaponId}"`);
     if (s.buildUp && !weaponById.has(s.buildUp.weaponId))
       errors.push(`${at}: unknown weapon "${s.buildUp.weaponId}"`);
   });

@@ -1,4 +1,4 @@
-import { stageNeedsItems } from "@/lib/guide/buildItems";
+import { stepNeedsItems } from "@/lib/guide/buildItems";
 import { useEffect, useMemo, useState } from "react";
 import { useChecks, useProfile, useReady } from "@/lib/useAppStore";
 import { CheckIcon } from "lucide-react";
@@ -107,6 +107,7 @@ export function StepCard({
     entries.length === 0 &&
     !step.build &&
     !step.buildUp &&
+    !step.prepare &&
     !step.notes
   )
     return null;
@@ -114,7 +115,7 @@ export function StepCard({
   if (filters.category && entries.length === 0) return null;
 
   const ownTick =
-    step.build || step.buildUp || step.entries.length === 0
+    step.build || step.buildUp || step.prepare || step.entries.length === 0
       ? stepTickId(guide.id, step.id)
       : undefined;
   const chapter = step.chapterId ? chapterById.get(step.chapterId) : undefined;
@@ -186,7 +187,7 @@ export function StepCard({
       </div>
       {!isFolded && (
         <CardContent className="flex flex-col gap-1 px-1 py-1">
-          {(step.notes || step.build || step.buildUp) && (
+          {(step.notes || step.build || step.buildUp || step.prepare) && (
             <div className="flex flex-col gap-2 px-2 py-1">
               {step.notes && <p className="text-sm whitespace-pre-wrap">{step.notes}</p>}
               <BuildStepBody
@@ -196,7 +197,7 @@ export function StepCard({
                 spBonus={guide.build?.spBonus ?? 1}
               />
               {/* Only saved guides: the shopping list follows the guide by id. */}
-              {stageNeedsItems(step.build) && findGuide(guide.id, profile.guides) && (
+              {stepNeedsItems(step) && findGuide(guide.id, profile.guides) && (
                 <div>
                   <AddToListButton
                     label={t("shopping.addMaterials")}

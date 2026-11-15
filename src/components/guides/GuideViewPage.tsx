@@ -1,4 +1,4 @@
-import { stageNeedsItems } from "@/lib/guide/buildItems";
+import { stepNeedsItems } from "@/lib/guide/buildItems";
 import { PageHeader } from "@/components/PageHeader";
 import { useChecks, useProfile } from "@/lib/useAppStore";
 import { cn } from "cn";
@@ -115,7 +115,8 @@ export function GuideViewPage() {
     needle: needle.trim().toLowerCase(),
   };
   // A weapon build reads as a timeline of work and build-up steps.
-  const isBuild = guide.steps.length > 0 && guide.steps.every((s) => s.build || s.buildUp);
+  const isBuild =
+    guide.steps.length > 0 && guide.steps.every((s) => s.build || s.buildUp || s.prepare);
   const nextIndex = guide.steps.findIndex((s) => !isStepDone(guide, s, checks));
   const next = nextIndex >= 0 ? guide.steps[nextIndex] : undefined;
   const groupKey = (chapterId: string | undefined) => chapterId ?? "anytime";
@@ -146,7 +147,7 @@ export function GuideViewPage() {
         : t("guides.resumeStep", { title: next.title });
   // Build steps with items that aren't ticked yet: "add remaining steps" to the shopping list.
   const remaining = guide.steps
-    .filter((s) => stageNeedsItems(s.build))
+    .filter((s) => stepNeedsItems(s))
     .filter((s) => !checks[stepTickId(guide.id, s.id)])
     .map((s) => s.id);
   const target = guide.steps.at(-1)?.build?.weaponId;

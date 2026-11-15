@@ -1,4 +1,4 @@
-import { stageItems, stageNeedsItems } from "@/lib/guide/buildItems";
+import { stepItems, stepNeedsItems } from "@/lib/guide/buildItems";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { MinusIcon, PlusIcon, SearchIcon, XIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -142,7 +142,7 @@ function buildCatalog(t: Translate, own: Guide[]): CatalogEntry[] {
       goal: { kind: "georama", name: p.name },
     });
   for (const g of [...weaponGuides, ...own]) {
-    const steps = g.steps.filter((s) => stageNeedsItems(s.build));
+    const steps = g.steps.filter((s) => stepNeedsItems(s));
     if (!steps.length) continue;
     out.push({
       kind: "build",
@@ -152,9 +152,9 @@ function buildCatalog(t: Translate, own: Guide[]): CatalogEntry[] {
       goal: { kind: "build", guideId: g.id, stepIds: steps.map((s) => s.id) },
     });
     for (const s of steps) {
-      const items = s.build!.synths.flatMap((x) =>
-        x.kind === "item" ? [{ name: x.name, qty: x.count }] : [],
-      );
+      const items = s.build
+        ? s.build.synths.flatMap((x) => (x.kind === "item" ? [{ name: x.name, qty: x.count }] : []))
+        : [...stepItems(s)].map(([name, qty]) => ({ name, qty }));
       out.push({
         kind: "build",
         key: `b:${g.id}:${s.id}`,
@@ -307,7 +307,7 @@ function GoalCard({
     title = guide?.title ?? goal.guideId;
     sub = steps.length === 1 ? steps[0].title : t("shopping.stepsCount", { n: steps.length });
     const items = new Map<string, number>();
-    for (const s of steps) stageItems(s.build!, items);
+    for (const s of steps) stepItems(s, items);
     recipe = recipeText([...items].map(([name, qty]) => ({ name, qty })));
   } else {
     title = goal.name;

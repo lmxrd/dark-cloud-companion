@@ -37,6 +37,13 @@ export function storyCost(guide: Guide, prog: ProgressionOptions): number {
   const work = guide.steps.filter((s) => s.build);
   const first = work[0]?.build?.weaponId;
   let cost = 0;
+  // Side weapons prepared ahead of time: their ABS in the chapter they are levelled in.
+  for (const s of guide.steps) {
+    if (!s.prepare) continue;
+    const c = Number(s.chapterId ?? 8);
+    const abs = d.steps.get(s.id)?.cost.abs ?? 0;
+    cost += abs * (prog.effortPower ? effortWeights[c] ** prog.effortPower : 1);
+  }
   work.forEach((s, i) => {
     const st = d.steps.get(s.id);
     if (!st) return;

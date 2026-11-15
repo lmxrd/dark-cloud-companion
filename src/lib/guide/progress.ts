@@ -7,7 +7,9 @@ import { stepTickId, type Guide, type Step } from "./types";
  */
 export function stepTickIds(guide: Guide, step: Step): string[] {
   const own =
-    step.build || step.buildUp || step.entries.length === 0 ? [stepTickId(guide.id, step.id)] : [];
+    step.build || step.buildUp || step.prepare || step.entries.length === 0
+      ? [stepTickId(guide.id, step.id)]
+      : [];
   return [...step.entries.flatMap((e) => entryTickIds(guide.id, step.id, e)), ...own];
 }
 
