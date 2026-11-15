@@ -678,6 +678,7 @@ export async function planPath(
       delayCost: prog.delayCost,
       itemChapter: items.map((it) => it.fromChapter ?? 1),
       chapterWindow: 2,
+      firstStageWindow: 0,
       ...(prog.earlyStatBonus ? { earlyStatBonus: prog.earlyStatBonus } : {}),
       ...(prog.mainItemCost ? { mainItemCost: prog.mainItemCost } : {}),
       ...(prog.effortPower ? { absWeights: effortWeights.map((w) => w ** prog.effortPower!) } : {}),

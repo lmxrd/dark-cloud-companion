@@ -49,6 +49,8 @@ plan you can follow while playing:
 - **Spheres are shells.** The model chooses what goes into each side weapon (to its SP), with an
   exact bound on the 60% transfer, so spheres carry what the main weapon needs.
 - **Levels.** Weapons on the way are capped at +10, the last at +15.
+- **Start.** Work on the first weapon starts in the first chapter it can (`firstStageWindow` 0);
+  otherwise effort weighting can leave it unlevelled until chapter 4.
 - **In-between stages.** When a build-up is locked to a later chapter (enemies not met yet), the
   weapon gets an earlier stage that already meets the next weapon's requirements, so only the
   build-up waits. In the guide it is a separate work step; the build-up is its own step.

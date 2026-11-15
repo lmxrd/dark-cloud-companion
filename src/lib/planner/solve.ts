@@ -101,6 +101,8 @@ export interface Progression {
   itemChapter: number[];
   /** A stage may be placed at most this many chapters after its unlock (keeps the search small). */
   chapterWindow?: number;
+  /** The same for the first stage (0: work on the first weapon starts as soon as it can). */
+  firstStageWindow?: number;
   /**
    * Reward (in objective units) per stat point the weapon has at the end of each stage: stats gained
    * earlier count in more stages, so items go into the earliest spheres that can hold them and the
@@ -366,12 +368,13 @@ export function buildModel(input: SolveInput) {
       }
   if (p) {
     const chapters = [1, 2, 3, 4, 5, 6, 7, 8];
+    const windowOf = (j: number) =>
+      j === 0 && p.firstStageWindow !== undefined ? p.firstStageWindow : (p.chapterWindow ?? 8);
     /** A generous upper bound on how many of one item or sphere a stage can take. */
     const MANY = 200;
     for (let j = 0; j < nStages; j++) {
       const open = chapters.filter(
-        (c) =>
-          c >= (p.stageUnlock[j] ?? 1) && c <= (p.stageUnlock[j] ?? 1) + (p.chapterWindow ?? 8),
+        (c) => c >= (p.stageUnlock[j] ?? 1) && c <= (p.stageUnlock[j] ?? 1) + windowOf(j),
       );
       const z = (c: number) => `vZ${j}_${c}`;
       row(`cOne${j}`, { min: 1, max: 1 });
@@ -390,8 +393,7 @@ export function buildModel(input: SolveInput) {
         for (const c of open) coef(`cOrder${j}`, z(c), c);
         for (const c of chapters.filter(
           (c) =>
-            c >= (p.stageUnlock[j - 1] ?? 1) &&
-            c <= (p.stageUnlock[j - 1] ?? 1) + (p.chapterWindow ?? 8),
+            c >= (p.stageUnlock[j - 1] ?? 1) && c <= (p.stageUnlock[j - 1] ?? 1) + windowOf(j - 1),
         ))
           coef(`cOrder${j}`, `vZ${j - 1}_${c}`, -c);
       }
@@ -440,8 +442,7 @@ export function buildModel(input: SolveInput) {
       const BIG = 1_000_000;
       for (let j = 0; j < nStages; j++) {
         const open = chapters.filter(
-          (c) =>
-            c >= (p.stageUnlock[j] ?? 1) && c <= (p.stageUnlock[j] ?? 1) + (p.chapterWindow ?? 8),
+          (c) => c >= (p.stageUnlock[j] ?? 1) && c <= (p.stageUnlock[j] ?? 1) + windowOf(j),
         );
         model.objective.delete(`vA${j}`);
         const e = `cEffort${j}`;
