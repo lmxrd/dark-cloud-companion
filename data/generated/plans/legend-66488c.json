@@ -4,7 +4,7 @@
   "guide": {
     "id": "legend-66488c",
     "title": "LEGEND — Story",
-    "description": "Story · maxed stats · 8 abilities (side-weapon spheres first) · optimal start (Battle Wrench) · done after Final Battle (chapter 7) · no ABS grinding",
+    "description": "Story · maxed stats · 8 abilities (side-weapon spheres first) · optimal start (Battle Wrench) · done after The Zelmite Mine (chapter 8) · no ABS grinding",
     "kind": "builtin",
     "build": {
       "weaponId": "battle-wrench",
@@ -31,16 +31,26 @@
     },
     "steps": [
       {
-        "id": "battle-wrench+4",
+        "id": "battle-wrench+5",
         "title": "Battle Wrench",
         "notes": "",
         "chapterId": "2",
-        "sectionId": "frightening-forest",
+        "sectionId": "strange-tree",
         "entries": [],
         "build": {
           "weaponId": "battle-wrench",
-          "levelTo": 4,
+          "levelTo": 5,
           "synths": [
+            {
+              "kind": "item",
+              "name": "Antidote Drink",
+              "count": 2
+            },
+            {
+              "kind": "item",
+              "name": "Bundle of Hay",
+              "count": 3
+            },
             {
               "kind": "sphere",
               "recipe": {
@@ -63,7 +73,7 @@
                       {
                         "kind": "item",
                         "name": "Antidote Drink",
-                        "count": 5
+                        "count": 4
                       },
                       {
                         "kind": "item",
@@ -83,7 +93,7 @@
                       {
                         "kind": "item",
                         "name": "Gunpowder",
-                        "count": 3
+                        "count": 4
                       },
                       {
                         "kind": "item",
@@ -108,22 +118,22 @@
         "title": "Battle Wrench → True Battle Wrench",
         "notes": "",
         "chapterId": "2",
-        "sectionId": "frightening-forest",
+        "sectionId": "strange-tree",
         "entries": [],
         "buildUp": {
           "weaponId": "true-battle-wrench"
         }
       },
       {
-        "id": "true-battle-wrench+4",
+        "id": "true-battle-wrench+5",
         "title": "True Battle Wrench",
         "notes": "",
         "chapterId": "2",
-        "sectionId": "noise-in-the-forest",
+        "sectionId": "im-a-pixie",
         "entries": [],
         "build": {
           "weaponId": "true-battle-wrench",
-          "levelTo": 4,
+          "levelTo": 5,
           "synths": [
             {
               "kind": "sphere",
@@ -147,12 +157,7 @@
                       {
                         "kind": "item",
                         "name": "Antidote Drink",
-                        "count": 5
-                      },
-                      {
-                        "kind": "item",
-                        "name": "Bundle of Hay",
-                        "count": 4
+                        "count": 8
                       },
                       {
                         "kind": "item",
@@ -162,22 +167,27 @@
                       {
                         "kind": "item",
                         "name": "Glass Material",
-                        "count": 4
+                        "count": 5
                       },
                       {
                         "kind": "item",
                         "name": "Gunpowder",
-                        "count": 2
+                        "count": 4
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Rolling Log",
+                        "count": 1
                       },
                       {
                         "kind": "item",
                         "name": "Scrap of Metal",
-                        "count": 9
+                        "count": 5
                       },
                       {
                         "kind": "item",
                         "name": "Sturdy Cloth",
-                        "count": 4
+                        "count": 5
                       }
                     ]
                   }
@@ -192,22 +202,22 @@
         "title": "True Battle Wrench → Drill Wrench",
         "notes": "",
         "chapterId": "2",
-        "sectionId": "noise-in-the-forest",
+        "sectionId": "im-a-pixie",
         "entries": [],
         "buildUp": {
           "weaponId": "drill-wrench"
         }
       },
       {
-        "id": "drill-wrench+4",
+        "id": "drill-wrench+5",
         "title": "Drill Wrench",
         "notes": "",
-        "chapterId": "4",
-        "sectionId": "pau-and-shingala",
+        "chapterId": "2",
+        "sectionId": "rainbow-falls-entrance",
         "entries": [],
         "build": {
           "weaponId": "drill-wrench",
-          "levelTo": 4,
+          "levelTo": 5,
           "synths": [
             {
               "kind": "sphere",
@@ -230,7 +240,7 @@
                     "synths": [
                       {
                         "kind": "item",
-                        "name": "Antidote Drink",
+                        "name": "Bundle of Hay",
                         "count": 5
                       },
                       {
@@ -241,50 +251,27 @@
                       {
                         "kind": "item",
                         "name": "Glass Material",
-                        "count": 9
+                        "count": 5
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Gunpowder",
+                        "count": 4
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Rolling Log",
+                        "count": 4
                       },
                       {
                         "kind": "item",
                         "name": "Scrap of Metal",
-                        "count": 9
+                        "count": 5
                       },
                       {
                         "kind": "item",
                         "name": "Sturdy Cloth",
                         "count": 5
-                      }
-                    ]
-                  }
-                ]
-              }
-            },
-            {
-              "kind": "sphere",
-              "recipe": {
-                "acquire": {
-                  "kind": "invent",
-                  "chapter": 4,
-                  "gilda": 840
-                },
-                "stages": [
-                  {
-                    "weaponId": "dark-viper",
-                    "levelTo": 5,
-                    "synths": [
-                      {
-                        "kind": "item",
-                        "name": "Antidote Drink",
-                        "count": 1
-                      },
-                      {
-                        "kind": "item",
-                        "name": "Flour",
-                        "count": 14
-                      },
-                      {
-                        "kind": "item",
-                        "name": "Glass Material",
-                        "count": 12
                       }
                     ]
                   }
@@ -298,23 +285,23 @@
         "id": "to-smash-wrench",
         "title": "Drill Wrench → Smash Wrench",
         "notes": "",
-        "chapterId": "4",
-        "sectionId": "pau-and-shingala",
+        "chapterId": "2",
+        "sectionId": "rainbow-falls-entrance",
         "entries": [],
         "buildUp": {
           "weaponId": "smash-wrench"
         }
       },
       {
-        "id": "smash-wrench+4",
+        "id": "smash-wrench+5",
         "title": "Smash Wrench",
         "notes": "",
-        "chapterId": "4",
-        "sectionId": "pau-and-shingala",
+        "chapterId": "3",
+        "sectionId": "lighthouse-appears",
         "entries": [],
         "build": {
           "weaponId": "smash-wrench",
-          "levelTo": 4,
+          "levelTo": 5,
           "synths": [
             {
               "kind": "sphere",
@@ -328,140 +315,12 @@
                 "stages": [
                   {
                     "weaponId": "battle-wrench",
-                    "levelTo": 3,
-                    "synths": []
-                  },
-                  {
-                    "weaponId": "true-battle-wrench",
                     "levelTo": 5,
                     "synths": [
                       {
                         "kind": "item",
                         "name": "Antidote Drink",
-                        "count": 1
-                      },
-                      {
-                        "kind": "item",
-                        "name": "Bundle of Hay",
-                        "count": 6
-                      },
-                      {
-                        "kind": "item",
-                        "name": "Flour",
-                        "count": 6
-                      },
-                      {
-                        "kind": "item",
-                        "name": "Glass Material",
-                        "count": 6
-                      },
-                      {
-                        "kind": "item",
-                        "name": "Rolling Log",
-                        "count": 1
-                      },
-                      {
-                        "kind": "item",
-                        "name": "Scrap of Metal",
                         "count": 7
-                      },
-                      {
-                        "kind": "item",
-                        "name": "Sturdy Cloth",
-                        "count": 4
-                      }
-                    ]
-                  }
-                ]
-              }
-            },
-            {
-              "kind": "sphere",
-              "recipe": {
-                "acquire": {
-                  "kind": "shop",
-                  "shop": "Milane's Weapon Shop",
-                  "price": 200,
-                  "chapter": 1
-                },
-                "stages": [
-                  {
-                    "weaponId": "battle-wrench",
-                    "levelTo": 3,
-                    "synths": []
-                  },
-                  {
-                    "weaponId": "true-battle-wrench",
-                    "levelTo": 5,
-                    "synths": [
-                      {
-                        "kind": "item",
-                        "name": "Antidote Drink",
-                        "count": 1
-                      },
-                      {
-                        "kind": "item",
-                        "name": "Bundle of Hay",
-                        "count": 6
-                      },
-                      {
-                        "kind": "item",
-                        "name": "Flour",
-                        "count": 6
-                      },
-                      {
-                        "kind": "item",
-                        "name": "Glass Material",
-                        "count": 6
-                      },
-                      {
-                        "kind": "item",
-                        "name": "Rolling Log",
-                        "count": 1
-                      },
-                      {
-                        "kind": "item",
-                        "name": "Scrap of Metal",
-                        "count": 6
-                      },
-                      {
-                        "kind": "item",
-                        "name": "Sturdy Cloth",
-                        "count": 5
-                      }
-                    ]
-                  }
-                ]
-              }
-            },
-            {
-              "kind": "sphere",
-              "recipe": {
-                "acquire": {
-                  "kind": "shop",
-                  "shop": "Milane's Weapon Shop",
-                  "price": 200,
-                  "chapter": 1
-                },
-                "stages": [
-                  {
-                    "weaponId": "battle-wrench",
-                    "levelTo": 3,
-                    "synths": []
-                  },
-                  {
-                    "weaponId": "true-battle-wrench",
-                    "levelTo": 5,
-                    "synths": [
-                      {
-                        "kind": "item",
-                        "name": "Bundle of Hay",
-                        "count": 7
-                      },
-                      {
-                        "kind": "item",
-                        "name": "Flour",
-                        "count": 6
                       },
                       {
                         "kind": "item",
@@ -471,12 +330,71 @@
                       {
                         "kind": "item",
                         "name": "Gunpowder",
+                        "count": 4
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 5
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "shop",
+                  "shop": "Milane's Weapon Shop",
+                  "price": 200,
+                  "chapter": 1
+                },
+                "stages": [
+                  {
+                    "weaponId": "battle-wrench",
+                    "levelTo": 3,
+                    "synths": []
+                  },
+                  {
+                    "weaponId": "true-battle-wrench",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Antidote Drink",
+                        "count": 5
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Bundle of Hay",
+                        "count": 5
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Flour",
+                        "count": 5
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Glass Material",
+                        "count": 5
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Gunpowder",
+                        "count": 3
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Rolling Log",
                         "count": 1
                       },
                       {
                         "kind": "item",
                         "name": "Scrap of Metal",
-                        "count": 7
+                        "count": 4
                       },
                       {
                         "kind": "item",
@@ -509,33 +427,43 @@
                     "synths": [
                       {
                         "kind": "item",
+                        "name": "Antidote Drink",
+                        "count": 5
+                      },
+                      {
+                        "kind": "item",
                         "name": "Bundle of Hay",
-                        "count": 6
+                        "count": 5
                       },
                       {
                         "kind": "item",
                         "name": "Flour",
-                        "count": 6
+                        "count": 5
                       },
                       {
                         "kind": "item",
                         "name": "Glass Material",
-                        "count": 6
+                        "count": 5
                       },
                       {
                         "kind": "item",
                         "name": "Gunpowder",
+                        "count": 3
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Rolling Log",
                         "count": 1
                       },
                       {
                         "kind": "item",
                         "name": "Scrap of Metal",
-                        "count": 7
+                        "count": 4
                       },
                       {
                         "kind": "item",
                         "name": "Sturdy Cloth",
-                        "count": 4
+                        "count": 5
                       }
                     ]
                   }
@@ -546,19 +474,380 @@
               "kind": "sphere",
               "recipe": {
                 "acquire": {
-                  "kind": "invent",
-                  "chapter": 4,
-                  "gilda": 2550
+                  "kind": "shop",
+                  "shop": "Milane's Weapon Shop",
+                  "price": 200,
+                  "chapter": 1
                 },
                 "stages": [
                   {
-                    "weaponId": "wild-cat",
+                    "weaponId": "battle-wrench",
+                    "levelTo": 3,
+                    "synths": []
+                  },
+                  {
+                    "weaponId": "true-battle-wrench",
                     "levelTo": 5,
                     "synths": [
                       {
                         "kind": "item",
                         "name": "Antidote Drink",
-                        "count": 1
+                        "count": 5
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Bundle of Hay",
+                        "count": 5
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Flour",
+                        "count": 5
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Glass Material",
+                        "count": 4
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Gunpowder",
+                        "count": 3
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Rolling Log",
+                        "count": 2
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 4
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Sturdy Cloth",
+                        "count": 5
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "shop",
+                  "shop": "Milane's Weapon Shop",
+                  "price": 200,
+                  "chapter": 1
+                },
+                "stages": [
+                  {
+                    "weaponId": "battle-wrench",
+                    "levelTo": 3,
+                    "synths": []
+                  },
+                  {
+                    "weaponId": "true-battle-wrench",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Antidote Drink",
+                        "count": 5
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Bundle of Hay",
+                        "count": 5
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Flour",
+                        "count": 5
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Glass Material",
+                        "count": 4
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Gunpowder",
+                        "count": 3
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Rolling Log",
+                        "count": 2
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 4
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Sturdy Cloth",
+                        "count": 5
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "shop",
+                  "shop": "Milane's Weapon Shop",
+                  "price": 200,
+                  "chapter": 1
+                },
+                "stages": [
+                  {
+                    "weaponId": "battle-wrench",
+                    "levelTo": 3,
+                    "synths": []
+                  },
+                  {
+                    "weaponId": "true-battle-wrench",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Antidote Drink",
+                        "count": 5
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Bundle of Hay",
+                        "count": 5
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Flour",
+                        "count": 5
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Glass Material",
+                        "count": 4
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Gunpowder",
+                        "count": 3
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Rolling Log",
+                        "count": 2
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 4
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Sturdy Cloth",
+                        "count": 5
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "shop",
+                  "shop": "Milane's Weapon Shop",
+                  "price": 200,
+                  "chapter": 1
+                },
+                "stages": [
+                  {
+                    "weaponId": "battle-wrench",
+                    "levelTo": 3,
+                    "synths": []
+                  },
+                  {
+                    "weaponId": "true-battle-wrench",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Antidote Drink",
+                        "count": 5
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Bundle of Hay",
+                        "count": 5
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Flour",
+                        "count": 5
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Glass Material",
+                        "count": 4
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Gunpowder",
+                        "count": 3
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Rolling Log",
+                        "count": 2
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 4
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Sturdy Cloth",
+                        "count": 5
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "shop",
+                  "shop": "Milane's Weapon Shop",
+                  "price": 200,
+                  "chapter": 1
+                },
+                "stages": [
+                  {
+                    "weaponId": "battle-wrench",
+                    "levelTo": 3,
+                    "synths": []
+                  },
+                  {
+                    "weaponId": "true-battle-wrench",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Antidote Drink",
+                        "count": 4
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Bundle of Hay",
+                        "count": 5
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Flour",
+                        "count": 5
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Glass Material",
+                        "count": 5
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Gunpowder",
+                        "count": 3
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Rolling Log",
+                        "count": 2
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 4
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Sturdy Cloth",
+                        "count": 5
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "shop",
+                  "shop": "Milane's Weapon Shop",
+                  "price": 200,
+                  "chapter": 1
+                },
+                "stages": [
+                  {
+                    "weaponId": "battle-wrench",
+                    "levelTo": 3,
+                    "synths": []
+                  },
+                  {
+                    "weaponId": "true-battle-wrench",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Antidote Drink",
+                        "count": 4
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Bundle of Hay",
+                        "count": 5
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Flour",
+                        "count": 5
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Glass Material",
+                        "count": 5
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Gunpowder",
+                        "count": 3
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Rolling Log",
+                        "count": 2
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 3
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Sturdy Cloth",
+                        "count": 5
                       }
                     ]
                   }
@@ -572,23 +861,23 @@
         "id": "to-cubic-hammer",
         "title": "Smash Wrench → Cubic Hammer",
         "notes": "",
-        "chapterId": "4",
-        "sectionId": "pau-and-shingala",
+        "chapterId": "3",
+        "sectionId": "lighthouse-appears",
         "entries": [],
         "buildUp": {
           "weaponId": "cubic-hammer"
         }
       },
       {
-        "id": "cubic-hammer+4",
+        "id": "cubic-hammer+5",
         "title": "Cubic Hammer",
         "notes": "",
         "chapterId": "4",
-        "sectionId": "tons-of-fish",
+        "sectionId": "bat-den",
         "entries": [],
         "build": {
           "weaponId": "cubic-hammer",
-          "levelTo": 4,
+          "levelTo": 5,
           "synths": [
             {
               "kind": "sphere",
@@ -606,23 +895,23 @@
                     "synths": [
                       {
                         "kind": "item",
-                        "name": "Flour",
+                        "name": "Antidote Drink",
                         "count": 5
                       },
                       {
                         "kind": "item",
                         "name": "Glass Material",
-                        "count": 6
+                        "count": 4
                       },
                       {
                         "kind": "item",
-                        "name": "Rolling Log",
-                        "count": 7
+                        "name": "Gunpowder",
+                        "count": 5
                       },
                       {
                         "kind": "item",
                         "name": "Scrap of Metal",
-                        "count": 3
+                        "count": 7
                       }
                     ]
                   }
@@ -651,12 +940,17 @@
                       {
                         "kind": "item",
                         "name": "Antidote Drink",
-                        "count": 10
+                        "count": 1
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Bundle of Hay",
+                        "count": 6
                       },
                       {
                         "kind": "item",
                         "name": "Flour",
-                        "count": 8
+                        "count": 7
                       },
                       {
                         "kind": "item",
@@ -666,7 +960,7 @@
                       {
                         "kind": "item",
                         "name": "Gunpowder",
-                        "count": 1
+                        "count": 6
                       },
                       {
                         "kind": "item",
@@ -676,7 +970,7 @@
                       {
                         "kind": "item",
                         "name": "Scrap of Metal",
-                        "count": 2
+                        "count": 1
                       },
                       {
                         "kind": "item",
@@ -710,12 +1004,12 @@
                       {
                         "kind": "item",
                         "name": "Antidote Drink",
-                        "count": 9
+                        "count": 1
                       },
                       {
                         "kind": "item",
                         "name": "Bundle of Hay",
-                        "count": 1
+                        "count": 6
                       },
                       {
                         "kind": "item",
@@ -725,7 +1019,12 @@
                       {
                         "kind": "item",
                         "name": "Glass Material",
-                        "count": 9
+                        "count": 8
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Gunpowder",
+                        "count": 6
                       },
                       {
                         "kind": "item",
@@ -735,12 +1034,184 @@
                       {
                         "kind": "item",
                         "name": "Scrap of Metal",
-                        "count": 3
+                        "count": 1
                       },
                       {
                         "kind": "item",
                         "name": "Sturdy Cloth",
                         "count": 2
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "shop",
+                  "shop": "Milane's Weapon Shop",
+                  "price": 200,
+                  "chapter": 1
+                },
+                "stages": [
+                  {
+                    "weaponId": "battle-wrench",
+                    "levelTo": 3,
+                    "synths": []
+                  },
+                  {
+                    "weaponId": "true-battle-wrench",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Antidote Drink",
+                        "count": 1
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Bundle of Hay",
+                        "count": 6
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Flour",
+                        "count": 7
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Glass Material",
+                        "count": 7
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Gunpowder",
+                        "count": 7
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Rolling Log",
+                        "count": 2
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Sturdy Cloth",
+                        "count": 3
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "shop",
+                  "shop": "Milane's Weapon Shop",
+                  "price": 200,
+                  "chapter": 1
+                },
+                "stages": [
+                  {
+                    "weaponId": "battle-wrench",
+                    "levelTo": 3,
+                    "synths": []
+                  },
+                  {
+                    "weaponId": "true-battle-wrench",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Bundle of Hay",
+                        "count": 6
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Flour",
+                        "count": 8
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Glass Material",
+                        "count": 7
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Gunpowder",
+                        "count": 6
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Rolling Log",
+                        "count": 3
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Sturdy Cloth",
+                        "count": 3
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "shop",
+                  "shop": "Milane's Weapon Shop",
+                  "price": 200,
+                  "chapter": 1
+                },
+                "stages": [
+                  {
+                    "weaponId": "battle-wrench",
+                    "levelTo": 3,
+                    "synths": []
+                  },
+                  {
+                    "weaponId": "true-battle-wrench",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Bundle of Hay",
+                        "count": 6
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Flour",
+                        "count": 8
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Glass Material",
+                        "count": 7
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Gunpowder",
+                        "count": 6
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Rolling Log",
+                        "count": 2
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 1
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Sturdy Cloth",
+                        "count": 3
                       }
                     ]
                   }
@@ -755,57 +1226,23 @@
         "title": "Cubic Hammer → Digi Hammer",
         "notes": "",
         "chapterId": "4",
-        "sectionId": "tons-of-fish",
+        "sectionId": "bat-den",
         "entries": [],
         "buildUp": {
           "weaponId": "digi-hammer"
         }
       },
       {
-        "id": "digi-hammer+0",
+        "id": "digi-hammer+5",
         "title": "Digi Hammer",
         "notes": "",
-        "chapterId": "4",
-        "sectionId": "scary-auntie-medusa",
+        "chapterId": "8",
+        "sectionId": "the-zelmite-mine",
         "entries": [],
         "build": {
           "weaponId": "digi-hammer",
-          "levelTo": 0,
+          "levelTo": 5,
           "synths": [
-            {
-              "kind": "sphere",
-              "recipe": {
-                "acquire": {
-                  "kind": "shop",
-                  "shop": "Milane's Weapon Shop",
-                  "price": 200,
-                  "chapter": 1
-                },
-                "stages": [
-                  {
-                    "weaponId": "battle-wrench",
-                    "levelTo": 5,
-                    "synths": [
-                      {
-                        "kind": "item",
-                        "name": "Antidote Drink",
-                        "count": 3
-                      },
-                      {
-                        "kind": "item",
-                        "name": "Flour",
-                        "count": 9
-                      },
-                      {
-                        "kind": "item",
-                        "name": "Glass Material",
-                        "count": 9
-                      }
-                    ]
-                  }
-                ]
-              }
-            },
             {
               "kind": "sphere",
               "recipe": {
@@ -827,28 +1264,56 @@
                     "synths": [
                       {
                         "kind": "item",
-                        "name": "Bundle of Hay",
-                        "count": 9
-                      },
-                      {
-                        "kind": "item",
-                        "name": "Flour",
-                        "count": 9
+                        "name": "Antidote Drink",
+                        "count": 5
                       },
                       {
                         "kind": "item",
                         "name": "Glass Material",
-                        "count": 9
+                        "count": 5
                       },
                       {
                         "kind": "item",
-                        "name": "Rolling Log",
-                        "count": 1
+                        "name": "Gunpowder",
+                        "count": 6
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 8
                       },
                       {
                         "kind": "item",
                         "name": "Sturdy Cloth",
-                        "count": 5
+                        "count": 9
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "invent",
+                  "chapter": 8,
+                  "gilda": 7150
+                },
+                "stages": [
+                  {
+                    "weaponId": "stinger-wrench",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Antidote Drink",
+                        "count": 6
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Flour",
+                        "count": 21
                       }
                     ]
                   }
@@ -859,15 +1324,26 @@
         }
       },
       {
-        "id": "digi-hammer+4",
-        "title": "Digi Hammer",
+        "id": "to-heavy-hammer",
+        "title": "Digi Hammer → Heavy Hammer",
         "notes": "",
-        "chapterId": "5",
-        "sectionId": "heim-rada-rebuilding",
+        "chapterId": "8",
+        "sectionId": "the-zelmite-mine",
+        "entries": [],
+        "buildUp": {
+          "weaponId": "heavy-hammer"
+        }
+      },
+      {
+        "id": "heavy-hammer+5",
+        "title": "Heavy Hammer",
+        "notes": "",
+        "chapterId": "8",
+        "sectionId": "the-zelmite-mine",
         "entries": [],
         "build": {
-          "weaponId": "digi-hammer",
-          "levelTo": 4,
+          "weaponId": "heavy-hammer",
+          "levelTo": 5,
           "synths": [
             {
               "kind": "sphere",
@@ -884,51 +1360,13 @@
                     "synths": [
                       {
                         "kind": "item",
+                        "name": "Antidote Drink",
+                        "count": 25
+                      },
+                      {
+                        "kind": "item",
                         "name": "Flour",
-                        "count": 10
-                      },
-                      {
-                        "kind": "item",
-                        "name": "Gunpowder",
-                        "count": 6
-                      },
-                      {
-                        "kind": "item",
-                        "name": "Scrap of Metal",
-                        "count": 5
-                      },
-                      {
-                        "kind": "item",
-                        "name": "Sturdy Cloth",
-                        "count": 5
-                      }
-                    ]
-                  }
-                ]
-              }
-            },
-            {
-              "kind": "sphere",
-              "recipe": {
-                "acquire": {
-                  "kind": "invent",
-                  "chapter": 5,
-                  "gilda": 700
-                },
-                "stages": [
-                  {
-                    "weaponId": "poison-wrench",
-                    "levelTo": 5,
-                    "synths": [
-                      {
-                        "kind": "item",
-                        "name": "Glass Material",
-                        "count": 10
-                      },
-                      {
-                        "kind": "item",
-                        "name": "Scrap of Metal",
-                        "count": 1
+                        "count": 2
                       }
                     ]
                   }
@@ -939,26 +1377,26 @@
         }
       },
       {
-        "id": "to-heavy-hammer",
-        "title": "Digi Hammer → Heavy Hammer",
+        "id": "to-legend",
+        "title": "Heavy Hammer → LEGEND",
         "notes": "",
-        "chapterId": "6",
-        "sectionId": "pirates-revenge",
+        "chapterId": "8",
+        "sectionId": "the-zelmite-mine",
         "entries": [],
         "buildUp": {
-          "weaponId": "heavy-hammer"
+          "weaponId": "legend"
         }
       },
       {
-        "id": "heavy-hammer+4",
-        "title": "Heavy Hammer",
+        "id": "legend+2",
+        "title": "LEGEND",
         "notes": "",
-        "chapterId": "6",
-        "sectionId": "pirates-revenge",
+        "chapterId": "8",
+        "sectionId": "the-zelmite-mine",
         "entries": [],
         "build": {
-          "weaponId": "heavy-hammer",
-          "levelTo": 4,
+          "weaponId": "legend",
+          "levelTo": 2,
           "synths": [
             {
               "kind": "sphere",
@@ -976,90 +1414,13 @@
                       {
                         "kind": "item",
                         "name": "Flour",
-                        "count": 9
+                        "count": 2
                       },
                       {
                         "kind": "item",
                         "name": "Gunpowder",
-                        "count": 18
-                      }
-                    ]
-                  }
-                ]
-              }
-            },
-            {
-              "kind": "sphere",
-              "recipe": {
-                "acquire": {
-                  "kind": "invent",
-                  "chapter": 5,
-                  "gilda": 1890
-                },
-                "stages": [
-                  {
-                    "weaponId": "soul-breaker",
-                    "levelTo": 5,
-                    "synths": [
-                      {
-                        "kind": "item",
-                        "name": "Glass Material",
-                        "count": 1
+                        "count": 5
                       },
-                      {
-                        "kind": "item",
-                        "name": "Gunpowder",
-                        "count": 25
-                      },
-                      {
-                        "kind": "item",
-                        "name": "Scrap of Metal",
-                        "count": 1
-                      }
-                    ]
-                  }
-                ]
-              }
-            }
-          ]
-        }
-      },
-      {
-        "id": "to-legend",
-        "title": "Heavy Hammer → LEGEND",
-        "notes": "",
-        "chapterId": "7",
-        "sectionId": "final-battle",
-        "entries": [],
-        "buildUp": {
-          "weaponId": "legend"
-        }
-      },
-      {
-        "id": "legend+4",
-        "title": "LEGEND",
-        "notes": "",
-        "chapterId": "7",
-        "sectionId": "final-battle",
-        "entries": [],
-        "build": {
-          "weaponId": "legend",
-          "levelTo": 4,
-          "synths": [
-            {
-              "kind": "sphere",
-              "recipe": {
-                "acquire": {
-                  "kind": "shop",
-                  "shop": "Milane's Weapon Shop",
-                  "price": 500,
-                  "chapter": 3
-                },
-                "stages": [
-                  {
-                    "weaponId": "kuberas-hand",
-                    "levelTo": 5,
-                    "synths": [
                       {
                         "kind": "item",
                         "name": "Rolling Log",
@@ -1085,23 +1446,8 @@
                     "synths": [
                       {
                         "kind": "item",
-                        "name": "Gunpowder",
-                        "count": 15
-                      },
-                      {
-                        "kind": "item",
-                        "name": "Rolling Log",
-                        "count": 1
-                      },
-                      {
-                        "kind": "item",
                         "name": "Scrap of Metal",
-                        "count": 3
-                      },
-                      {
-                        "kind": "item",
-                        "name": "Sturdy Cloth",
-                        "count": 8
+                        "count": 25
                       }
                     ]
                   }
@@ -1113,24 +1459,19 @@
               "recipe": {
                 "acquire": {
                   "kind": "shop",
-                  "shop": "Julia's Ringware",
-                  "price": 860,
+                  "shop": "G-Weapons",
+                  "price": 900,
                   "chapter": 5
                 },
                 "stages": [
                   {
-                    "weaponId": "pocklekul",
+                    "weaponId": "platinum-brassard",
                     "levelTo": 5,
                     "synths": [
                       {
                         "kind": "item",
                         "name": "Gunpowder",
-                        "count": 2
-                      },
-                      {
-                        "kind": "item",
-                        "name": "Scrap of Metal",
-                        "count": 20
+                        "count": 15
                       }
                     ]
                   }
@@ -1153,13 +1494,8 @@
                     "synths": [
                       {
                         "kind": "item",
-                        "name": "Gunpowder",
-                        "count": 17
-                      },
-                      {
-                        "kind": "item",
-                        "name": "Scrap of Metal",
-                        "count": 10
+                        "name": "Rolling Log",
+                        "count": 25
                       }
                     ]
                   }
@@ -1181,61 +1517,22 @@
                     "synths": [
                       {
                         "kind": "item",
-                        "name": "Gunpowder",
-                        "count": 25
-                      },
-                      {
-                        "kind": "item",
-                        "name": "Scrap of Metal",
-                        "count": 2
-                      }
-                    ]
-                  }
-                ]
-              }
-            },
-            {
-              "kind": "sphere",
-              "recipe": {
-                "acquire": {
-                  "kind": "shop",
-                  "shop": "Starlight Weapons",
-                  "price": 1800,
-                  "chapter": 6
-                },
-                "stages": [
-                  {
-                    "weaponId": "moon-armlet",
-                    "levelTo": 5,
-                    "synths": [
-                      {
-                        "kind": "item",
-                        "name": "Antidote Drink",
-                        "count": 1
-                      },
-                      {
-                        "kind": "item",
                         "name": "Bundle of Hay",
-                        "count": 1
+                        "count": 3
                       },
                       {
                         "kind": "item",
-                        "name": "Glass Material",
-                        "count": 1
+                        "name": "Flour",
+                        "count": 3
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Gunpowder",
+                        "count": 12
                       },
                       {
                         "kind": "item",
                         "name": "Rolling Log",
-                        "count": 6
-                      },
-                      {
-                        "kind": "item",
-                        "name": "Scrap of Metal",
-                        "count": 1
-                      },
-                      {
-                        "kind": "item",
-                        "name": "Sturdy Cloth",
                         "count": 3
                       }
                     ]
@@ -1269,50 +1566,6 @@
                       },
                       {
                         "kind": "item",
-                        "name": "Gunpowder",
-                        "count": 1
-                      },
-                      {
-                        "kind": "item",
-                        "name": "Rolling Log",
-                        "count": 6
-                      },
-                      {
-                        "kind": "item",
-                        "name": "Scrap of Metal",
-                        "count": 1
-                      },
-                      {
-                        "kind": "item",
-                        "name": "Sturdy Cloth",
-                        "count": 3
-                      }
-                    ]
-                  }
-                ]
-              }
-            },
-            {
-              "kind": "sphere",
-              "recipe": {
-                "acquire": {
-                  "kind": "shop",
-                  "shop": "Starlight Weapons",
-                  "price": 1800,
-                  "chapter": 6
-                },
-                "stages": [
-                  {
-                    "weaponId": "moon-armlet",
-                    "levelTo": 5,
-                    "synths": [
-                      {
-                        "kind": "item",
-                        "name": "Antidote Drink",
-                        "count": 1
-                      },
-                      {
-                        "kind": "item",
                         "name": "Flour",
                         "count": 1
                       },
@@ -1324,110 +1577,12 @@
                       {
                         "kind": "item",
                         "name": "Rolling Log",
-                        "count": 6
+                        "count": 1
                       },
                       {
                         "kind": "item",
                         "name": "Scrap of Metal",
-                        "count": 1
-                      },
-                      {
-                        "kind": "item",
-                        "name": "Sturdy Cloth",
-                        "count": 3
-                      }
-                    ]
-                  }
-                ]
-              }
-            },
-            {
-              "kind": "sphere",
-              "recipe": {
-                "acquire": {
-                  "kind": "shop",
-                  "shop": "Starlight Weapons",
-                  "price": 1800,
-                  "chapter": 6
-                },
-                "stages": [
-                  {
-                    "weaponId": "moon-armlet",
-                    "levelTo": 5,
-                    "synths": [
-                      {
-                        "kind": "item",
-                        "name": "Antidote Drink",
-                        "count": 1
-                      },
-                      {
-                        "kind": "item",
-                        "name": "Flour",
-                        "count": 1
-                      },
-                      {
-                        "kind": "item",
-                        "name": "Gunpowder",
-                        "count": 1
-                      },
-                      {
-                        "kind": "item",
-                        "name": "Rolling Log",
-                        "count": 5
-                      },
-                      {
-                        "kind": "item",
-                        "name": "Scrap of Metal",
-                        "count": 2
-                      },
-                      {
-                        "kind": "item",
-                        "name": "Sturdy Cloth",
-                        "count": 3
-                      }
-                    ]
-                  }
-                ]
-              }
-            },
-            {
-              "kind": "sphere",
-              "recipe": {
-                "acquire": {
-                  "kind": "shop",
-                  "shop": "Starlight Weapons",
-                  "price": 1800,
-                  "chapter": 6
-                },
-                "stages": [
-                  {
-                    "weaponId": "moon-armlet",
-                    "levelTo": 5,
-                    "synths": [
-                      {
-                        "kind": "item",
-                        "name": "Antidote Drink",
-                        "count": 1
-                      },
-                      {
-                        "kind": "item",
-                        "name": "Flour",
-                        "count": 1
-                      },
-                      {
-                        "kind": "item",
-                        "name": "Gunpowder",
-                        "count": 1
-                      },
-                      {
-                        "kind": "item",
-                        "name": "Rolling Log",
-                        "count": 5
-                      },
-                      {
-                        "kind": "item",
-                        "name": "Scrap of Metal",
-                        "count": 1
+                        "count": 4
                       },
                       {
                         "kind": "item",
@@ -1460,6 +1615,11 @@
                       },
                       {
                         "kind": "item",
+                        "name": "Bundle of Hay",
+                        "count": 1
+                      },
+                      {
+                        "kind": "item",
                         "name": "Flour",
                         "count": 1
                       },
@@ -1471,12 +1631,12 @@
                       {
                         "kind": "item",
                         "name": "Rolling Log",
-                        "count": 5
+                        "count": 1
                       },
                       {
                         "kind": "item",
                         "name": "Scrap of Metal",
-                        "count": 1
+                        "count": 4
                       },
                       {
                         "kind": "item",
@@ -1504,6 +1664,11 @@
                     "synths": [
                       {
                         "kind": "item",
+                        "name": "Antidote Drink",
+                        "count": 1
+                      },
+                      {
+                        "kind": "item",
                         "name": "Bundle of Hay",
                         "count": 1
                       },
@@ -1520,12 +1685,311 @@
                       {
                         "kind": "item",
                         "name": "Rolling Log",
-                        "count": 5
+                        "count": 1
                       },
                       {
                         "kind": "item",
                         "name": "Scrap of Metal",
+                        "count": 4
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Sturdy Cloth",
+                        "count": 4
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "shop",
+                  "shop": "Starlight Weapons",
+                  "price": 1800,
+                  "chapter": 6
+                },
+                "stages": [
+                  {
+                    "weaponId": "moon-armlet",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Antidote Drink",
                         "count": 1
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Bundle of Hay",
+                        "count": 1
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Flour",
+                        "count": 1
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Gunpowder",
+                        "count": 1
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Rolling Log",
+                        "count": 1
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 4
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Sturdy Cloth",
+                        "count": 4
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "shop",
+                  "shop": "Starlight Weapons",
+                  "price": 1800,
+                  "chapter": 6
+                },
+                "stages": [
+                  {
+                    "weaponId": "moon-armlet",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Antidote Drink",
+                        "count": 1
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Bundle of Hay",
+                        "count": 1
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Flour",
+                        "count": 1
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Gunpowder",
+                        "count": 1
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Rolling Log",
+                        "count": 1
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 4
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Sturdy Cloth",
+                        "count": 4
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "shop",
+                  "shop": "Starlight Weapons",
+                  "price": 1800,
+                  "chapter": 6
+                },
+                "stages": [
+                  {
+                    "weaponId": "moon-armlet",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Antidote Drink",
+                        "count": 1
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Bundle of Hay",
+                        "count": 1
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Flour",
+                        "count": 1
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Gunpowder",
+                        "count": 1
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Rolling Log",
+                        "count": 1
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 4
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Sturdy Cloth",
+                        "count": 3
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "shop",
+                  "shop": "Starlight Weapons",
+                  "price": 1800,
+                  "chapter": 6
+                },
+                "stages": [
+                  {
+                    "weaponId": "moon-armlet",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Bundle of Hay",
+                        "count": 2
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Flour",
+                        "count": 1
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Gunpowder",
+                        "count": 1
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Rolling Log",
+                        "count": 1
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 4
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Sturdy Cloth",
+                        "count": 3
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "shop",
+                  "shop": "Starlight Weapons",
+                  "price": 1800,
+                  "chapter": 6
+                },
+                "stages": [
+                  {
+                    "weaponId": "moon-armlet",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Bundle of Hay",
+                        "count": 2
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Glass Material",
+                        "count": 1
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Gunpowder",
+                        "count": 1
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 5
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Sturdy Cloth",
+                        "count": 3
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "shop",
+                  "shop": "Starlight Weapons",
+                  "price": 1800,
+                  "chapter": 6
+                },
+                "stages": [
+                  {
+                    "weaponId": "moon-armlet",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Bundle of Hay",
+                        "count": 2
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Glass Material",
+                        "count": 1
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Gunpowder",
+                        "count": 1
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 5
                       },
                       {
                         "kind": "item",
@@ -1563,106 +2027,23 @@
                       },
                       {
                         "kind": "item",
-                        "name": "Rolling Log",
-                        "count": 6
-                      },
-                      {
-                        "kind": "item",
-                        "name": "Scrap of Metal",
-                        "count": 1
-                      },
-                      {
-                        "kind": "item",
-                        "name": "Sturdy Cloth",
-                        "count": 3
-                      }
-                    ]
-                  }
-                ]
-              }
-            },
-            {
-              "kind": "sphere",
-              "recipe": {
-                "acquire": {
-                  "kind": "shop",
-                  "shop": "Starlight Weapons",
-                  "price": 1800,
-                  "chapter": 6
-                },
-                "stages": [
-                  {
-                    "weaponId": "moon-armlet",
-                    "levelTo": 5,
-                    "synths": [
-                      {
-                        "kind": "item",
-                        "name": "Bundle of Hay",
-                        "count": 1
-                      },
-                      {
-                        "kind": "item",
                         "name": "Glass Material",
                         "count": 1
                       },
                       {
                         "kind": "item",
-                        "name": "Rolling Log",
-                        "count": 6
+                        "name": "Gunpowder",
+                        "count": 1
                       },
                       {
                         "kind": "item",
                         "name": "Scrap of Metal",
-                        "count": 1
+                        "count": 4
                       },
                       {
                         "kind": "item",
                         "name": "Sturdy Cloth",
-                        "count": 3
-                      }
-                    ]
-                  }
-                ]
-              }
-            },
-            {
-              "kind": "sphere",
-              "recipe": {
-                "acquire": {
-                  "kind": "shop",
-                  "shop": "Starlight Weapons",
-                  "price": 1800,
-                  "chapter": 6
-                },
-                "stages": [
-                  {
-                    "weaponId": "moon-armlet",
-                    "levelTo": 5,
-                    "synths": [
-                      {
-                        "kind": "item",
-                        "name": "Bundle of Hay",
-                        "count": 1
-                      },
-                      {
-                        "kind": "item",
-                        "name": "Glass Material",
-                        "count": 1
-                      },
-                      {
-                        "kind": "item",
-                        "name": "Rolling Log",
-                        "count": 6
-                      },
-                      {
-                        "kind": "item",
-                        "name": "Scrap of Metal",
-                        "count": 1
-                      },
-                      {
-                        "kind": "item",
-                        "name": "Sturdy Cloth",
-                        "count": 3
+                        "count": 4
                       }
                     ]
                   }

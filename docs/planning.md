@@ -138,7 +138,9 @@ Bone Rapier +6 for 2,880 ABS in chapter 2, then +3, +3, +2, +2, +5, +4). Two set
 story styles, spread the levels out:
 
 - `firstStatFloor` 0.3: the floor on the first weapon (instead of 0.5);
-- `buildUpLevel` 4: every weapon on the way is levelled to at least +4 before its build-up.
+- `buildUpLevel` 4: every weapon on the way is levelled to at least +4 before its build-up. Soft:
+  each level short costs `buildUpLevelCost` (3,000 ABS), so an unusual start or target on the
+  planner page still gets a plan.
 
 | Island King        | ABS    | Effort | Levels               | Last step ABS | Finishes |
 | ------------------ | ------ | ------ | -------------------- | ------------- | -------- |
@@ -149,6 +151,22 @@ Over all plans: total ABS from 6% less (Five-Star Armlet) to 15% more (LEGEND); 
 the way at +4 or +5 (a `+0` step is a weapon's first chapter, spheres only, levelled in the next);
 stats start lower on the first weapon (16–32% of its maximum) and are about half or more after.
 Supernova now finishes in chapter 8 (was 7).
+
+### +5 before build-ups (LEGEND, Supernova, Five-Star Armlet)
+
+These three have the costliest last steps, so they ask for +5 (`buildUpLevel: 5` in
+`plans.config.ts`):
+
+| Plan             | ABS             | Last step ABS   | Levels before build-ups | Finishes  |
+| ---------------- | --------------- | --------------- | ----------------------- | --------- |
+| LEGEND           | 53,896 → 49,480 | 29,424 → 29,064 | +4 → +5                 | ch7 → ch8 |
+| Supernova        | 50,524 → 51,173 | 30,709 → 31,037 | +4 → +5                 | ch8 → ch7 |
+| Five-Star Armlet | 53,216 → 53,528 | 32,408 → 29,952 | +4 → +5                 | ch7       |
+
+The last step hardly shrinks: its ABS is not the final weapon's levels (LEGEND +2) but the 14–15
+side weapons levelled to +5 for its spheres (mostly Moon Armlets). A weapon's stats are capped at its
+maximum, and the final weapon's maximum is far above the one before, so those stat points can only
+go in at the end. SP from earlier levels carries over, but it is not what the last step is short of.
 
 ### Uneven levels are expected
 
@@ -188,9 +206,13 @@ pnpm plans island-king/story --new      # a new guide next to the old one (new i
 
 Each plan is solved `--runs` times in parallel worker processes (120 s per route; runs differ a
 little). The runs and the committed plan are scored (`plan-score.ts`) and the best is kept:
-valid first (simulator-clean, maxed, every wanted ability), then the earliest finish chapter, the
-least earning effort, the least ABS, the earliest pace, the least gilda. The committed file only
-changes when a run is better; `--replace` leaves the committed plan out of the comparison.
+valid first (simulator-clean, maxed, every wanted ability); then, for story plans, the least story
+cost: the solver's objective recomputed from the guide with the plan's current settings
+(`storyCost`: effort-weighted ABS, chapter delay, early stats, items on the main weapon, stat floor,
+build-up levels), so a change of settings is judged fairly against the committed plan; then the
+earliest finish chapter, the least earning effort, the least ABS, the earliest pace, the least
+gilda. The committed file only changes when a run is better; `--replace` leaves the committed plan
+out of the comparison.
 
 Review regenerated plans in the app before committing them; `src/lib/guide/plans.test.ts` checks
 that every plan is simulator-valid and reaches its goal.

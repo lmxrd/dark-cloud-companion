@@ -92,6 +92,8 @@ export const plansConfig = {
           objective: "abs",
           flow: "progression",
           label: "Story",
+          // +5 before each build-up: more SP along the way, less ABS farming on the last weapon.
+          buildUpLevel: 5,
           // The weapon guide's LEGEND route (recipe 7.6): through the hammers.
           route: [
             "battle-wrench",
@@ -114,6 +116,8 @@ export const plansConfig = {
           objective: "abs",
           flow: "progression",
           label: "Story",
+          // +5 before each build-up: more SP along the way, less ABS farming on the last weapon.
+          buildUpLevel: 5,
           // The weapon guide's Supernova route (recipe 7.3).
           route: [
             "classic-gun",
@@ -157,6 +161,8 @@ export const plansConfig = {
           label: "Story",
           // 150 per point (the default) cost this plan far more ABS for no evener stats.
           statFloorCost: 60,
+          // +5 before each build-up: more SP along the way, less ABS farming on the last weapon.
+          buildUpLevel: 5,
           // The weapon guide's Five-Star Armlet route (recipe 7.5).
           route: [
             "magic-brassard",
