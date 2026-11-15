@@ -819,7 +819,11 @@ export const en = {
   "planner.step.spUsed": "{used} / {total} SP",
   "planner.step.withAlly": "with {ally} along (+1 SP per level)",
   "planner.step.passesOnEach": "Each passes on:",
-  "planner.step.allItems": "Items for this step (spheres included):",
+  "planner.step.allItems": "Items for this step (spheres included)",
+  "planner.step.amount": "Amount",
+  "planner.step.itemName": "Item",
+  "planner.step.aSphere": "Synth sphere",
+  "planner.step.noAbilities": "none",
   "planner.step.requirements": "{weapon} needs (stat now / required):",
   "planner.step.statsLegend": "Stat after this stage / the weapon's maximum.",
   "planner.step.statsLegendNeeds":

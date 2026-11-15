@@ -6,6 +6,7 @@ import { useTranslations } from "@/i18n";
 import type { DerivedBuild } from "@/lib/guide/derive";
 import type { Guide, Step } from "@/lib/guide/types";
 import type { ItemUse, Recipe } from "@/lib/planner/types";
+import type { AbilityId } from "@/lib/schemas";
 import { getWeapon } from "@/lib/planner/sources";
 import { finalWeaponIds } from "@/lib/planner/graph";
 import { addShoppingGoal } from "@/lib/store";
@@ -282,6 +283,13 @@ export function PlanDetailedMap({
                             values={plus({ ...g.gains, du: g.du })}
                             className="overflow-hidden rounded-md border-[1.5px] font-extrabold"
                           />
+                          {g.abilities.length > 0 && (
+                            <span className="text-[11px] font-bold">
+                              {g.abilities
+                                .map((a) => t(`ability.${a as AbilityId}` as const))
+                                .join(", ")}
+                            </span>
+                          )}
                         </div>
                       )}
                     </li>

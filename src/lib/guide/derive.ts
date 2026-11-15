@@ -38,7 +38,13 @@ export interface DerivedStep {
    */
   nextWeaponId?: string;
   /** Work steps: what each sphere synthed in the step passed on, in the step's order. */
-  spheres: { weaponId: string; level: number; gains: Partial<Stats>; du: number }[];
+  spheres: {
+    weaponId: string;
+    level: number;
+    gains: Partial<Stats>;
+    du: number;
+    abilities: string[];
+  }[];
   cost: Cost;
   errors: string[];
 }
@@ -91,9 +97,13 @@ export function deriveBuild(guide: Guide): DerivedBuild {
   for (const l of sim.log) {
     if (l.depth !== 0) continue;
     if (l.type === "sphere")
-      spheresByStage
-        .at(-1)!
-        .push({ weaponId: l.weaponId, level: l.level, gains: l.gains, du: l.du });
+      spheresByStage.at(-1)!.push({
+        weaponId: l.weaponId,
+        level: l.level,
+        gains: l.gains,
+        du: l.du,
+        abilities: l.abilities,
+      });
     if (l.type === "state") spheresByStage.push([]);
   }
   const snapAt = (i: number) => {

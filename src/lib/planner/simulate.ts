@@ -119,13 +119,8 @@ function runStages(
           );
           continue;
         }
-        run.state = synth(
-          run.state,
-          weapon,
-          { ...sphere.gains, du: sphere.du },
-          sphere.sp,
-          aux.level >= MIN_SPHERE_LEVEL ? aux.abilities : [],
-        );
+        const passed = aux.level >= MIN_SPHERE_LEVEL ? aux.abilities : [];
+        run.state = synth(run.state, weapon, { ...sphere.gains, du: sphere.du }, sphere.sp, passed);
         run.log.push({
           type: "sphere",
           weaponId: aux.weaponId,
@@ -133,6 +128,7 @@ function runStages(
           sp: sphere.sp,
           gains: sphere.gains,
           du: sphere.du,
+          abilities: [...passed],
           depth,
         });
       }

@@ -1,4 +1,4 @@
-import { STAT_KEYS, type StatKey } from "@/lib/schemas";
+import { STAT_KEYS, type AbilityId, type StatKey } from "@/lib/schemas";
 import { recipeItems, stageItems, stepItems } from "@/lib/guide/buildItems";
 import { useTranslations, type Translate } from "@/i18n";
 import type { DerivedStep } from "@/lib/guide/derive";
@@ -47,12 +47,52 @@ function groupSynths(stage: Stage): Group[] {
 }
 
 /** "At +24 · Fl +12 · …" for the stats a sphere passes on (only those it adds). */
-export function GainsText({ gains }: { gains: Partial<Record<StatKey, number>> }) {
+export function GainsText({
+  gains,
+  abilities = [],
+}: {
+  gains: Partial<Record<StatKey, number>>;
+  /** Abilities passed on too, listed after the stats. */
+  abilities?: string[];
+}) {
   const t = useTranslations();
-  const parts = STAT_KEYS.filter((k) => (gains[k] ?? 0) > 0).map(
-    (k) => `${t(`stat.short.${k}` as const)} +${gains[k]}`,
-  );
+  const parts = [
+    ...STAT_KEYS.filter((k) => (gains[k] ?? 0) > 0).map(
+      (k) => `${t(`stat.short.${k}` as const)} +${gains[k]}`,
+    ),
+    ...abilities.map((a) => t(`ability.${a as AbilityId}` as const)),
+  ];
   return <>{parts.length ? parts.join(" · ") : "–"}</>;
+}
+
+/** A compact amount | item table, most first. */
+function ItemTable({
+  items,
+  className,
+}: {
+  items: Iterable<[string, number]>;
+  className?: string;
+}) {
+  const t = useTranslations();
+  const rows = [...items].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+  return (
+    <table className={cn("text-xs tabular-nums", className)}>
+      <thead className="sr-only">
+        <tr>
+          <th>{t("planner.step.amount")}</th>
+          <th>{t("planner.step.itemName")}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {rows.map(([n, c]) => (
+          <tr key={n}>
+            <td className="pr-2 text-right font-semibold">{c}×</td>
+            <td>{n}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
 }
 
 export function RecipeView({ recipe, spBonus = 1 }: { recipe: Recipe; spBonus?: number }) {
@@ -80,14 +120,37 @@ export function RecipeView({ recipe, spBonus = 1 }: { recipe: Recipe; spBonus?: 
               </span>
             )}
             +{s.levelTo}
-            {s.synths.length > 0 &&
-              ` · ${s.synths.map((x) => (x.kind === "item" ? `${x.count}× ${x.name}` : "sphere")).join(", ")}`}
-            {i < recipe.stages.length - 1 &&
-              ` → ${t("planner.step.buildup", { weapon: name(recipe.stages[i + 1].weaponId) })}`}
+            {s.synths.length > 0 && (
+              <ItemTable
+                className="text-foreground my-0.5"
+                items={s.synths.reduce((m, x) => {
+                  const key = x.kind === "item" ? x.name : t("planner.step.aSphere");
+                  return m.set(key, (m.get(key) ?? 0) + (x.kind === "item" ? x.count : 1));
+                }, new Map<string, number>())}
+              />
+            )}
+            {i < recipe.stages.length - 1 && (
+              <span className="block">
+                → {t("planner.step.buildup", { weapon: name(recipe.stages[i + 1].weaponId) })}
+              </span>
+            )}
           </li>
         );
       })}
     </ol>
+  );
+}
+
+/** Every item a step needs, spheres included, in an accordion. */
+function AllItems({ items }: { items: Map<string, number> }) {
+  const t = useTranslations();
+  return (
+    <details>
+      <summary className="text-muted-foreground cursor-pointer text-xs">
+        {t("planner.step.allItems")}
+      </summary>
+      <ItemTable items={items} className="mt-1" />
+    </details>
   );
 }
 
@@ -181,7 +244,7 @@ export function BuildStepBody({
               <p className="text-muted-foreground text-xs">
                 {t(g.count > 1 ? "planner.step.passesOnEach" : "planner.step.passesOn")}{" "}
                 <span className="text-foreground tabular-nums">
-                  <GainsText gains={passed.gains} />
+                  <GainsText gains={passed.gains} abilities={passed.abilities} />
                 </span>
               </p>
             )}
@@ -199,15 +262,7 @@ export function BuildStepBody({
           </div>
         );
       })}
-      {stageItems(stage).size > 0 && (
-        <p className="text-xs">
-          <span className="text-muted-foreground">{t("planner.step.allItems")} </span>
-          {[...stageItems(stage)]
-            .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
-            .map(([n, c]) => `${c}× ${n}`)
-            .join(", ")}
-        </p>
-      )}
+      {stageItems(stage).size > 0 && <AllItems items={stageItems(stage)} />}
       {buyableOnly && foundItems.length > 0 && (
         <p className="text-destructive text-xs">
           {t("step.foundItems", { items: foundItems.join(", ") })}
@@ -231,7 +286,7 @@ export function BuildStepBody({
                 derived.requirements ? "planner.step.statsLegendNeeds" : "planner.step.statsLegend",
               )}
             </p>
-            <div className="mt-1.5 grid grid-cols-3 gap-x-3 gap-y-1.5 text-xs">
+            <div className="mt-1.5 grid grid-cols-2 gap-x-3 gap-y-1.5 text-xs sm:grid-cols-3 lg:grid-cols-4">
               {STAT_KEYS.map((k) => {
                 const need = derived.requirements?.[k] ?? 0;
                 const max = weapon.maxStats[k] || 1;
@@ -273,6 +328,12 @@ export function BuildStepBody({
                 );
               })}
             </div>
+            <p className="mt-1.5 text-xs">
+              <span className="text-muted-foreground">{t("planner.abilities")}: </span>
+              {derived.abilities.length > 0
+                ? derived.abilities.map((a) => t(`ability.${a as AbilityId}` as const)).join(", ")
+                : t("planner.step.noAbilities")}
+            </p>
           </details>
           {next && (
             <p className="font-medium">{t("planner.step.buildup", { weapon: next.name })}</p>
@@ -338,15 +399,7 @@ function PrepareBody({
           </div>
         );
       })}
-      {items.size > 0 && (
-        <p className="text-xs">
-          <span className="text-muted-foreground">{t("planner.step.allItems")} </span>
-          {[...items]
-            .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
-            .map(([n, c]) => `${c}× ${n}`)
-            .join(", ")}
-        </p>
-      )}
+      {items.size > 0 && <AllItems items={items} />}
       {derived && (
         <p className="text-muted-foreground text-xs">
           {t("planner.step.cost", {

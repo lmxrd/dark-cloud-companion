@@ -1,4 +1,4 @@
-import type { Stats } from "@/lib/schemas";
+import type { AbilityId, Stats } from "@/lib/schemas";
 
 /** How a weapon enters the plan. */
 export type Acquire =
@@ -65,6 +65,8 @@ export type LogEntry =
       gains: Partial<Stats>;
       /** Durability it passes on. */
       du: number;
+      /** Abilities it passes on. */
+      abilities: AbilityId[];
       depth: number;
     }
   | { type: "buildup"; from: string; to: string; depth: number }
