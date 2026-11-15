@@ -4,7 +4,7 @@
 import { z } from "zod";
 import { type AbilityId, abilityId } from "../../src/lib/schemas.ts";
 import { finalWeaponIds } from "../../src/lib/planner/graph.ts";
-import { STORY_PRESETS, type ProgressionOptions } from "../../src/lib/planner/plan.ts";
+import { storyOptions, type ProgressionOptions } from "../../src/lib/planner/plan.ts";
 
 const variantSchema = z.object({
   /** With the target, the plan's config key <targetId>/<id> (unique; the guide id is a hash, see plan-files.ts). */
@@ -29,26 +29,10 @@ const variantSchema = z.object({
    * src/lib/planner/plan.ts): a story style preset (default `balanced`), and overrides of its settings.
    */
   storyStyle: z.enum(["balanced", "effort"]).optional(),
-  grindShare: z.number().optional(),
-  delayCost: z.number().optional(),
-  levelCap: z.number().optional(),
-  finalLevelCap: z.number().optional(),
-  startBy: z.number().optional(),
-  /** Reward per stat point per stage for stats gained earlier (preset: 2; 0: off). */
-  earlyStatBonus: z.number().optional(),
-  statFloor: z.number().optional(),
-  statFloorCost: z.number().optional(),
-  firstStatFloor: z.number().optional(),
+  /** Least level before each build-up (default 4). The other story rules are fixed (STORY_RULES). */
   buildUpLevel: z.number().optional(),
-  buildUpLevelCost: z.number().optional(),
-  /** Weigh ABS by the effort of earning it in its chapter, to this power (preset: 0.5 or 1; 0: off). */
-  effortPower: z.number().optional(),
-  /** ABS each item synthed straight onto the main weapon counts as (its SP is gone; default 30). */
-  mainItemCost: z.number().optional(),
   /** A fixed build-up route (first weapon … target) instead of searching for one. */
   route: z.array(z.string()).optional(),
-  /** Also offer built-up spheres with their earlier weapons this many levels higher (default 0). */
-  extraAuxLevels: z.number().optional(),
   /** Level the side weapons for spheres in earlier chapters ("prepare" steps, docs/planning.md). */
   prepareSpheres: z.boolean().optional(),
   /** Routes solved exactly, and seconds per exact solve (story plans are generated once: be thorough). */
@@ -102,7 +86,6 @@ export interface PlanSpec {
   progression: ProgressionOptions;
   /** A fixed build-up route (first weapon … target). */
   route?: string[];
-  extraAuxLevels?: number;
   /** The guide gets prepare steps (see `prepareSpheresEarly`). */
   prepareSpheres?: boolean;
   /** Routes solved exactly and seconds per exact solve (undefined: the planner's defaults). */
@@ -111,26 +94,12 @@ export interface PlanSpec {
   maxGilda?: number;
 }
 
-/** A variant's story settings: its style's preset with the variant's own overrides. */
+/** A variant's story settings: the fixed rules with its choices. */
 function storySettings(v: z.infer<typeof variantSchema>): ProgressionOptions {
-  const preset = STORY_PRESETS[v.storyStyle ?? "balanced"];
-  const pick = <K extends keyof ProgressionOptions>(k: K) =>
-    (v[k as keyof typeof v] as ProgressionOptions[K] | undefined) ?? preset[k];
-  return {
-    grindShare: pick("grindShare"),
-    delayCost: pick("delayCost"),
-    levelCap: pick("levelCap"),
-    finalLevelCap: pick("finalLevelCap"),
-    startBy: pick("startBy"),
-    earlyStatBonus: pick("earlyStatBonus"),
-    statFloor: pick("statFloor"),
-    statFloorCost: pick("statFloorCost"),
-    firstStatFloor: pick("firstStatFloor"),
-    buildUpLevel: pick("buildUpLevel"),
-    buildUpLevelCost: pick("buildUpLevelCost"),
-    mainItemCost: pick("mainItemCost"),
-    effortPower: pick("effortPower"),
-  };
+  return storyOptions({
+    ...(v.storyStyle ? { style: v.storyStyle } : {}),
+    ...(v.buildUpLevel ? { buildUpLevel: v.buildUpLevel } : {}),
+  });
 }
 
 export function expandPlans(config: PlansConfig): PlanSpec[] {
@@ -162,7 +131,6 @@ export function expandPlans(config: PlansConfig): PlanSpec[] {
           itemPool: v.itemPool ?? "cheap",
           progression: storySettings(v),
           ...(v.route ? { route: v.route } : {}),
-          ...(v.extraAuxLevels ? { extraAuxLevels: v.extraAuxLevels } : {}),
           ...(v.prepareSpheres ? { prepareSpheres: true } : {}),
           ...(v.flow === "progression"
             ? { exactChains: v.exactChains ?? 6, timeLimitSec: v.timeLimitSec ?? 120 }

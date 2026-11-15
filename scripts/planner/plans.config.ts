@@ -68,8 +68,6 @@ export const plansConfig = {
           objective: "abs",
           flow: "progression",
           label: "Story",
-          // 150 per point (the default) cost this plan far more ABS for no evener stats.
-          statFloorCost: 60,
           // The weapon guide's Grade Zero route (recipe 7.2).
           route: [
             "battle-wrench",
@@ -159,8 +157,6 @@ export const plansConfig = {
           objective: "abs",
           flow: "progression",
           label: "Story",
-          // 150 per point (the default) cost this plan far more ABS for no evener stats.
-          statFloorCost: 60,
           // Side weapons for its spheres levelled in earlier chapters (try-out on one plan).
           prepareSpheres: true,
           // +5 before each build-up: more SP along the way, less ABS farming on the last weapon.

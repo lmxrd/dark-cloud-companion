@@ -63,8 +63,6 @@ export interface PlanRequest {
   templates?: Template[];
   /** Which bought items may be synthed (default `all`); see {@link ItemPool}. */
   itemPool?: ItemPool;
-  /** See `TemplateOptions.extraAuxLevels`. */
-  extraAuxLevels?: number;
   /** Follow the story: see {@link ProgressionOptions}. */
   progression?: ProgressionOptions;
 }
@@ -109,11 +107,6 @@ export interface ProgressionOptions {
   effortPower?: number;
 }
 
-/**
- * How hard an ABS is to earn in each chapter (index 1…8), relative to chapter 4: the inverse of the
- * ABS an ABS-paying floor or fight pays there on average (about 230 in chapter 2, 1,100 in chapter
- * 4, 3,500 in chapter 7).
- */
 /** ABS an ABS-paying floor or fight pays on average in each chapter (index 1…8). */
 export const ABS_PER_FLOOR: number[] = (() => {
   const perSection = Array<number>(9).fill(0);
@@ -123,6 +116,11 @@ export const ABS_PER_FLOOR: number[] = (() => {
   }
   return perSection;
 })();
+/**
+ * How hard an ABS is to earn in each chapter (index 1…8), relative to chapter 4: the inverse of the
+ * ABS an ABS-paying floor or fight pays there on average (about 230 in chapter 2, 1,100 in chapter
+ * 4, 3,500 in chapter 7).
+ */
 export const effortWeights: number[] = ABS_PER_FLOOR.map((v, c) =>
   c === 0 || !v ? 1 : ABS_PER_FLOOR[4] / v,
 );
@@ -134,7 +132,12 @@ export const effortWeights: number[] = ABS_PER_FLOOR.map((v, c) =>
  * strongest mid-game weapon for some targets, but it may leave the first chapters to later.
  */
 export type StoryStyle = "balanced" | "effort";
-const STORY_BASE = {
+
+/**
+ * The fixed story rules (docs/planning.md, "Story rules"): measured and the same for every plan,
+ * not settings. Only `StoryChoices` vary.
+ */
+export const STORY_RULES = {
   grindShare: 0.3,
   delayCost: 10000,
   levelCap: 10,
@@ -145,12 +148,27 @@ const STORY_BASE = {
   statFloor: 0.5,
   statFloorCost: 150,
   firstStatFloor: 0.3,
-  buildUpLevel: 4,
   buildUpLevelCost: 3000,
-};
+} as const satisfies Partial<ProgressionOptions>;
+
+/** What a story plan may choose: its style and the least level before each build-up (4 or 5). */
+export interface StoryChoices {
+  style?: StoryStyle;
+  buildUpLevel?: number;
+}
+
+/** The story rules with a plan's choices. */
+export function storyOptions(c: StoryChoices = {}): ProgressionOptions {
+  return {
+    ...STORY_RULES,
+    effortPower: c.style === "effort" ? 1 : 0.5,
+    buildUpLevel: c.buildUpLevel ?? 4,
+  };
+}
+
 export const STORY_PRESETS: Record<StoryStyle, ProgressionOptions> = {
-  balanced: { ...STORY_BASE, effortPower: 0.5 },
-  effort: { ...STORY_BASE, effortPower: 1 },
+  balanced: storyOptions(),
+  effort: storyOptions({ style: "effort" }),
 };
 /** The story settings the built-in plans use by default. */
 export const STORY_DEFAULTS: ProgressionOptions = STORY_PRESETS.balanced;
@@ -593,7 +611,6 @@ export async function planPath(
     allowFound: req.allowFound,
     spBonus: req.spBonus,
     pool: req.itemPool,
-    extraAuxLevels: req.extraAuxLevels,
   };
   const prog = req.progression;
   let templates =

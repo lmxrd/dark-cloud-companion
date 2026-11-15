@@ -57,11 +57,47 @@ plan you can follow while playing:
 - **Abilities** come from spheres placed where no later build-up brings the opposite.
 - **Margins.** Requirements get a 1-point margin; a retry uses 3 and keeps a few SP spare.
 
+### Rules and choices
+
+A story plan follows fixed rules (`STORY_RULES` in `plan.ts`), the same for every plan; each was
+added for a reason measured below. Only a few things are a plan's choice.
+
+| Rule                             | Value                                                               | Why                                                 |
+| -------------------------------- | ------------------------------------------------------------------- | --------------------------------------------------- |
+| Grind allowance                  | 30% of what the story pays                                          | a little grinding, not an insane amount             |
+| Chapter delay (`delayCost`)      | 10,000 over all stages                                              | work happens as early as the story allows           |
+| Level caps                       | +10 on the way, +15 last                                            | no over-levelling mid-game                          |
+| Start weapon                     | obtainable by chapter 2                                             | the weapon is used through the story                |
+| Effort weighting (`effortPower`) | 0.5 (the style can make it 1)                                       | ABS counts by how hard it is to earn in its chapter |
+| Early stats (`earlyStatBonus`)   | 2 per point per stage                                               | stats above the floor come earlier                  |
+| Items on the main weapon         | 30 each (`mainItemCost`)                                            | SP stays for spheres                                |
+| Stat floor                       | 0.5 of the weapon's maximum (0.3 on the first), 150 per point short | every stat rises along the way                      |
+| Least level before a build-up    | 3,000 per level short                                               | soft, so the planner page always gets a plan        |
+
+| Choice                                         | Where                                        | Values                                       |
+| ---------------------------------------------- | -------------------------------------------- | -------------------------------------------- |
+| Route                                          | `plans.config.ts`; the planner page searches | the weapon guide's route for most plans      |
+| Item set                                       | both                                         | everyday +2 items, or crystals too           |
+| Least level before a build-up (`buildUpLevel`) | `plans.config.ts`                            | 4; 5 for LEGEND, Supernova, Five-Star Armlet |
+| Prepare steps (`prepareSpheres`)               | `plans.config.ts`                            | Five-Star Armlet only                        |
+| Story style                                    | both                                         | balanced (default) or least effort           |
+
+**Which rules matter (switched off one at a time).** The solver alone varies by
+about ±3% ABS between runs (same settings, re-solved), so smaller differences are noise.
+
+| Switched off                                             | Effect                                                                                             |
+| -------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| Early stats                                              | Dark Cloud 7% less ABS, but stats only just over the floor (lowest 47–56% instead of 51–97%): kept |
+| Items on the main weapon                                 | the same ABS, but Island King got a stray stage with a stat at 0%: kept                            |
+| Floor cost 60 (was Grade Zero's and Five-Star Armlet's)  | within noise of 150: one value for all                                                             |
+| Least effort style                                       | within noise on Island King and Dark Cloud, the same level pattern                                 |
+| Extra levels on built-up side weapons (`extraAuxLevels`) | no gain (measured earlier): removed                                                                |
+
 ### What a story plan minimises
 
 The objective adds up (in ABS-equivalent units):
 
-| Term                        | What it does                                                  | Setting             |
+| Term                        | What it does                                                  | Rule                |
 | --------------------------- | ------------------------------------------------------------- | ------------------- |
 | ABS, weighted by **effort** | ABS spent in a chapter counts by how hard it is to earn there | `effortPower`       |
 | Chapter delay               | every stage one chapter later costs this much in all          | `delayCost` 10,000  |
@@ -102,6 +138,9 @@ as % of the weapon's maximum):
 | Balanced         | 51,208 | 31.0   | ch2   | 42 → 45 → 71 → 70 → 77 → 89 → 100      |
 
 (Effort weighting in full without the stronger early-stats term skipped chapters 2–3 for both.)
+
+Since the stat floor and the least level before a build-up, the two styles barely differ (within
+the solver's noise on Island King and Dark Cloud).
 
 ### Stat floor
 
@@ -200,7 +239,7 @@ weapon guide's recipes have the same shape (Island King: +6, +5, +3, +2, +2, +2,
   for the chapter 6 kills, the old Digi Hammer as a sphere): LEGEND cost 53,800 ABS instead of
   43,384, finishing in the same chapter. A sphere keeps only 60% of the old weapon's stats.
 - **Higher levels on built-up side weapons** (Battle Wrench +4/+5 before True Battle Wrench, more SP
-  to fill): Island King 44,048 vs 43,712 ABS, no gain. Kept as `extraAuxLevels`, off.
+  to fill): Island King 44,048 vs 43,712 ABS, no gain.
 - **Free route search** for weapons with a recipe in the weapon guide: it found the guide's routes.
 
 ## Built-in plans
