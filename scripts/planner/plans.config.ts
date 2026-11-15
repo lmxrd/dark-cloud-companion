@@ -42,10 +42,10 @@ export const plansConfig = {
       targets: ["island-king"],
       variants: [
         {
-          id: "story",
+          id: "balanced",
           objective: "abs",
           flow: "progression",
-          label: "Story",
+          label: "Balanced",
           // The weapon guide's "evil sword" route: Poison, Absorb and Dark come with it, no slow
           // 4-hit swords before the Island King, and Griffon Fork on the way is a fine stop.
           route: [
@@ -64,10 +64,10 @@ export const plansConfig = {
       targets: ["grade-zero"],
       variants: [
         {
-          id: "story",
+          id: "balanced",
           objective: "abs",
           flow: "progression",
-          label: "Story",
+          label: "Balanced",
           // The weapon guide's Grade Zero route (recipe 7.2).
           route: [
             "battle-wrench",
@@ -86,10 +86,10 @@ export const plansConfig = {
       targets: ["legend"],
       variants: [
         {
-          id: "story",
+          id: "balanced",
           objective: "abs",
           flow: "progression",
-          label: "Story",
+          label: "Balanced",
           // +5 before each build-up: more SP along the way, less ABS farming on the last weapon.
           buildUpLevel: 5,
           // The weapon guide's LEGEND route (recipe 7.6): through the hammers.
@@ -110,10 +110,10 @@ export const plansConfig = {
       targets: ["supernova"],
       variants: [
         {
-          id: "story",
+          id: "balanced",
           objective: "abs",
           flow: "progression",
-          label: "Story",
+          label: "Balanced",
           // +5 before each build-up: more SP along the way, less ABS farming on the last weapon.
           buildUpLevel: 5,
           // The weapon guide's Supernova route (recipe 7.3).
@@ -133,10 +133,10 @@ export const plansConfig = {
       targets: ["griffon-fork"],
       variants: [
         {
-          id: "story",
+          id: "balanced",
           objective: "abs",
           flow: "progression",
-          label: "Story",
+          label: "Balanced",
           // The weapon guide's Griffon Fork route (recipe 7.4).
           route: [
             "bone-rapier",
@@ -153,10 +153,10 @@ export const plansConfig = {
       targets: ["five-star-armlet"],
       variants: [
         {
-          id: "story",
+          id: "balanced",
           objective: "abs",
           flow: "progression",
-          label: "Story",
+          label: "Balanced",
           // Side weapons for its spheres levelled in earlier chapters (try-out on one plan).
           prepareSpheres: true,
           // +5 before each build-up: more SP along the way, less ABS farming on the last weapon.
@@ -178,10 +178,10 @@ export const plansConfig = {
       targets: ["dark-cloud"],
       variants: [
         {
-          id: "story",
+          id: "balanced",
           objective: "abs",
           flow: "progression",
-          label: "Story",
+          label: "Balanced",
           // The weapon guide's Dark Cloud route (recipe 7.8).
           route: [
             "baselard",
@@ -199,10 +199,10 @@ export const plansConfig = {
       targets: ["love"],
       variants: [
         {
-          id: "story",
+          id: "balanced",
           objective: "abs",
           flow: "progression",
-          label: "Story",
+          label: "Balanced",
           // No guide recipe: the cheapest route the planner found (pinned for stable regeneration).
           route: [
             "magic-brassard",
@@ -221,10 +221,10 @@ export const plansConfig = {
       targets: ["last-resort"],
       variants: [
         {
-          id: "story",
+          id: "balanced",
           objective: "abs",
           flow: "progression",
-          label: "Story",
+          label: "Balanced",
           // No guide recipe: the cheapest route the planner found (pinned for stable regeneration).
           route: [
             "classic-gun",
@@ -242,10 +242,10 @@ export const plansConfig = {
       targets: ["sigma-bazooka"],
       variants: [
         {
-          id: "story",
+          id: "balanced",
           objective: "abs",
           flow: "progression",
-          label: "Story",
+          label: "Balanced",
           // No guide recipe: the cheapest route the planner found (pinned for stable regeneration).
           route: [
             "classic-gun",
@@ -259,18 +259,63 @@ export const plansConfig = {
       ],
     },
     {
-      // The fastest way to each final weapon: finished in the earliest chapter possible, with any
-      // items (gems included) and any gilda, grinding whatever ABS the story hasn't paid by then.
+      // Flamingo, the best Spheda club: no guide recipe, so the route is searched.
+      targets: ["flamingo"],
+      // Stop, Wealth and Dark come only from side weapons later than a club's plan finishes, so
+      // its story plans take the other five (Gilda max can still use coins for all eight).
+      abilities: ["poison", "abs-up", "steal", "durable", "absorb"],
+      variants: [
+        { id: "balanced", objective: "abs", flow: "progression", label: "Balanced" },
+        {
+          id: "earliest",
+          objective: "abs",
+          flow: "progression",
+          label: "Earliest",
+          earliestSteps: true,
+        },
+      ],
+    },
+    {
+      // Gilda max for each starred weapon: the best path no matter the cost, without the story
+      // rules (any gilda, every item on sale as of chapter 7).
       targets: ["finals"],
       variants: [
         {
-          id: "fastest",
+          id: "gilda-max",
           objective: "abs",
-          flow: "earliest",
-          label: "Fastest",
+          label: "Gilda max",
+          // The best path no matter the cost: no story rules, any gilda, every item on sale as of
+          // chapter 7 (gems and coins too); the least ABS.
+          maxChapter: 7,
           itemPool: "all",
           anyGilda: true,
           timeLimitSec: 120,
+        },
+      ],
+    },
+    {
+      // Every step as soon as the story unlocks it, grinding as much ABS as it takes, with the
+      // Story rules otherwise (items and gilda by chapter, no items straight on the weapon early).
+      // The route is searched.
+      targets: [
+        "island-king",
+        "love",
+        "grade-zero",
+        "legend",
+        "supernova",
+        "last-resort",
+        "sigma-bazooka",
+        "dark-cloud",
+        "griffon-fork",
+        "five-star-armlet",
+      ],
+      variants: [
+        {
+          id: "earliest",
+          objective: "abs",
+          flow: "progression",
+          label: "Earliest",
+          earliestSteps: true,
         },
       ],
     },

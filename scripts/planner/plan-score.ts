@@ -1,6 +1,7 @@
 // Scores a generated plan so runs can be compared (the generator keeps the best of several runs and
 // the committed plan). Everything is derived from the guide itself with the simulator, so a plan
 // from an older generator version is scored the same way.
+import { mainItemCostAt } from "../../src/lib/planner/solve.ts";
 import { deriveBuild } from "../../src/lib/guide/derive.ts";
 import type { Guide } from "../../src/lib/guide/types.ts";
 import { getWeapon } from "../../src/lib/planner/sources.ts";
@@ -61,8 +62,13 @@ export function storyCost(guide: Guide, prog: ProgressionOptions): number {
     const next = work[i + 1]?.build?.weaponId;
     if (next && next !== w.id && prog.buildUpLevel)
       cost += (prog.buildUpLevelCost ?? 0) * Math.max(0, prog.buildUpLevel - st.level);
-    for (const x of s.build!.synths ?? [])
-      if (x.kind === "item") cost += (prog.mainItemCost ?? 0) * (x.count ?? 1);
+    const each = mainItemCostAt(
+      i,
+      work.length,
+      prog.mainItemCost ?? 0,
+      prog.mainItemCostLast ?? prog.mainItemCost ?? 0,
+    );
+    for (const x of s.build!.synths ?? []) if (x.kind === "item") cost += each * (x.count ?? 1);
   });
   return cost;
 }

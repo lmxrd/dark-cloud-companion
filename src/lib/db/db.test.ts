@@ -114,7 +114,7 @@ describe("plan views data", () => {
     const { builtinGuideById } = await import("@/lib/guide/builtin");
     const { deriveBuild } = await import("@/lib/guide/derive");
     const g = [...builtinGuideById.values()].find(
-      (x) => x.id.startsWith("island-king") && x.title.includes("Story"),
+      (x) => x.id.startsWith("island-king") && x.title.includes("Balanced"),
     )!;
     const d = deriveBuild(g);
     const work = g.steps.filter((s) => s.build).map((s) => d.steps.get(s.id)!);

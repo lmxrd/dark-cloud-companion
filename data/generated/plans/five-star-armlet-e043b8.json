@@ -1,10 +1,10 @@
 {
-  "name": "Five-Star Armlet — Fastest",
-  "spec": "five-star-armlet/fastest",
+  "name": "Five-Star Armlet — Gilda max",
+  "spec": "five-star-armlet/gilda-max",
   "guide": {
     "id": "five-star-armlet-e043b8",
-    "title": "Five-Star Armlet — Fastest",
-    "description": "Fastest · maxed stats · 8 abilities (side-weapon spheres first) · optimal start (Magic Brassard) · done after Palace Watchdog (chapter 7) · 3,260 ABS to grind · 2,312 gilda to farm",
+    "title": "Five-Star Armlet — Gilda max",
+    "description": "Gilda max · maxed stats · 8 abilities (side-weapon spheres first) · optimal start (Magic Brassard) · done after Palace Watchdog (chapter 7) · no ABS grinding",
     "kind": "builtin",
     "build": {
       "weaponId": "magic-brassard",
@@ -33,9 +33,9 @@
       {
         "id": "magic-brassard+15",
         "title": "Magic Brassard",
-        "notes": "Grind about 3,260 ABS more than the story gives by this point. Farm about 280 gilda more than the story pays by this point.",
-        "chapterId": "2",
-        "sectionId": "palm-brinks-photo-spree-revisited",
+        "notes": "",
+        "chapterId": "3",
+        "sectionId": "earth-shaking-demon",
         "entries": [],
         "build": {
           "weaponId": "magic-brassard",
@@ -53,8 +53,8 @@
         "id": "to-gold-brassard",
         "title": "Magic Brassard → Gold Brassard",
         "notes": "",
-        "chapterId": "2",
-        "sectionId": "palm-brinks-photo-spree-revisited",
+        "chapterId": "3",
+        "sectionId": "earth-shaking-demon",
         "entries": [],
         "buildUp": {
           "weaponId": "gold-brassard"
@@ -231,9 +231,9 @@
       {
         "id": "moon-armlet+6",
         "title": "Moon Armlet",
-        "notes": "Farm about 2,032 gilda more than the story pays by this point.",
+        "notes": "",
         "chapterId": "5",
-        "sectionId": "heim-rada-rebuilding",
+        "sectionId": "mt-gundor-wind",
         "entries": [],
         "build": {
           "weaponId": "moon-armlet",

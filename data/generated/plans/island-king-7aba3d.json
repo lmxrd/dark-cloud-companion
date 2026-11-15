@@ -1,10 +1,10 @@
 {
-  "name": "Island King — Fastest",
-  "spec": "island-king/fastest",
+  "name": "Island King — Gilda max",
+  "spec": "island-king/gilda-max",
   "guide": {
     "id": "island-king-7aba3d",
-    "title": "Island King — Fastest",
-    "description": "Fastest · maxed stats · 8 abilities (side-weapon spheres first) · optimal start (Baselard) · done after Wandering Knight's Soul (chapter 7) · no ABS grinding · 8,272 gilda to farm",
+    "title": "Island King — Gilda max",
+    "description": "Gilda max · maxed stats · 8 abilities (side-weapon spheres first) · optimal start (Baselard) · done after Wandering Knight's Soul (chapter 7) · no ABS grinding",
     "kind": "builtin",
     "build": {
       "weaponId": "baselard",
@@ -450,9 +450,9 @@
       {
         "id": "rulers-sword+3",
         "title": "Ruler's Sword",
-        "notes": "Farm about 8,272 gilda more than the story pays by this point.",
+        "notes": "",
         "chapterId": "5",
-        "sectionId": "heim-rada-rebuilding",
+        "sectionId": "secret-of-fire-mountain",
         "entries": [],
         "build": {
           "weaponId": "rulers-sword",

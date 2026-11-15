@@ -1,10 +1,10 @@
 {
-  "name": "Dark Cloud — Fastest",
-  "spec": "dark-cloud/fastest",
+  "name": "Dark Cloud — Gilda max",
+  "spec": "dark-cloud/gilda-max",
   "guide": {
     "id": "dark-cloud-fb71d0",
-    "title": "Dark Cloud — Fastest",
-    "description": "Fastest · maxed stats · 8 abilities (side-weapon spheres first) · optimal start (Gladius) · done after Ancient Wind (chapter 7) · 2,332 ABS to grind · 770 gilda to farm",
+    "title": "Dark Cloud — Gilda max",
+    "description": "Gilda max · maxed stats · 8 abilities (side-weapon spheres first) · optimal start (Gladius) · done after Ancient Wind (chapter 7) · no ABS grinding",
     "kind": "builtin",
     "build": {
       "weaponId": "gladius",
@@ -33,9 +33,9 @@
       {
         "id": "gladius+13",
         "title": "Gladius",
-        "notes": "Grind about 2,332 ABS more than the story gives by this point. Farm about 770 gilda more than the story pays by this point.",
-        "chapterId": "2",
-        "sectionId": "palm-brinks-photo-spree-revisited",
+        "notes": "",
+        "chapterId": "3",
+        "sectionId": "headlong-dash",
         "entries": [],
         "build": {
           "weaponId": "gladius",
@@ -58,8 +58,8 @@
         "id": "to-cliff-knife",
         "title": "Gladius → Cliff Knife",
         "notes": "",
-        "chapterId": "2",
-        "sectionId": "palm-brinks-photo-spree-revisited",
+        "chapterId": "3",
+        "sectionId": "headlong-dash",
         "entries": [],
         "buildUp": {
           "weaponId": "cliff-knife"

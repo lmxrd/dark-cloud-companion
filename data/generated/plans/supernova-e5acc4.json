@@ -1,10 +1,10 @@
 {
-  "name": "Supernova — Fastest",
-  "spec": "supernova/fastest",
+  "name": "Supernova — Gilda max",
+  "spec": "supernova/gilda-max",
   "guide": {
     "id": "supernova-e5acc4",
-    "title": "Supernova — Fastest",
-    "description": "Fastest · maxed stats · 8 abilities (side-weapon spheres first) · optimal start (Classic Gun) · done after Lonely Machine (chapter 7) · 6,183 ABS to grind · 3,130 gilda to farm",
+    "title": "Supernova — Gilda max",
+    "description": "Gilda max · maxed stats · 8 abilities (side-weapon spheres first) · optimal start (Classic Gun) · done after Lonely Machine (chapter 7) · no ABS grinding",
     "kind": "builtin",
     "build": {
       "weaponId": "classic-gun",
@@ -33,9 +33,9 @@
       {
         "id": "classic-gun+18",
         "title": "Classic Gun",
-        "notes": "Grind about 3,860 ABS more than the story gives by this point. Farm about 1,180 gilda more than the story pays by this point.",
-        "chapterId": "2",
-        "sectionId": "palm-brinks-photo-spree-revisited",
+        "notes": "",
+        "chapterId": "3",
+        "sectionId": "elephant-army-in-the-valley",
         "entries": [],
         "build": {
           "weaponId": "classic-gun",
@@ -58,8 +58,8 @@
         "id": "to-trumpet-gun",
         "title": "Classic Gun → Trumpet Gun",
         "notes": "",
-        "chapterId": "2",
-        "sectionId": "palm-brinks-photo-spree-revisited",
+        "chapterId": "3",
+        "sectionId": "elephant-army-in-the-valley",
         "entries": [],
         "buildUp": {
           "weaponId": "trumpet-gun"
@@ -68,9 +68,9 @@
       {
         "id": "trumpet-gun+9",
         "title": "Trumpet Gun",
-        "notes": "Grind about 2,323 ABS more than the story gives by this point. Farm about 1,950 gilda more than the story pays by this point.",
-        "chapterId": "2",
-        "sectionId": "palm-brinks-photo-spree-revisited",
+        "notes": "",
+        "chapterId": "3",
+        "sectionId": "little-dragon-counterattack",
         "entries": [],
         "build": {
           "weaponId": "trumpet-gun",
@@ -93,8 +93,8 @@
         "id": "to-bell-trigger",
         "title": "Trumpet Gun → Bell Trigger",
         "notes": "",
-        "chapterId": "2",
-        "sectionId": "palm-brinks-photo-spree-revisited",
+        "chapterId": "3",
+        "sectionId": "little-dragon-counterattack",
         "entries": [],
         "buildUp": {
           "weaponId": "bell-trigger"

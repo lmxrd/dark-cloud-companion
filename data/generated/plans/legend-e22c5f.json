@@ -1,10 +1,10 @@
 {
-  "name": "LEGEND — Fastest",
-  "spec": "legend/fastest",
+  "name": "LEGEND — Gilda max",
+  "spec": "legend/gilda-max",
   "guide": {
     "id": "legend-e22c5f",
-    "title": "LEGEND — Fastest",
-    "description": "Fastest · maxed stats · 8 abilities (side-weapon spheres first) · optimal start (Battle Wrench) · done after Final Battle (chapter 7) · 6,790 ABS to grind · 10,792 gilda to farm",
+    "title": "LEGEND — Gilda max",
+    "description": "Gilda max · maxed stats · 8 abilities (side-weapon spheres first) · optimal start (Battle Wrench) · done after Final Battle (chapter 7) · no ABS grinding",
     "kind": "builtin",
     "build": {
       "weaponId": "battle-wrench",
@@ -33,9 +33,9 @@
       {
         "id": "battle-wrench+20",
         "title": "Battle Wrench",
-        "notes": "Grind about 998 ABS more than the story gives by this point. Farm about 1,516 gilda more than the story pays by this point.",
+        "notes": "",
         "chapterId": "3",
-        "sectionId": "balance-valley",
+        "sectionId": "powerful-yo-yo-robot",
         "entries": [],
         "build": {
           "weaponId": "battle-wrench",
@@ -124,7 +124,7 @@
         "title": "Battle Wrench → True Battle Wrench",
         "notes": "",
         "chapterId": "3",
-        "sectionId": "balance-valley",
+        "sectionId": "powerful-yo-yo-robot",
         "entries": [],
         "buildUp": {
           "weaponId": "true-battle-wrench"
@@ -133,9 +133,9 @@
       {
         "id": "true-battle-wrench+21",
         "title": "True Battle Wrench",
-        "notes": "Grind about 3,712 ABS more than the story gives by this point. Farm about 300 gilda more than the story pays by this point.",
+        "notes": "",
         "chapterId": "3",
-        "sectionId": "balance-valley",
+        "sectionId": "cursed-mask",
         "entries": [],
         "build": {
           "weaponId": "true-battle-wrench",
@@ -154,7 +154,7 @@
         "title": "True Battle Wrench → Drill Wrench",
         "notes": "",
         "chapterId": "3",
-        "sectionId": "balance-valley",
+        "sectionId": "cursed-mask",
         "entries": [],
         "buildUp": {
           "weaponId": "drill-wrench"
@@ -163,9 +163,9 @@
       {
         "id": "drill-wrench+10",
         "title": "Drill Wrench",
-        "notes": "Grind about 2,080 ABS more than the story gives by this point. Farm about 4,050 gilda more than the story pays by this point.",
+        "notes": "",
         "chapterId": "3",
-        "sectionId": "balance-valley",
+        "sectionId": "natures-threat",
         "entries": [],
         "build": {
           "weaponId": "drill-wrench",
@@ -234,7 +234,7 @@
         "title": "Drill Wrench → Smash Wrench",
         "notes": "",
         "chapterId": "3",
-        "sectionId": "balance-valley",
+        "sectionId": "natures-threat",
         "entries": [],
         "buildUp": {
           "weaponId": "smash-wrench"
@@ -385,9 +385,9 @@
       {
         "id": "digi-hammer+2",
         "title": "Digi Hammer",
-        "notes": "Farm about 4,926 gilda more than the story pays by this point.",
+        "notes": "",
         "chapterId": "5",
-        "sectionId": "heim-rada-rebuilding",
+        "sectionId": "pains-in-the-neck",
         "entries": [],
         "build": {
           "weaponId": "digi-hammer",

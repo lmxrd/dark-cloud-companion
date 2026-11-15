@@ -1,10 +1,10 @@
 {
-  "name": "Sigma Bazooka — Fastest",
-  "spec": "sigma-bazooka/fastest",
+  "name": "Sigma Bazooka — Gilda max",
+  "spec": "sigma-bazooka/gilda-max",
   "guide": {
     "id": "sigma-bazooka-3a2e5d",
-    "title": "Sigma Bazooka — Fastest",
-    "description": "Fastest · maxed stats · 8 abilities (side-weapon spheres first) · optimal start (Classic Gun) · done after Crush the Undead (chapter 7) · 1,442 ABS to grind · 750 gilda to farm",
+    "title": "Sigma Bazooka — Gilda max",
+    "description": "Gilda max · maxed stats · 8 abilities (side-weapon spheres first) · optimal start (Classic Gun) · done after Crush the Undead (chapter 7) · no ABS grinding",
     "kind": "builtin",
     "build": {
       "weaponId": "classic-gun",
@@ -33,9 +33,9 @@
       {
         "id": "classic-gun+12",
         "title": "Classic Gun",
-        "notes": "Grind about 1,442 ABS more than the story gives by this point. Farm about 750 gilda more than the story pays by this point.",
+        "notes": "",
         "chapterId": "2",
-        "sectionId": "palm-brinks-photo-spree-revisited",
+        "sectionId": "legendary-killer-snake",
         "entries": [],
         "build": {
           "weaponId": "classic-gun",
@@ -64,7 +64,7 @@
         "title": "Classic Gun → Trumpet Gun",
         "notes": "",
         "chapterId": "2",
-        "sectionId": "palm-brinks-photo-spree-revisited",
+        "sectionId": "legendary-killer-snake",
         "entries": [],
         "buildUp": {
           "weaponId": "trumpet-gun"

@@ -1,10 +1,10 @@
 {
-  "name": "Grade Zero — Fastest",
-  "spec": "grade-zero/fastest",
+  "name": "Grade Zero — Gilda max",
+  "spec": "grade-zero/gilda-max",
   "guide": {
     "id": "grade-zero-079b4c",
-    "title": "Grade Zero — Fastest",
-    "description": "Fastest · maxed stats · 8 abilities (side-weapon spheres first) · optimal start (Battle Wrench) · done after Palace Watchdog (chapter 7) · 246 ABS to grind · 2,996 gilda to farm",
+    "title": "Grade Zero — Gilda max",
+    "description": "Gilda max · maxed stats · 8 abilities (side-weapon spheres first) · optimal start (Battle Wrench) · done after Palace Watchdog (chapter 7) · no ABS grinding",
     "kind": "builtin",
     "build": {
       "weaponId": "battle-wrench",
@@ -33,9 +33,9 @@
       {
         "id": "battle-wrench+14",
         "title": "Battle Wrench",
-        "notes": "Farm about 2,076 gilda more than the story pays by this point.",
+        "notes": "",
         "chapterId": "3",
-        "sectionId": "balance-valley",
+        "sectionId": "warrior-in-starlight-canyon",
         "entries": [],
         "build": {
           "weaponId": "battle-wrench",
@@ -114,7 +114,7 @@
         "title": "Battle Wrench → Drill Wrench",
         "notes": "",
         "chapterId": "3",
-        "sectionId": "balance-valley",
+        "sectionId": "warrior-in-starlight-canyon",
         "entries": [],
         "buildUp": {
           "weaponId": "drill-wrench"
@@ -123,9 +123,9 @@
       {
         "id": "drill-wrench+7",
         "title": "Drill Wrench",
-        "notes": "Grind about 246 ABS more than the story gives by this point. Farm about 920 gilda more than the story pays by this point.",
+        "notes": "",
         "chapterId": "3",
-        "sectionId": "balance-valley",
+        "sectionId": "dangerous-treasure-chest",
         "entries": [],
         "build": {
           "weaponId": "drill-wrench",
@@ -159,7 +159,7 @@
         "title": "Drill Wrench → Smash Wrench",
         "notes": "",
         "chapterId": "3",
-        "sectionId": "balance-valley",
+        "sectionId": "dangerous-treasure-chest",
         "entries": [],
         "buildUp": {
           "weaponId": "smash-wrench"

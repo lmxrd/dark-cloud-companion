@@ -1,10 +1,10 @@
 {
-  "name": "Love — Fastest",
-  "spec": "love/fastest",
+  "name": "Love — Gilda max",
+  "spec": "love/gilda-max",
   "guide": {
     "id": "love-eb327c",
-    "title": "Love — Fastest",
-    "description": "Fastest · maxed stats · 8 abilities (side-weapon spheres first) · optimal start (Magic Brassard) · done after Final Trump Card (chapter 7) · no ABS grinding",
+    "title": "Love — Gilda max",
+    "description": "Gilda max · maxed stats · 8 abilities (side-weapon spheres first) · optimal start (Magic Brassard) · done after Final Trump Card (chapter 7) · no ABS grinding",
     "kind": "builtin",
     "build": {
       "weaponId": "magic-brassard",

@@ -34,6 +34,11 @@ const variantSchema = z.object({
   route: z.array(z.string()).optional(),
   /** Level the side weapons for spheres in earlier chapters ("prepare" steps, docs/planning.md). */
   prepareSpheres: z.boolean().optional(),
+  /**
+   * With the `progression` flow: every step in the chapter it unlocks, grinding as much ABS as it
+   * takes (gilda keeps the story's limit). The "Earliest" plans.
+   */
+  earliestSteps: z.boolean().optional(),
   /** Spend any gilda, not only what the story has paid by the chapter (the fastest plans). */
   anyGilda: z.boolean().optional(),
   /** Routes solved exactly, and seconds per exact solve (story plans are generated once: be thorough). */
@@ -91,6 +96,7 @@ export interface PlanSpec {
   prepareSpheres?: boolean;
   /** No cap on gilda (otherwise: what the story has paid by the chapter). */
   anyGilda?: boolean;
+
   /** Routes solved exactly and seconds per exact solve (undefined: the planner's defaults). */
   exactChains?: number;
   timeLimitSec?: number;
@@ -99,7 +105,10 @@ export interface PlanSpec {
 
 /** A variant's story settings: the fixed rules with its choices. */
 function storySettings(v: z.infer<typeof variantSchema>): ProgressionOptions {
-  return storyOptions(v.buildUpLevel ? { buildUpLevel: v.buildUpLevel } : {});
+  return storyOptions({
+    ...(v.buildUpLevel ? { buildUpLevel: v.buildUpLevel } : {}),
+    ...(v.earliestSteps ? { earliestSteps: true } : {}),
+  });
 }
 
 export function expandPlans(config: PlansConfig): PlanSpec[] {

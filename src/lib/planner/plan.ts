@@ -77,6 +77,8 @@ export interface PlanRequest {
 export interface ProgressionOptions {
   /** Grinding allowed on top of what the story pays by a chapter, as a share of it (e.g. 0.2). */
   grindShare: number;
+  /** The ABS grind allowance instead of `grindShare` (gilda keeps `grindShare`). */
+  absGrindShare?: number;
   /** ABS (in objective units) worth avoiding to have every stage one chapter earlier. */
   delayCost: number;
   levelCap: number;
@@ -87,6 +89,8 @@ export interface ProgressionOptions {
   earlyStatBonus?: number;
   /** See `Progression.mainItemCost` (0: off). */
   mainItemCost?: number;
+  /** See `Progression.mainItemCostLast`. */
+  mainItemCostLast?: number;
   /** See `Progression.statFloor` (0: off). */
   statFloor?: number;
   /** See `Progression.statFloorCost`. */
@@ -138,6 +142,7 @@ export const STORY_RULES = {
   effortPower: 0.5,
   earlyStatBonus: 2,
   mainItemCost: 1000,
+  mainItemCostLast: 30,
   statFloor: 0.5,
   statFloorCost: 150,
   firstStatFloor: 0.3,
@@ -147,11 +152,25 @@ export const STORY_RULES = {
 /** What a story plan may choose: the least level before each build-up (4 or 5). */
 export interface StoryChoices {
   buildUpLevel?: number;
+  /**
+   * The Earliest plans: every step in the chapter it unlocks (a delay costs far more than any ABS),
+   * grinding as much ABS as it takes; gilda keeps the grind allowance.
+   */
+  earliestSteps?: boolean;
 }
+
+/** "As much as it takes": an ABS grind allowance far beyond any plan's needs. */
+export const UNLIMITED_GRIND = 1000;
+/** The Earliest plans' delay cost: a chapter's delay outweighs any plan's whole ABS. */
+export const EARLIEST_DELAY_COST = 1_000_000;
 
 /** The story rules with a plan's choices. */
 export function storyOptions(c: StoryChoices = {}): ProgressionOptions {
-  return { ...STORY_RULES, buildUpLevel: c.buildUpLevel ?? 4 };
+  return {
+    ...STORY_RULES,
+    buildUpLevel: c.buildUpLevel ?? 4,
+    ...(c.earliestSteps ? { absGrindShare: UNLIMITED_GRIND, delayCost: EARLIEST_DELAY_COST } : {}),
+  };
 }
 
 /** The story settings the planner page and the built-in plans use by default. */
@@ -691,15 +710,21 @@ export async function planPath(
       stageUnlock,
       storyAbs: storyTotals.abs,
       storyGilda: storyTotals.gilda,
-      grindAbs: storyTotals.abs.map((v) => Math.round(v * prog.grindShare)),
+      grindAbs: storyTotals.abs.map((v) => Math.round(v * (prog.absGrindShare ?? prog.grindShare))),
       grindGilda: storyTotals.gilda.map((v) => Math.round(v * prog.grindShare)),
       spentGilda: acquireGilda(c.acquire),
       delayCost: prog.delayCost,
       itemChapter: items.map((it) => it.fromChapter ?? 1),
       chapterWindow: 2,
       firstStageWindow: 0,
+      ...(req.maxChapter < 8 ? { lastChapter: req.maxChapter } : {}),
       ...(prog.earlyStatBonus ? { earlyStatBonus: prog.earlyStatBonus } : {}),
-      ...(prog.mainItemCost ? { mainItemCost: prog.mainItemCost } : {}),
+      ...(prog.mainItemCost
+        ? {
+            mainItemCost: prog.mainItemCost,
+            mainItemCostLast: prog.mainItemCostLast ?? prog.mainItemCost,
+          }
+        : {}),
       ...(prog.statFloor && prog.statFloorCost
         ? { statFloor: prog.statFloor, statFloorCost: prog.statFloorCost }
         : {}),

@@ -26,6 +26,16 @@ import type { Plan, Recipe, Stage, SynthUse } from "./types";
 
 export type Objective = "abs" | "gilda" | "steps";
 
+/**
+ * The cost of an item synthed straight onto the main weapon at stage `j` of `n`: `full` for the first
+ * half of the stages, then falling evenly to `last` on the last stage.
+ */
+export function mainItemCostAt(j: number, n: number, full: number, last: number): number {
+  if (n <= 1) return full;
+  const p = j / (n - 1);
+  return p <= 0.5 ? full : last + (full - last) * ((1 - p) / 0.5);
+}
+
 export interface Template {
   id: string;
   recipe: Recipe;
@@ -105,6 +115,8 @@ export interface Progression {
   delayCost: number;
   /** Chapter each item is first sold in (by item index); missing = chapter 1. */
   itemChapter: number[];
+  /** The last chapter any stage may be placed in (default 8): the plan must finish by then. */
+  lastChapter?: number;
   /** A stage may be placed at most this many chapters after its unlock (keeps the search small). */
   chapterWindow?: number;
   /** The same for the first stage (0: work on the first weapon starts as soon as it can). */
@@ -132,8 +144,11 @@ export interface Progression {
   /**
    * Cost (in objective units) of each item synthed straight onto the main weapon: its SP is gone for
    * good (SP carries over build-ups), while items inside spheres cost the main weapon nothing extra.
+   * Full for the first half of the stages, then falling evenly to `mainItemCostLast` on the last one
+   * (`mainItemCostAt`): the early SP are the precious ones.
    */
   mainItemCost?: number;
+  mainItemCostLast?: number;
 }
 
 export interface SolveResult {
@@ -382,7 +397,13 @@ export function buildModel(input: SolveInput) {
     for (let j = 0; j < nStages; j++)
       items.forEach((_, i) => {
         const v = `vX${j}_${i}`;
-        model.objective.set(v, (model.objective.get(v) ?? 0) + SCALE * p.mainItemCost!);
+        const each = mainItemCostAt(
+          j,
+          nStages,
+          p.mainItemCost!,
+          p.mainItemCostLast ?? p.mainItemCost!,
+        );
+        model.objective.set(v, (model.objective.get(v) ?? 0) + SCALE * each);
       });
   if (p?.earlyStatBonus)
     for (let j = 0; j < nStages; j++)
@@ -405,7 +426,7 @@ export function buildModel(input: SolveInput) {
       }
     }
   if (p) {
-    const chapters = [1, 2, 3, 4, 5, 6, 7, 8];
+    const chapters = [1, 2, 3, 4, 5, 6, 7, 8].filter((c) => c <= (p.lastChapter ?? 8));
     const windowOf = (j: number) =>
       j === 0 && p.firstStageWindow !== undefined ? p.firstStageWindow : (p.chapterWindow ?? 8);
     /** A generous upper bound on how many of one item or sphere a stage can take. */

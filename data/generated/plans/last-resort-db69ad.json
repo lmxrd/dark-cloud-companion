@@ -1,10 +1,10 @@
 {
-  "name": "Last Resort — Fastest",
-  "spec": "last-resort/fastest",
+  "name": "Last Resort — Gilda max",
+  "spec": "last-resort/gilda-max",
   "guide": {
     "id": "last-resort-db69ad",
-    "title": "Last Resort — Fastest",
-    "description": "Fastest · maxed stats · 8 abilities (side-weapon spheres first) · optimal start (Classic Gun) · done after Card Warriors Gather (chapter 7) · 1,442 ABS to grind · 3,552 gilda to farm",
+    "title": "Last Resort — Gilda max",
+    "description": "Gilda max · maxed stats · 8 abilities (side-weapon spheres first) · optimal start (Classic Gun) · done after Card Warriors Gather (chapter 7) · no ABS grinding",
     "kind": "builtin",
     "build": {
       "weaponId": "classic-gun",
@@ -33,9 +33,9 @@
       {
         "id": "classic-gun+12",
         "title": "Classic Gun",
-        "notes": "Grind about 1,442 ABS more than the story gives by this point. Farm about 600 gilda more than the story pays by this point.",
+        "notes": "",
         "chapterId": "2",
-        "sectionId": "palm-brinks-photo-spree-revisited",
+        "sectionId": "legendary-killer-snake",
         "entries": [],
         "build": {
           "weaponId": "classic-gun",
@@ -64,7 +64,7 @@
         "title": "Classic Gun → Trumpet Gun",
         "notes": "",
         "chapterId": "2",
-        "sectionId": "palm-brinks-photo-spree-revisited",
+        "sectionId": "legendary-killer-snake",
         "entries": [],
         "buildUp": {
           "weaponId": "trumpet-gun"
@@ -311,9 +311,9 @@
       {
         "id": "wild-cat+3",
         "title": "Wild Cat",
-        "notes": "Farm about 552 gilda more than the story pays by this point.",
+        "notes": "",
         "chapterId": "5",
-        "sectionId": "heim-rada-rebuilding",
+        "sectionId": "mt-gundor-wind",
         "entries": [],
         "build": {
           "weaponId": "wild-cat",
@@ -516,7 +516,7 @@
         "title": "Wild Cat → Sexy Panther",
         "notes": "",
         "chapterId": "5",
-        "sectionId": "heim-rada-rebuilding",
+        "sectionId": "mt-gundor-wind",
         "entries": [],
         "buildUp": {
           "weaponId": "sexy-panther"
@@ -525,9 +525,9 @@
       {
         "id": "sexy-panther+3",
         "title": "Sexy Panther",
-        "notes": "Farm about 2,400 gilda more than the story pays by this point.",
+        "notes": "",
         "chapterId": "5",
-        "sectionId": "heim-rada-rebuilding",
+        "sectionId": "little-dragons-on-the-mountain",
         "entries": [],
         "build": {
           "weaponId": "sexy-panther",

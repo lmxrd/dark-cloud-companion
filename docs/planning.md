@@ -62,17 +62,17 @@ plan you can follow while playing:
 A story plan follows fixed rules (`STORY_RULES` in `plan.ts`), the same for every plan; each was
 added for a reason measured below. Only a few things are a plan's choice.
 
-| Rule                             | Value                                                               | Why                                                 |
-| -------------------------------- | ------------------------------------------------------------------- | --------------------------------------------------- |
-| Grind allowance                  | 30% of what the story pays                                          | a little grinding, not an insane amount             |
-| Chapter delay (`delayCost`)      | 10,000 over all stages                                              | work happens as early as the story allows           |
-| Level caps                       | +10 on the way, +15 last                                            | no over-levelling mid-game                          |
-| Start weapon                     | obtainable by chapter 2                                             | the weapon is used through the story                |
-| Effort weighting (`effortPower`) | 0.5                                                                 | ABS counts by how hard it is to earn in its chapter |
-| Early stats (`earlyStatBonus`)   | 2 per point per stage                                               | stats above the floor come earlier                  |
-| Items on the main weapon         | 1,000 each (`mainItemCost`)                                         | every SP counts: a sphere is worth some gilda       |
-| Stat floor                       | 0.5 of the weapon's maximum (0.3 on the first), 150 per point short | every stat rises along the way                      |
-| Least level before a build-up    | 3,000 per level short                                               | soft, so the planner page always gets a plan        |
+| Rule                             | Value                                                               | Why                                                   |
+| -------------------------------- | ------------------------------------------------------------------- | ----------------------------------------------------- |
+| Grind allowance                  | 30% of what the story pays                                          | a little grinding, not an insane amount               |
+| Chapter delay (`delayCost`)      | 10,000 over all stages                                              | work happens as early as the story allows             |
+| Level caps                       | +10 on the way, +15 last                                            | no over-levelling mid-game                            |
+| Start weapon                     | obtainable by chapter 2                                             | the weapon is used through the story                  |
+| Effort weighting (`effortPower`) | 0.5                                                                 | ABS counts by how hard it is to earn in its chapter   |
+| Early stats (`earlyStatBonus`)   | 2 per point per stage                                               | stats above the floor come earlier                    |
+| Items on the main weapon         | 1,000 each to halfway, then falling to 30 on the last step          | the early SP count most: a sphere is worth some gilda |
+| Stat floor                       | 0.5 of the weapon's maximum (0.3 on the first), 150 per point short | every stat rises along the way                        |
+| Least level before a build-up    | 3,000 per level short                                               | soft, so the planner page always gets a plan          |
 
 | Choice                                         | Where                                        | Values                                       |
 | ---------------------------------------------- | -------------------------------------------- | -------------------------------------------- |
@@ -96,13 +96,13 @@ about ±3% ABS between runs (same settings, re-solved), so smaller differences a
 
 The objective adds up (in ABS-equivalent units):
 
-| Term                        | What it does                                                  | Rule                 |
-| --------------------------- | ------------------------------------------------------------- | -------------------- |
-| ABS, weighted by **effort** | ABS spent in a chapter counts by how hard it is to earn there | `effortPower`        |
-| Chapter delay               | every stage one chapter later costs this much in all          | `delayCost` 10,000   |
-| Early stats                 | each stat point at the end of each stage is worth this        | `earlyStatBonus` 2   |
-| Items on the main weapon    | each costs this (its SP is gone for good)                     | `mainItemCost` 1,000 |
-| Stat floor                  | each point a stat is below its floor after a stage            | `statFloorCost` 150  |
+| Term                        | What it does                                                  | Rule                                                                |
+| --------------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------- |
+| ABS, weighted by **effort** | ABS spent in a chapter counts by how hard it is to earn there | `effortPower`                                                       |
+| Chapter delay               | every stage one chapter later costs this much in all          | `delayCost` 10,000                                                  |
+| Early stats                 | each stat point at the end of each stage is worth this        | `earlyStatBonus` 2                                                  |
+| Items on the main weapon    | each costs this (its SP is gone for good)                     | `mainItemCost` 1,000, from halfway falling to `mainItemCostLast` 30 |
+| Stat floor                  | each point a stat is below its floor after a stage            | `statFloorCost` 150                                                 |
 
 **Effort.** The story pays far more ABS later: an ABS-paying floor or fight pays about 230 ABS in
 chapter 2, 540 in 3, 1,100 in 4, 1,600 in 5, 1,750 in 6, 3,500 in 7. So 1,000 ABS is about four
@@ -236,14 +236,20 @@ weapon guide's recipes have the same shape (Island King: +6, +5, +3, +2, +2, +2,
 
 ## Built-in plans
 
-Configured in `scripts/planner/plans.config.ts`, keyed `<target>/<variant>`, two per final weapon:
+Configured in `scripts/planner/plans.config.ts`, keyed `<target>/<variant>`, three per final weapon:
 
-- **Story** (`<target>/story`): follows the story by the rules above, mostly on the weapon guide's
-  route (Love, Last Resort and Sigma Bazooka on the route a free search found).
-- **Fastest** (`<target>/fastest`): finishes in the earliest chapter possible, with no regard to
-  gilda or grinding: any items sold (gems included), any gilda, a free route search, the same
-  abilities; the ABS the story hasn't paid by then is grinding (the guide says how much). A coin
-  counts from the chapter it can first be won at Spheda, which is often before any shop sells it.
+- **Balanced** (`<target>/balanced`): follows the story by the rules above, mostly on the weapon
+  guide's route (Love, Last Resort and Sigma Bazooka on the route a free search found).
+- **Earliest** (`<target>/earliest`): every step as soon as the story unlocks it, grinding as much
+  ABS as it takes (`earliestSteps`: the ABS grind allowance is unlimited and a chapter's delay costs
+  1,000,000, more than any plan's ABS), with the story rules otherwise (items and gilda by chapter,
+  the item penalty). The route is searched. Every starred weapon but Flamingo needs chapter 7 kills
+  before its last build-up, so no plan can finish before chapter 7; Earliest gets there with each
+  weapon built up the moment it can be.
+- **Gilda max** (`<target>/gilda-max`): the best path to the maxed weapon no matter the cost, without
+  the story rules: any gilda, every item on sale as of chapter 7 (gems and coins too), a free route
+  search, the same abilities, the least ABS. A coin counts from the chapter it can first be won at
+  Spheda, which is often before any shop sells it.
 
 Each is committed as `data/generated/plans/<guide id>.json`
 (`{ name, spec, guide }`); the guide id is the target plus a hash of its first content and never

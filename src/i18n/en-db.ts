@@ -454,6 +454,13 @@ export const enDb = {
     "What each ability does, the weapons with it and the coins that pass it on.",
   "db.intro.trophies": "Every trophy and what it takes, lowest tier first.",
 
+  // Weapon builds table
+  "guides.buildsWeapon": "Starred weapon",
+  "guides.kind.balanced": "Balanced",
+  "guides.kind.earliest": "Earliest",
+  "guides.kind.gildaMax": "Gilda max",
+  "guides.buildSummary": "ch {ch} · {abs} ABS",
+
   // Plan views
   "plan.view": "View",
   "plan.view.steps": "Steps",

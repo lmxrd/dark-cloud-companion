@@ -6,7 +6,8 @@ describe("finalWeaponIds", () => {
   test("the final weapons sit at the top SP tier at the end of a full build-up line", () => {
     for (const id of finalWeaponIds) {
       const w = getWeapon(id);
-      expect(w.spPerLevel, id).toBe(6);
+      // Flamingo, the best Spheda club, is starred though it sits mid-line.
+      if (id !== "flamingo") expect(w.spPerLevel, id).toBe(6);
       // Not every final is a leaf: Griffon Fork builds up into Island King, yet the FAQ lists
       // both as endgame targets. What holds is that a whole line leads into each of them.
       expect(
@@ -16,9 +17,9 @@ describe("finalWeaponIds", () => {
     }
   });
 
-  test("every type except clubs has a final weapon", () => {
+  test("every type has a starred weapon", () => {
     const types = new Set(finalWeaponIds.map((id) => getWeapon(id).type));
-    expect([...types].sort()).toEqual(["armband", "gun", "sword", "wrench"]);
+    expect([...types].sort()).toEqual(["armband", "club", "gun", "sword", "wrench"]);
   });
 
   test("covers the weapon FAQ's endgame targets", () => {
@@ -34,6 +35,7 @@ describe("finalWeaponIds", () => {
       "Dark Cloud",
       "Griffon Fork",
       "Five-Star Armlet",
+      "Flamingo",
     ]);
   });
 });

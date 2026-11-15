@@ -85,7 +85,7 @@ test.describe("shopping list", () => {
 
     await go(page, "/tools/shopping");
     await expect(making(page).getByText("Gunpowder", { exact: true })).toBeVisible();
-    await expect(making(page).getByText("Island King — Story")).toBeVisible();
+    await expect(making(page).getByText("Island King — Balanced")).toBeVisible();
     const p = await activeProfile(page);
     const kinds = p.shopping.goals.map((g: { kind: string }) => g.kind);
     expect(kinds).toContain("georama");
