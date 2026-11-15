@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { ChevronRightIcon } from "lucide-react";
 import { useTranslations } from "@/i18n";
 import { withBase } from "@/lib/base";
+import { names } from "@/lib/gamedata";
 import {
   itemCounts,
   monsterProgress,
@@ -37,6 +38,26 @@ export function ReferenceHub() {
       meta: t("reference.weapons", { count: weaponCount }),
     },
     { href: "/items", title: t("nav.items"), meta: t("reference.items", itemCounts) },
+    {
+      href: "/bestiary",
+      title: t("nav.bestiary"),
+      meta: t("reference.bestiary", { count: Object.keys(names.enemies).length }),
+    },
+    {
+      href: "/shops",
+      title: t("nav.shops"),
+      meta: t("reference.shops", { count: Object.keys(names.shops).length }),
+    },
+    {
+      href: "/fishing",
+      title: t("nav.fishing"),
+      meta: t("reference.fishing", { fish: Object.keys(names.fish).length }),
+    },
+    {
+      href: "/people",
+      title: t("nav.people"),
+      meta: t("reference.people", { count: Object.keys(names.npcs).length }),
+    },
     tracker("ridepod", ridepodProgress(shown)),
     tracker("monsters", monsterProgress(shown)),
     tracker("spheda", sphedaProgress(shown)),

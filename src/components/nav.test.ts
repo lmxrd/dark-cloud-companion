@@ -41,14 +41,14 @@ describe("crumbsFor", () => {
 });
 
 describe("mainNav", () => {
-  const [today, guides, reference, tools] = mainNav(t);
+  const [today, guides, tools, reference] = mainNav(t);
 
   it("has the four main sections; planner, shopping list and calculator are tools", () => {
-    expect([today, guides, reference, tools].map((i) => i.title)).toEqual([
+    expect([today, guides, tools, reference].map((i) => i.title)).toEqual([
       "Dashboard",
       "Guides",
-      "Reference",
       "Tools",
+      "Reference",
     ]);
     expect(tools.children!.map((c) => c.href)).toEqual([
       "/tools/planner",
@@ -60,7 +60,16 @@ describe("mainNav", () => {
   });
 
   it("marks Reference active on the hub and every sub-page", () => {
-    for (const path of ["/reference", "/weapons", "/weapons/poison-wrench", "/spheda"])
+    for (const path of [
+      "/reference",
+      "/weapons",
+      "/weapons/poison-wrench",
+      "/spheda",
+      "/fishing",
+      "/bestiary",
+      "/shops",
+      "/people",
+    ])
       expect(isSectionActive(reference, path)).toBe(true);
     expect(isSectionActive(reference, "/")).toBe(false);
     expect(isSectionActive(today, "/weapons")).toBe(false);
@@ -68,7 +77,7 @@ describe("mainNav", () => {
 });
 
 describe("activeChild", () => {
-  const [, guides, reference] = mainNav(t);
+  const [, guides, , reference] = mainNav(t);
 
   test("marks only the most specific sub-item", () => {
     expect(activeChild(guides, "/guides", "")).toBe("/guides");

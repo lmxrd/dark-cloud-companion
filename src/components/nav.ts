@@ -25,7 +25,17 @@ export type NavItem = {
 };
 
 /** The Reference sub-pages, by their top-level path segment. */
-export const REFERENCE_PAGES = ["weapons", "items", "ridepod", "monsters", "spheda"] as const;
+export const REFERENCE_PAGES = [
+  "weapons",
+  "items",
+  "bestiary",
+  "shops",
+  "fishing",
+  "people",
+  "ridepod",
+  "monsters",
+  "spheda",
+] as const;
 
 /** The Tools pages, under /tools/. */
 export const TOOL_PAGES = ["planner", "shopping", "spheres"] as const;
@@ -44,21 +54,21 @@ export function mainNav(t: Translate): NavItem[] {
       ],
     },
     {
-      title: t("nav.reference"),
-      href: "/reference",
-      icon: DatabaseIcon,
-      children: REFERENCE_PAGES.map((page) => ({
-        title: t(`nav.${page}` as const),
-        href: `/${page}`,
-      })),
-    },
-    {
       title: t("nav.tools"),
       href: "/tools",
       icon: WrenchIcon,
       children: TOOL_PAGES.map((page) => ({
         title: t(`nav.${page}` as const),
         href: `/tools/${page}`,
+      })),
+    },
+    {
+      title: t("nav.reference"),
+      href: "/reference",
+      icon: DatabaseIcon,
+      children: REFERENCE_PAGES.map((page) => ({
+        title: t(`nav.${page}` as const),
+        href: `/${page}`,
       })),
     },
   ];
