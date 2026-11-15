@@ -1,16 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { collectables, names } from "@/lib/gamedata";
 import { tick } from "@/lib/gamedata/ticks";
-import {
-  itemCounts,
-  monsterProgress,
-  ridepodProgress,
-  sphedaMedals,
-  sphedaProgress,
-} from "./reference";
-import { synthSources } from "./planner/sources";
+import { monsterProgress, ridepodProgress, sphedaMedals, sphedaProgress } from "./reference";
 
-describe("reference hub counts", () => {
+describe("database home tracker counts", () => {
   it("counts every Ridepod part and core", () => {
     const parts = Object.keys(names.ridepodParts);
     const empty = ridepodProgress({});
@@ -34,10 +27,5 @@ describe("reference hub counts", () => {
       done: 1,
       total: sphedaMedals.length,
     });
-  });
-
-  it("splits the synth items into buyable and found-only", () => {
-    expect(itemCounts.buyable + itemCounts.found).toBe(synthSources.length);
-    expect(itemCounts.found).toBeGreaterThan(0);
   });
 });

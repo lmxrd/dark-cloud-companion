@@ -335,18 +335,18 @@ export function PersonPage({ npc: n, actions }: { npc: Npc; actions?: ReactNode 
       )}
       <DetailSection
         title={t("db.shops")}
-        rows={[
-          ...shopsRun.map((s) => (
-            <Row key={`run-${s.id}`} title={<Ref href={dbHref("shop", s.id)}>{s.name}</Ref>}>
-              <Detail>{t("db.runsIt")}</Detail>
-            </Row>
-          )),
-          ...shopsOpened.map((s) => (
-            <Row key={`open-${s.id}`} title={<Ref href={dbHref("shop", s.id)}>{s.name}</Ref>}>
-              <Detail>{t("db.opensAfterRecruiting")}</Detail>
-            </Row>
-          )),
-        ]}
+        rows={[...new Set([...shopsRun, ...shopsOpened])].map((s) => (
+          <Row key={s.id} title={<Ref href={dbHref("shop", s.id)}>{s.name}</Ref>}>
+            <Detail>
+              {[
+                shopsRun.includes(s) && t("db.runsIt"),
+                shopsOpened.includes(s) && t("db.opensAfterRecruiting"),
+              ]
+                .filter(Boolean)
+                .join(" · ")}
+            </Detail>
+          </Row>
+        ))}
       />
       <DetailSection
         title={t("db.housing")}

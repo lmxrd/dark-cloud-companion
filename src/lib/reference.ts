@@ -1,9 +1,8 @@
 import { collectables, names } from "@/lib/gamedata";
 import { tick } from "@/lib/gamedata/ticks";
 import { allMedals } from "@/lib/data";
-import { itemAvailability, synthSources } from "@/lib/planner/sources";
 
-/** Counts shown on the Reference hub: static totals plus the active profile's tracker progress. */
+/** Tracker progress shown on the database home: the active profile's ticks. */
 
 export type Progress = { done: number; total: number };
 
@@ -32,10 +31,3 @@ export const sphedaProgress = (checks: Record<string, true>) =>
     sphedaMedals.map((m) => m.id),
     checks,
   );
-
-export const weaponCount = Object.keys(names.weapons).length;
-
-export const itemCounts = (() => {
-  const found = synthSources.filter((s) => itemAvailability(s.name).kind === "found").length;
-  return { buyable: synthSources.length - found, found };
-})();
