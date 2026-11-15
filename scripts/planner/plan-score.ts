@@ -36,7 +36,6 @@ export interface PlanScore {
 export function storyCost(guide: Guide, prog: ProgressionOptions): number {
   const d = deriveBuild(guide);
   const work = guide.steps.filter((s) => s.build);
-  const first = work[0]?.build?.weaponId;
   let cost = 0;
   // Side weapons prepared ahead of time: their ABS in the chapter they are levelled in.
   for (const s of guide.steps) {
@@ -52,14 +51,20 @@ export function storyCost(guide: Guide, prog: ProgressionOptions): number {
     const w = getWeapon(s.build!.weaponId);
     cost += st.cost.abs * (prog.effortPower ? effortWeights[c] ** prog.effortPower : 1);
     cost += (prog.delayCost * c) / work.length;
+    const next = work[i + 1]?.build?.weaponId;
+    // The stat floor counts where the plan leaves the weapon, and on the last step.
+    const leaving = next !== w.id;
     for (const k of STAT_KEYS) {
       cost -= (prog.earlyStatBonus ?? 0) * st.stats[k];
-      if (prog.statFloor && prog.statFloorCost) {
-        const share = w.id === first ? (prog.firstStatFloor ?? prog.statFloor) : prog.statFloor;
-        cost += prog.statFloorCost * Math.max(0, Math.round(share * w.maxStats[k]) - st.stats[k]);
-      }
+      if (leaving && prog.statFloor && prog.statFloorCost)
+        cost +=
+          prog.statFloorCost *
+          Math.max(0, Math.round(prog.statFloor * w.maxStats[k]) - st.stats[k]);
+      if (leaving && prog.minStatFloor && prog.minStatFloorCost)
+        cost +=
+          prog.minStatFloorCost *
+          Math.max(0, Math.round(prog.minStatFloor * w.maxStats[k]) - st.stats[k]);
     }
-    const next = work[i + 1]?.build?.weaponId;
     if (next && next !== w.id && prog.buildUpLevel)
       cost += (prog.buildUpLevelCost ?? 0) * Math.max(0, prog.buildUpLevel - st.level);
     const each = mainItemCostAt(

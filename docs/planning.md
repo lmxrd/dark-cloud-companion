@@ -62,17 +62,17 @@ plan you can follow while playing:
 A story plan follows fixed rules (`STORY_RULES` in `plan.ts`), the same for every plan; each was
 added for a reason measured below. Only a few things are a plan's choice.
 
-| Rule                             | Value                                                               | Why                                                   |
-| -------------------------------- | ------------------------------------------------------------------- | ----------------------------------------------------- |
-| Grind allowance                  | 30% of what the story pays                                          | a little grinding, not an insane amount               |
-| Chapter delay (`delayCost`)      | 10,000 over all stages                                              | work happens as early as the story allows             |
-| Level caps                       | +10 on the way, +15 last                                            | no over-levelling mid-game                            |
-| Start weapon                     | obtainable by chapter 2                                             | the weapon is used through the story                  |
-| Effort weighting (`effortPower`) | 0.5                                                                 | ABS counts by how hard it is to earn in its chapter   |
-| Early stats (`earlyStatBonus`)   | 2 per point per stage                                               | stats above the floor come earlier                    |
-| Items on the main weapon         | 1,000 each to halfway, then falling to 30 on the last step          | the early SP count most: a sphere is worth some gilda |
-| Stat floor                       | 0.5 of the weapon's maximum (0.3 on the first), 150 per point short | every stat rises along the way                        |
-| Least level before a build-up    | 3,000 per level short                                               | soft, so the planner page always gets a plan          |
+| Rule                             | Value                                                                                                          | Why                                                   |
+| -------------------------------- | -------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| Grind allowance                  | 30% of what the story pays                                                                                     | a little grinding, not an insane amount               |
+| Chapter delay (`delayCost`)      | 40,000 over all stages                                                                                         | work happens as early as the story allows             |
+| Level caps                       | +10 on the way, +15 last                                                                                       | no over-levelling mid-game                            |
+| Start weapon                     | obtainable by chapter 2                                                                                        | the weapon is used through the story                  |
+| Effort weighting (`effortPower`) | 0.5                                                                                                            | ABS counts by how hard it is to earn in its chapter   |
+| Early stats (`earlyStatBonus`)   | 2 per point per stage                                                                                          | stats above the floor come earlier                    |
+| Items on the main weapon         | 1,000 each to halfway, then falling to 30 on the last step                                                     | the early SP count most: a sphere is worth some gilda |
+| Stat floor                       | 0.5 of the weapon's maximum when leaving it, 2,000 per point short; Balanced: under 0.4, 20,000 more per point | every stat rises along the way                        |
+| Least level before a build-up    | 3,000 per level short                                                                                          | soft, so the planner page always gets a plan          |
 
 | Choice                                         | Where                                        | Values                                       |
 | ---------------------------------------------- | -------------------------------------------- | -------------------------------------------- |
@@ -89,6 +89,7 @@ about ±3% ABS between runs (same settings, re-solved), so smaller differences a
 | Early stats                                                      | Dark Cloud 7% less ABS, but stats only just over the floor (lowest 47–56% instead of 51–97%): kept                                                                                                                       |
 | Items on the main weapon                                         | the same ABS, but Island King got a stray stage with a stat at 0%: kept. At 30 each, seven plans still put a few cheap items on their first weapon, so it is now 1,000: SP matters more than a little gilda for a sphere |
 | Floor cost 60 (was Grade Zero's and Five-Star Armlet's)          | within noise of 150: one value for all                                                                                                                                                                                   |
+| Chapter delay 10,000 (until the chapter cap was removed)         | Island King drifted to chapter 8 (45,680 ABS); at 40,000 it finishes in chapter 7 for about 450 ABS more                                                                                                                 |
 | Effort weighting in full (power 1, was the "least effort" style) | within noise on Island King and Dark Cloud, the same level pattern: removed                                                                                                                                              |
 | Extra levels on built-up side weapons (`extraAuxLevels`)         | no gain (measured earlier): removed                                                                                                                                                                                      |
 
@@ -99,10 +100,10 @@ The objective adds up (in ABS-equivalent units):
 | Term                        | What it does                                                  | Rule                                                                |
 | --------------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------- |
 | ABS, weighted by **effort** | ABS spent in a chapter counts by how hard it is to earn there | `effortPower`                                                       |
-| Chapter delay               | every stage one chapter later costs this much in all          | `delayCost` 10,000                                                  |
+| Chapter delay               | every stage one chapter later costs this much in all          | `delayCost` 40,000                                                  |
 | Early stats                 | each stat point at the end of each stage is worth this        | `earlyStatBonus` 2                                                  |
 | Items on the main weapon    | each costs this (its SP is gone for good)                     | `mainItemCost` 1,000, from halfway falling to `mainItemCostLast` 30 |
-| Stat floor                  | each point a stat is below its floor after a stage            | `statFloorCost` 150                                                 |
+| Stat floor                  | each point a stat is below its floor when leaving a weapon    | `statFloorCost` 2,000                                               |
 
 **Effort.** The story pays far more ABS later: an ABS-paying floor or fight pays about 230 ABS in
 chapter 2, 540 in 3, 1,100 in 4, 1,600 in 5, 1,750 in 6, 3,500 in 7. So 1,000 ABS is about four
@@ -142,11 +143,15 @@ only the Evilcise build-up needs Lightning (9), so Lightning sat at 12–36% of 
 until Griffon Fork in chapter 8 filled it from 18 to 200 with spheres full of Scrap of Metal. Stats
 carry over every build-up, so adding them late is cheapest, but the weapon is lopsided all game.
 
-`statFloor` asks for every stat to be at least that share of the stage weapon's maximum (capped by
-the final target) after each stage. It is soft: each point short costs `statFloorCost` per stage,
-so early on, when SP is scarce, a stat can stay below it. At 60 per point some plans still left a
-stat near 0 (LEGEND's Scale, Supernova's Charge): raising it needed extra levels whose ABS cost
-more than the shortfall. At 150 every plan keeps its stats at about half of the maximum or more.
+`statFloor` asks for every stat to be at least that share of the weapon's maximum (capped by the
+final target) when the plan leaves the weapon: after its last stage before the build-up, and on the
+final weapon. Earlier stages on the same weapon (the first one in chapter 2, in-between stages while
+a build-up waits) may be lower. Each point short costs `statFloorCost` (2,000: practically a rule,
+but a plan is still found where it can't be met). Balanced also has a minimum at 0.4
+(`minStatFloor`): each point under it costs 20,000 more, more than a chapter's delay, so the plan
+waits rather than leave a weapon that lopsided. Earliest has only the 0.5 target: speed comes first,
+and a stat it leaves low has nothing available yet to raise it. Earlier it counted after every stage at 150 per
+point (0.3 on the first weapon); the measurements below are from then.
 
 Lowest stat after each work step (% of that weapon's maximum) and total ABS:
 
@@ -168,7 +173,8 @@ With the floor in full the first weapon is levelled hard while ABS is slow to ea
 Bone Rapier +6 for 2,880 ABS in chapter 2, then +3, +3, +2, +2, +5, +4). Two rules spread the levels
 out:
 
-- `firstStatFloor` 0.3: the floor on the first weapon (instead of 0.5);
+- the floor counts only when the plan leaves a weapon (since November 2026; it was 0.3 on the first
+  weapon before), so the first weapon's chapter 2 step can stay light;
 - `buildUpLevel` 4: every weapon on the way is levelled to at least +4 before its build-up. Soft:
   each level short costs `buildUpLevelCost` (3,000 ABS), so an unusual start or target on the
   planner page still gets a plan.
@@ -266,7 +272,7 @@ pnpm plans --all --replace              # after changing settings: take the best
 pnpm plans island-king/story --new      # a new guide next to the old one (new id)
 ```
 
-Each plan is solved `--runs` times in parallel worker processes (120 s per route; runs differ a
+Each plan is solved `--runs` times in parallel worker processes (360 s per route for Balanced, 120 s for Earliest and Gilda max; runs differ a
 little). The runs and the committed plan are scored (`plan-score.ts`) and the best is kept:
 valid first (simulator-clean, maxed, every wanted ability); then, for story plans, the least story
 cost: the solver's objective recomputed from the guide with the plan's current settings

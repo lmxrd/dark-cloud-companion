@@ -143,7 +143,7 @@ export function expandPlans(config: PlansConfig): PlanSpec[] {
           ...(v.prepareSpheres ? { prepareSpheres: true } : {}),
           ...(v.anyGilda ? { anyGilda: true } : {}),
           ...(v.flow === "progression"
-            ? { exactChains: v.exactChains ?? 6, timeLimitSec: v.timeLimitSec ?? 120 }
+            ? { exactChains: v.exactChains ?? 6, timeLimitSec: v.timeLimitSec ?? 360 }
             : {
                 ...(v.exactChains !== undefined ? { exactChains: v.exactChains } : {}),
                 ...(v.timeLimitSec !== undefined ? { timeLimitSec: v.timeLimitSec } : {}),

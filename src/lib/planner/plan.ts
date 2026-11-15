@@ -95,8 +95,9 @@ export interface ProgressionOptions {
   statFloor?: number;
   /** See `Progression.statFloorCost`. */
   statFloorCost?: number;
-  /** See `Progression.firstStatFloor`. */
-  firstStatFloor?: number;
+  /** See `Progression.minStatFloor` / `minStatFloorCost` (Balanced only). */
+  minStatFloor?: number;
+  minStatFloorCost?: number;
   /**
    * Every weapon on the way is levelled to at least this before its build-up (0 or unset: off), so
    * the SP comes along the story instead of from long ABS farming on the last weapons.
@@ -135,7 +136,7 @@ export const effortWeights: number[] = ABS_PER_FLOOR.map((v, c) =>
  */
 export const STORY_RULES = {
   grindShare: 0.3,
-  delayCost: 10000,
+  delayCost: 40000,
   levelCap: 10,
   finalLevelCap: 15,
   startBy: 2,
@@ -144,8 +145,9 @@ export const STORY_RULES = {
   mainItemCost: 1000,
   mainItemCostLast: 30,
   statFloor: 0.5,
-  statFloorCost: 150,
-  firstStatFloor: 0.3,
+  statFloorCost: 2000,
+  minStatFloor: 0.4,
+  minStatFloorCost: 20000,
   buildUpLevelCost: 3000,
 } as const satisfies Partial<ProgressionOptions>;
 
@@ -169,7 +171,10 @@ export function storyOptions(c: StoryChoices = {}): ProgressionOptions {
   return {
     ...STORY_RULES,
     buildUpLevel: c.buildUpLevel ?? 4,
-    ...(c.earliestSteps ? { absGrindShare: UNLIMITED_GRIND, delayCost: EARLIEST_DELAY_COST } : {}),
+    // Earliest: speed first, so no 40% minimum (only the cheap 50% target).
+    ...(c.earliestSteps
+      ? { absGrindShare: UNLIMITED_GRIND, delayCost: EARLIEST_DELAY_COST, minStatFloor: 0 }
+      : {}),
   };
 }
 
@@ -715,7 +720,6 @@ export async function planPath(
       spentGilda: acquireGilda(c.acquire),
       delayCost: prog.delayCost,
       itemChapter: items.map((it) => it.fromChapter ?? 1),
-      chapterWindow: 2,
       firstStageWindow: 0,
       ...(req.maxChapter < 8 ? { lastChapter: req.maxChapter } : {}),
       ...(prog.earlyStatBonus ? { earlyStatBonus: prog.earlyStatBonus } : {}),
@@ -728,7 +732,9 @@ export async function planPath(
       ...(prog.statFloor && prog.statFloorCost
         ? { statFloor: prog.statFloor, statFloorCost: prog.statFloorCost }
         : {}),
-      ...(prog.firstStatFloor !== undefined ? { firstStatFloor: prog.firstStatFloor } : {}),
+      ...(prog.minStatFloor && prog.minStatFloorCost
+        ? { minStatFloor: prog.minStatFloor, minStatFloorCost: prog.minStatFloorCost }
+        : {}),
       ...(prog.effortPower ? { absWeights: effortWeights.map((w) => w ** prog.effortPower!) } : {}),
     };
     return {

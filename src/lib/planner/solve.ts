@@ -117,7 +117,7 @@ export interface Progression {
   itemChapter: number[];
   /** The last chapter any stage may be placed in (default 8): the plan must finish by then. */
   lastChapter?: number;
-  /** A stage may be placed at most this many chapters after its unlock (keeps the search small). */
+  /** A stage may be placed at most this many chapters after its unlock (default: no limit). */
   chapterWindow?: number;
   /** The same for the first stage (0: work on the first weapon starts as soon as it can). */
   firstStageWindow?: number;
@@ -128,14 +128,19 @@ export interface Progression {
    */
   earlyStatBonus?: number;
   /**
-   * Every stat should be at least this share of the stage weapon's maximum at the end of each stage
-   * (capped by the final target), so all stats rise through the story instead of the ones no
-   * build-up needs waiting for the end. Soft: each point short costs `statFloorCost` per stage.
+   * Every stat should be at least this share of the weapon's maximum when the plan leaves it: at the
+   * end of its last stage before the build-up, and on the final weapon (capped by the final target).
+   * Earlier stages on the same weapon (the first one in chapter 2, in-between stages) may be lower.
+   * Soft, with a cost per point short (`statFloorCost`) high enough to make it practically a rule.
    */
   statFloor?: number;
   statFloorCost?: number;
-  /** `statFloor` for the stages on the first weapon (default: `statFloor`). */
-  firstStatFloor?: number;
+  /**
+   * A second, lower floor at the same points (Balanced: 0.4) with a cost per point short above a
+   * chapter's delay, so the plan waits rather than leave a weapon that lopsided.
+   */
+  minStatFloor?: number;
+  minStatFloorCost?: number;
   /**
    * Weight of an ABS spent in each chapter (index 1…8): how hard it is to earn there. When set (and
    * minimising ABS), stage ABS counts at its chapter's weight instead of 1.
@@ -413,20 +418,36 @@ export function buildModel(input: SolveInput) {
       }
   if (p?.statFloor && p.statFloorCost)
     for (let j = 0; j < nStages; j++) {
+      // Only where the plan leaves the weapon (a build-up follows) and on the final stage.
+      if (j < nStages - 1 && chain[j + 1] === chain[j]) continue;
       const max = getWeapon(chain[j]).maxStats;
-      const share = chain[j] === chain[0] ? (p.firstStatFloor ?? p.statFloor) : p.statFloor;
       for (const k of STAT_KEYS) {
-        const want = Math.min(Math.round(share * max[k]), input.finalStats?.[k] ?? max[k]);
+        const want = Math.min(Math.round(p.statFloor * max[k]), input.finalStats?.[k] ?? max[k]);
         if (want <= 0) continue;
         const short = `vS${j}_${k}`;
         row(`cFloor${j}_${k}`, { min: want });
         coef(`cFloor${j}_${k}`, `vE${j}_${k}`, 1);
         coef(`cFloor${j}_${k}`, short, 1);
         model.objective.set(short, SCALE * p.statFloorCost);
+        if (p.minStatFloor && p.minStatFloorCost) {
+          const low = Math.min(
+            Math.round(p.minStatFloor * max[k]),
+            input.finalStats?.[k] ?? max[k],
+          );
+          if (low > 0) {
+            const under = `vT${j}_${k}`;
+            row(`cMinFloor${j}_${k}`, { min: low });
+            coef(`cMinFloor${j}_${k}`, `vE${j}_${k}`, 1);
+            coef(`cMinFloor${j}_${k}`, under, 1);
+            model.objective.set(under, SCALE * p.minStatFloorCost);
+          }
+        }
       }
     }
   if (p) {
     const chapters = [1, 2, 3, 4, 5, 6, 7, 8].filter((c) => c <= (p.lastChapter ?? 8));
+    // There is no story cap: a stage may wait as long as it needs (for kills, items, gilda or the
+    // side weapons that carry its abilities); the delay cost keeps it as early as it can be.
     const windowOf = (j: number) =>
       j === 0 && p.firstStageWindow !== undefined ? p.firstStageWindow : (p.chapterWindow ?? 8);
     /** A generous upper bound on how many of one item or sphere a stage can take. */

@@ -261,9 +261,6 @@ export const plansConfig = {
     {
       // Flamingo, the best Spheda club: no guide recipe, so the route is searched.
       targets: ["flamingo"],
-      // Stop, Wealth and Dark come only from side weapons later than a club's plan finishes, so
-      // its story plans take the other five (Gilda max can still use coins for all eight).
-      abilities: ["poison", "abs-up", "steal", "durable", "absorb"],
       variants: [
         { id: "balanced", objective: "abs", flow: "progression", label: "Balanced" },
         {
@@ -272,6 +269,8 @@ export const plansConfig = {
           flow: "progression",
           label: "Earliest",
           earliestSteps: true,
+          // Every step at its unlock makes these slow to solve already (20–80 minutes a run).
+          timeLimitSec: 120,
         },
       ],
     },
@@ -316,6 +315,8 @@ export const plansConfig = {
           flow: "progression",
           label: "Earliest",
           earliestSteps: true,
+          // Every step at its unlock makes these slow to solve already (20–80 minutes a run).
+          timeLimitSec: 120,
         },
       ],
     },
