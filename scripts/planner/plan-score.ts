@@ -4,7 +4,11 @@
 import { deriveBuild } from "../../src/lib/guide/derive.ts";
 import type { Guide } from "../../src/lib/guide/types.ts";
 import { getWeapon } from "../../src/lib/planner/sources.ts";
-import { ABS_PER_FLOOR } from "../../src/lib/planner/plan.ts";
+import {
+  ABS_PER_FLOOR,
+  effortWeights,
+  type ProgressionOptions,
+} from "../../src/lib/planner/plan.ts";
 import { STAT_KEYS } from "../../src/lib/schemas.ts";
 import type { PlanSpec } from "./plans-config.ts";
 
@@ -19,6 +23,41 @@ export interface PlanScore {
   gilda: number;
   /** Sum of the chapters of its steps: lower means the build progresses earlier. */
   pace: number;
+  /** Story plans: what the solver minimises, recomputed from the guide (see `storyCost`). */
+  cost?: number;
+}
+
+/**
+ * The story objective (in ABS units, see docs/planning.md) recomputed from a guide's derived steps,
+ * so committed plans and new runs are judged by what the solver trades off: effort-weighted ABS,
+ * chapter delay, early stats, items straight on the main weapon, the stat floor and build-up levels.
+ */
+export function storyCost(guide: Guide, prog: ProgressionOptions): number {
+  const d = deriveBuild(guide);
+  const work = guide.steps.filter((s) => s.build);
+  const first = work[0]?.build?.weaponId;
+  let cost = 0;
+  work.forEach((s, i) => {
+    const st = d.steps.get(s.id);
+    if (!st) return;
+    const c = Number(s.chapterId ?? 8);
+    const w = getWeapon(s.build!.weaponId);
+    cost += st.cost.abs * (prog.effortPower ? effortWeights[c] ** prog.effortPower : 1);
+    cost += (prog.delayCost * c) / work.length;
+    for (const k of STAT_KEYS) {
+      cost -= (prog.earlyStatBonus ?? 0) * st.stats[k];
+      if (prog.statFloor && prog.statFloorCost) {
+        const share = w.id === first ? (prog.firstStatFloor ?? prog.statFloor) : prog.statFloor;
+        cost += prog.statFloorCost * Math.max(0, Math.round(share * w.maxStats[k]) - st.stats[k]);
+      }
+    }
+    const next = work[i + 1]?.build?.weaponId;
+    if (next && next !== w.id && prog.buildUpLevel)
+      cost += (prog.buildUpLevelCost ?? 0) * Math.max(0, prog.buildUpLevel - st.level);
+    for (const x of s.build!.synths ?? [])
+      if (x.kind === "item") cost += (prog.mainItemCost ?? 0) * (x.count ?? 1);
+  });
+  return cost;
 }
 
 export function scorePlan(guide: Guide, spec: PlanSpec): PlanScore {
@@ -47,16 +86,18 @@ export function scorePlan(guide: Guide, spec: PlanSpec): PlanScore {
     effort,
     gilda: d.total.gilda,
     pace: chapters.reduce((n, c) => n + c, 0),
+    ...(spec.flow === "progression" ? { cost: storyCost(guide, spec.progression) } : {}),
   };
 }
 
 /**
- * Better first: valid, then the earliest finish, the least earning effort (rounded to a tenth of a
- * floor), least ABS, earliest pace, least gilda.
+ * Better first: valid, then (story plans) the least story cost, then the earliest finish, the least
+ * earning effort (rounded to a tenth of a floor), least ABS, earliest pace, least gilda.
  */
 export function compareScores(a: PlanScore, b: PlanScore): number {
   return (
     Number(a.problems.length > 0) - Number(b.problems.length > 0) ||
+    (a.cost !== undefined && b.cost !== undefined ? Math.round(a.cost - b.cost) : 0) ||
     a.finish - b.finish ||
     Math.round(a.effort * 10) - Math.round(b.effort * 10) ||
     a.abs - b.abs ||
@@ -66,4 +107,4 @@ export function compareScores(a: PlanScore, b: PlanScore): number {
 }
 
 export const scoreText = (s: PlanScore) =>
-  `${s.problems.length ? `INVALID (${s.problems.slice(0, 3).join("; ")})` : "valid"} · ch${s.finish} · ${s.effort.toFixed(1)} floors' effort · ${Math.round(s.abs).toLocaleString("en")} ABS · ${s.gilda.toLocaleString("en")} gilda · pace ${s.pace}`;
+  `${s.problems.length ? `INVALID (${s.problems.slice(0, 3).join("; ")})` : "valid"} · ch${s.finish} · ${s.effort.toFixed(1)} floors' effort · ${Math.round(s.abs).toLocaleString("en")} ABS · ${s.gilda.toLocaleString("en")} gilda · pace ${s.pace}${s.cost === undefined ? "" : ` · cost ${Math.round(s.cost).toLocaleString("en")}`}`;

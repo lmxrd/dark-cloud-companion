@@ -100,6 +100,8 @@ export interface ProgressionOptions {
    * the SP comes along the story instead of from long ABS farming on the last weapons.
    */
   buildUpLevel?: number;
+  /** Cost (in ABS) of each level short of `buildUpLevel`: soft, so a plan is always found. */
+  buildUpLevelCost?: number;
   /**
    * Weight ABS by how hard it is to earn in the chapter it is spent (see `effortWeights`), raised to
    * this power (1: in full; 0.5: softened; 0 or unset: off).
@@ -121,7 +123,7 @@ export const ABS_PER_FLOOR: number[] = (() => {
   }
   return perSection;
 })();
-const effortWeights: number[] = ABS_PER_FLOOR.map((v, c) =>
+export const effortWeights: number[] = ABS_PER_FLOOR.map((v, c) =>
   c === 0 || !v ? 1 : ABS_PER_FLOOR[4] / v,
 );
 
@@ -144,6 +146,7 @@ const STORY_BASE = {
   statFloorCost: 150,
   firstStatFloor: 0.3,
   buildUpLevel: 4,
+  buildUpLevelCost: 3000,
 };
 export const STORY_PRESETS: Record<StoryStyle, ProgressionOptions> = {
   balanced: { ...STORY_BASE, effortPower: 0.5 },
@@ -712,6 +715,7 @@ export async function planPath(
       stageMinLevels: Array.from({ length: nStages }, (_, j) =>
         chain[j + 1] !== undefined && chain[j + 1] !== chain[j] ? (prog.buildUpLevel ?? 0) : 0,
       ),
+      stageMinLevelCost: prog.buildUpLevelCost ?? 0,
     };
   };
 

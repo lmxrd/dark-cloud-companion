@@ -66,8 +66,12 @@ export interface SolveInput {
   timeLimitSec?: number;
   /** Highest level per stage (overrides `maxLevel` where given). */
   stageMaxLevels?: number[];
-  /** Lowest level per stage (0 or missing: none). */
+  /**
+   * Wanted lowest level per stage (0 or missing: none). Soft when `stageMinLevelCost` is set (each
+   * level short costs that much in ABS units), so an unusual start or target still gets a plan.
+   */
   stageMinLevels?: number[];
+  stageMinLevelCost?: number;
   /**
    * Abilities that must come from spheres: at least `count` spheres carrying each, on stage
    * `fromStage` or later (a build-up into a weapon with the opposite ability would cancel earlier ones).
@@ -270,6 +274,10 @@ export function buildModel(input: SolveInput) {
     if (minLevel > ls) {
       row(`cLfloor${j}`, { min: minLevel });
       coef(`cLfloor${j}`, L, 1);
+      if (input.stageMinLevelCost) {
+        coef(`cLfloor${j}`, `vLs${j}`, 1);
+        model.objective.set(`vLs${j}`, SCALE * input.stageMinLevelCost);
+      }
     }
     const stored = first === 0 ? start.abs : 0;
     const absAt = (m: number) => Math.max(0, absBetween(w.baseAbs, ls, m) - stored);

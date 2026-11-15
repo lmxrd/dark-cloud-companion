@@ -2,7 +2,7 @@ import { describe, expect, test } from "vitest";
 import { plansConfig } from "./plans.config";
 import { expandPlans, parsePlansConfig } from "./plans-config";
 import { readPlanFiles } from "./plan-files";
-import { compareScores, scorePlan, type PlanScore } from "./plan-score";
+import { compareScores, scorePlan, storyCost, type PlanScore } from "./plan-score";
 
 const specs = expandPlans(parsePlansConfig(plansConfig));
 
@@ -13,6 +13,7 @@ describe("scoring generated plans", () => {
     const score = scorePlan(file.guide, spec);
     expect(score.problems).toEqual([]);
     expect(score.finish).toBeLessThanOrEqual(8);
+    expect(score.cost).toBeGreaterThan(0);
     const other = specs.find((s) => s.id === "legend/story")!;
     expect(scorePlan(file.guide, other).problems.length).toBeGreaterThan(0);
   });
@@ -41,5 +42,23 @@ describe("scoring generated plans", () => {
       [0, 8, 20, 30000],
       [1, 7, 20, 1],
     ]);
+  });
+
+  test("story plans compare by their story cost first", () => {
+    const base: PlanScore = { problems: [], finish: 7, abs: 40000, effort: 20, gilda: 1, pace: 50 };
+    const order = [
+      { ...base, cost: 90000 },
+      { ...base, finish: 8, abs: 60000, cost: 80000 },
+      { ...base, problems: ["no Dark"], cost: 1 },
+    ].sort(compareScores);
+    expect(order.map((x) => x.cost)).toEqual([80000, 90000, 1]);
+  });
+
+  test("the story cost charges a stat below its floor and a level short before a build-up", () => {
+    const file = readPlanFiles().find((f) => f.spec === "island-king/story")!;
+    const spec = specs.find((s) => s.id === "island-king/story")!;
+    const cost = storyCost(file.guide, spec.progression);
+    expect(storyCost(file.guide, { ...spec.progression, statFloor: 0.99 })).toBeGreaterThan(cost);
+    expect(storyCost(file.guide, { ...spec.progression, buildUpLevel: 9 })).toBeGreaterThan(cost);
   });
 });

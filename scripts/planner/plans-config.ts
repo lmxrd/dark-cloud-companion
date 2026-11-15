@@ -40,6 +40,7 @@ const variantSchema = z.object({
   statFloorCost: z.number().optional(),
   firstStatFloor: z.number().optional(),
   buildUpLevel: z.number().optional(),
+  buildUpLevelCost: z.number().optional(),
   /** Weigh ABS by the effort of earning it in its chapter, to this power (preset: 0.5 or 1; 0: off). */
   effortPower: z.number().optional(),
   /** ABS each item synthed straight onto the main weapon counts as (its SP is gone; default 30). */
@@ -122,6 +123,7 @@ function storySettings(v: z.infer<typeof variantSchema>): ProgressionOptions {
     statFloorCost: pick("statFloorCost"),
     firstStatFloor: pick("firstStatFloor"),
     buildUpLevel: pick("buildUpLevel"),
+    buildUpLevelCost: pick("buildUpLevelCost"),
     mainItemCost: pick("mainItemCost"),
     effortPower: pick("effortPower"),
   };
