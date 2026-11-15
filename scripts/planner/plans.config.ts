@@ -57,6 +57,8 @@ export const plansConfig = {
             "griffon-fork",
             "island-king",
           ],
+          statFloor: 0.5,
+          statFloorCost: 60,
         },
       ],
     },

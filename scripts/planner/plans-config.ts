@@ -36,6 +36,8 @@ const variantSchema = z.object({
   startBy: z.number().optional(),
   /** Reward per stat point per stage for stats gained earlier (preset: 2; 0: off). */
   earlyStatBonus: z.number().optional(),
+  statFloor: z.number().optional(),
+  statFloorCost: z.number().optional(),
   /** Weigh ABS by the effort of earning it in its chapter, to this power (preset: 0.5 or 1; 0: off). */
   effortPower: z.number().optional(),
   /** ABS each item synthed straight onto the main weapon counts as (its SP is gone; default 30). */
@@ -114,6 +116,8 @@ function storySettings(v: z.infer<typeof variantSchema>): ProgressionOptions {
     finalLevelCap: pick("finalLevelCap"),
     startBy: pick("startBy"),
     earlyStatBonus: pick("earlyStatBonus"),
+    statFloor: pick("statFloor"),
+    statFloorCost: pick("statFloorCost"),
     mainItemCost: pick("mainItemCost"),
     effortPower: pick("effortPower"),
   };

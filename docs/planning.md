@@ -67,6 +67,7 @@ The objective adds up (in ABS-equivalent units):
 | Chapter delay               | every stage one chapter later costs this much in all          | `delayCost` 10,000 |
 | Early stats                 | each stat point at the end of each stage is worth this        | `earlyStatBonus` 2 |
 | Items on the main weapon    | each costs this (its SP is gone for good)                     | `mainItemCost` 30  |
+| Stat floor (per plan)       | each point a stat is below its floor after a stage            | `statFloorCost`    |
 
 **Effort.** The story pays far more ABS later: an ABS-paying floor or fight pays about 230 ABS in
 chapter 2, 540 in 3, 1,100 in 4, 1,600 in 5, 1,750 in 6, 3,500 in 7. So 1,000 ABS is about four
@@ -101,6 +102,24 @@ as % of the weapon's maximum):
 | Balanced         | 51,208 | 31.0   | ch2   | 42 → 45 → 71 → 70 → 77 → 89 → 100      |
 
 (Effort weighting in full without the stronger early-stats term skipped chapters 2–3 for both.)
+
+### Stat floor
+
+Without it, stats that no build-up on the route asks for wait for the end: on the Island King route
+only the Evilcise build-up needs Lightning (9), so Lightning sat at 12–36% of each weapon's maximum
+until Griffon Fork in chapter 8 filled it from 18 to 200 with spheres full of Scrap of Metal. Stats
+carry over every build-up, so adding them late is cheapest, but the weapon is lopsided all game.
+
+`statFloor` asks for every stat to be at least that share of the stage weapon's maximum (capped by
+the final target) after each stage; it is soft, each point short costs `statFloorCost` per stage.
+Island King with floor 0.5 at 60 per point (stats as % of each weapon's maximum, lowest stat):
+
+| Island King | ABS    | Effort | Lightning along the route         | Lowest stat per stage            |
+| ----------- | ------ | ------ | --------------------------------- | -------------------------------- |
+| No floor    | 44,328 | 22.7   | 36 → 28 → 16 → 14 → 12 → 100      | 4 → 28 → 16 → 14 → 12 → 91       |
+| Floor 0.5   | 46,224 | 26.5   | 58 → 57 → 59 → 57 → 81 → 67 → 100 | 31 → 57 → 59 → 57 → 81 → 67 → 99 |
+
+Set per plan in `plans.config.ts` (Island King only so far); off in the presets.
 
 ### Uneven levels are expected
 

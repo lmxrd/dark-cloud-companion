@@ -89,6 +89,10 @@ export interface ProgressionOptions {
   earlyStatBonus?: number;
   /** See `Progression.mainItemCost` (0: off). */
   mainItemCost?: number;
+  /** See `Progression.statFloor` (0: off). */
+  statFloor?: number;
+  /** See `Progression.statFloorCost`. */
+  statFloorCost?: number;
   /**
    * Weight ABS by how hard it is to earn in the chapter it is spent (see `effortWeights`), raised to
    * this power (1: in full; 0.5: softened; 0 or unset: off).
@@ -681,6 +685,9 @@ export async function planPath(
       firstStageWindow: 0,
       ...(prog.earlyStatBonus ? { earlyStatBonus: prog.earlyStatBonus } : {}),
       ...(prog.mainItemCost ? { mainItemCost: prog.mainItemCost } : {}),
+      ...(prog.statFloor && prog.statFloorCost
+        ? { statFloor: prog.statFloor, statFloorCost: prog.statFloorCost }
+        : {}),
       ...(prog.effortPower ? { absWeights: effortWeights.map((w) => w ** prog.effortPower!) } : {}),
     };
     return {

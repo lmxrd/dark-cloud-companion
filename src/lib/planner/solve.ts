@@ -110,6 +110,13 @@ export interface Progression {
    */
   earlyStatBonus?: number;
   /**
+   * Every stat should be at least this share of the stage weapon's maximum at the end of each stage
+   * (capped by the final target), so all stats rise through the story instead of the ones no
+   * build-up needs waiting for the end. Soft: each point short costs `statFloorCost` per stage.
+   */
+  statFloor?: number;
+  statFloorCost?: number;
+  /**
    * Weight of an ABS spent in each chapter (index 1…8): how hard it is to earn there. When set (and
    * minimising ABS), stage ABS counts at its chapter's weight instead of 1.
    */
@@ -366,6 +373,19 @@ export function buildModel(input: SolveInput) {
         const v = `vE${j}_${k}`;
         model.objective.set(v, (model.objective.get(v) ?? 0) - SCALE * p.earlyStatBonus);
       }
+  if (p?.statFloor && p.statFloorCost)
+    for (let j = 0; j < nStages; j++) {
+      const max = getWeapon(chain[j]).maxStats;
+      for (const k of STAT_KEYS) {
+        const want = Math.min(Math.round(p.statFloor * max[k]), input.finalStats?.[k] ?? max[k]);
+        if (want <= 0) continue;
+        const short = `vS${j}_${k}`;
+        row(`cFloor${j}_${k}`, { min: want });
+        coef(`cFloor${j}_${k}`, `vE${j}_${k}`, 1);
+        coef(`cFloor${j}_${k}`, short, 1);
+        model.objective.set(short, SCALE * p.statFloorCost);
+      }
+    }
   if (p) {
     const chapters = [1, 2, 3, 4, 5, 6, 7, 8];
     const windowOf = (j: number) =>
