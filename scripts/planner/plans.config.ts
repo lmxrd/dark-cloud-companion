@@ -161,6 +161,8 @@ export const plansConfig = {
           label: "Story",
           // 150 per point (the default) cost this plan far more ABS for no evener stats.
           statFloorCost: 60,
+          // Side weapons for its spheres levelled in earlier chapters (try-out on one plan).
+          prepareSpheres: true,
           // +5 before each build-up: more SP along the way, less ABS farming on the last weapon.
           buildUpLevel: 5,
           // The weapon guide's Five-Star Armlet route (recipe 7.5).

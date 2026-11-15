@@ -42,6 +42,8 @@ export function planResultToGuide(args: {
   createdAt?: number;
   /** Where each stage falls in the story (see planner/timeline); without it, steps get a chapter only. */
   placement?: PlacedStage[];
+  /** Level the side weapons for spheres in earlier chapters (prepare steps, see `prepareSpheresEarly`). */
+  prepareSpheres?: boolean;
 }): Guide {
   const { result } = args;
   if (!result.plan || !result.chain) throw new Error("no plan to convert");
@@ -134,8 +136,7 @@ export function planResultToGuide(args: {
     createdAt: args.createdAt ?? Date.now(),
     updatedAt: args.createdAt ?? Date.now(),
   };
-  // Following the story: side weapons for spheres are levelled in earlier chapters where they can be.
-  return args.placement ? prepareSpheresEarly(guide) : guide;
+  return args.prepareSpheres ? prepareSpheresEarly(guide) : guide;
 }
 
 /**

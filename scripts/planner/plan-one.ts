@@ -106,6 +106,7 @@ export async function planOne(
       acquire: result.acquire,
       createdAt: 0,
       placement,
+      prepareSpheres: !!spec.prepareSpheres,
     }),
   );
   const log = `${spec.id} — from ${startName} · ${cost.abs} ABS · ${cost.gilda} gilda · ${cost.steps} steps · done ch${done.chapter} ${done.sectionId} · grind ${grind} ABS / ${farm} gilda`;

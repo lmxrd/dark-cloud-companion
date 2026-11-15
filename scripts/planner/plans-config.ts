@@ -49,6 +49,8 @@ const variantSchema = z.object({
   route: z.array(z.string()).optional(),
   /** Also offer built-up spheres with their earlier weapons this many levels higher (default 0). */
   extraAuxLevels: z.number().optional(),
+  /** Level the side weapons for spheres in earlier chapters ("prepare" steps, docs/planning.md). */
+  prepareSpheres: z.boolean().optional(),
   /** Routes solved exactly, and seconds per exact solve (story plans are generated once: be thorough). */
   exactChains: z.number().optional(),
   timeLimitSec: z.number().optional(),
@@ -101,6 +103,8 @@ export interface PlanSpec {
   /** A fixed build-up route (first weapon … target). */
   route?: string[];
   extraAuxLevels?: number;
+  /** The guide gets prepare steps (see `prepareSpheresEarly`). */
+  prepareSpheres?: boolean;
   /** Routes solved exactly and seconds per exact solve (undefined: the planner's defaults). */
   exactChains?: number;
   timeLimitSec?: number;
@@ -159,6 +163,7 @@ export function expandPlans(config: PlansConfig): PlanSpec[] {
           progression: storySettings(v),
           ...(v.route ? { route: v.route } : {}),
           ...(v.extraAuxLevels ? { extraAuxLevels: v.extraAuxLevels } : {}),
+          ...(v.prepareSpheres ? { prepareSpheres: true } : {}),
           ...(v.flow === "progression"
             ? { exactChains: v.exactChains ?? 6, timeLimitSec: v.timeLimitSec ?? 120 }
             : {

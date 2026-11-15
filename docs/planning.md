@@ -95,14 +95,96 @@ as % of the weapon's maximum):
 | Least effort                 | 37,312 | 14.9   | ch4   | 82 → 76 → 75 → 61 → 91 → 90 → 100      |
 | Balanced                     | 39,656 | 21.8   | ch2   | 42 → 35 → 88 → 64 → 75 → 94 → 100      |
 
+| Five-Star Armlet | ABS    | Effort | First | Stats                                  |
+| ---------------- | ------ | ------ | ----- | -------------------------------------- |
+| Before           | 49,752 | 33.4   | ch2   | 41 → 44 → 63 → 61 → 71 → 84 → 93 → 100 |
+| Least effort     | 59,160 | 34.7   | ch2   | 55 → 44 → 70 → 69 → 98 → 100 → 100     |
+| Balanced         | 51,208 | 31.0   | ch2   | 42 → 45 → 71 → 70 → 77 → 89 → 100      |
+
+(Effort weighting in full without the stronger early-stats term skipped chapters 2–3 for both.)
+
+### Stat floor
+
+Without it, stats that no build-up on the route asks for wait for the end: on the Island King route
+only the Evilcise build-up needs Lightning (9), so Lightning sat at 12–36% of each weapon's maximum
+until Griffon Fork in chapter 8 filled it from 18 to 200 with spheres full of Scrap of Metal. Stats
+carry over every build-up, so adding them late is cheapest, but the weapon is lopsided all game.
+
+`statFloor` asks for every stat to be at least that share of the stage weapon's maximum (capped by
+the final target) after each stage. It is soft: each point short costs `statFloorCost` per stage,
+so early on, when SP is scarce, a stat can stay below it. At 60 per point some plans still left a
+stat near 0 (LEGEND's Scale, Supernova's Charge): raising it needed extra levels whose ABS cost
+more than the shortfall. At 150 every plan keeps its stats at about half of the maximum or more.
+
+Lowest stat after each work step (% of that weapon's maximum) and total ABS:
+
+| Plan             | No floor                          | Floor 0.5 at 150 (60 where marked)    |
+| ---------------- | --------------------------------- | ------------------------------------- |
+| Island King      | 44,328 · 4 28 16 14 12 91         | 46,640 · 51 62 53 54 81 98            |
+| LEGEND           | 87,488 · 11 21 24 18 12 10 100 85 | 46,752 · 42 42 65 52 51 50 50 52      |
+| Supernova        | 51,200 · 0 0 0 0 40 42            | 52,558 · 52 56 56 58 51 61            |
+| Grade Zero       | 27,608 · 0 11 6 13 15 13 11       | 29,472 · 53 53 47 65 51 47 70 64 (60) |
+| Five-Star Armlet | 56,200 · 3 2 2 12 45 68           | 56,840 · 44 40 58 45 46 73 63 (60)    |
+| Love             | 45,592 · 0 0 3 2 2 1 84           | 48,144 · 38 51 52 56 56 48 100        |
+
+Grade Zero and Five-Star Armlet use 60 (`plans.config.ts`): at 150 they cost 38,024 and 60,968 ABS
+for no evener stats. The cost is part of both story styles (0.5 at 150), so "Follow the story" on
+the planner page uses it too.
+
+### First weapon and build-up levels
+
+With the floor in full the first weapon is levelled hard while ABS is slow to earn (Island King:
+Bone Rapier +6 for 2,880 ABS in chapter 2, then +3, +3, +2, +2, +5, +4). Two settings, part of both
+story styles, spread the levels out:
+
+- `firstStatFloor` 0.3: the floor on the first weapon (instead of 0.5);
+- `buildUpLevel` 4: every weapon on the way is levelled to at least +4 before its build-up. Soft:
+  each level short costs `buildUpLevelCost` (3,000 ABS), so an unusual start or target on the
+  planner page still gets a plan.
+
+| Island King        | ABS    | Effort | Levels               | Last step ABS | Finishes |
+| ------------------ | ------ | ------ | -------------------- | ------------- | -------- |
+| Floor 0.5          | 46,640 | 31.5   | +6 +3 +3 +2 +2 +5 +4 | 17,648        | ch7      |
+| First 0.3, min. +4 | 45,792 | 24.5   | +4 +4 +4 +4 +4 +4 +2 | 15,168        | ch8      |
+
+Over all plans: total ABS from 6% less (Five-Star Armlet) to 15% more (LEGEND); every weapon on
+the way at +4 or +5 (a `+0` step is a weapon's first chapter, spheres only, levelled in the next);
+stats start lower on the first weapon (16–32% of its maximum) and are about half or more after.
+Supernova now finishes in chapter 8 (was 7).
+
+### +5 before build-ups (LEGEND, Supernova, Five-Star Armlet)
+
+These three have the costliest last steps, so they ask for +5 (`buildUpLevel: 5` in
+`plans.config.ts`):
+
+| Plan             | ABS             | Last step ABS   | Levels before build-ups | Finishes  |
+| ---------------- | --------------- | --------------- | ----------------------- | --------- |
+| LEGEND           | 53,896 → 49,480 | 29,424 → 29,064 | +4 → +5                 | ch7 → ch8 |
+| Supernova        | 50,524 → 51,173 | 30,709 → 31,037 | +4 → +5                 | ch8 → ch7 |
+| Five-Star Armlet | 53,216 → 53,528 | 32,408 → 29,952 | +4 → +5                 | ch7       |
+
+The last step hardly shrinks: its ABS is not the final weapon's levels (LEGEND +2) but the 14–15
+side weapons levelled to +5 for its spheres (mostly Moon Armlets). A weapon's stats are capped at its
+maximum, and the final weapon's maximum is far above the one before, so those stat points can only
+go in at the end. SP from earlier levels carries over, but it is not what the last step is short of.
+
+### Preparing side weapons ahead of time (Five-Star Armlet so far)
+
+The side weapons for a step's spheres don't have to be levelled in that step: they can be made as
+soon as they are sold (or invented) and kept. With `prepareSpheres` (a plan setting in
+`plans.config.ts`), `prepareSpheresEarly` (`src/lib/guide/prepare.ts`) moves each into a "Spheres
+for …" prepare step in an earlier chapter: from chapter 2 and once it can be made (purchase, items,
+build-up kills), to the chapter whose story ABS is least used by then, never past what the story
+pays in that chapter. The sphere stays in its step, marked `prepared` (the simulator counts its
+cost in the prepare step only), so the plan, its totals and its validity are unchanged.
+
 | Five-Star Armlet   | Last step ABS | Prepare steps (for all its work steps) |
 | ------------------ | ------------- | -------------------------------------- |
 | Without            | 29,952        | –                                      |
 | With prepare steps | 3,328         | ch3 2,832 · ch5 6,224 · ch6 23,040 ABS |
 
-On the other plans the last step drops the same way (Supernova 31,037 → 2,805, LEGEND 29,064 →
-832). So far only Five-Star Armlet's committed guide has them; the others get them when
-regenerated (or by applying `prepareSpheresEarly` to their file).
+Tried on the others (not committed), the last step drops the same way (Supernova 31,037 → 2,805,
+LEGEND 29,064 → 832, Island King 15,168 → 832).
 
 ### Uneven levels are expected
 
