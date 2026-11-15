@@ -108,6 +108,11 @@ export interface Progression {
    */
   earlyStatBonus?: number;
   /**
+   * Weight of an ABS spent in each chapter (index 1…8): how hard it is to earn there. When set (and
+   * minimising ABS), stage ABS counts at its chapter's weight instead of 1.
+   */
+  absWeights?: number[];
+  /**
    * Cost (in objective units) of each item synthed straight onto the main weapon: its SP is gone for
    * good (SP carries over build-ups), while items inside spheres cost the main weapon nothing extra.
    */
@@ -425,6 +430,37 @@ export function buildModel(input: SolveInput) {
             for (const { it, i: ii } of shellItems)
               coef(gildaRow, `vQ${i}_${ti}_${ii}`, it.price ?? 0);
         });
+      }
+    }
+
+    // ABS weighted by the effort of earning it where it is spent: a stage's ABS (its levelling and
+    // its spheres) counts at its chapter's weight. B[j][c] carries stage j's ABS when it is placed in
+    // chapter c (and is 0 otherwise); its ABS no longer counts at weight 1.
+    if (p.absWeights && objective === "abs") {
+      const BIG = 1_000_000;
+      for (let j = 0; j < nStages; j++) {
+        const open = chapters.filter(
+          (c) =>
+            c >= (p.stageUnlock[j] ?? 1) && c <= (p.stageUnlock[j] ?? 1) + (p.chapterWindow ?? 8),
+        );
+        model.objective.delete(`vA${j}`);
+        const e = `cEffort${j}`;
+        row(e, { min: 0, max: 0 });
+        coef(e, `vA${j}`, -1);
+        if (isContinuation(chain, j)) coef(e, `vA${j - 1}`, 1);
+        templates.forEach((t, ti) => {
+          const v = `vY${j}_${ti}`;
+          coef(e, v, -t.abs);
+          model.objective.set(v, (model.objective.get(v) ?? 0) - SCALE * t.abs);
+        });
+        for (const c of open) {
+          const b = `vB${j}_${c}`;
+          coef(e, b, 1);
+          model.objective.set(b, SCALE * p.absWeights[c]);
+          row(`cEffZ${j}_${c}`, { max: 0 });
+          coef(`cEffZ${j}_${c}`, b, 1);
+          coef(`cEffZ${j}_${c}`, `vZ${j}_${c}`, -BIG);
+        }
       }
     }
   }

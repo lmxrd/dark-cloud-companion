@@ -89,7 +89,26 @@ export interface ProgressionOptions {
   earlyStatBonus?: number;
   /** See `Progression.mainItemCost` (0: off). */
   mainItemCost?: number;
+  /**
+   * Weight ABS by how hard it is to earn in the chapter it is spent (see `effortWeights`), raised to
+   * this power (1: in full; 0.5: softened; 0 or unset: off).
+   */
+  effortPower?: number;
 }
+
+/**
+ * How hard an ABS is to earn in each chapter (index 1…8), relative to chapter 4: the inverse of the
+ * ABS an ABS-paying floor or fight pays there on average (about 230 in chapter 2, 1,100 in chapter
+ * 4, 3,500 in chapter 7).
+ */
+const effortWeights: number[] = (() => {
+  const perSection = Array<number>(9).fill(0);
+  for (let c = 1; c <= 8; c++) {
+    const paying = core.sections.filter((s) => s.chapterNumber === c && (s.abs ?? 0) > 0);
+    perSection[c] = paying.reduce((n, s) => n + (s.abs ?? 0), 0) / Math.max(1, paying.length);
+  }
+  return perSection.map((v, c) => (c === 0 || !v ? 1 : perSection[4] / v));
+})();
 
 /** The story settings the built-in plans use (and the planner page's "follow the story"). */
 export const STORY_DEFAULTS: ProgressionOptions = {
@@ -645,6 +664,7 @@ export async function planPath(
       chapterWindow: 2,
       ...(prog.earlyStatBonus ? { earlyStatBonus: prog.earlyStatBonus } : {}),
       ...(prog.mainItemCost ? { mainItemCost: prog.mainItemCost } : {}),
+      ...(prog.effortPower ? { absWeights: effortWeights.map((w) => w ** prog.effortPower!) } : {}),
     };
     return {
       chain,
