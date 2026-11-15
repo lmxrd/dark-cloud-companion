@@ -61,6 +61,19 @@ const RULES: Rule[] = [
     sql: `SELECT f.id FROM towns f JOIN towns p ON p.id = f.present_town_id WHERE p.era <> 'present'`,
     describe: (r) => `town ${r.id} is the future of a town that isn't in the present`,
   },
+  {
+    name: "weapon tier",
+    sql: `SELECT id, tier FROM weapons WHERE tier NOT BETWEEN 1 AND 9`,
+    describe: (r) =>
+      `weapon ${r.id} has tier ${r.tier}; tiers run 1 to 9 (the build-up charts' columns)`,
+  },
+  {
+    name: "build-up into a lower tier",
+    sql: `SELECT a.id AS fromId, b.id AS toId FROM weapon_build_ups u
+          JOIN weapons a ON a.id = u.weapon_id JOIN weapons b ON b.id = u.target_id
+          WHERE b.tier < a.tier`,
+    describe: (r) => `${r.fromId} builds up into ${r.toId}, which is in a lower tier`,
+  },
 ];
 
 /** Every problem in the database, as readable lines; empty when all is well. */

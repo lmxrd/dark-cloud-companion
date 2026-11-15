@@ -45,6 +45,7 @@ const weaponList: Weapon[] = weaponsFile.weapons.map((w) => ({
   ...(w.description ? { description: w.description } : {}),
   ...(w.attackVariesByTime ? { attackVariesByTime: true } : {}),
   baseAbs: w.baseAbs,
+  tier: w.tier,
   spPerLevel: w.synthPointsPerLevel,
   abilities: w.abilities as AbilityId[],
   buildsUpTo: w.buildsInto,

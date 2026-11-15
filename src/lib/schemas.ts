@@ -48,6 +48,8 @@ export const weapon = z.object({
   attackVariesByTime: z.boolean().optional(),
   /** ABS needed to reach +1 (B in the ABS formulas). May be .5 for some guns. */
   baseAbs: z.number(),
+  /** Tier 1–9: the column on the build-up charts (game data; custom weapons have none). */
+  tier: z.number().int().optional(),
   /** SP gained per level (3 low / 4 mid / 6 high tier). */
   spPerLevel: z.number().int(),
   abilities: z.array(abilityId),

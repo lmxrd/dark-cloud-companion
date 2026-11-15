@@ -65,6 +65,7 @@ export function WeaponPage({
         title={w.name}
         description={w.description}
         facts={[
+          { label: t("db.tier"), value: w.tier },
           { label: t("weapons.baseAbs"), value: w.baseAbs },
           { label: t("weapons.spPerLevel"), value: w.synthPointsPerLevel },
           w.combo && { label: t("weapons.combo"), value: w.combo },

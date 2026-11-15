@@ -70,3 +70,41 @@ describe("list rows", () => {
     expect(palm.dungeons.map((d) => d.id)).toContain("underground-channel");
   });
 });
+
+describe("tiers", () => {
+  it("puts every weapon in a chart column, and never builds up into a lower one", async () => {
+    const { weapons } = await import("@/lib/gamedata/weapons");
+    const tier = new Map(weapons.weapons.map((w) => [w.id, w.tier]));
+    for (const w of weapons.weapons) {
+      expect(w.tier, w.id).toBeGreaterThanOrEqual(1);
+      expect(w.tier, w.id).toBeLessThanOrEqual(9);
+      for (const next of w.buildsInto)
+        expect(tier.get(next)!, `${w.id} → ${next}`).toBeGreaterThanOrEqual(w.tier);
+    }
+    expect(tier.get("holy-daedalus-blade")).toBe(5);
+    expect(tier.get("island-king")).toBe(9);
+  });
+
+  it("sorts weapons by tier, keeping a line together", async () => {
+    const { weaponData } = await import("@/lib/planner/sources");
+    const { byTier } = await import("@/lib/weapons/info");
+    const swords = weaponData.weapons.filter((w) => w.type === "sword").sort(byTier);
+    expect(swords[0].name).toBe("Royal Sword");
+    expect(swords.at(-1)!.name).toBe("Island King");
+    const tiers = swords.map((w) => w.tier!);
+    expect([...tiers].sort((a, b) => a - b)).toEqual(tiers);
+  });
+
+  it("orders monster forms by evolution stage", async () => {
+    const { formsInOrder, stageOf } = await import("@/components/db/pages/MonsterPages");
+    expect(formsInOrder("aquatic").map((f) => f.name)).toEqual([
+      "Froggy",
+      "Geron",
+      "Gamal",
+      "Moon Goyone",
+      "Putos",
+      "Mariner",
+    ]);
+    expect(stageOf("geron")).toEqual({ stage: 2, level: 26 });
+  });
+});

@@ -730,7 +730,7 @@ export const en = {
   "weapons.finalsOnly": "Finals",
   "weapons.final": "Final weapon",
   "weapons.inGuide": "Used by a switched-on guide",
-  "weapons.statLine": "Atk {atk} · ABS {abs} · SP {sp}",
+  "weapons.statLine": "Tier {tier} · Atk {atk} · ABS {abs} · SP {sp}",
   "weapons.noMatch": "No weapons match.",
   "weapons.all": "All",
   "weapons.max": "Max",

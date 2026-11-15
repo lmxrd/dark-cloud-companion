@@ -233,12 +233,12 @@ export const enDb = {
   "db.view.table": "Table",
   "db.statsBase": "Base",
   "db.statsMax": "Max",
-  "db.sort.buildUp": "Build-up",
   "db.sort.name": "Name",
   "db.sort.attack": "Attack",
   "db.sort.abs": "ABS",
   "db.sort.sp": "SP",
   "db.weaponTableHint": "Highest in each column is marked.",
+  "db.tier": "Tier",
 
   // Enemies
   "db.damageTaken": "Damage taken",
@@ -268,6 +268,9 @@ export const enDb = {
   "db.evolution": "Evolution",
   "db.noEvolution": "Doesn't evolve.",
   "db.otherForms": "Other forms of the class",
+  "db.stage": "Stage",
+  "db.stageN": "Stage {n}",
+  "db.stageLevel": "{n} · Lv {level}",
 
   // Ridepod
   "db.partType.weapon": "Arm",

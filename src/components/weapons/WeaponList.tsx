@@ -11,7 +11,7 @@ import { allGuides } from "@/lib/guide/builtin";
 import { finalWeaponIds } from "@/lib/planner/graph";
 import { weaponData } from "@/lib/planner/sources";
 import { dbHref } from "@/lib/db/routes";
-import { buildOrder } from "@/lib/weapons/info";
+import { byTier } from "@/lib/weapons/info";
 import {
   directed,
   FilterChips,
@@ -21,7 +21,7 @@ import {
   type SortDir,
 } from "@/components/db/kit";
 
-const SORTS = ["buildUp", "name", "abs", "sp", ...STAT_KEYS] as const;
+const SORTS = ["tier", "name", "abs", "sp", ...STAT_KEYS] as const;
 type Sort = (typeof SORTS)[number];
 
 /** Weapon types per owner, in the order the list shows them. */
@@ -33,7 +33,7 @@ const OWNERS: { owner: "max" | "monica"; types: WeaponType[] }[] = [
 const byName = (a: Weapon, b: Weapon) => a.name.localeCompare(b.name);
 /** Ascending comparisons; the direction flips them. */
 const sorter = (sort: Sort, level: "base" | "max") => (a: Weapon, b: Weapon) => {
-  if (sort === "buildUp") return (buildOrder.get(a.id) ?? 0) - (buildOrder.get(b.id) ?? 0);
+  if (sort === "tier") return byTier(a, b);
   if (sort === "name") return byName(a, b);
   if (sort === "abs") return a.baseAbs - b.baseAbs || byName(a, b);
   if (sort === "sp") return a.spPerLevel - b.spPerLevel || byName(a, b);
@@ -71,7 +71,7 @@ export function WeaponList() {
   const [type, setType] = useQueryChoice("type", ["all", ...weaponType.options], "all");
   const [finals, setFinals] = useQueryChoice("finals", ["", "1"], "");
   const finalsOnly = finals === "1";
-  const [sort, setSort] = useQueryChoice<Sort>("sort", SORTS, "buildUp");
+  const [sort, setSort] = useQueryChoice<Sort>("sort", SORTS, "tier");
   const [dir, setDir] = useQueryChoice<SortDir>("dir", ["asc", "desc"], "asc");
   const [view, setView] = useQueryChoice("view", ["list", "table"], "list");
   const [level, setLevel] = useQueryChoice("stats", ["max", "base"], "max");
@@ -143,7 +143,7 @@ export function WeaponList() {
               onChange={setSort}
               dir={dir}
               onDir={setDir}
-              options={(["buildUp", "name", "at", "abs", "sp"] as const).map((s) => ({
+              options={(["tier", "name", "at", "abs", "sp"] as const).map((s) => ({
                 value: s,
                 label: t(`db.sort.${s === "at" ? "attack" : s}` as const),
               }))}
@@ -223,6 +223,7 @@ export function WeaponList() {
                       </span>
                       <span className="text-muted-foreground text-xs tabular-nums">
                         {t("weapons.statLine", {
+                          tier: w.tier ?? "?",
                           atk: w.maxStats.at,
                           abs: w.baseAbs,
                           sp: w.spPerLevel,
@@ -266,7 +267,8 @@ function WeaponTable({
 }) {
   const t = useTranslations();
   const stats = (w: Weapon) => (level === "base" ? w.baseStats : w.maxStats);
-  const cols: { key: Sort; label: string; value: (w: Weapon) => number }[] = [
+  const cols: { key: Sort; label: string; value: (w: Weapon) => number; best?: false }[] = [
+    { key: "tier", label: t("db.tier"), value: (w) => w.tier ?? 0, best: false },
     ...STAT_KEYS.map((k) => ({
       key: k as Sort,
       label: t(`stat.short.${k}` as const),
@@ -275,7 +277,9 @@ function WeaponTable({
     { key: "abs", label: t("db.sort.abs"), value: (w) => w.baseAbs },
     { key: "sp", label: t("db.sort.sp"), value: (w) => w.spPerLevel },
   ];
-  const best = new Map(cols.map((c) => [c.key, Math.max(...weapons.map(c.value))]));
+  const best = new Map(
+    cols.filter((c) => c.best !== false).map((c) => [c.key, Math.max(...weapons.map(c.value))]),
+  );
   const header = (key: Sort, label: string, className?: string) => (
     <th
       scope="col"

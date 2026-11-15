@@ -17,14 +17,26 @@ import {
 } from "../kit";
 import { FormRef } from "../text";
 
-/** Forms of a class in evolution order: roots first, then what each evolves into. */
+/**
+ * A form's evolution stage: 1 for the class's first form, then one more per evolution (the level-26,
+ * 51 and 76 forms), with the level it is reached at.
+ */
+export function stageOf(formId: string): { stage: number; level: number } {
+  const from = evolvesFrom.get(formId) ?? [];
+  if (!from.length) return { stage: 1, level: 1 };
+  const prev = stageOf(from[0].id);
+  const e = from[0].evolvesInto.find((x) => x.toId === formId)!;
+  return { stage: prev.stage + 1, level: e.level };
+}
+
+/** Forms of a class by evolution stage, lowest first; a branch's forms stay together in a stage. */
 export function formsInOrder(classId: string): MonsterForm[] {
   const forms = monsters.forms.filter((f) => f.classId === classId);
   const into = new Set(forms.flatMap((f) => f.evolvesInto.map((e) => e.toId)));
-  const out: MonsterForm[] = [];
+  const tree: MonsterForm[] = [];
   const visit = (f: MonsterForm) => {
-    if (out.includes(f)) return;
-    out.push(f);
+    if (tree.includes(f)) return;
+    tree.push(f);
     for (const e of f.evolvesInto) {
       const next = byId.monsterForm.get(e.toId);
       if (next) visit(next);
@@ -32,7 +44,9 @@ export function formsInOrder(classId: string): MonsterForm[] {
   };
   forms.filter((f) => !into.has(f.id)).forEach(visit);
   forms.forEach(visit);
-  return out;
+  return tree.sort(
+    (a, b) => stageOf(a.id).stage - stageOf(b.id).stage || tree.indexOf(a) - tree.indexOf(b),
+  );
 }
 
 /** The evolution levels and items of one step. */
@@ -123,6 +137,7 @@ export function MonsterClassPage({ cls, actions }: { cls: MonsterClass; actions?
         rows={forms.map((f) => (
           <Row
             key={f.id}
+            tag={t("db.stageN", { n: stageOf(f.id).stage })}
             title={<FormRef classId={cls.id} id={f.id} name={f.name} />}
             aside={t("monsters.stats", { atk: f.attack, def: f.defense })}
           >
@@ -180,6 +195,10 @@ export function MonsterFormPage({ form: f }: { form: MonsterForm }) {
         ]}
         title={f.name}
         facts={[
+          {
+            label: t("db.stage"),
+            value: t("db.stageLevel", { n: stageOf(f.id).stage, level: stageOf(f.id).level }),
+          },
           { label: t("stat.at"), value: f.attack },
           { label: t("db.defense"), value: f.defense },
         ]}
@@ -221,6 +240,7 @@ export function MonsterFormPage({ form: f }: { form: MonsterForm }) {
         rows={others.map((x) => (
           <Row
             key={x.id}
+            tag={t("db.stageN", { n: stageOf(x.id).stage })}
             title={<Ref href={monsterFormHref(x.classId, x.id)}>{x.name}</Ref>}
             aside={t("monsters.stats", { atk: x.attack, def: x.defense })}
           />

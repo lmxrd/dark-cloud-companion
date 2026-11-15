@@ -84,18 +84,26 @@ export function lineTo(id: string): Weapon[] {
 }
 
 /**
- * Build-up order: each weapon line from its root weapon onwards, depth first, so a weapon comes
- * right after the one it is built from (the order the weapon list sorts by default).
+ * Line order: each weapon line from its first weapon onwards, depth first, so a weapon comes right
+ * after the one it is built from. Used to keep a line together within a tier.
  */
-export const buildOrder: Map<string, number> = (() => {
+const lineOrder: Map<string, number> = (() => {
   const order = new Map<string, number>();
   const visit = (w: Weapon) => {
     if (order.has(w.id)) return;
     order.set(w.id, order.size);
     for (const next of buildsInto(w.id)) visit(next);
   };
-  const roots = weaponData.weapons.filter((w) => buildsFrom(w.id).length === 0);
-  roots.forEach(visit);
+  weaponData.weapons.filter((w) => buildsFrom(w.id).length === 0).forEach(visit);
   weaponData.weapons.forEach(visit);
   return order;
 })();
+
+/**
+ * Tier order, the weapon list's default: lowest tier first (the build-up charts' columns), a line's
+ * weapons together within a tier, then by name.
+ */
+export const byTier = (a: Weapon, b: Weapon) =>
+  (a.tier ?? 0) - (b.tier ?? 0) ||
+  (lineOrder.get(a.id) ?? 0) - (lineOrder.get(b.id) ?? 0) ||
+  a.name.localeCompare(b.name);

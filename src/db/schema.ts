@@ -1411,6 +1411,12 @@ export const weapons = sqliteTable(
     type: text({ enum: WEAPON_TYPES }).notNull(),
     /** The kind of weapon within its type: a gun's damage type, wrench or hammer. */
     subType: text({ enum: ALL_WEAPON_SUB_TYPES }),
+    /**
+     * Its tier: the column it sits in on Valken Lee's build-up charts (1 to 9). A weapon is never in
+     * a lower tier than one it is built up from; weapons that start a line sit where the chart puts
+     * them (Holy Daedalus Blade in 5).
+     */
+    tier: integer().notNull(),
     /** Combo length as printed ("5"; "5F" fast, "5b" a variant); shown as is. */
     combo: text(),
     /** The in-game item description. */
