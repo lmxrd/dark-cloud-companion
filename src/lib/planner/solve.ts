@@ -166,6 +166,11 @@ export interface Progression {
    */
   risingFloor?: { from: number; to: number; gap: number };
   /**
+   * Abilities from spheres (`sphereAbilities`) as early as possible: the chapter of the first sphere
+   * that brings each costs this much per chapter (high for ABS Up and Wealth, lower for the rest).
+   */
+  earlyAbilityCosts?: Partial<Record<AbilityId, number>>;
+  /**
    * Weight of an ABS spent in each chapter (index 1…8): how hard it is to earn there. When set (and
    * minimising ABS), stage ABS counts at its chapter's weight instead of 1.
    */
@@ -567,6 +572,37 @@ export function buildModel(input: SolveInput) {
           coef(`cEffZ${j}_${c}`, b, 1);
           coef(`cEffZ${j}_${c}`, `vZ${j}_${c}`, -BIG);
         }
+      }
+    }
+
+    // Early abilities: F[a][j] picks the stage of the first sphere that brings ability a (it must
+    // have one), and C[a] ≥ that stage's chapter costs the ability's early cost per chapter.
+    for (const { ability, fromStage } of input.sphereAbilities ?? []) {
+      const each = p.earlyAbilityCosts?.[ability];
+      if (!each) continue;
+      const a = ability.replace(/\W/g, "_");
+      const when = `vC_${a}`;
+      model.objective.set(when, SCALE * each);
+      row(`cFirst_${a}`, { min: 1, max: 1 });
+      for (let j = fromStage; j < nStages; j++) {
+        const first = `vF_${a}_${j}`;
+        model.integers.push(first);
+        coef(`cFirst_${a}`, first, 1);
+        const has = `cFirstHas_${a}_${j}`;
+        row(has, { max: 0 });
+        coef(has, first, 1);
+        templates.forEach((t, ti) => {
+          if (t.abilities?.includes(ability)) coef(has, `vY${j}_${ti}`, -1);
+        });
+        // C ≥ chapter(j) − 8 · (1 − F[j])
+        const at = `cFirstCh_${a}_${j}`;
+        row(at, { min: -8 });
+        coef(at, when, 1);
+        coef(at, first, -8);
+        for (const c of chapters.filter(
+          (c) => c >= (p.stageUnlock[j] ?? 1) && c <= (p.stageUnlock[j] ?? 1) + windowOf(j),
+        ))
+          coef(at, `vZ${j}_${c}`, -c);
       }
     }
   }

@@ -7,10 +7,12 @@ import type { Guide } from "../../src/lib/guide/types.ts";
 import { getWeapon } from "../../src/lib/planner/sources.ts";
 import {
   ABS_PER_FLOOR,
+  earlyAbilityCosts,
   effortWeights,
   type ProgressionOptions,
 } from "../../src/lib/planner/plan.ts";
-import { STAT_KEYS } from "../../src/lib/schemas.ts";
+import { STAT_KEYS, type AbilityId } from "../../src/lib/schemas.ts";
+import { OPPOSITES } from "../../src/lib/weapons/mechanics.ts";
 import type { PlanSpec } from "./plans-config.ts";
 
 export interface PlanScore {
@@ -33,7 +35,11 @@ export interface PlanScore {
  * so committed plans and new runs are judged by what the solver trades off: effort-weighted ABS,
  * chapter delay, early stats, items straight on the main weapon, the stat floor and build-up levels.
  */
-export function storyCost(guide: Guide, prog: ProgressionOptions): number {
+export function storyCost(
+  guide: Guide,
+  prog: ProgressionOptions,
+  wanted: readonly AbilityId[] = [],
+): number {
   const d = deriveBuild(guide);
   const work = guide.steps.filter((s) => s.build);
   let cost = 0;
@@ -76,6 +82,30 @@ export function storyCost(guide: Guide, prog: ProgressionOptions): number {
     );
     for (const x of s.build!.synths ?? []) if (x.kind === "item") cost += each * (x.count ?? 1);
   });
+  // Early abilities: the chapter of the first sphere bringing each wanted one, after the last
+  // build-up into a weapon with the opposite (that would cancel it). Abilities a chain weapon
+  // brings need no sphere.
+  for (const [a, each] of Object.entries(earlyAbilityCosts(prog, wanted)) as [
+    AbilityId,
+    number,
+  ][]) {
+    if (!each || ids.some((id) => getWeapon(id).abilities.includes(a))) continue;
+    const opposite = OPPOSITES[a];
+    let from = 0;
+    work.forEach((_, i) => {
+      if (
+        i > 0 &&
+        ids[i] !== ids[i - 1] &&
+        opposite &&
+        getWeapon(ids[i]).abilities.includes(opposite)
+      )
+        from = i;
+    });
+    const first = work.findIndex(
+      (s, i) => i >= from && d.steps.get(s.id)?.spheres.some((g) => g.abilities.includes(a)),
+    );
+    if (first >= 0) cost += each * Number(work[first].chapterId ?? 8);
+  }
   return cost;
 }
 
@@ -105,7 +135,9 @@ export function scorePlan(guide: Guide, spec: PlanSpec): PlanScore {
     effort,
     gilda: d.total.gilda,
     pace: chapters.reduce((n, c) => n + c, 0),
-    ...(spec.flow === "progression" ? { cost: storyCost(guide, spec.progression) } : {}),
+    ...(spec.flow === "progression"
+      ? { cost: storyCost(guide, spec.progression, spec.abilities) }
+      : {}),
   };
 }
 

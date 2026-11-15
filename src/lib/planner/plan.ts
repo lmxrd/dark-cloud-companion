@@ -101,6 +101,13 @@ export interface ProgressionOptions {
   /** See `Progression.risingFloor`. */
   risingFloor?: { from: number; to: number; gap: number };
   /**
+   * Cost per chapter of the first sphere bringing a wanted ability (see
+   * `Progression.earlyAbilityCosts`): `keyAbilityCost` for `keyAbilities`, `abilityCost` for the rest.
+   */
+  keyAbilities?: readonly AbilityId[];
+  keyAbilityCost?: number;
+  abilityCost?: number;
+  /**
    * Every weapon on the way is levelled to at least this before its build-up (0 or unset: off), so
    * the SP comes along the story instead of from long ABS farming on the last weapons.
    */
@@ -151,6 +158,11 @@ export const STORY_RULES = {
   minStatFloor: 0.4,
   minStatFloorCost: 20000,
   buildUpLevelCost: 3000,
+  // ABS Up and Wealth pay off on every kill after: as early as they can be (near-hard); other
+  // abilities help the fighting, so early too, but not at any price.
+  keyAbilities: ["abs-up", "wealth"],
+  keyAbilityCost: 20000,
+  abilityCost: 5000,
 } as const satisfies Partial<ProgressionOptions>;
 
 /** What a story plan may choose: the least level before each build-up (4 or 5). */
@@ -183,6 +195,19 @@ export function storyOptions(c: StoryChoices = {}): ProgressionOptions {
       ? { absGrindShare: UNLIMITED_GRIND, delayCost: EARLIEST_DELAY_COST, minStatFloor: 0 }
       : {}),
   };
+}
+
+/** Each wanted ability's early cost per chapter (see `ProgressionOptions.keyAbilities`). */
+export function earlyAbilityCosts(
+  prog: ProgressionOptions,
+  wanted: readonly AbilityId[],
+): Partial<Record<AbilityId, number>> {
+  return Object.fromEntries(
+    wanted.map((a) => [
+      a,
+      prog.keyAbilities?.includes(a) ? (prog.keyAbilityCost ?? 0) : (prog.abilityCost ?? 0),
+    ]),
+  );
 }
 
 /** The story settings the planner page and the built-in plans use by default. */
@@ -743,6 +768,7 @@ export async function planPath(
         ? { minStatFloor: prog.minStatFloor, minStatFloorCost: prog.minStatFloorCost }
         : {}),
       ...(prog.risingFloor ? { risingFloor: prog.risingFloor } : {}),
+      earlyAbilityCosts: earlyAbilityCosts(prog, wanted),
       ...(prog.effortPower ? { absWeights: effortWeights.map((w) => w ** prog.effortPower!) } : {}),
     };
     return {

@@ -54,7 +54,8 @@ plan you can follow while playing:
 - **In-between stages.** When a build-up is locked to a later chapter (enemies not met yet), the
   weapon gets an earlier stage that already meets the next weapon's requirements, so only the
   build-up waits. In the guide it is a separate work step; the build-up is its own step.
-- **Abilities** come from spheres placed where no later build-up brings the opposite.
+- **Abilities** come from spheres placed where no later build-up brings the opposite, as early as
+  they can (see "Early abilities").
 - **Margins.** Requirements get a 1-point margin; a retry uses 3 and keeps a few SP spare.
 
 ### Rules and choices
@@ -104,6 +105,7 @@ The objective adds up (in ABS-equivalent units):
 | Early stats                 | each stat point at the end of each stage is worth this        | `earlyStatBonus` 2                                                  |
 | Items on the main weapon    | each costs this (its SP is gone for good)                     | `mainItemCost` 1,000, from halfway falling to `mainItemCostLast` 30 |
 | Stat floor                  | each point a stat is below its floor when leaving a weapon    | `statFloorCost` 2,000                                               |
+| Early abilities             | each chapter of the first sphere bringing a wanted ability    | `keyAbilityCost` 20,000 (ABS Up, Wealth), `abilityCost` 5,000       |
 
 **Effort.** The story pays far more ABS later: an ABS-paying floor or fight pays about 230 ABS in
 chapter 2, 540 in 3, 1,100 in 4, 1,600 in 5, 1,750 in 6, 3,500 in 7. So 1,000 ABS is about four
@@ -152,6 +154,13 @@ but a plan is still found where it can't be met). Balanced also has a minimum at
 waits rather than leave a weapon that lopsided. Earliest has only the 0.5 target: speed comes first,
 and a stat it leaves low has nothing available yet to raise it. Earlier it counted after every stage at 150 per
 point (0.3 on the first weapon); the measurements below are from then.
+
+**Early abilities.** Wanted abilities help the whole game, so the first sphere bringing each should
+come as early as it can. The model picks that sphere's stage and charges its chapter: 20,000 a
+chapter for ABS Up and Wealth (`keyAbilities`: 20% more ABS and 30% more gilda from every kill
+after, so practically a rule), 5,000 for the others (early, but not at any price). The extra ABS and
+gilda they bring is not counted in the story's budget. Abilities a weapon on the route brings need
+no sphere and cost nothing.
 
 Lowest stat after each work step (% of that weapon's maximum) and total ABS:
 

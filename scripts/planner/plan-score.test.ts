@@ -62,6 +62,17 @@ describe("scoring generated plans", () => {
     expect(storyCost(file.guide, { ...spec.progression, statFloor: 0.99 })).toBeGreaterThan(cost);
     expect(storyCost(file.guide, { ...spec.progression, buildUpLevel: 9 })).toBeGreaterThan(cost);
   });
+
+  test("the story cost charges the chapter of the first sphere bringing a wanted ability", () => {
+    const file = readPlanFiles().find((f) => f.spec === "legend/balanced")!;
+    const spec = specs.find((s) => s.id === "legend/balanced")!;
+    const off = { ...spec.progression, keyAbilityCost: 0, abilityCost: 0 };
+    const one = { ...off, keyAbilityCost: 1 };
+    const extra = storyCost(file.guide, one, ["abs-up"]) - storyCost(file.guide, off, ["abs-up"]);
+    // One unit per chapter: the chapter the ABS Up sphere goes in.
+    expect(extra).toBeGreaterThanOrEqual(1);
+    expect(extra).toBeLessThanOrEqual(8);
+  });
 });
 
 test("a rising floor goes from 30% on the first weapon to 80% before the final one", async () => {
