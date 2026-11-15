@@ -70,7 +70,7 @@ added for a reason measured below. Only a few things are a plan's choice.
 | Start weapon                     | obtainable by chapter 2                                             | the weapon is used through the story                |
 | Effort weighting (`effortPower`) | 0.5                                                                 | ABS counts by how hard it is to earn in its chapter |
 | Early stats (`earlyStatBonus`)   | 2 per point per stage                                               | stats above the floor come earlier                  |
-| Items on the main weapon         | 30 each (`mainItemCost`)                                            | SP stays for spheres                                |
+| Items on the main weapon         | 1,000 each (`mainItemCost`)                                         | every SP counts: a sphere is worth some gilda       |
 | Stat floor                       | 0.5 of the weapon's maximum (0.3 on the first), 150 per point short | every stat rises along the way                      |
 | Least level before a build-up    | 3,000 per level short                                               | soft, so the planner page always gets a plan        |
 
@@ -84,25 +84,25 @@ added for a reason measured below. Only a few things are a plan's choice.
 **Which rules matter (switched off one at a time).** The solver alone varies by
 about ±3% ABS between runs (same settings, re-solved), so smaller differences are noise.
 
-| Switched off                                                     | Effect                                                                                             |
-| ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| Early stats                                                      | Dark Cloud 7% less ABS, but stats only just over the floor (lowest 47–56% instead of 51–97%): kept |
-| Items on the main weapon                                         | the same ABS, but Island King got a stray stage with a stat at 0%: kept                            |
-| Floor cost 60 (was Grade Zero's and Five-Star Armlet's)          | within noise of 150: one value for all                                                             |
-| Effort weighting in full (power 1, was the "least effort" style) | within noise on Island King and Dark Cloud, the same level pattern: removed                        |
-| Extra levels on built-up side weapons (`extraAuxLevels`)         | no gain (measured earlier): removed                                                                |
+| Switched off                                                     | Effect                                                                                                                                                                                                                   |
+| ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Early stats                                                      | Dark Cloud 7% less ABS, but stats only just over the floor (lowest 47–56% instead of 51–97%): kept                                                                                                                       |
+| Items on the main weapon                                         | the same ABS, but Island King got a stray stage with a stat at 0%: kept. At 30 each, seven plans still put a few cheap items on their first weapon, so it is now 1,000: SP matters more than a little gilda for a sphere |
+| Floor cost 60 (was Grade Zero's and Five-Star Armlet's)          | within noise of 150: one value for all                                                                                                                                                                                   |
+| Effort weighting in full (power 1, was the "least effort" style) | within noise on Island King and Dark Cloud, the same level pattern: removed                                                                                                                                              |
+| Extra levels on built-up side weapons (`extraAuxLevels`)         | no gain (measured earlier): removed                                                                                                                                                                                      |
 
 ### What a story plan minimises
 
 The objective adds up (in ABS-equivalent units):
 
-| Term                        | What it does                                                  | Rule                |
-| --------------------------- | ------------------------------------------------------------- | ------------------- |
-| ABS, weighted by **effort** | ABS spent in a chapter counts by how hard it is to earn there | `effortPower`       |
-| Chapter delay               | every stage one chapter later costs this much in all          | `delayCost` 10,000  |
-| Early stats                 | each stat point at the end of each stage is worth this        | `earlyStatBonus` 2  |
-| Items on the main weapon    | each costs this (its SP is gone for good)                     | `mainItemCost` 30   |
-| Stat floor                  | each point a stat is below its floor after a stage            | `statFloorCost` 150 |
+| Term                        | What it does                                                  | Rule                 |
+| --------------------------- | ------------------------------------------------------------- | -------------------- |
+| ABS, weighted by **effort** | ABS spent in a chapter counts by how hard it is to earn there | `effortPower`        |
+| Chapter delay               | every stage one chapter later costs this much in all          | `delayCost` 10,000   |
+| Early stats                 | each stat point at the end of each stage is worth this        | `earlyStatBonus` 2   |
+| Items on the main weapon    | each costs this (its SP is gone for good)                     | `mainItemCost` 1,000 |
+| Stat floor                  | each point a stat is below its floor after a stage            | `statFloorCost` 150  |
 
 **Effort.** The story pays far more ABS later: an ABS-paying floor or fight pays about 230 ABS in
 chapter 2, 540 in 3, 1,100 in 4, 1,600 in 5, 1,750 in 6, 3,500 in 7. So 1,000 ABS is about four
