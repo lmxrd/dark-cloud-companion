@@ -66,10 +66,10 @@ test.describe("guides, planner and editor", () => {
 
   test("a built-in guide can be duplicated into an editable copy", async ({ page }) => {
     await go(page, "/guides");
-    await page.getByRole("link", { name: "Island King — Story" }).click();
+    await page.getByRole("link", { name: "Island King — Balanced" }).click();
     await page.getByRole("button", { name: "More actions" }).click();
     await page.getByRole("menuitem", { name: "Duplicate to edit" }).click();
-    await expect(page.getByLabel("Guide title")).toHaveValue("Island King — Story (copy)");
+    await expect(page.getByLabel("Guide title")).toHaveValue("Island King — Balanced (copy)");
     await expect(page.getByText("Weapon build", { exact: true }).first()).toBeVisible();
   });
 
@@ -257,18 +257,28 @@ test.describe("custom start and end weapons, one tab per weapon type", () => {
     await expect(pair.getByLabel("Neither Critical nor Dark")).toBeChecked();
   });
 
-  test("weapon builds are grouped per target and a guide resumes at its next stage", async ({
+  test("weapon builds are a table per weapon type and a guide resumes at its next stage", async ({
     page,
   }) => {
     await go(page, "/guides");
-    const builds = page.getByRole("region", { name: "Weapon builds" });
-    const row = builds.getByRole("listitem").filter({ hasText: "Island King" });
-    // A story plan and a fastest plan per final weapon.
-    await expect(row.getByRole("link")).toHaveCount(2);
-    await expect(row.getByRole("link", { name: /Fastest/ })).toBeVisible();
-    await row.getByRole("link", { name: /Story/ }).click();
+    const builds = page.getByRole("table", { name: "Weapon builds" });
+    await expect(builds.getByRole("columnheader")).toHaveText([
+      "Starred weapon",
+      "Balanced",
+      "Earliest",
+      "Gilda max",
+    ]);
+    await expect(builds.getByRole("rowheader", { name: "Monica · Swords" })).toBeVisible();
+    const row = builds.getByRole("row").filter({ hasText: "Island King" });
+    // A balanced, an earliest and a gilda max plan per starred weapon, in that order.
+    await expect(row.getByRole("link")).toHaveCount(3);
+    await expect(row.getByRole("link").first()).toContainText("Balanced");
+    await expect(row.getByText(/^ch \d · \d+k ABS$/).first()).toBeVisible();
+    await expect(row.getByRole("link", { name: /Gilda max/ })).toBeVisible();
+    await expect(row.getByRole("link", { name: /Earliest/ })).toBeVisible();
+    await row.getByRole("link", { name: /Balanced/ }).click();
     await expect(
-      page.getByRole("heading", { name: "Island King — Story", level: 1 }),
+      page.getByRole("heading", { name: "Island King — Balanced", level: 1 }),
     ).toBeVisible();
     await expect(page.getByText(/^0 \/ \d+ stages$/)).toBeVisible();
     // Each stage says when to do it, and a build-up lists the enemies it needs defeated first.
@@ -283,9 +293,9 @@ test.describe("custom start and end weapons, one tab per weapon type", () => {
     await go(page, "/guides");
     await expect(
       page.getByRole("region", { name: "On the dashboard" }).getByRole("link", {
-        name: /Island King — Story/,
+        name: /Island King — Balanced/,
       }),
     ).toBeVisible();
-    await expect(row.getByRole("link", { name: /Story \(on the dashboard\)/ })).toBeVisible();
+    await expect(row.getByRole("link", { name: /Balanced \(on the dashboard\)/ })).toBeVisible();
   });
 });

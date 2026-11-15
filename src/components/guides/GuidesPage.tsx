@@ -22,6 +22,7 @@ import { mainWalkthrough } from "@/lib/guide/main";
 import { guideProgress } from "@/lib/guide/progress";
 import type { Guide } from "@/lib/guide/types";
 import { getWeapon } from "@/lib/planner/sources";
+import { deriveBuild } from "@/lib/guide/derive";
 import { toggleGuide } from "@/lib/store";
 
 const viewHref = (g: Guide) => withBase(`/guides/view?id=${encodeURIComponent(g.id)}`);
@@ -30,6 +31,43 @@ const viewHref = (g: Guide) => withBase(`/guides/view?id=${encodeURIComponent(g.
 function targetOf(g: Guide): string | undefined {
   const last = g.steps.findLast((s) => s.build || s.buildUp);
   return last?.buildUp?.weaponId ?? last?.build?.weaponId;
+}
+
+/** The plan kinds of the built-in weapon builds, in the table's column order. */
+const PLAN_KINDS = ["balanced", "earliest", "gildaMax"] as const;
+const KIND_LABEL: Record<string, (typeof PLAN_KINDS)[number]> = {
+  Balanced: "balanced",
+  Earliest: "earliest",
+  "Gilda max": "gildaMax",
+};
+const kindOf = (g: Guide) => KIND_LABEL[variantOf(g)];
+
+/** Owner and type groups, in the weapon list's order. */
+const BUILD_GROUPS = [
+  { owner: "max", type: "wrench" },
+  { owner: "max", type: "gun" },
+  { owner: "max", type: "club" },
+  { owner: "monica", type: "sword" },
+  { owner: "monica", type: "armband" },
+] as const;
+
+/** A build's finish chapter and total ABS ("47k"), worked out once per guide. */
+const summaries = new Map<string, { chapter: string; abs: string } | undefined>();
+function buildSummary(g: Guide) {
+  if (!summaries.has(g.id)) {
+    const last = g.steps.findLast((s) => s.build && s.chapterId);
+    const abs = deriveBuild(g).total.abs;
+    summaries.set(
+      g.id,
+      last?.chapterId
+        ? {
+            chapter: last.chapterId,
+            abs: abs >= 1000 ? `${Math.round(abs / 1000)}k` : String(Math.round(abs)),
+          }
+        : undefined,
+    );
+  }
+  return summaries.get(g.id);
 }
 
 /** The variant part of a built-in title ("Grade Zero — Least ABS" → "Least ABS"). */
@@ -79,19 +117,30 @@ export function GuidesPage() {
   const all = [...builtinGuides, ...guides];
   const onDashboard = all.filter((g) => activeGuides.includes(g.id) && match(g));
 
-  // Built-in weapon builds, one row per target weapon with its variants.
+  // Built-in weapon builds: one row per starred weapon, grouped by owner and type, with a column
+  // per plan kind (always in the same order).
   const builds = useMemo(() => {
     const byTarget = new Map<string, Guide[]>();
     for (const g of weaponGuides) {
       const target = targetOf(g) ?? g.id;
       byTarget.set(target, [...(byTarget.get(target) ?? []), g]);
     }
-    return [...byTarget];
+    return BUILD_GROUPS.map((grp) => ({
+      ...grp,
+      rows: [...byTarget]
+        .filter(([target]) => getWeapon(target).type === grp.type)
+        .sort(([a], [b]) => getWeapon(a).name.localeCompare(getWeapon(b).name)),
+    })).filter((grp) => grp.rows.length);
   }, []);
-  const shownBuilds = builds.filter(
-    ([target, variants]) =>
-      !needle || getWeapon(target).name.toLowerCase().includes(needle) || variants.some(match),
-  );
+  const shownBuilds = builds
+    .map((grp) => ({
+      ...grp,
+      rows: grp.rows.filter(
+        ([target, variants]) =>
+          !needle || getWeapon(target).name.toLowerCase().includes(needle) || variants.some(match),
+      ),
+    }))
+    .filter((grp) => grp.rows.length);
 
   return (
     <Gate on={["url", "state"]} className="flex flex-col gap-6">
@@ -184,39 +233,88 @@ export function GuidesPage() {
         <h2 id="guides-builds" className={heading}>
           {t("guides.weaponBuilds")}
         </h2>
-        <ul className={list}>
-          {shownBuilds.map(([target, variants]) => {
-            const weapon = getWeapon(target);
-            const Icon = TYPE_ICON[weapon.type];
-            return (
-              <li key={target} className="flex flex-wrap items-center gap-x-3 gap-y-2 px-3 py-2.5">
-                <Icon className="text-muted-foreground size-4 shrink-0" aria-hidden />
-                <span className="min-w-0 flex-1 truncate text-sm font-semibold">{weapon.name}</span>
-                <span className="flex gap-1.5">
-                  {variants.map((g) => {
-                    const on = activeGuides.includes(g.id);
-                    return (
-                      <a
-                        key={g.id}
-                        href={viewHref(g)}
-                        aria-label={`${g.title}${on ? ` (${t("guides.isOn")})` : ""}`}
-                        className={cn(
-                          "rounded-full border-2 px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap",
-                          on
-                            ? "bg-accent text-accent-foreground shadow-sticker-sm"
-                            : "border-border/40 text-muted-foreground hover:border-border",
-                        )}
-                      >
-                        {on ? "✓ " : ""}
-                        {variantOf(g)}
-                      </a>
-                    );
-                  })}
+        <div className={cn(list, "divide-y-0")} role="table" aria-label={t("guides.weaponBuilds")}>
+          <div
+            role="row"
+            className="bg-muted/60 text-muted-foreground hidden items-center gap-1.5 border-b-2 px-3 py-1.5 text-[10px] font-bold tracking-wider uppercase sm:grid sm:grid-cols-[minmax(0,1fr)_repeat(3,6.5rem)]"
+          >
+            <span role="columnheader">{t("guides.buildsWeapon")}</span>
+            {PLAN_KINDS.map((k) => (
+              <span key={k} role="columnheader" className="text-center">
+                {t(`guides.kind.${k}` as const)}
+              </span>
+            ))}
+          </div>
+          {shownBuilds.map((grp) => (
+            <div key={grp.type} role="rowgroup">
+              <div
+                role="row"
+                className="bg-muted/30 text-muted-foreground border-b px-3 py-1 text-[11px] font-semibold [&:not(:first-child)]:border-t-2"
+              >
+                <span role="rowheader">
+                  {t(`weapons.${grp.owner}` as const)} · {t(`weapon.type.${grp.type}` as const)}
                 </span>
-              </li>
-            );
-          })}
-        </ul>
+              </div>
+              {grp.rows.map(([target, variants]) => {
+                const weapon = getWeapon(target);
+                const Icon = TYPE_ICON[weapon.type];
+                return (
+                  <div
+                    key={target}
+                    role="row"
+                    // On phones the plans sit on a second line under the name, in the same three columns.
+                    className="border-border/20 grid grid-cols-3 items-center gap-x-1.5 gap-y-1.5 border-b px-3 py-2 last:border-b-0 sm:grid-cols-[minmax(0,1fr)_repeat(3,6.5rem)]"
+                  >
+                    <span
+                      role="rowheader"
+                      className="col-span-3 flex min-w-0 items-center gap-2 sm:col-span-1"
+                    >
+                      <Icon className="text-muted-foreground size-4 shrink-0" aria-hidden />
+                      <span className="truncate text-sm font-semibold">{weapon.name}</span>
+                    </span>
+                    {PLAN_KINDS.map((k) => {
+                      const g = variants.find((v) => kindOf(v) === k);
+                      if (!g)
+                        return (
+                          <span
+                            key={k}
+                            role="cell"
+                            className="text-muted-foreground/60 text-center"
+                          >
+                            –
+                          </span>
+                        );
+                      const on = activeGuides.includes(g.id);
+                      const sum = buildSummary(g);
+                      return (
+                        <span key={k} role="cell" className="flex flex-col items-center gap-0.5">
+                          <a
+                            href={viewHref(g)}
+                            aria-label={`${g.title}${on ? ` (${t("guides.isOn")})` : ""}`}
+                            className={cn(
+                              "w-full truncate rounded-full border-2 px-1.5 py-0.5 text-center text-xs font-semibold whitespace-nowrap",
+                              on
+                                ? "bg-accent text-accent-foreground shadow-sticker-sm"
+                                : "border-border/40 text-muted-foreground hover:border-border",
+                            )}
+                          >
+                            {on ? "✓ " : ""}
+                            {variantOf(g)}
+                          </a>
+                          {sum && (
+                            <span className="text-muted-foreground text-[10px] whitespace-nowrap tabular-nums">
+                              {t("guides.buildSummary", { ch: sum.chapter, abs: sum.abs })}
+                            </span>
+                          )}
+                        </span>
+                      );
+                    })}
+                  </div>
+                );
+              })}
+            </div>
+          ))}
+        </div>
       </section>
 
       {match(mainWalkthrough) && !activeGuides.includes(mainWalkthrough.id) && (
