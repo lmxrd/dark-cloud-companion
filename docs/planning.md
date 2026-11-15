@@ -131,6 +131,22 @@ Grade Zero and Five-Star Armlet use 60 (`plans.config.ts`): at 150 they cost 38,
 for no evener stats. The cost is part of both story styles (0.5 at 150), so "Follow the story" on
 the planner page uses it too.
 
+### First weapon and build-up levels (Island King so far)
+
+With the floor in full the first weapon is levelled hard while ABS is slow to earn (Island King:
+Bone Rapier +6 for 2,880 ABS in chapter 2, then +3, +3, +2, +2, +5, +4). Two per-plan settings
+spread the levels out:
+
+- `firstStatFloor`: the floor on the first weapon (0.3 instead of 0.5);
+- `buildUpLevel`: every weapon on the way is levelled to at least this before its build-up (4).
+
+| Island King        | ABS    | Effort | Levels               | Last step ABS | Finishes |
+| ------------------ | ------ | ------ | -------------------- | ------------- | -------- |
+| Floor 0.5          | 46,640 | 31.5   | +6 +3 +3 +2 +2 +5 +4 | 17,648        | ch7      |
+| First 0.3, min. +4 | 45,792 | 24.5   | +4 +4 +4 +4 +4 +4 +2 | 15,168        | ch8      |
+
+Stats start lower (the lowest at 27% on Bone Rapier) and are at 65% or more from Evilcise on.
+
 ### Uneven levels are expected
 
 Each level costs more ABS than the last and later weapons cost more per level (Baselard 16 ABS per

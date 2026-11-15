@@ -93,6 +93,13 @@ export interface ProgressionOptions {
   statFloor?: number;
   /** See `Progression.statFloorCost`. */
   statFloorCost?: number;
+  /** See `Progression.firstStatFloor`. */
+  firstStatFloor?: number;
+  /**
+   * Every weapon on the way is levelled to at least this before its build-up (0 or unset: off), so
+   * the SP comes along the story instead of from long ABS farming on the last weapons.
+   */
+  buildUpLevel?: number;
   /**
    * Weight ABS by how hard it is to earn in the chapter it is spent (see `effortWeights`), raised to
    * this power (1: in full; 0.5: softened; 0 or unset: off).
@@ -690,6 +697,7 @@ export async function planPath(
       ...(prog.statFloor && prog.statFloorCost
         ? { statFloor: prog.statFloor, statFloorCost: prog.statFloorCost }
         : {}),
+      ...(prog.firstStatFloor !== undefined ? { firstStatFloor: prog.firstStatFloor } : {}),
       ...(prog.effortPower ? { absWeights: effortWeights.map((w) => w ** prog.effortPower!) } : {}),
     };
     return {
@@ -698,6 +706,9 @@ export async function planPath(
       sphereAbilities,
       stageMaxLevels: Array.from({ length: nStages }, (_, j) =>
         j === nStages - 1 && req.goal.kind !== "reach" ? prog.finalLevelCap : prog.levelCap,
+      ),
+      stageMinLevels: Array.from({ length: nStages }, (_, j) =>
+        chain[j + 1] !== undefined && chain[j + 1] !== chain[j] ? (prog.buildUpLevel ?? 0) : 0,
       ),
     };
   };

@@ -66,6 +66,8 @@ export interface SolveInput {
   timeLimitSec?: number;
   /** Highest level per stage (overrides `maxLevel` where given). */
   stageMaxLevels?: number[];
+  /** Lowest level per stage (0 or missing: none). */
+  stageMinLevels?: number[];
   /**
    * Abilities that must come from spheres: at least `count` spheres carrying each, on stage
    * `fromStage` or later (a build-up into a weapon with the opposite ability would cancel earlier ones).
@@ -116,6 +118,8 @@ export interface Progression {
    */
   statFloor?: number;
   statFloorCost?: number;
+  /** `statFloor` for the stages on the first weapon (default: `statFloor`). */
+  firstStatFloor?: number;
   /**
    * Weight of an ABS spent in each chapter (index 1…8): how hard it is to earn there. When set (and
    * minimising ABS), stage ABS counts at its chapter's weight instead of 1.
@@ -262,6 +266,11 @@ export function buildModel(input: SolveInput) {
     const levelCap = Math.max(ls, input.stageMaxLevels?.[j] ?? maxLevel);
     row(`cLmax${j}`, { max: levelCap });
     coef(`cLmax${j}`, L, 1);
+    const minLevel = Math.min(input.stageMinLevels?.[j] ?? 0, levelCap);
+    if (minLevel > ls) {
+      row(`cLfloor${j}`, { min: minLevel });
+      coef(`cLfloor${j}`, L, 1);
+    }
     const stored = first === 0 ? start.abs : 0;
     const absAt = (m: number) => Math.max(0, absBetween(w.baseAbs, ls, m) - stored);
     for (let m = ls; m < levelCap; m++) {
@@ -376,8 +385,9 @@ export function buildModel(input: SolveInput) {
   if (p?.statFloor && p.statFloorCost)
     for (let j = 0; j < nStages; j++) {
       const max = getWeapon(chain[j]).maxStats;
+      const share = chain[j] === chain[0] ? (p.firstStatFloor ?? p.statFloor) : p.statFloor;
       for (const k of STAT_KEYS) {
-        const want = Math.min(Math.round(p.statFloor * max[k]), input.finalStats?.[k] ?? max[k]);
+        const want = Math.min(Math.round(share * max[k]), input.finalStats?.[k] ?? max[k]);
         if (want <= 0) continue;
         const short = `vS${j}_${k}`;
         row(`cFloor${j}_${k}`, { min: want });
