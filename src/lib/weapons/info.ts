@@ -82,3 +82,20 @@ export function lineTo(id: string): Weapon[] {
   }
   return line;
 }
+
+/**
+ * Build-up order: each weapon line from its root weapon onwards, depth first, so a weapon comes
+ * right after the one it is built from (the order the weapon list sorts by default).
+ */
+export const buildOrder: Map<string, number> = (() => {
+  const order = new Map<string, number>();
+  const visit = (w: Weapon) => {
+    if (order.has(w.id)) return;
+    order.set(w.id, order.size);
+    for (const next of buildsInto(w.id)) visit(next);
+  };
+  const roots = weaponData.weapons.filter((w) => buildsFrom(w.id).length === 0);
+  roots.forEach(visit);
+  weaponData.weapons.forEach(visit);
+  return order;
+})();

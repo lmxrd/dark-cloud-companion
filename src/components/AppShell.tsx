@@ -14,14 +14,22 @@ import { AppSidebar, ProfileButton } from "@/components/AppSidebar";
 import { BottomNav } from "@/components/BottomNav";
 import { StorageBanner } from "@/components/StorageBanner";
 import { UpdatePrompt } from "@/components/UpdatePrompt";
-import { crumbsFor } from "@/components/nav";
+import { crumbsFor, type Crumb } from "@/components/nav";
 import { withBase } from "@/lib/base";
 import { useTranslations } from "@/i18n";
 
-function AppHeader({ pathname, page }: { pathname: string; page?: string }) {
+function AppHeader({
+  pathname,
+  page,
+  parents,
+}: {
+  pathname: string;
+  page?: string;
+  parents?: Crumb[];
+}) {
   const t = useTranslations();
   const { state } = useSidebar();
-  const crumbs = crumbsFor(t, pathname, page);
+  const crumbs = crumbsFor(t, pathname, page, parents);
   return (
     <header
       className={cn(
@@ -68,11 +76,14 @@ function AppHeader({ pathname, page }: { pathname: string; page?: string }) {
 export function AppShell({
   pathname,
   page,
+  parents,
   children,
 }: {
   pathname: string;
   /** The current page's name for the breadcrumb, when the path doesn't say it (a weapon's id). */
   page?: string;
+  /** Crumbs between a database list and the page (a monster form's class). */
+  parents?: Crumb[];
   children: ReactNode;
 }) {
   const [open, setOpen] = useState(true);
@@ -86,7 +97,7 @@ export function AppShell({
     <SidebarProvider open={open} onOpenChange={setOpen}>
       <AppSidebar pathname={pathname} />
       <SidebarInset>
-        <AppHeader pathname={pathname} page={page} />
+        <AppHeader pathname={pathname} page={page} parents={parents} />
         {/* On phones, leave room for the fixed tab bar and the home indicator below it. */}
         <div className="mx-auto w-full max-w-5xl px-4 pt-6 pb-[calc(6rem+env(safe-area-inset-bottom))] md:pb-6">
           <StorageBanner />

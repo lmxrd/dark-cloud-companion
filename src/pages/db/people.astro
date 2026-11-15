@@ -1,0 +1,18 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { PageHeader } from "@/components/PageHeader";
+import { PeoplePage } from "@/components/db/PeoplePage";
+import { useTranslations } from "@/i18n";
+import { personRows } from "@/lib/db/lists";
+import { core, misc } from "@/lib/db/data";
+
+const t = useTranslations();
+const towns = core.towns
+  .filter((x) => misc.npcs.some((n) => n.homeTownId === x.id))
+  .map((x) => ({ id: x.id, name: x.name }));
+---
+
+<Layout title={`${t("people.title")} · ${t("app.name")}`}>
+  <PageHeader title={t("people.title")} description={t("people.intro")} />
+  <PeoplePage client:load rows={personRows()} towns={towns} />
+</Layout>

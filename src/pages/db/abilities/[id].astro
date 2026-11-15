@@ -1,0 +1,17 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { useTranslations } from "@/i18n";
+import { weapons } from "@/lib/db/data";
+import { AbilityPage } from "@/components/db/pages/MorePages";
+
+export function getStaticPaths() {
+  return weapons.abilities.map((a) => ({ params: { id: a.id }, props: { ability: a } }));
+}
+
+const t = useTranslations();
+const { ability } = Astro.props;
+---
+
+<Layout title={`${ability.name} · ${t("app.name")}`} page={ability.name}>
+  <AbilityPage ability={ability} />
+</Layout>

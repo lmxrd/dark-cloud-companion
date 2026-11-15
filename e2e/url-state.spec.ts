@@ -37,32 +37,38 @@ test.describe("navigation state in the URL", () => {
   });
 
   test("weapon filters survive a reload", async ({ page }) => {
-    await go(page, "/weapons");
-    await page.getByRole("tab", { name: "Swords" }).click();
+    await go(page, "/db/weapons");
+    const type = page.getByRole("group", { name: "Type" });
+    const sort = page.getByRole("group", { name: "Sort" });
+    await type.getByRole("button", { name: "Swords" }).click();
     await page.getByRole("button", { name: "Finals", exact: true }).click();
-    await page.getByLabel("Sort by").selectOption("abs");
+    await sort.getByRole("button", { name: "ABS", exact: true }).click();
+    await sort.getByRole("button", { name: "Lowest first" }).click();
     await page.getByLabel("Search weapons").fill("blade");
     await expect(page).toHaveURL(/q=blade/);
     expect(new URL(page.url()).searchParams.get("type")).toBe("sword");
     await page.reload();
-    await expect(page.getByRole("tab", { name: "Swords" })).toHaveAttribute(
-      "aria-selected",
+    await expect(type.getByRole("button", { name: "Swords" })).toHaveAttribute(
+      "aria-pressed",
       "true",
     );
     await expect(page.getByRole("button", { name: "Finals", exact: true })).toHaveAttribute(
       "aria-pressed",
       "true",
     );
-    await expect(page.getByLabel("Sort by")).toHaveValue("abs");
+    await expect(sort.getByRole("button", { name: "ABS", exact: true })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    await expect(sort.getByRole("button", { name: "Highest first" })).toBeVisible();
     await expect(page.getByLabel("Search weapons")).toHaveValue("blade");
   });
 
   test("item filters survive a reload", async ({ page }) => {
-    await go(page, "/items?kind=found");
-    await expect(page.getByRole("radio", { name: /Found/ })).toHaveAttribute(
-      "aria-checked",
-      "true",
-    );
+    await go(page, "/db/items?kind=found");
+    await expect(
+      page.getByRole("group", { name: "Get" }).getByRole("button", { name: "Found" }),
+    ).toHaveAttribute("aria-pressed", "true");
   });
 
   test("the planner's editor tab is a path", async ({ page }) => {
@@ -87,7 +93,7 @@ test.describe("navigation state in the URL", () => {
   });
 
   test("a tracker jump is kept in the hash", async ({ page }) => {
-    await go(page, "/spheda");
+    await go(page, "/db/spheda");
     const nav = page.getByRole("navigation", { name: "Jump to a group" });
     const chip = nav.getByRole("button").last();
     await chip.click();
@@ -103,7 +109,7 @@ test.describe("navigation state in the URL", () => {
   }) => {
     // Without scripts the island never applies the query; the CSS fallback shows it after 1.5s.
     await page.route(/\/_astro\/.*\.js$/, (r) => r.abort());
-    await page.goto(`${basePath}/weapons?type=sword`);
+    await page.goto(`${basePath}/db/weapons?type=sword`);
     const gate = page.locator("[data-gate]").first();
     await expect(gate).toBeHidden({ timeout: 1000 });
     await expect(gate).toBeVisible({ timeout: 5000 });

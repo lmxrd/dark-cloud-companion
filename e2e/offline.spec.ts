@@ -15,13 +15,18 @@ test("the app works offline after the first visit", async ({ page, context }) =>
       await new Promise((r) => setTimeout(r, 200));
     }
   });
+  // Database pages are cached when first opened (once the service worker is in charge).
+  await go(page, "/db/weapons/poison-wrench");
+  await go(page, "/");
   await context.setOffline(true);
   await page.reload();
   await expect(page.getByRole("heading", { name: "Dashboard", exact: true })).toBeVisible();
   await go(page, "/guides");
   await expect(page.getByRole("heading", { name: "Guides", exact: true })).toBeVisible();
-  await go(page, "/weapons/poison-wrench");
+  await go(page, "/db/weapons/poison-wrench");
   await expect(page.getByRole("heading", { name: "Poison Wrench" })).toBeVisible();
+  await go(page, "/db/items");
+  await expect(page.getByRole("heading", { name: "Items", level: 1 })).toBeVisible();
   // A client-only page with a query string is served from the same cached file.
   await go(page, "/guides/view?id=main");
   await expect(page.getByRole("heading", { name: "Main walkthrough" })).toBeVisible();
@@ -43,4 +48,19 @@ test("the planner still runs offline (solver bundled)", async ({ page, context }
   await page.getByRole("button", { name: "Min", exact: true }).click();
   await page.getByRole("button", { name: "Generate plan" }).click();
   await expect(page.getByText(/Build-up route:/)).toBeVisible({ timeout: 60_000 });
+});
+
+test("Settings saves every database page for offline use", async ({ page, context }) => {
+  test.setTimeout(120_000);
+  await go(page, "/settings");
+  await page.evaluate(() => navigator.serviceWorker.ready);
+  // The first visit isn't controlled yet: reload so the service worker answers.
+  await page.reload();
+  await page.getByRole("button", { name: "Save all for offline" }).click();
+  await expect(page.getByRole("button", { name: "All pages saved" })).toBeVisible({
+    timeout: 100_000,
+  });
+  await context.setOffline(true);
+  await go(page, "/db/floors/frightening-forest");
+  await expect(page.getByRole("heading", { name: "Frightening Forest", level: 1 })).toBeVisible();
 });

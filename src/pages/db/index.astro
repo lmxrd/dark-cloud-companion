@@ -1,0 +1,13 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { PageHeader } from "@/components/PageHeader";
+import { DbHome } from "@/components/db/DbHome";
+import { useTranslations } from "@/i18n";
+
+const t = useTranslations();
+---
+
+<Layout title={`${t("db.title")} · ${t("app.name")}`}>
+  <PageHeader title={t("db.title")} description={t("db.intro")} />
+  <DbHome client:load />
+</Layout>

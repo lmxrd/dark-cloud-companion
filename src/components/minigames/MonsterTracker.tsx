@@ -6,6 +6,8 @@ import { monsters } from "@/lib/gamedata/monsters";
 import { tick } from "@/lib/gamedata/ticks";
 import { setChecked } from "@/lib/store";
 import { TrackerLayout, type TrackerGroup } from "./TrackerLayout";
+import { Ref } from "@/components/db/kit";
+import { dbHref, monsterFormHref } from "@/lib/db/routes";
 
 const formById = new Map(monsters.forms.map((f) => [f.id, f]));
 const evolvedInto = new Set(monsters.forms.flatMap((f) => f.evolvesInto.map((e) => e.toId)));
@@ -17,7 +19,7 @@ function FormNode({ form, note }: { form: MonsterForm; note?: string }) {
     <li className="relative pl-4 before:absolute before:top-0 before:left-0 before:h-4 before:w-3 before:rounded-bl-md before:border-b-2 before:border-l-2">
       <span className="bg-background inline-flex flex-col rounded-md border-2 px-2 py-0.5">
         <span className="text-sm font-semibold">
-          {form.name}
+          <Ref href={monsterFormHref(form.classId, form.id)}>{form.name}</Ref>
           {note && <span className="text-muted-foreground text-xs font-normal"> · {note}</span>}
         </span>
         <span className="text-muted-foreground font-mono text-[11px]">
@@ -122,6 +124,9 @@ export function MonsterTracker() {
               onChange={(v) => setChecked(mastered, v)}
             />
           </div>
+          <Ref href={dbHref("monsterClass", c.id)} className="w-fit text-xs">
+            {t("monsters.classPage", { name: c.name })}
+          </Ref>
           <ul aria-label={t("monsters.forms")} className="flex flex-col gap-1">
             {roots.map((f) => (
               <FormNode key={f.id} form={f} />

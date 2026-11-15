@@ -1,0 +1,16 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { PageHeader } from "@/components/PageHeader";
+import { GeoramaPage } from "@/components/db/ListPages";
+import { useTranslations } from "@/i18n";
+import { georamaRows } from "@/lib/db/lists";
+import { core } from "@/lib/db/data";
+
+const t = useTranslations();
+const towns = core.towns.filter((x) => x.hasGeorama).map((x) => ({ id: x.id, name: x.name }));
+---
+
+<Layout title={`${t("nav.georama")} · ${t("app.name")}`}>
+  <PageHeader title={t("nav.georama")} description={t("db.intro.georama")} />
+  <GeoramaPage client:load rows={georamaRows()} towns={towns} />
+</Layout>

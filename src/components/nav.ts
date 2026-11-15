@@ -8,6 +8,7 @@ import {
 import type { Translate } from "@/i18n";
 import { MAIN_GUIDE_ID } from "@/lib/guide/main";
 import { DASHBOARD_SEGMENTS } from "@/components/dashboard/route";
+import { DB_KINDS, DB_LISTS, type DbList } from "@/lib/db/routes";
 
 export type NavChild = {
   title: string;
@@ -24,18 +25,8 @@ export type NavItem = {
   badge?: number;
 };
 
-/** The Reference sub-pages, by their top-level path segment. */
-export const REFERENCE_PAGES = [
-  "weapons",
-  "items",
-  "bestiary",
-  "shops",
-  "fishing",
-  "people",
-  "ridepod",
-  "monsters",
-  "spheda",
-] as const;
+/** The database list pages, under /db/. */
+export const DB_PAGES = DB_LISTS;
 
 /** The Tools pages, under /tools/. */
 export const TOOL_PAGES = ["planner", "shopping", "spheres"] as const;
@@ -63,12 +54,12 @@ export function mainNav(t: Translate): NavItem[] {
       })),
     },
     {
-      title: t("nav.reference"),
-      href: "/reference",
+      title: t("nav.db"),
+      href: "/db",
       icon: DatabaseIcon,
-      children: REFERENCE_PAGES.map((page) => ({
+      children: DB_LISTS.map((page) => ({
         title: t(`nav.${page}` as const),
-        href: `/${page}`,
+        href: `/db/${page}`,
       })),
     },
   ];
@@ -92,6 +83,7 @@ export const isActive = (href: string, pathname: string) => {
  * the browser; pass "" on the server.
  */
 export function activeChild(item: NavItem, pathname: string, search: string): string | undefined {
+  pathname = dbNavPath(pathname);
   const path = (href: string) => href.split("?")[0];
   const matches = (item.children ?? []).filter((c) => isActive(c.href, pathname));
   if (!matches.length) return undefined;
@@ -111,12 +103,47 @@ export const isSectionActive = (item: NavItem, pathname: string) =>
 
 export type Crumb = { label: string; href?: string };
 
+/** The database list a /db path belongs to (`/db/towns/x` → `places`). */
+export function dbListOf(pathname: string): DbList | undefined {
+  const [head, seg] = pathname.replace(/^\/|\/$/g, "").split("/");
+  if (head !== "db" || !seg) return undefined;
+  if ((DB_LISTS as readonly string[]).includes(seg)) return seg as DbList;
+  return Object.values(DB_KINDS).find((k) => k.segment === seg)?.list;
+}
+
+/** A /db page's path as its list's (`/db/towns/x` → `/db/places/x`), for marking the menu. */
+const dbNavPath = (pathname: string) => {
+  const list = dbListOf(pathname);
+  if (!list) return pathname;
+  const parts = pathname.replace(/^\/|\/$/g, "").split("/");
+  return "/" + ["db", list, ...parts.slice(2)].join("/");
+};
+
 /**
  * Breadcrumb from the pathname: sub-pages get their section as the first crumb, and a detail page
  * (a weapon) gets its list page in between. `page` names the current page when the path can't.
  */
-export function crumbsFor(t: Translate, pathname: string, page?: string): Crumb[] {
-  const [head, sub] = pathname.replace(/^\/|\/$/g, "").split("/");
+export function crumbsFor(
+  t: Translate,
+  pathname: string,
+  page?: string,
+  parents: Crumb[] = [],
+): Crumb[] {
+  const [head, sub, ...rest] = pathname.replace(/^\/|\/$/g, "").split("/");
+  if (head === "db") {
+    const home = { label: t("nav.db"), href: "/db" };
+    const list = dbListOf(pathname);
+    if (!sub || !list) return [{ label: t("nav.db") }];
+    const listLabel = t(`nav.${list}` as const);
+    return sub === list && !rest.length
+      ? [home, { label: listLabel }]
+      : [
+          home,
+          { label: listLabel, href: `/db/${list}` },
+          ...parents,
+          { label: page ?? rest.at(-1) ?? sub },
+        ];
+  }
   if (!head || (DASHBOARD_SEGMENTS as readonly string[]).includes(head))
     return [{ label: t("nav.dashboard") }];
 
@@ -124,10 +151,8 @@ export function crumbsFor(t: Translate, pathname: string, page?: string): Crumb[
     {
       guides: t("nav.guides"),
       tools: t("nav.tools"),
-      reference: t("nav.reference"),
       settings: t("nav.settings"),
       about: t("nav.about"),
-      ...Object.fromEntries(REFERENCE_PAGES.map((p) => [p, t(`nav.${p}` as const)])),
     }[head] ?? head;
 
   if (head === "tools" && sub)
@@ -139,11 +164,5 @@ export function crumbsFor(t: Translate, pathname: string, page?: string): Crumb[
       : [{ label, href: "/tools" }];
   if (head === "guides" && sub === "view")
     return [{ label, href: "/guides" }, { label: page ?? t("nav.guide") }];
-  if ((REFERENCE_PAGES as readonly string[]).includes(head)) {
-    const reference = { label: t("nav.reference"), href: "/reference" };
-    return sub
-      ? [reference, { label, href: `/${head}` }, { label: page ?? sub }]
-      : [reference, { label }];
-  }
   return [{ label }];
 }

@@ -5,18 +5,30 @@ const pages = [
   "/",
   "/guides",
   "/tools/planner",
-  "/reference",
+  "/db",
   "/tools/shopping",
-  "/weapons",
-  "/weapons/poison-wrench",
-  "/items",
-  "/bestiary",
-  "/shops",
-  "/fishing",
-  "/people",
-  "/ridepod",
-  "/monsters",
-  "/spheda",
+  "/db/weapons",
+  "/db/weapons/poison-wrench",
+  "/db/items",
+  "/db/bestiary",
+  "/db/shops",
+  "/db/fishing",
+  "/db/people",
+  "/db/ridepod",
+  "/db/monsters",
+  "/db/spheda",
+  "/db/places",
+  "/db/inventions",
+  "/db/georama",
+  "/db/abilities",
+  "/db/trophies",
+  "/db/weapons?view=table",
+  "/db/items/treasure-chest-key",
+  "/db/bestiary/arthur",
+  "/db/floors/frightening-forest",
+  "/db/monsters/aquatic/geron",
+  "/db/shops/milanes-weapon-shop",
+  "/db/people/rufio",
   "/settings",
   "/about",
 ];
@@ -46,15 +58,15 @@ test.describe("phone layout", () => {
       "aria-current",
       "page",
     );
-    for (const name of ["Guides", "Tools", "Reference"]) {
+    for (const name of ["Guides", "Tools", "Database"]) {
       await tabs.getByRole("link", { name }).click();
       await expect(page.getByRole("heading", { name, level: 1 })).toBeVisible();
       await expect(tabs.getByRole("link", { name })).toHaveAttribute("aria-current", "page");
     }
     await page.getByRole("link", { name: /^Items/ }).click();
     await expect(page.getByRole("heading", { name: "Items", level: 1 })).toBeVisible();
-    // Reference stays the active tab on its sub-pages.
-    await expect(tabs.getByRole("link", { name: "Reference" })).toHaveAttribute(
+    // Database stays the active tab on its sub-pages.
+    await expect(tabs.getByRole("link", { name: "Database" })).toHaveAttribute(
       "aria-current",
       "page",
     );

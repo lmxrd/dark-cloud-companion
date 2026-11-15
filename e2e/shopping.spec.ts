@@ -73,7 +73,7 @@ test.describe("shopping list", () => {
   });
 
   test("items, Georama lists and guide build steps add to the list", async ({ page }) => {
-    await go(page, "/items");
+    await go(page, "/db/items");
     await page.getByRole("button", { name: "Add Gunpowder to shopping list" }).click();
 
     // A Georama goal that asks for a number of one part (Sindain: 15 River Parts placed).

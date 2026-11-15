@@ -1,0 +1,33 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { useTranslations } from "@/i18n";
+import { ridepod } from "@/lib/db/data";
+import { RidepodCorePage, RidepodPartPage } from "@/components/db/pages/MorePages";
+import { TickToggle } from "@/components/db/TickToggle";
+import { tick } from "@/lib/gamedata/ticks";
+import type { RidepodCore, RidepodPart } from "@/lib/gamedata/types";
+
+export function getStaticPaths() {
+  return [
+    ...ridepod.parts.map((p) => ({ params: { id: p.id }, props: { part: p as RidepodPart | undefined, core: undefined as RidepodCore | undefined } })),
+    ...ridepod.cores.map((c) => ({ params: { id: c.id }, props: { part: undefined, core: c } })),
+  ];
+}
+
+const t = useTranslations();
+const { part, core } = Astro.props;
+const name = (part ?? core)!.name;
+---
+
+<Layout title={`${name} · ${t("app.name")}`} page={name}>
+  {part && (
+    <RidepodPartPage part={part}>
+      <TickToggle slot="actions" client:load tickId={tick.ridepodPart(part.id)} label={t("db.owned")} />
+    </RidepodPartPage>
+  )}
+  {core && (
+    <RidepodCorePage core={core}>
+      <TickToggle slot="actions" client:load tickId={tick.ridepodCore(core.id)} label={t("db.owned")} />
+    </RidepodCorePage>
+  )}
+</Layout>

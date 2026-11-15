@@ -1,0 +1,18 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { useTranslations } from "@/i18n";
+import { collectables } from "@/lib/db/data";
+import { PhotoPage } from "@/components/db/pages/MorePages";
+import { TickToggle } from "@/components/db/TickToggle";
+import { tick } from "@/lib/gamedata/ticks";
+export function getStaticPaths() {
+  return collectables.photos.map((p) => ({ params: { id: p.id }, props: { photo: p } }));
+}
+
+const t = useTranslations();
+const { photo } = Astro.props;
+---
+
+<Layout title={`${photo.name} · ${t("app.name")}`} page={photo.name}>
+  <PhotoPage photo={photo}><TickToggle slot="actions" client:load tickId={tick.photo(photo.id)} label={t("db.taken")} /></PhotoPage>
+</Layout>

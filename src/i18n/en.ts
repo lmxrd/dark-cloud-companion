@@ -1,4 +1,7 @@
+import { enDb } from "./en-db";
+
 export const en = {
+  ...enDb,
   "app.name": "Dark Chronicles Companion",
   "app.short": "Dark Chronicle",
   "app.tagline": "Companion",
@@ -45,7 +48,6 @@ export const en = {
   "fishing.tab.fish": "Fish",
   "fishing.tab.tackle": "Baits & lures",
   "fishing.tab.breeding": "Breeding",
-  "fishing.tab.rod": "Rod & contests",
   "fishing.inChapter": "{place} (ch {n})",
   "fishing.hours": "{from}:00–{to}:00",
   "fishing.rejects": "Won't bite in {water} water, whatever the bait",
@@ -698,7 +700,7 @@ export const en = {
   "items.title": "Items",
   "items.foundOnly": "Found only",
   "items.search": "Search items",
-  "items.introShort": "Every synth item, its stat gains and where to get it.",
+  "items.introShort": "Every item, what it does and how to get it, from the earliest chapter.",
   "items.noteLabel": "About shop chapters",
   "items.note":
     "Found-only items come from dungeon chests, drops, fishing or inventions. Shop chapters are the first chapter a shop stocks the item; when the shops themselves open isn't stated in the guides, so they are approximate.",

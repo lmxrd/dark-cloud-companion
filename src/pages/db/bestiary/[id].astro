@@ -1,0 +1,17 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { useTranslations } from "@/i18n";
+import { enemies } from "@/lib/db/data";
+import { EnemyPage } from "@/components/db/pages/EnemyPage";
+
+export function getStaticPaths() {
+  return enemies.map((e) => ({ params: { id: e.id }, props: { enemy: e } }));
+}
+
+const t = useTranslations();
+const { enemy } = Astro.props;
+---
+
+<Layout title={`${enemy.name} · ${t("app.name")}`} page={enemy.name}>
+  <EnemyPage enemy={enemy} />
+</Layout>

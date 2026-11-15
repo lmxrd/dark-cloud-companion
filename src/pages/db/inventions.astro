@@ -1,0 +1,15 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { PageHeader } from "@/components/PageHeader";
+import { InventionsPage } from "@/components/db/ListPages";
+import { useTranslations } from "@/i18n";
+import { inventionRows, photoRows } from "@/lib/db/lists";
+
+const t = useTranslations();
+
+---
+
+<Layout title={`${t("nav.inventions")} · ${t("app.name")}`}>
+  <PageHeader title={t("nav.inventions")} description={t("db.intro.inventions")} />
+  <InventionsPage client:load inventions={inventionRows()} photos={photoRows()} />
+</Layout>

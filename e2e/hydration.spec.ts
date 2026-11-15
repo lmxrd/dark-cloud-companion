@@ -25,16 +25,22 @@ const pages = [
   "/chapters/3",
   "/?chapter=c3&cat=medal&q=a",
   "/guides?q=zero",
-  "/weapons?type=sword&finals=1&sort=abs&q=a",
-  "/items?kind=found&gives=at&q=a",
-  "/monsters#flora",
+  "/db/weapons?type=sword&finals=1&sort=abs&q=a",
+  "/db/items?kind=found&gives=at&q=a",
+  "/db/monsters#flora",
   "/guides",
-  "/reference",
-  "/weapons",
-  "/items",
-  "/ridepod",
-  "/monsters",
-  "/spheda",
+  "/db",
+  "/db/weapons",
+  "/db/items",
+  "/db/ridepod",
+  "/db/monsters",
+  "/db/spheda",
+  "/db/bestiary?dungeon=underground-channel&sort=hp&dir=desc",
+  "/db/inventions?tab=photos&chapter=2",
+  "/db/people",
+  "/db/places?era=future",
+  "/db/weapons/chronicle-sword",
+  "/db/photos/clock",
   "/settings",
 ];
 
@@ -63,7 +69,7 @@ test.describe("saved progress", () => {
   test("the stored state is shown once hydrated", async ({ page }) => {
     await go(page, "/");
     await expect(page.getByLabel("Chapter", { exact: true })).toHaveValue("2");
-    await go(page, "/spheda");
+    await go(page, "/db/spheda");
     await expect(page.getByRole("checkbox", { name: "I own Turkey" })).toBeChecked();
     await go(page, "/settings");
     await expect(page.getByRole("button", { name: /^Switch to / })).toHaveCount(2);

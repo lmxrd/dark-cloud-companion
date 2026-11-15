@@ -3,6 +3,7 @@ import { cn } from "cn";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { ChevronRightIcon, MoreHorizontalIcon, PlusIcon } from "lucide-react";
 import { ViewToggles } from "@/components/dashboard/ViewToggles";
+import { OfflinePages } from "./OfflinePages";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -308,6 +309,10 @@ export function SettingsPage() {
 
       <Section id="settings-dashboard" title={t("settings.dashboard")}>
         <ViewToggles className="bg-card rounded-lg border-2 px-3" />
+      </Section>
+
+      <Section id="settings-offline" title={t("db.offline.title")}>
+        {mounted ? <OfflinePages /> : null}
       </Section>
 
       <Section id="settings-data" title={t("settings.data")}>

@@ -8,10 +8,12 @@ interface Props {
   title?: string;
   /** The page's name in the breadcrumb, when the path doesn't say it (a weapon's id). */
   page?: string;
+  /** Crumbs between a database list and the page (a monster form's class). */
+  parents?: { label: string; href?: string }[];
 }
 
 const t = useTranslations();
-const { title = t("app.name"), page } = Astro.props;
+const { title = t("app.name"), page, parents } = Astro.props;
 const pathname = stripBase(Astro.url.pathname);
 ---
 
@@ -41,7 +43,7 @@ const pathname = stripBase(Astro.url.pathname);
     </script>
   </head>
   <body class="bg-background text-foreground min-h-screen font-sans antialiased">
-    <AppShell client:load pathname={pathname} page={page}>
+    <AppShell client:load pathname={pathname} page={page} parents={parents}>
       <slot />
     </AppShell>
     <script>

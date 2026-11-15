@@ -9,13 +9,16 @@ import { chapters, sectionById } from "@/lib/data";
 import { sphedaMedals } from "@/lib/reference";
 import { setChecked } from "@/lib/store";
 import { TrackerLayout, type TrackerGroup } from "./TrackerLayout";
+import { Ref } from "@/components/db/kit";
+import { dbHref } from "@/lib/db/routes";
 
 export function SphedaTracker() {
   const t = useTranslations();
   const checks = useChecks();
   const clubs = weapons.weapons
     .filter((w) => w.type === "club")
-    .sort((a, b) => a.name.localeCompare(b.name));
+    // Weakest first.
+    .sort((a, b) => a.maxAttack - b.maxAttack || a.name.localeCompare(b.name));
   const owned = clubs.filter((c) => checks[tick.weapon(c.id)]).length;
   const done = sphedaMedals.filter((m) => checks[m.id]).length;
 
@@ -41,7 +44,11 @@ export function SphedaTracker() {
                 checked={!!checks[m.id]}
                 onChange={(v) => setChecked(m.id, v)}
                 label={<span className="font-semibold">{m.value}</span>}
-                detail={sectionById.get(m.sectionId)?.title}
+                detail={
+                  <Ref href={dbHref("floor", m.sectionId)}>
+                    {sectionById.get(m.sectionId)?.title}
+                  </Ref>
+                }
               />
             ))}
             <a
@@ -95,7 +102,7 @@ export function SphedaTracker() {
                     {c.name}
                   </label>
                   <a
-                    href={withBase(`/weapons/${c.id}`)}
+                    href={withBase(dbHref("weapon", c.id))}
                     aria-label={t("spheda.openWeapon", { club: c.name })}
                     className={cn(
                       "grid place-items-center rounded-r-full border-2 border-l-0 px-2 text-xs",

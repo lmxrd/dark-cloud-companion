@@ -9,18 +9,33 @@ describe("crumbsFor", () => {
     expect(crumbsFor(t, "/")).toEqual([{ label: "Dashboard" }]);
   });
 
-  it("puts Reference before its sub-pages", () => {
-    expect(crumbsFor(t, "/items")).toEqual([
-      { label: "Reference", href: "/reference" },
+  it("puts the database before its lists", () => {
+    expect(crumbsFor(t, "/db/items")).toEqual([
+      { label: "Database", href: "/db" },
       { label: "Items" },
     ]);
   });
 
   it("shows the full path to a weapon", () => {
-    expect(crumbsFor(t, "/weapons/poison-wrench/", "Poison Wrench")).toEqual([
-      { label: "Reference", href: "/reference" },
-      { label: "Weapons", href: "/weapons" },
+    expect(crumbsFor(t, "/db/weapons/poison-wrench/", "Poison Wrench")).toEqual([
+      { label: "Database", href: "/db" },
+      { label: "Weapons", href: "/db/weapons" },
       { label: "Poison Wrench" },
+    ]);
+  });
+
+  it("puts a page under its list, with any parents between", () => {
+    expect(crumbsFor(t, "/db/floors/to-the-outside-world", "To the Outside World")).toEqual([
+      { label: "Database", href: "/db" },
+      { label: "Places", href: "/db/places" },
+      { label: "To the Outside World" },
+    ]);
+    const cls = { label: "Aquatic", href: "/db/monsters/aquatic" };
+    expect(crumbsFor(t, "/db/monsters/aquatic/geron", "Geron", [cls])).toEqual([
+      { label: "Database", href: "/db" },
+      { label: "Monsters", href: "/db/monsters" },
+      cls,
+      { label: "Geron" },
     ]);
   });
 
@@ -32,7 +47,7 @@ describe("crumbsFor", () => {
   });
 
   it("gives top-level pages a single crumb", () => {
-    expect(crumbsFor(t, "/reference")).toEqual([{ label: "Reference" }]);
+    expect(crumbsFor(t, "/db")).toEqual([{ label: "Database" }]);
     expect(crumbsFor(t, "/tools/planner")).toEqual([
       { label: "Tools", href: "/tools" },
       { label: "Planner" },
@@ -48,7 +63,7 @@ describe("mainNav", () => {
       "Dashboard",
       "Guides",
       "Tools",
-      "Reference",
+      "Database",
     ]);
     expect(tools.children!.map((c) => c.href)).toEqual([
       "/tools/planner",
@@ -59,20 +74,18 @@ describe("mainNav", () => {
       expect(isSectionActive(tools, path)).toBe(true);
   });
 
-  it("marks Reference active on the hub and every sub-page", () => {
+  it("marks the database active on its home and every page under it", () => {
     for (const path of [
-      "/reference",
-      "/weapons",
-      "/weapons/poison-wrench",
-      "/spheda",
-      "/fishing",
-      "/bestiary",
-      "/shops",
-      "/people",
+      "/db",
+      "/db/weapons",
+      "/db/weapons/poison-wrench",
+      "/db/spheda",
+      "/db/floors/to-the-outside-world",
+      "/db/monsters/aquatic/geron",
     ])
       expect(isSectionActive(reference, path)).toBe(true);
     expect(isSectionActive(reference, "/")).toBe(false);
-    expect(isSectionActive(today, "/weapons")).toBe(false);
+    expect(isSectionActive(today, "/db/weapons")).toBe(false);
   });
 });
 
@@ -81,7 +94,9 @@ describe("activeChild", () => {
 
   test("marks only the most specific sub-item", () => {
     expect(activeChild(guides, "/guides", "")).toBe("/guides");
-    expect(activeChild(reference, "/weapons/poison-wrench", "")).toBe("/weapons");
+    expect(activeChild(reference, "/db/weapons/poison-wrench", "")).toBe("/db/weapons");
+    expect(activeChild(reference, "/db/towns/palm-brinks", "")).toBe("/db/places");
+    expect(activeChild(reference, "/db/photos/clock", "")).toBe("/db/inventions");
   });
 
   test("a sub-item with a query needs a matching query", () => {

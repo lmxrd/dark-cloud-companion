@@ -6,6 +6,8 @@ import { ridepod } from "@/lib/gamedata/ridepod";
 import { tick } from "@/lib/gamedata/ticks";
 import { useTranslations } from "@/i18n";
 import { setChecked } from "@/lib/store";
+import { Ref } from "@/components/db/kit";
+import { dbHref } from "@/lib/db/routes";
 
 const categories = ["short", "long", "armor", "legs", "pack"] as const;
 type Category = (typeof categories)[number];
@@ -70,7 +72,10 @@ export function RidepodTracker() {
 
   const groups: TrackerGroup[] = [
     ...categories.map((cat) => {
-      const parts = ridepod.parts.filter((p) => categoryOf(p) === cat);
+      // Lowest tier first, then by capacity.
+      const parts = ridepod.parts
+        .filter((p) => categoryOf(p) === cat)
+        .sort((a, b) => (a.weapon?.tier ?? 0) - (b.weapon?.tier ?? 0) || a.capacity - b.capacity);
       return {
         id: cat,
         label: t(`ridepod.cat.${cat}` as const),
@@ -97,7 +102,7 @@ export function RidepodTracker() {
               key={p.id}
               checked={built}
               onChange={(v) => setChecked(partId(p), v)}
-              label={p.name}
+              label={<Ref href={dbHref("ridepodPart", p.id)}>{p.name}</Ref>}
               badges={
                 !built && ready(inv, checks) ? (
                   <span className="bg-accent text-accent-foreground rounded-full border-2 px-2 py-0.5 text-[11px] font-bold">
@@ -146,7 +151,7 @@ export function RidepodTracker() {
             key={c.id}
             checked={!!checks[tick.ridepodCore(c.id)]}
             onChange={(v) => setChecked(tick.ridepodCore(c.id), v)}
-            label={c.name}
+            label={<Ref href={dbHref("ridepodCore", c.id)}>{c.name}</Ref>}
             detail={cost !== undefined ? t("ridepod.coreExp", { abs: cost }) : undefined}
             aside={
               <>

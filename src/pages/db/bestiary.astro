@@ -1,0 +1,18 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { PageHeader } from "@/components/PageHeader";
+import { BestiaryPage } from "@/components/db/BestiaryPage";
+import { useTranslations } from "@/i18n";
+import { enemyRows } from "@/lib/db/lists";
+import { core } from "@/lib/db/data";
+
+const t = useTranslations();
+const dungeons = [...core.dungeons]
+  .sort((a, b) => (a.chapterNumber ?? 0) - (b.chapterNumber ?? 0) || a.position - b.position)
+  .map((d) => ({ id: d.id, name: d.name }));
+---
+
+<Layout title={`${t("bestiary.title")} · ${t("app.name")}`}>
+  <PageHeader title={t("bestiary.title")} description={t("bestiary.intro")} />
+  <BestiaryPage client:load rows={enemyRows()} dungeons={dungeons} />
+</Layout>

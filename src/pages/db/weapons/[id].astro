@@ -1,0 +1,29 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { useTranslations } from "@/i18n";
+import { withBase } from "@/lib/base";
+import { weapons } from "@/lib/db/data";
+import { WeaponPage } from "@/components/db/pages/WeaponPage";
+import { AbsRange } from "@/components/db/AbsRange";
+
+export function getStaticPaths() {
+  return weapons.weapons.map((w) => ({ params: { id: w.id }, props: { weapon: w } }));
+}
+
+const t = useTranslations();
+const { weapon } = Astro.props;
+---
+
+<Layout title={`${weapon.name} · ${t("app.name")}`} page={weapon.name}>
+  <WeaponPage weapon={weapon}>
+    <Fragment slot="actions">
+      <a
+        href={withBase(`/tools/planner?target=${weapon.id}`)}
+        class="bg-primary text-primary-foreground shadow-sticker w-fit rounded-md border-2 px-4 py-2 text-sm font-semibold active:translate-x-(--shadow-offset) active:translate-y-(--shadow-offset) active:shadow-none"
+      >
+        {t("weapons.plan")}
+      </a>
+    </Fragment>
+    <AbsRange slot="absRange" client:load baseAbs={weapon.baseAbs} />
+  </WeaponPage>
+</Layout>
