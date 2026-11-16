@@ -273,6 +273,8 @@ export interface SolveLog {
   /** Seconds it was allowed. */
   limit: number;
   status: string;
+  /** The objective value of the plan it found (`SolveResult.value`). */
+  value?: number;
   stats?: SolveStats;
 }
 
@@ -345,6 +347,34 @@ export function startOptions(targetId: string, maxChapter: number): StartOption[
 /** Chain enumeration caps for the optimal-start search: enough per start, bounded overall. */
 const CHAINS_PER_START = 12;
 const MAX_RANKED_CHAINS = 48;
+
+/**
+ * The build-up chains to rank, from each start to the target. Each start's own chains go longest
+ * first (more build-up bonuses and SP, cheaper levels). With `capped` (the optimal-start search) a
+ * start keeps its first CHAINS_PER_START, and the starts take turns up to MAX_RANKED_CHAINS, so no
+ * start family is starved when the cap bites.
+ */
+export function rankChains<C extends { state: { weaponId: string } }>(
+  starts: C[],
+  targetId: string,
+  maxChapter: number,
+  capped: boolean,
+): { candidate: C; chain: string[] }[] {
+  const byStart = starts.map((candidate) =>
+    findChains(candidate.state.weaponId, targetId, maxChapter)
+      .sort((a, b) => b.length - a.length)
+      .slice(0, capped ? CHAINS_PER_START : undefined)
+      .map((chain) => ({ candidate, chain })),
+  );
+  if (!capped) return byStart.flat();
+  const pairs: { candidate: C; chain: string[] }[] = [];
+  for (let n = 0; pairs.length < MAX_RANKED_CHAINS; n++) {
+    const round = byStart.flatMap((list) => (list[n] ? [list[n]] : []));
+    if (!round.length) break;
+    pairs.push(...round.slice(0, MAX_RANKED_CHAINS - pairs.length));
+  }
+  return pairs;
+}
 
 /**
  * Relative gap accepted by the exact solves. High-tier chains prove optimality to 0.1% only after tens
@@ -633,33 +663,12 @@ export async function planPath(
       (c) => c.acquire.kind === "have" || c.acquire.chapter <= startBy,
     );
 
-  // Build-up chains from every start; the optimal search caps the enumeration, taking them
-  // round-robin across starts (each start's own chains longest first: more build-up bonuses and SP,
-  // cheaper levels) so no start family is starved when the cap bites.
-  const pairs: { candidate: Candidate; chain: string[] }[] = [];
-  if (req.optimalStart) {
-    const byStart = candidates.map((candidate) =>
-      findChains(candidate.state.weaponId, req.targetId, req.maxChapter)
-        .sort((a, b) => b.length - a.length)
-        .slice(0, CHAINS_PER_START)
-        .map((chain) => ({ candidate, chain })),
-    );
-    outer: for (let n = 0; pairs.length < MAX_RANKED_CHAINS; n++) {
-      let added = false;
-      for (const list of byStart)
-        if (list[n]) {
-          pairs.push(list[n]);
-          added = true;
-          if (pairs.length >= MAX_RANKED_CHAINS) break outer;
-        }
-      if (!added) break;
-    }
-  } else {
-    for (const chain of findChains(req.start.weaponId, req.targetId, req.maxChapter).sort(
-      (a, b) => b.length - a.length,
-    ))
-      pairs.push({ candidate: candidates[0], chain });
-  }
+  const pairs = rankChains(
+    req.optimalStart ? candidates : candidates.slice(0, 1),
+    req.targetId,
+    req.maxChapter,
+    !!req.optimalStart,
+  );
   if (req.route) {
     const route = req.route.join(">");
     const only = pairs.filter((p) => p.chain.join(">") === route);
@@ -927,6 +936,7 @@ export async function planPath(
           margin: extraOrMargin,
           limit: input.timeLimitSec,
           status: out.status,
+          ...(out.value !== undefined ? { value: out.value } : {}),
           ...(out.stats ? { stats: out.stats } : {}),
         });
         return out;

@@ -4,6 +4,7 @@ import { expandPlans, parsePlansConfig } from "./plans-config";
 import flamingoRaw from "../../src/lib/guide/fixtures/story-flamingo.json";
 import type { Guide } from "../../src/lib/guide/types";
 import { compareScores, scorePlan, storyCost, type PlanScore } from "./plan-score";
+import { planOne } from "./plan-one";
 
 const specs = expandPlans(parsePlansConfig(plansConfig));
 // Flamingo Balanced, frozen as the solver gave it (see src/lib/guide/split.test.ts).
@@ -74,3 +75,29 @@ describe("scoring generated plans", () => {
     expect(extra).toBeLessThanOrEqual(8);
   });
 });
+
+/** Joins each run of work steps on one weapon back into one step, as the solver gave them. */
+function unsplit(guide: Guide): Guide {
+  const steps: Guide["steps"] = [];
+  for (const s of guide.steps) {
+    const prev = steps[steps.length - 1];
+    if (s.build && prev?.build && prev.build.weaponId === s.build.weaponId)
+      steps[steps.length - 1] = {
+        ...s,
+        build: { ...s.build, synths: [...prev.build.synths, ...s.build.synths] },
+      };
+    else steps.push(s);
+  }
+  return { ...guide, steps };
+}
+
+test("the story cost of a fresh plan is the solver's own objective, and splitting only lowers it", async () => {
+  // Flamingo Balanced is the quickest story plan to solve (two weapons, done in chapter 5).
+  const spec = { ...flamingoSpec, timeLimitSec: 20 };
+  const { guide, result } = await planOne(spec);
+  const value = result.solves!.findLast((s) => s.value !== undefined)!.value!;
+  const solved = storyCost(unsplit(guide), spec.progression, spec.abilities);
+  // Within rounding: the solver's value also carries small tie-break terms.
+  expect(Math.abs(solved - value) / value).toBeLessThan(1e-4);
+  expect(storyCost(guide, spec.progression, spec.abilities)).toBeLessThanOrEqual(solved);
+}, 120000);
