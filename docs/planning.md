@@ -33,7 +33,16 @@ target stats is topped up with items (levelling it for SP, to at most +5).
 
 Exact solves stop at a time limit and keep the best plan found. Measured over all built-in plans
 against 60 s per route: 10 s costs about 3% more ABS, 15 s about 2%, 30 s under 1%; below about
-10 s solves often end without any plan (then one retry with 4× the time).
+10 s solves often end without any plan (then one retry with 4× the time). Story plans solve a
+route twice when the first plan simulates a point short (a second try with a 3-point margin), so a
+Balanced plan can take several times its limit.
+
+**Warm starts.** A solve can start from a saved solution: the solver's own nonzero values, saved
+with each built-in plan under stable names (items by name, spheres by template id, not by their
+position in this solve's lists). HiGHS checks them, completes or repairs them, and only has to
+improve on them; a stale value matches nothing and is skipped. The generator logs each exact solve:
+its time, when the first plan came, how often it improved, the gap to the proven bound when it
+stopped, and how much of the start matched.
 
 ## Story plans
 
@@ -275,7 +284,8 @@ Configured in `scripts/planner/plans.config.ts`, keyed `<target>/<variant>`, thr
   Spheda, which is often before any shop sells it.
 
 Each is committed as `data/generated/plans/<guide id>.json`
-(`{ name, spec, guide }`); the guide id is the target plus a hash of its first content and never
+(`{ name, spec, guide, solution }`, the solution being the next generation's warm start); the
+guide id is the target plus a hash of its first content and never
 changes. Builds and tests only assemble the files into `src/data/plans.json`; they never re-solve.
 
 Generating (`scripts/planner/predefined.ts`):

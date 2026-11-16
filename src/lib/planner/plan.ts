@@ -30,6 +30,7 @@ import {
 } from "./sources";
 import { generateTemplates, progressionTemplates } from "./templates";
 import type { Acquire, Cost, Plan, SimulationResult } from "./types";
+import type { SolveStats } from "./highs";
 
 export type Goal =
   | { kind: "reach" }
@@ -59,6 +60,11 @@ export interface PlanRequest {
   /** Number of chains to solve exactly (the best by LP bound). */
   exactChains?: number;
   timeLimitSec?: number;
+  /**
+   * A saved solution (`PlanResult.solution`) to start the exact solve of the same chain from: the
+   * solver only has to improve on it instead of first finding a plan.
+   */
+  warmStart?: SavedSolution;
   /** Sphere recipes to choose from; built on the fly (and cached) when not given. */
   templates?: Template[];
   /** Which bought items may be synthed (default `all`); see {@link ItemPool}. */
@@ -250,8 +256,29 @@ export interface ChainOutcome {
   status: SolveResult["status"] | "skipped";
 }
 
+/** The solver's own answer for a chain: its nonzero values by variable name. */
+export interface SavedSolution {
+  chain: string[];
+  values: Record<string, number>;
+}
+
+/** One exact solve: which chain, which try, how it ended and how it went. */
+export interface SolveLog {
+  chain: string[];
+  /** The requirement margin of the try (story plans: 1, then 3). */
+  margin: number;
+  /** Seconds it was allowed. */
+  limit: number;
+  status: string;
+  stats?: SolveStats;
+}
+
 export interface PlanResult {
   status: "ok" | "no-path" | "infeasible";
+  /** The winning exact solve's values, to start a later solve of the same chain from. */
+  solution?: SavedSolution;
+  /** Every exact solve, for judging time limits. */
+  solves?: SolveLog[];
   chain?: string[];
   plan?: Plan;
   simulation?: SimulationResult & { state: WeaponState };
@@ -815,6 +842,7 @@ export async function planPath(
         missing: AbilityId[];
         acquire: Acquire;
         stageChapters?: number[];
+        solution?: SavedSolution;
       }
     | undefined;
   let bestKey = Infinity;
@@ -823,6 +851,7 @@ export async function planPath(
   // (a chain can be relaxation-feasible yet exact-infeasible, e.g. under a gilda budget).
   let solved = 0;
   let attempts = 0;
+  const solves: SolveLog[] = [];
   for (const o of ranked) {
     if (solved >= exact || attempts >= exact * 4) {
       if (o.bound !== undefined) o.status = "skipped";
@@ -852,6 +881,8 @@ export async function planPath(
         ? abilityReserve(o.chain, wanted, spheres, req.maxChapter, req.objective, source)
         : { sp: 0, gilda: 0 };
     const chainBase = { ...baseFor(candidate), ...progressionFor(candidate, o.chain) };
+    // Following the story, the chain may repeat a weapon for in-between stages.
+    const exactChain = chainBase.chain ?? o.chain;
     // Following the story, a retry keeps more margin on the requirements instead (the sphere
     // transfer and SP rounding can leave the simulator a point short of what the model expects).
     const tries = prog ? [1, 3] : wanted.length ? [0, 10] : [0];
@@ -867,8 +898,7 @@ export async function planPath(
           : {}),
         reserveSp: reserve.sp + extra,
         ...(prog ? { statMargin: extraOrMargin } : {}),
-        // Following the story, the chain may repeat a weapon for in-between stages.
-        chain: chainBase.chain ?? o.chain,
+        chain: exactChain,
         // HiGHS finds a near-optimal incumbent early and spends minutes proving the last 1%:
         // cap the proof instead and keep whatever incumbent it has (still simulator-verified).
         timeLimitSec: req.timeLimitSec ?? 3,
@@ -879,11 +909,26 @@ export async function planPath(
           ? { objectiveBound: cutoff - acquireOffset(candidate.acquire, req.objective) }
           : {}),
       };
-      r = await solveChain(exactInput);
+      const warm =
+        req.warmStart && req.warmStart.chain.join() === exactInput.chain.join()
+          ? { warmStart: new Map(Object.entries(req.warmStart.values)) }
+          : {};
+      const logged = async (input: typeof exactInput) => {
+        const out = await solveChain({ ...input, ...warm });
+        solves.push({
+          chain: input.chain,
+          margin: extraOrMargin,
+          limit: input.timeLimitSec,
+          status: out.status,
+          ...(out.stats ? { stats: out.stats } : {}),
+        });
+        return out;
+      };
+      r = await logged(exactInput);
       // A slow machine (or a hard chain) can run out of time before any plan is found: try once
       // more with four times as long rather than report no plan.
       if (!r.plan && r.status === "timedout")
-        r = await solveChain({ ...exactInput, timeLimitSec: 4 * (req.timeLimitSec ?? 3) });
+        r = await logged({ ...exactInput, timeLimitSec: 4 * (req.timeLimitSec ?? 3) });
       o.status = r.status;
       if (!r.plan) {
         // "Infeasible" under a cutoff only means "no improvement on the best chain already solved".
@@ -964,6 +1009,7 @@ export async function planPath(
         missing,
         acquire: candidate.acquire,
         ...(r?.stageChapters ? { stageChapters: r.stageChapters } : {}),
+        ...(r?.solution ? { solution: { chain: exactChain, values: r.solution } } : {}),
       };
     }
   }
@@ -972,6 +1018,7 @@ export async function planPath(
     return {
       status: "infeasible",
       alternatives: ranked,
+      solves,
       message: "No valid plan found within the available content.",
     };
   const { missing, ...rest } = best;
@@ -979,6 +1026,7 @@ export async function planPath(
     status: "ok",
     ...rest,
     alternatives: ranked,
+    solves,
     ...(missing.length ? { abilitiesMissing: missing } : {}),
   };
 }

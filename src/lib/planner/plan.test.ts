@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { freshState } from "@/lib/weapons/mechanics";
 import { itemCandidates } from "./candidates";
-import { findChains, planPath, startOptions } from "./plan";
+import { findChains, planPath, startOptions, STORY_DEFAULTS } from "./plan";
 import { getWeapon } from "./sources";
 
 const start = (id: string) => freshState(getWeapon(id));
@@ -305,5 +305,31 @@ describe("following the story", () => {
     const cheap = new Set(itemCandidates({ maxChapter: 8, pool: "cheap" }).map((i) => i.name));
     for (const s of r.plan!.stages)
       for (const u of s.synths) if (u.kind === "item") expect(cheap.has(u.name)).toBe(true);
+  }, 120000);
+
+  test("a saved solution starts the next solve: a plan from the start, never a worse one", async () => {
+    const req = {
+      start: start("battle-wrench"),
+      targetId: "smash-wrench",
+      objective: "abs" as const,
+      goal: { kind: "max" as const },
+      maxChapter: 8,
+      spBonus: 1,
+      itemPool: "cheap" as const,
+      route: ["battle-wrench", "true-battle-wrench", "drill-wrench", "smash-wrench"],
+      progression: STORY_DEFAULTS,
+      timeLimitSec: 20,
+    };
+    const first = await planPath(req);
+    expect(first.status).toBe("ok");
+    expect(first.solution).toBeDefined();
+    // Saved values name items and spheres, not list positions.
+    expect(Object.keys(first.solution!.values).some((k) => k.includes("|item:"))).toBe(true);
+    const again = await planPath({ ...req, warmStart: first.solution, timeLimitSec: 5 });
+    expect(again.status).toBe("ok");
+    const solve = again.solves![0];
+    expect(solve.stats?.start?.matched).toBeGreaterThan(0);
+    expect(solve.stats?.firstSec).toBeLessThan(2);
+    expect(again.simulation!.cost.abs).toBeLessThanOrEqual(first.simulation!.cost.abs);
   }, 120000);
 });

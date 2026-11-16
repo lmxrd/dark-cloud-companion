@@ -20,7 +20,7 @@ import {
   SPECTRUMIZE_KEEP,
   type WeaponState,
 } from "@/lib/weapons/mechanics";
-import { solveLp, type LpModel, type LpRow } from "./highs";
+import { solveLp, type LpModel, type LpRow, type SolveStats } from "./highs";
 import { allyBonus, getWeapon, type SynthSource } from "./sources";
 import type { Plan, Recipe, Stage, SynthUse } from "./types";
 
@@ -116,6 +116,8 @@ export interface SolveInput {
   objectiveBound?: number;
   /** Solve the continuous relaxation only (fast; used to pick candidate templates). */
   relax?: boolean;
+  /** Starting values by variable name (a saved `SolveResult.solution`), see `solveLp`. */
+  warmStart?: ReadonlyMap<string, number>;
 }
 
 /** Story constraints for `SolveInput.progression`. Arrays by chapter are indexed 1…8. */
@@ -192,6 +194,10 @@ export interface SolveResult {
   stageChapters?: number[];
   /** Objective value used by the solver (primary cost plus small tie-break terms). */
   value?: number;
+  /** How the solve went (time to the first plan, gap when it stopped). */
+  stats?: SolveStats;
+  /** The solver's nonzero values, to start a later solve of the same model from (`warmStart`). */
+  solution?: Record<string, number>;
 }
 
 const itemGain = (it: SynthSource, k: StatKey) => it.gains[k] ?? 0;
@@ -610,16 +616,49 @@ export function buildModel(input: SolveInput) {
   return { model, nStages, hasFinal };
 }
 
+/**
+ * A variable's name for saving: the model numbers items and sphere templates by their position in
+ * this solve's lists, which change with the game data or item set, so saved values name them by item
+ * name and template id instead (a saved value then means the same thing, or matches nothing).
+ */
+function stableName(name: string, items: SynthSource[], templates: Template[]): string {
+  const item = (i: string) => `item:${items[Number(i)]?.name ?? `#${i}`}`;
+  const tpl = (t: string) => `sphere:${templates[Number(t)]?.id ?? `#${t}`}`;
+  let m: RegExpMatchArray | null;
+  if ((m = name.match(/^vX(\d+)_(\d+)$/))) return `vX${m[1]}|${item(m[2])}`;
+  if ((m = name.match(/^vY(\d+)_(\d+)$/))) return `vY${m[1]}|${tpl(m[2])}`;
+  if ((m = name.match(/^vQ(\d+)_(\d+)_(\d+)$/))) return `vQ${m[1]}|${tpl(m[2])}|${item(m[3])}`;
+  if ((m = name.match(/^vT(\d+)_(\d+)_([a-z]+)$/))) return `vT${m[1]}|${tpl(m[2])}|${m[3]}`;
+  return name;
+}
+
 export async function solveChain(input: SolveInput): Promise<SolveResult> {
   const { model, nStages, hasFinal } = buildModel(input);
   if (input.relax) model.integers = [];
+  const stable = (n: string) => stableName(n, input.items, input.templates);
+  // A saved solution by stable name, translated to this model's variables.
+  let warm: Map<string, number> | undefined;
+  if (input.warmStart?.size) {
+    const names = new Set([...model.objective.keys(), ...model.integers]);
+    for (const r of model.rows) for (const v of r.coeffs.keys()) names.add(v);
+    const byStable = new Map([...names].map((n) => [stable(n), n]));
+    warm = new Map();
+    for (const [n, v] of input.warmStart) {
+      const own = byStable.get(n);
+      if (own) warm.set(own, v);
+    }
+    // Every other variable starts at 0, so HiGHS gets a complete start to check.
+    for (const n of names) if (!warm.has(n)) warm.set(n, 0);
+  }
   const sol = await solveLp(model, {
     timeLimitSec: input.timeLimitSec,
     mipGap: input.mipGap,
     objectiveBound: input.objectiveBound === undefined ? undefined : input.objectiveBound * SCALE,
+    ...(warm ? { start: warm } : {}),
   });
-  if (sol.status === "infeasible" || sol.status === "error") return { status: sol.status };
-  if (!sol.values.size) return { status: sol.status };
+  const stats = sol.stats;
+  if (sol.status === "infeasible" || sol.status === "error") return { status: sol.status, stats };
+  if (!sol.values.size) return { status: sol.status, stats };
 
   const get = (name: string) => Math.round(sol.values.get(name) ?? 0);
   const { chain, items, templates, start } = input;
@@ -684,5 +723,15 @@ export async function solveChain(input: SolveInput): Promise<SolveResult> {
     plan: { stages: stages.filter((_, j) => keep[j]) },
     value,
     ...(stageChapters ? { stageChapters: stageChapters.filter((_, j) => keep[j]) } : {}),
+    stats,
+    ...(input.relax
+      ? {}
+      : {
+          solution: Object.fromEntries(
+            [...sol.values]
+              .filter(([, v]) => Math.abs(v) > 1e-9)
+              .map(([n, v]) => [stable(n), Math.round(v * 1e6) / 1e6]),
+          ),
+        }),
   };
 }

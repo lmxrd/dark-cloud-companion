@@ -3,7 +3,12 @@
 // the planner benches.
 import { planResultToGuide } from "../../src/lib/guide/fromPlan.ts";
 import { guide as guideSchema, type Guide } from "../../src/lib/guide/types.ts";
-import { planPath, type PlanResult } from "../../src/lib/planner/plan.ts";
+import {
+  planPath,
+  type PlanResult,
+  type SavedSolution,
+  type SolveLog,
+} from "../../src/lib/planner/plan.ts";
 import { placeResult, storyGilda } from "../../src/lib/planner/timeline.ts";
 import { names } from "../../src/lib/gamedata/index.ts";
 import { getWeapon, weaponData } from "../../src/lib/planner/sources.ts";
@@ -22,11 +27,26 @@ function earliestPossibleChapter(spec: PlanSpec): number {
   return Math.max(1, ...target.requiresKills.map((e) => killChapter.get(e) ?? 8));
 }
 
+/** One exact solve in the log: margin, limit, when the first plan came, the gap at the end. */
+const solveText = (s: SolveLog) => {
+  const st = s.stats;
+  const parts = [
+    `${Math.round(st?.seconds ?? 0)}/${s.limit}s`,
+    st?.firstSec !== undefined ? `first plan ${st.firstSec.toFixed(1)}s` : "no plan",
+    `${st?.improvements ?? 0} better`,
+    ...(st?.gap !== undefined ? [`gap ${(100 * st.gap).toFixed(2)}%`] : []),
+    ...(st?.start ? [`start ${st.start.matched}/${st.start.given}`] : []),
+  ];
+  return `\n      solve (margin ${s.margin}): ${s.status} · ${parts.join(" · ")}`;
+};
+
 /** Solves one configured plan into a guide; `timeLimitSec` bounds each exact solve (wall clock). */
 export async function planOne(
   spec: PlanSpec,
   // 30 s per exact solve: within about 0.6% of 60 s across all plans (see bench-time-limits.ts).
   timeLimitSec = 30,
+  /** The committed plan's solver values: the exact solve starts from them (see `PlanRequest`). */
+  warmStart?: SavedSolution,
 ): Promise<{ guide: Guide; log: string; result: PlanResult }> {
   const target = getWeapon(spec.targetId);
   const solve = (maxChapter: number) =>
@@ -49,6 +69,7 @@ export async function planOne(
       ...(spec.flow === "progression" ? { progression: spec.progression } : {}),
       // Generation is one-off, so let the exact solves run longer than the interactive default.
       timeLimitSec: spec.timeLimitSec ?? timeLimitSec,
+      ...(warmStart ? { warmStart } : {}),
       ...(spec.exactChains !== undefined ? { exactChains: spec.exactChains } : {}),
       ...(spec.route ? { route: spec.route } : {}),
     });
@@ -118,6 +139,6 @@ export async function planOne(
         : {}),
     }),
   );
-  const log = `${spec.id} — from ${startName} · ${cost.abs} ABS · ${cost.gilda} gilda · ${cost.steps} steps · done ch${done.chapter} ${done.sectionId} · grind ${grind} ABS / ${farm} gilda`;
+  const log = `${spec.id} — from ${startName} · ${cost.abs} ABS · ${cost.gilda} gilda · ${cost.steps} steps · done ch${done.chapter} ${done.sectionId} · grind ${grind} ABS / ${farm} gilda${(result.solves ?? []).map(solveText).join("")}`;
   return { guide, log, result };
 }

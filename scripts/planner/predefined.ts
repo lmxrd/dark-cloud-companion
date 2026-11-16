@@ -26,6 +26,7 @@ import { planOne } from "./plan-one.ts";
 import { newGuideId, planPath, readPlanFiles, type PlanFile } from "./plan-files.ts";
 import { compareScores, scorePlan, scoreText } from "./plan-score.ts";
 import type { Guide } from "../../src/lib/guide/types.ts";
+import type { SavedSolution } from "../../src/lib/planner/plan.ts";
 
 const specs = expandPlans(parsePlansConfig(plansConfig));
 const fileFor = (key: string) => readPlanFiles().find((p) => p.spec === key);
@@ -43,8 +44,12 @@ async function worker(tasks: string[], out: string) {
     const spec = specs.find((s) => s.id === key)!;
     const t0 = Date.now();
     try {
-      const { guide, log } = await planOne(spec);
-      writeFileSync(candidatePath(out, key, Number(run)), JSON.stringify(guide));
+      // Start from the committed plan's solver values (a fresh guide with --new has none).
+      const { guide, log, result } = await planOne(spec, undefined, fileFor(key)?.solution);
+      writeFileSync(
+        candidatePath(out, key, Number(run)),
+        JSON.stringify({ guide, solution: result.solution }),
+      );
       console.log(`  ${key} run ${run}: ${log} (${((Date.now() - t0) / 1000).toFixed(1)}s)`);
     } catch (err) {
       console.log(`  ${key} run ${run}: failed (${String(err)})`);
@@ -120,14 +125,18 @@ async function main(args: string[]) {
     // Keep the best of the runs and the committed plan.
     for (const spec of order) {
       const current = fresh ? undefined : fileFor(spec.id);
-      const candidates: { label: string; guide: Guide }[] = [];
-      if (current && !replace) candidates.push({ label: "committed", guide: current.guide });
+      const candidates: { label: string; guide: Guide; solution?: SavedSolution }[] = [];
+      if (current && !replace)
+        candidates.push({ label: "committed", guide: current.guide, solution: current.solution });
       for (let run = 0; run < runs; run++) {
         const path = candidatePath(out, spec.id, run);
         if (existsSync(path))
           candidates.push({
             label: `run ${run + 1}`,
-            guide: JSON.parse(readFileSync(path, "utf8")),
+            ...(JSON.parse(readFileSync(path, "utf8")) as {
+              guide: Guide;
+              solution?: SavedSolution;
+            }),
           });
       }
       const scored = candidates.map((c) => ({ ...c, score: scorePlan(c.guide, spec) }));
@@ -146,7 +155,12 @@ async function main(args: string[]) {
       const guide = best.guide;
       guide.id = current?.guide.id ?? newGuideId(spec.targetId, guide);
       mkdirSync(PLANS_DIR, { recursive: true });
-      write({ name: guide.title, spec: spec.id, guide });
+      write({
+        name: guide.title,
+        spec: spec.id,
+        guide,
+        ...(best.solution ? { solution: best.solution } : {}),
+      });
       console.log(`    → ${best.label} written as ${guide.id}`);
     }
     rmSync(out, { recursive: true, force: true });
