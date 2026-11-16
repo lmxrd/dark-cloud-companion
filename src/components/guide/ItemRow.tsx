@@ -12,7 +12,9 @@ export function ItemRow({ item, checks }: { item: ChecklistItem; checks: Record<
   const section = item.sectionId ? sectionById.get(item.sectionId) : undefined;
   const ready = item.category === "invention" && !checks[item.id] && inventionReady(item, checks);
   const detail = [
-    item.recipe?.map((r) => (r.scoop ? `${r.name} (scoop)` : r.name)).join(" + "),
+    item.recipe
+      ?.map((r) => (r.scoop ? t("item.scoopIngredient", { name: r.name }) : r.name))
+      .join(" + "),
     ...(item.notes ?? []),
     section && !item.notes?.includes(section.title) ? section.title : undefined,
   ]

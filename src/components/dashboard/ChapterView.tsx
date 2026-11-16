@@ -175,17 +175,8 @@ export function ChapterView({
   );
 }
 
-export function FilterBar({
-  filters,
-  onNeedle,
-  needle,
-}: {
-  filters: StepFilters;
-  needle: string;
-  onNeedle: (s: string) => void;
-}) {
+export function FilterBar({ onNeedle, needle }: { needle: string; onNeedle: (s: string) => void }) {
   const t = useTranslations();
-  void filters;
   return (
     <Input
       type="search"

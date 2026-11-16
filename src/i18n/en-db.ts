@@ -6,7 +6,6 @@ export const enDb = {
   "db.intro": "Everything in the game, linked together.",
   "db.search": "Search {n} things: weapons, items, enemies, people…",
   "db.searchLabel": "Search the database",
-  "db.searchHint": "Type a name to find anything in the game.",
   "db.noResults": "Nothing is called that.",
   "db.group.gear": "Gear",
   "db.group.creatures": "Creatures",
@@ -218,7 +217,6 @@ export const enDb = {
 
   // Weapons
   "db.noAbilities": "No abilities",
-  "db.alsoBuiltFrom": "Also built from",
   "db.killFirst": "Kill before building it up",
   "db.firstOn": "First on",
   "db.inGuides": "Built-in guides that build it",

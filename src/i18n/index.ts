@@ -15,6 +15,10 @@ const translators = new Map<Locale, Translate>();
  * The translate function for a locale. It is the same function on every call, so components can list
  * it as a memo or effect dependency without recomputing on every render.
  */
+/** `useTranslations` outside components (a class component, module code): it is not a hook. */
+export const getTranslations = (locale: Locale = defaultLocale): Translate =>
+  useTranslations(locale);
+
 export function useTranslations(locale: Locale = defaultLocale): Translate {
   let t = translators.get(locale);
   if (!t) {

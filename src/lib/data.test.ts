@@ -1,13 +1,5 @@
 import { expect, test } from "vitest";
-import {
-  allMedals,
-  chapterProgress,
-  chapters,
-  checklist,
-  inventionReady,
-  medalItems,
-  sections,
-} from "./data";
+import { allMedals, chapters, checklist, inventionReady, medalItems, sections } from "./data";
 
 test("eight chapters; chapter 8 is the postgame", () => {
   expect(chapters.map((c) => c.id)).toEqual(["1", "2", "3", "4", "5", "6", "7", "8"]);
@@ -30,10 +22,4 @@ test("invention readiness follows photo ticks", () => {
   expect(inventionReady(inv, {})).toBe(false);
   const all: Record<string, true> = Object.fromEntries(checklist.map((i) => [i.id, true as const]));
   expect(inventionReady(inv, all)).toBe(true);
-});
-
-test("chapter progress counts checked ids", () => {
-  const first = checklist.find((i) => i.chapterId === "1")!;
-  expect(chapterProgress("1", { [first.id]: true }).done).toBe(1);
-  expect(chapterProgress("1", {}).total).toBeGreaterThan(80);
 });

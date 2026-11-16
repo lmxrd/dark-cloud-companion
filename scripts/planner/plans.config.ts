@@ -335,29 +335,5 @@ export const plansConfig = {
         },
       ],
     },
-    // {
-    //   // The original curated guides (formerly scripts/planner/curated.ts → src/data/guides.json):
-    //   // maxed stats without the ability preset, plus a budget variant. Variant ids are kept
-    //   // stable — user profiles reference them (activeGuides, tick ids).
-    //   targets: [
-    //     "grade-zero",
-    //     "legend",
-    //     "supernova",
-    //     "griffon-fork",
-    //     "island-king",
-    //     "dark-cloud",
-    //     "five-star-armlet",
-    //   ],
-    //   abilities: [],
-    //   variants: [
-    //     { id: "abs", objective: "abs", label: "Least ABS, no abilities" },
-    //     {
-    //       id: "budget",
-    //       objective: "abs",
-    //       label: "Least ABS on a budget",
-    //       maxGilda: 15000,
-    //     },
-    //   ],
-    // },
   ],
 } satisfies PlansConfigInput;

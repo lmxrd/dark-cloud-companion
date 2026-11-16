@@ -1,6 +1,6 @@
 import { useChecks, useProfile } from "@/lib/useAppStore";
 import { useMemo } from "react";
-import { builtinGuideById, findGuide } from "@/lib/guide/builtin";
+import { findGuide } from "@/lib/guide/builtin";
 import type { Guide } from "@/lib/guide/types";
 
 /** The profile's switched-on guides (missing ids are ignored), plus the profile and ticks. */
@@ -18,6 +18,5 @@ export function useActiveGuides() {
     profile,
     checks,
     guides,
-    mainActive: profile.activeGuides.includes("main") && builtinGuideById.has("main"),
   };
 }

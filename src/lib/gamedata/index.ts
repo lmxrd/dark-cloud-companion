@@ -8,7 +8,7 @@
 import namesJson from "@/gamedata/names.json";
 import coreJson from "@/gamedata/core.json";
 import collectablesJson from "@/gamedata/collectables.json";
-import type { ChapterDetail, Collectables, Core, Enemies, Names } from "./types";
+import type { ChapterDetail, Collectables, Core, Names } from "./types";
 
 export type * from "./types";
 
@@ -31,8 +31,3 @@ export function loadChapterDetail(chapter: number): Promise<ChapterDetail> {
   }
   return p;
 }
-
-let enemies: Promise<Enemies> | undefined;
-/** The bestiary (the largest file), loaded on demand. */
-export const loadEnemies = () =>
-  (enemies ??= import("@/gamedata/enemies.json").then((m) => m.default as unknown as Enemies));

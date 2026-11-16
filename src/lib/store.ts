@@ -138,18 +138,6 @@ export function setChecked(id: string, checked: boolean) {
   });
 }
 
-/** Sets several ticks at once (e.g. "complete this step"). */
-export function setManyChecked(ids: string[], checked: boolean) {
-  updateProfile((p) => {
-    const checks = { ...p.checks };
-    for (const id of ids) {
-      if (checked) checks[id] = true;
-      else delete checks[id];
-    }
-    return { ...p, checks };
-  });
-}
-
 export function setView(patch: Partial<ViewSettings>) {
   updateProfile((p) => ({ ...p, view: { ...p.view, ...patch } }));
 }

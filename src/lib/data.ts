@@ -280,18 +280,3 @@ export const allMedals = sections.flatMap(medalItems);
 export function inventionReady(item: ChecklistItem, checks: Record<string, true>): boolean {
   return (item.recipe ?? []).every((r) => !!checks[tick.photo(r.id)]);
 }
-
-export interface Progress {
-  done: number;
-  total: number;
-}
-
-export function chapterProgress(chapterId: string, checks: Record<string, true>): Progress {
-  const ids = [
-    ...itemsOf(chapterId).map((i) => i.id),
-    ...sectionsOf(chapterId)
-      .flatMap(medalItems)
-      .map((m) => m.id),
-  ];
-  return { done: ids.filter((id) => checks[id]).length, total: ids.length };
-}

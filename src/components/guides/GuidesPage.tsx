@@ -17,7 +17,7 @@ import { Switch } from "@/components/ui/switch";
 import { useTranslations } from "@/i18n";
 import { useQueryText } from "@/lib/url";
 import { Gate } from "@/components/Gate";
-import { builtinGuides, weaponGuides } from "@/lib/guide/builtin";
+import { builtinGuides, planVariant, weaponGuides } from "@/lib/guide/builtin";
 import { mainWalkthrough } from "@/lib/guide/main";
 import { guideProgress } from "@/lib/guide/progress";
 import type { Guide } from "@/lib/guide/types";
@@ -35,12 +35,12 @@ function targetOf(g: Guide): string | undefined {
 
 /** The plan kinds of the built-in weapon builds, in the table's column order. */
 const PLAN_KINDS = ["balanced", "earliest", "gildaMax"] as const;
-const KIND_LABEL: Record<string, (typeof PLAN_KINDS)[number]> = {
-  Balanced: "balanced",
-  Earliest: "earliest",
-  "Gilda max": "gildaMax",
+const KIND_OF_VARIANT: Record<string, (typeof PLAN_KINDS)[number]> = {
+  balanced: "balanced",
+  earliest: "earliest",
+  "gilda-max": "gildaMax",
 };
-const kindOf = (g: Guide) => KIND_LABEL[variantOf(g)];
+const kindOf = (g: Guide) => KIND_OF_VARIANT[planVariant(g.id) ?? ""];
 
 /** Owner and type groups, in the weapon list's order. */
 const BUILD_GROUPS = [
@@ -69,9 +69,6 @@ function buildSummary(g: Guide) {
   }
   return summaries.get(g.id);
 }
-
-/** The variant part of a built-in title ("Grade Zero — Least ABS" → "Least ABS"). */
-const variantOf = (g: Guide) => g.title.split(" — ").at(-1) ?? g.title;
 
 /** A calm list row: title (opens the guide), a small bar and the dashboard switch at the right. */
 function GuideRow({ guide, icon }: { guide: Guide; icon?: React.ReactNode }) {
@@ -299,7 +296,7 @@ export function GuidesPage() {
                             )}
                           >
                             {on ? "✓ " : ""}
-                            {variantOf(g)}
+                            {t(`guides.kind.${k}` as const)}
                           </a>
                           {sum && (
                             <span className="text-muted-foreground text-[10px] whitespace-nowrap tabular-nums">

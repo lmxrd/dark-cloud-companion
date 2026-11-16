@@ -6,7 +6,12 @@ import { z } from "zod";
 import { mainWalkthrough } from "./main";
 import { guide, type Guide } from "./types";
 
-export const weaponGuides: Guide[] = z.object({ guides: z.array(guide) }).parse(plansJson).guides;
+const plans = z
+  .object({ guides: z.array(guide), variants: z.record(z.string(), z.string()) })
+  .parse(plansJson);
+export const weaponGuides: Guide[] = plans.guides;
+/** A built-in plan's variant from its config key ("balanced", "earliest", "gilda-max"). */
+export const planVariant = (id: string): string | undefined => plans.variants[id];
 export const builtinGuides: Guide[] = [mainWalkthrough, ...weaponGuides];
 export const builtinGuideById = new Map(builtinGuides.map((g) => [g.id, g]));
 

@@ -31,8 +31,6 @@ export interface WeaponState {
   abilities: AbilityId[];
 }
 
-export const emptyStats = (): Stats => Object.fromEntries(STAT_KEYS.map((k) => [k, 0])) as Stats;
-
 /** A fresh weapon exactly as bought or found: base stats, +0. */
 export function freshState(w: Weapon): WeaponState {
   return {

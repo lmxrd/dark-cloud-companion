@@ -25,9 +25,6 @@ export type NavItem = {
   badge?: number;
 };
 
-/** The database list pages, under /db/. */
-export const DB_PAGES = DB_LISTS;
-
 /** The Tools pages, under /tools/. */
 export const TOOL_PAGES = ["planner", "shopping", "spheres"] as const;
 

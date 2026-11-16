@@ -20,8 +20,14 @@ export function assemblePlans(log: (m: string) => void = console.log): void {
         .filter((f) => f.endsWith(".json"))
         .sort()
     : [];
-  const guides = files.map((f) => JSON.parse(readFileSync(join(PLANS_DIR, f), "utf8")).guide);
-  const json = JSON.stringify({ guides }, null, 2) + "\n";
+  const plans = files.map((f) => JSON.parse(readFileSync(join(PLANS_DIR, f), "utf8")));
+  const guides = plans.map((p) => p.guide);
+  // Each configured plan's variant ("balanced", "earliest", "gilda-max", from its <target>/<variant>
+  // config key), by guide id: the guides table groups by it rather than by the title's wording.
+  const variants = Object.fromEntries(
+    plans.filter((p) => p.spec).map((p) => [p.guide.id, p.spec.split("/")[1]]),
+  );
+  const json = JSON.stringify({ guides, variants }, null, 2) + "\n";
   if (existsSync(PLANS_OUT) && readFileSync(PLANS_OUT, "utf8") === json) return;
   mkdirSync(dirname(PLANS_OUT), { recursive: true });
   writeFileSync(PLANS_OUT, json);

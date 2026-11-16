@@ -9,6 +9,7 @@ import { chapters } from "@/lib/data";
 import { guideProgress, isStepDone } from "@/lib/guide/progress";
 import type { Guide } from "@/lib/guide/types";
 import { derivedFor } from "@/lib/guide/useDerived";
+import { setQuery, useQueryParam } from "@/lib/url";
 
 const PAGE = 5;
 
@@ -23,7 +24,10 @@ export function ByGuideView({
   filters: StepFilters;
 }) {
   const t = useTranslations();
-  const [chapterId, setChapterId] = useState("");
+  // The chapter chip is `?chapter=` (a reload or a link keeps it); unknown chapters show all.
+  const asked = useQueryParam("chapter");
+  const chapterId = chapters.some((c) => c.id === asked) ? asked : "";
+  const setChapterId = (id: string) => setQuery({ chapter: id }, { replace: true });
   const [shown, setShown] = useState<Record<string, number>>({});
   // Only the first guide starts open; anything the user toggled keeps its state.
   const [opened, setOpened] = useState<Record<string, boolean>>({});

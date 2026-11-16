@@ -125,7 +125,6 @@ export const ridepodPartAsItem = index(
   (p) => p.itemId!,
 );
 export const enemiesOfClass = group(enemies, (e) => [e.classId]);
-export const enemiesOnFloor = group(enemies, (e) => e.sections.map((s) => s.sectionId));
 export const shopsInTown = group(shops.shops, (s) => [s.townId]);
 export const shopsKeptBy = group(shops.shops, (s) => [s.npcId]);
 export const shopsAfterRecruiting = group(shops.shops, (s) => [s.afterRecruitNpcId]);
@@ -176,10 +175,3 @@ for (const [sectionId, d] of Object.entries(floorDetail))
 /** The chapter of a section. */
 export const chapterOf = (sectionId: string | undefined) =>
   sectionId ? byId.section.get(sectionId)?.chapterNumber : undefined;
-
-/** Where a town's or floor's dungeon is: the section's dungeon name, or its chapter title. */
-export const isFloor = (sectionId: string) =>
-  (FLOOR_TYPES as readonly string[]).includes(byId.section.get(sectionId)?.type ?? "");
-
-/** Names of everything, for the database home's search. */
-export const allNames = names;

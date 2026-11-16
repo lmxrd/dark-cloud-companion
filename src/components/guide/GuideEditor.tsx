@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useTranslations } from "@/i18n";
-import { chapters, checklist, sectionById, sectionsOf, sections } from "@/lib/data";
+import { chapters, checklist, sectionsOf, sections } from "@/lib/data";
 import { deriveBuild, startToState } from "@/lib/guide/derive";
 import { emptyStep } from "@/lib/guide/ops";
 import { resolveEntry } from "@/lib/guide/refs";
@@ -279,9 +279,13 @@ function SphereAdder({ spBonus, onAdd }: { spBonus: number; onAdd: (t: Template)
               className="h-auto w-full justify-start py-1 text-left whitespace-normal"
               onClick={() => onAdd(x)}
             >
-              {getWeapon(x.weaponId).name} +{x.level} · {Math.round(x.abs).toLocaleString("en-US")}{" "}
-              ABS · {Math.round(x.gilda).toLocaleString("en-US")} gilda ·{" "}
-              {t("guides.stepChapter", { n: x.chapter })}
+              {t("editor.sphereChoice", {
+                weapon: getWeapon(x.weaponId).name,
+                level: x.level,
+                abs: Math.round(x.abs).toLocaleString("en-US"),
+                gilda: Math.round(x.gilda).toLocaleString("en-US"),
+                chapter: t("guides.stepChapter", { n: x.chapter }),
+              })}
             </Button>
           </li>
         ))}
@@ -782,5 +786,3 @@ export function GuideEditor({ initial, persisted, onSave }: Props) {
     </div>
   );
 }
-
-export { sectionById };

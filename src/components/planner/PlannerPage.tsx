@@ -43,14 +43,14 @@ export function PlannerPage() {
       {/* Both sections stay mounted so a generated result and an open draft survive switching tabs. */}
       <div hidden={tab !== "generate"}>
         <ErrorBoundary
-          label="the planner"
-          recover={{ label: "Reset remembered planner inputs", run: clearPlannerInputs }}
+          label={t("error.planner")}
+          recover={{ label: t("error.resetPlanner"), run: clearPlannerInputs }}
         >
           <GeneratorSection onOpenEditor={() => setTab("create")} />
         </ErrorBoundary>
       </div>
       <div hidden={tab !== "create"}>
-        <ErrorBoundary label="the guide editor">
+        <ErrorBoundary label={t("error.editor")}>
           <EditorSection />
         </ErrorBoundary>
       </div>

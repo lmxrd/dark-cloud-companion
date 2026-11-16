@@ -235,7 +235,7 @@ export function SphereCalculator() {
                   {STAT_KEYS.filter((k) => s.gains[k])
                     .map((k) => `${t(`stat.short.${k}` as const)} +${s.gains[k]}`)
                     .join(" ")}
-                  {s.price !== undefined ? ` · ${s.price} G` : ""}
+                  {s.price !== undefined ? ` · ${t("sphere.itemPrice", { n: s.price })}` : ""}
                 </option>
               ))}
             </select>

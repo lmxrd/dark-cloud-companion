@@ -1,4 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode } from "react";
+import { getTranslations } from "@/i18n";
 
 interface Props {
   children: ReactNode;
@@ -23,12 +24,15 @@ export class ErrorBoundary extends Component<Props, { error: Error | null }> {
   render() {
     const { error } = this.state;
     if (!error) return this.props.children;
+    const t = getTranslations();
     return (
       <div
         role="alert"
         className="border-destructive/50 flex flex-col gap-3 rounded-md border p-4 text-sm"
       >
-        <p className="text-destructive font-medium">Something went wrong in {this.props.label}.</p>
+        <p className="text-destructive font-medium">
+          {t("error.title", { label: this.props.label })}
+        </p>
         <pre className="text-muted-foreground max-h-40 overflow-auto text-xs whitespace-pre-wrap">
           {String(error.stack ?? error.message).slice(0, 1200)}
         </pre>
@@ -38,7 +42,7 @@ export class ErrorBoundary extends Component<Props, { error: Error | null }> {
             className="rounded-md border px-3 py-1.5"
             onClick={() => location.reload()}
           >
-            Reload
+            {t("error.reload")}
           </button>
           {this.props.recover && (
             <button

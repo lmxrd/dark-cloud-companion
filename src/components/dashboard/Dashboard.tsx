@@ -128,7 +128,7 @@ function DashboardInner({ path }: { path: string }) {
         </div>
       </div>
       {canSearch && (searchOpen || needle !== "") && (
-        <FilterBar filters={filters} needle={needle} onNeedle={setNeedle} />
+        <FilterBar needle={needle} onNeedle={setNeedle} />
       )}
 
       {view === "chapter" && (
@@ -157,8 +157,9 @@ function DashboardInner({ path }: { path: string }) {
 
 /** `path` is the page's base-less path (the server render can't see the URL otherwise). */
 export function Dashboard({ path }: { path: string }) {
+  const t = useTranslations();
   return (
-    <ErrorBoundary label="the dashboard">
+    <ErrorBoundary label={t("error.dashboard")}>
       {/* Hidden until saved progress and the query are applied, so the defaults never flash. */}
       <Gate on={["url", "state"]}>
         <DashboardInner path={path} />
