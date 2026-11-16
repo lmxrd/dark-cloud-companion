@@ -6,6 +6,7 @@ import { buildUpSection, type PlacedStage } from "@/lib/planner/timeline";
 import type { Acquire } from "@/lib/planner/types";
 import type { WeaponState } from "@/lib/weapons/mechanics";
 import { prepareSpheresEarly } from "./prepare";
+import { splitStepsEarly, type SplitBudget } from "./split";
 import { newId, type BuildStart, type Guide, type Step } from "./types";
 
 const chapterIdOf = (n: number) => chapters.find((c) => c.number === n)?.id;
@@ -44,6 +45,8 @@ export function planResultToGuide(args: {
   placement?: PlacedStage[];
   /** Level the side weapons for spheres in earlier chapters (prepare steps, see `prepareSpheresEarly`). */
   prepareSpheres?: boolean;
+  /** Story plans: do what can be done earlier on a weapon in an earlier step (`splitStepsEarly`). */
+  splitEarly?: SplitBudget;
 }): Guide {
   const { result } = args;
   if (!result.plan || !result.chain) throw new Error("no plan to convert");
@@ -136,7 +139,8 @@ export function planResultToGuide(args: {
     createdAt: args.createdAt ?? Date.now(),
     updatedAt: args.createdAt ?? Date.now(),
   };
-  return args.prepareSpheres ? prepareSpheresEarly(guide) : guide;
+  const split = args.splitEarly ? splitStepsEarly(guide, args.splitEarly) : guide;
+  return args.prepareSpheres ? prepareSpheresEarly(split) : split;
 }
 
 /**

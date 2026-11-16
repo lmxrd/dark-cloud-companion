@@ -54,6 +54,14 @@ plan you can follow while playing:
 - **In-between stages.** When a build-up is locked to a later chapter (enemies not met yet), the
   weapon gets an earlier stage that already meets the next weapon's requirements, so only the
   build-up waits. In the guide it is a separate work step; the build-up is its own step.
+- **Split by chapter.** The solver gives a weapon one work stage, so everything on it happens in
+  the chapter its last part needs (Island King: Evilcise built up in chapter 2, its Ruler's Sword
+  sphere only from chapter 5). After solving, `splitStepsEarly` (`src/lib/guide/split.ts`) moves the
+  parts available earlier (spheres whose side weapons can be made, items on sale) into an earlier
+  step on the same weapon, after the build-up into it, levelled just enough for their SP: from
+  chapter 2, earliest chapter first, when the story's ABS and gilda by then (plus the grind
+  allowance) cover it and the simulator still gives a valid build with the same end. The solver
+  doesn't see the split, so it never chooses a plan for it.
 - **Abilities** come from spheres placed where no later build-up brings the opposite, as early as
   they can (see "Early abilities").
 - **Margins.** Requirements get a 1-point margin; a retry uses 3 and keeps a few SP spare.

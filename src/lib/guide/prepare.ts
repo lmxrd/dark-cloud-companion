@@ -21,7 +21,7 @@ const chapterNumber = (id: string | undefined) =>
 const chapterIdOf = (n: number) => chapters.find((c) => c.number === n)?.id ?? String(n);
 
 /** The first chapter a side weapon can be made in: its purchase, items, spheres and build-up kills. */
-function readyChapter(r: Recipe): number {
+export function readyChapter(r: Recipe): number {
   let ch = r.acquire.kind === "have" ? 1 : r.acquire.chapter;
   r.stages.forEach((st, i) => {
     ch = Math.max(ch, stageResourceChapter(st));

@@ -108,6 +108,14 @@ export async function planOne(
       createdAt: 0,
       placement,
       prepareSpheres: !!spec.prepareSpheres,
+      ...(spec.flow === "progression"
+        ? {
+            splitEarly: {
+              absGrindShare: spec.progression.absGrindShare ?? spec.progression.grindShare,
+              gildaGrindShare: spec.progression.grindShare,
+            },
+          }
+        : {}),
     }),
   );
   const log = `${spec.id} — from ${startName} · ${cost.abs} ABS · ${cost.gilda} gilda · ${cost.steps} steps · done ch${done.chapter} ${done.sectionId} · grind ${grind} ABS / ${farm} gilda`;

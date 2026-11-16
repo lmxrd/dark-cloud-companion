@@ -319,7 +319,15 @@ export function GeneratorSection({ onOpenEditor }: { onOpenEditor: () => void })
       spBonus: used.spBonus,
       ...(result.acquire ? { acquire: result.acquire } : {}),
       // Following the story, steps go after the sections the planner placed them in.
-      ...(result.stageChapters ? { placement: placeResult(result, "story") } : {}),
+      ...(result.stageChapters
+        ? {
+            placement: placeResult(result, "story"),
+            splitEarly: {
+              absGrindShare: STORY_DEFAULTS.absGrindShare ?? STORY_DEFAULTS.grindShare,
+              gildaGrindShare: STORY_DEFAULTS.grindShare,
+            },
+          }
+        : {}),
     });
     // The description should describe the request that produced the result, not later form edits.
     // eslint-disable-next-line react-hooks/exhaustive-deps
