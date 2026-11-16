@@ -631,13 +631,14 @@ export async function planPath(
     );
 
   // Build-up chains from every start; the optimal search caps the enumeration, taking them
-  // round-robin across starts (each start's own chains shortest-first) so no start family is
-  // starved when the cap bites.
+  // round-robin across starts (each start's own chains longest first: more build-up bonuses and SP,
+  // cheaper levels) so no start family is starved when the cap bites.
   const pairs: { candidate: Candidate; chain: string[] }[] = [];
   if (req.optimalStart) {
     const byStart = candidates.map((candidate) =>
-      findChains(candidate.state.weaponId, req.targetId, req.maxChapter, CHAINS_PER_START)
-        .sort((a, b) => a.length - b.length)
+      findChains(candidate.state.weaponId, req.targetId, req.maxChapter)
+        .sort((a, b) => b.length - a.length)
+        .slice(0, CHAINS_PER_START)
         .map((chain) => ({ candidate, chain })),
     );
     outer: for (let n = 0; pairs.length < MAX_RANKED_CHAINS; n++) {
@@ -651,7 +652,9 @@ export async function planPath(
       if (!added) break;
     }
   } else {
-    for (const chain of findChains(req.start.weaponId, req.targetId, req.maxChapter))
+    for (const chain of findChains(req.start.weaponId, req.targetId, req.maxChapter).sort(
+      (a, b) => b.length - a.length,
+    ))
       pairs.push({ candidate: candidates[0], chain });
   }
   if (req.route) {
