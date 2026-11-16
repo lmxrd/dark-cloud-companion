@@ -159,7 +159,7 @@ export const STORY_RULES = {
   startBy: 2,
   effortPower: 0.5,
   earlyStatBonus: 2,
-  lostStatCost: 20,
+  lostStatCost: 5,
   mainItemCost: 1000,
   mainItemCostLast: 30,
   statFloor: 0.5,
