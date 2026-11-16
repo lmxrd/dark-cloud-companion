@@ -58,6 +58,26 @@ describe("splitting work steps by chapter", () => {
     expect(added).toBeGreaterThan(0);
   });
 
+  test("moves spheres ready earlier onto the weapon held then, in some plan", () => {
+    const spheresOn = (g: Guide) => {
+      const n = new Map<string, number>();
+      for (const s of g.steps)
+        if (s.build)
+          n.set(
+            s.build.weaponId,
+            (n.get(s.build.weaponId) ?? 0) +
+              s.build.synths.filter((u) => u.kind === "sphere").length,
+          );
+      return n;
+    };
+    const moved = story.some((f) => {
+      const a = spheresOn(f.guide);
+      const b = spheresOn(splitStepsEarly(f.guide, { absGrindShare: 0.3, gildaGrindShare: 0.3 }));
+      return [...a].some(([w, n]) => b.get(w) !== n);
+    });
+    expect(moved).toBe(true);
+  });
+
   test("leaves a plan alone when no grinding is allowed and nothing fits the story", () => {
     const f = story[0];
     const out = splitStepsEarly(f.guide, { absGrindShare: -1, gildaGrindShare: -1 });
