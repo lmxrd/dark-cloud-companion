@@ -1,6 +1,6 @@
 // Converters from the previous model (separate build guides and walkthroughs) to unified guides.
 import { chapters } from "@/lib/data";
-import type { Guide as LegacyGuide } from "@/lib/guides/types";
+import type { Guide as LegacyGuide } from "@/lib/guide/legacy-types";
 import type { Stage } from "@/lib/planner/types";
 import { getWeapon } from "@/lib/planner/sources";
 import { freshState } from "@/lib/weapons/mechanics";

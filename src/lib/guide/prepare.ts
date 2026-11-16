@@ -2,7 +2,7 @@
 // spheres can often be levelled chapters earlier and kept, instead of all at once in that step.
 import { core } from "@/lib/gamedata";
 import { chapters } from "@/lib/data";
-import { enemyChapter, stageResourceChapter } from "@/lib/guides/fromPlan";
+import { enemyChapter, stageResourceChapter } from "@/lib/planner/timeline";
 import { getWeapon } from "@/lib/planner/sources";
 import { simulateRecipe } from "@/lib/planner/simulate";
 import type { Recipe } from "@/lib/planner/types";

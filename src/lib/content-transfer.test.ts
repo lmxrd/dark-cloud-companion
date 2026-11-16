@@ -4,7 +4,7 @@ import { parseContentImport } from "./content-transfer";
 import { deriveBuild } from "@/lib/guide/derive";
 import { planResultToGuide } from "@/lib/guide/fromPlan";
 import type { Guide } from "@/lib/guide/types";
-import { planToGuide as planToLegacyGuide } from "@/lib/guides/fromPlan";
+import legacyDrillWrench from "@/lib/guide/fixtures/legacy-drill-wrench.json";
 import { planPath } from "@/lib/planner/plan";
 import { getWeapon } from "@/lib/planner/sources";
 import { freshState } from "@/lib/weapons/mechanics";
@@ -111,22 +111,8 @@ describe("content export/import", () => {
   }, 60000);
 
   test("version 1 files (separate guides and walkthroughs) are converted", async () => {
-    const start = freshState(getWeapon("battle-wrench"));
-    const result = await planPath({
-      start,
-      targetId: "drill-wrench",
-      objective: "abs",
-      goal: { kind: "reach" },
-      maxChapter: 2,
-      spBonus: 1,
-    });
-    const legacyGuide = planToLegacyGuide({
-      id: "custom-old",
-      title: "Old pinned",
-      kind: "custom",
-      summary: "s",
-      result,
-    });
+    // A weapon guide as version 1 stored it (frozen).
+    const legacyGuide = { ...legacyDrillWrench, id: "custom-old", title: "Old pinned" };
     const w = emptyWalkthrough("Old walkthrough", 100);
     w.steps = [
       {

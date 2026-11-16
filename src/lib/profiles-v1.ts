@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { guide } from "@/lib/guides/types";
+import { guide } from "@/lib/guide/legacy-types";
 import { walkthrough } from "@/lib/walkthroughs/types";
 
 export const STORAGE_KEY = "dcc:state";

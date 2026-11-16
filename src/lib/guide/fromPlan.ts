@@ -1,5 +1,5 @@
 import { chapters } from "@/lib/data";
-import { enemyChapter, stageResourceChapter } from "@/lib/guides/fromPlan";
+import { enemyChapter, stageResourceChapter } from "@/lib/planner/timeline";
 import type { PlanResult } from "@/lib/planner/plan";
 import { getWeapon } from "@/lib/planner/sources";
 import { buildUpSection, type PlacedStage } from "@/lib/planner/timeline";

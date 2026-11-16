@@ -1,5 +1,5 @@
 import { fromLegacyGuide, fromLegacyWalkthrough } from "@/lib/guide/legacy";
-import { guide as legacyGuide } from "@/lib/guides/types";
+import { guide as legacyGuide } from "@/lib/guide/legacy-types";
 import { walkthrough as legacyWalkthrough } from "@/lib/walkthroughs/types";
 import { z } from "zod";
 import { CONTENT_VERSION, contentFile, type ContentFile } from "./content-file";

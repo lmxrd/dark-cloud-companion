@@ -7,7 +7,7 @@
 // onto the weapon held then, the same way (stats carry over the build-ups in between).
 import { core } from "@/lib/gamedata";
 import { chapters } from "@/lib/data";
-import { stageResourceChapter } from "@/lib/guides/fromPlan";
+import { stageResourceChapter } from "@/lib/planner/timeline";
 import { getWeapon } from "@/lib/planner/sources";
 import type { SynthUse } from "@/lib/planner/types";
 import { STAT_KEYS } from "@/lib/schemas";

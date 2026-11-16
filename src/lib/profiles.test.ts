@@ -4,8 +4,8 @@ import {
   createProfile as createProfileV1,
   initialState as initialStateV1,
 } from "@/lib/profiles-v1";
-import { planToGuide } from "@/lib/guides/fromPlan";
-import { planPath } from "@/lib/planner/plan";
+import legacyDrillWrench from "@/lib/guide/fixtures/legacy-drill-wrench.json";
+import { guide as legacyGuide } from "@/lib/guide/legacy-types";
 import { getWeapon } from "@/lib/planner/sources";
 import { freshState } from "@/lib/weapons/mechanics";
 import { emptyWalkthrough } from "@/lib/walkthroughs/types";
@@ -20,17 +20,10 @@ import {
   parseState,
 } from "./profiles";
 
-async function legacyProfile() {
+/** A version 1 profile with a saved weapon guide (frozen as the old app stored it) and a walkthrough. */
+function legacyProfile() {
   const p = createProfileV1("Old", 5);
-  const result = await planPath({
-    start: freshState(getWeapon("battle-wrench")),
-    targetId: "drill-wrench",
-    objective: "abs",
-    goal: { kind: "reach" },
-    maxChapter: 2,
-    spBonus: 1,
-  });
-  const g = planToGuide({ id: "custom-a", title: "Mine", kind: "custom", summary: "s", result });
+  const g = legacyGuide.parse(legacyDrillWrench);
   const w = emptyWalkthrough("Route", 10);
   w.steps = [
     { id: "s1", chapterId: "c1", title: "T", notes: "", checklist: [{ id: "i1", text: "Clock" }] },

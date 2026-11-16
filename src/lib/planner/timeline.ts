@@ -5,9 +5,26 @@
 // stage still lacks has to be ground out.
 import { core, names } from "@/lib/gamedata";
 import { weapons as weaponsFile } from "@/lib/gamedata/weapons";
-import { stageResourceChapter } from "@/lib/guides/fromPlan";
-import { getWeapon } from "./sources";
-import type { Acquire, Stage } from "./types";
+import { getWeapon, itemFirstChapter, weaponData } from "./sources";
+import type { Acquire, Recipe, Stage } from "./types";
+
+export const enemyChapter = new Map(weaponData.killEnemies.map((e) => [e.name, e.chapter ?? 8]));
+
+function recipeChapter(r: Recipe): number {
+  const acq = r.acquire.kind === "have" ? 1 : r.acquire.chapter;
+  let ch = acq;
+  for (const s of r.stages) ch = Math.max(ch, stageResourceChapter(s));
+  return ch;
+}
+
+/** Latest chapter among the items, sphere weapons and enemy kills this stage depends on. */
+export function stageResourceChapter(stage: Stage): number {
+  let ch = 1;
+  for (const u of stage.synths) {
+    ch = Math.max(ch, u.kind === "item" ? itemFirstChapter(u.name) : recipeChapter(u.recipe));
+  }
+  return ch;
+}
 
 /**
  * `earliest`: every stage as soon as it is unlocked, grinding whatever ABS or gilda is missing.

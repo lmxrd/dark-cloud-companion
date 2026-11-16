@@ -1,0 +1,124 @@
+{
+  "id": "custom-a",
+  "title": "Mine",
+  "kind": "custom",
+  "summary": "s",
+  "targetId": "drill-wrench",
+  "totals": {
+    "abs": 112,
+    "gilda": 100,
+    "steps": 6
+  },
+  "steps": [
+    {
+      "id": "s1",
+      "chapter": 2,
+      "stage": {
+        "weaponId": "battle-wrench",
+        "levelTo": 3,
+        "synths": [
+          {
+            "kind": "item",
+            "name": "Sturdy Cloth",
+            "count": 1
+          }
+        ]
+      },
+      "buildsUpTo": "true-battle-wrench",
+      "stats": {
+        "at": 14,
+        "fl": 2,
+        "ch": 0,
+        "li": 0,
+        "cy": 0,
+        "sm": 5,
+        "ex": 0,
+        "be": 2,
+        "sc": 0
+      },
+      "requirements": {
+        "at": 13,
+        "fl": 2,
+        "ch": 0,
+        "li": 0,
+        "cy": 0,
+        "sm": 5,
+        "ex": 0,
+        "be": 0,
+        "sc": 0
+      },
+      "level": 3,
+      "spLeft": 12,
+      "abs": 112
+    },
+    {
+      "id": "s2",
+      "chapter": 2,
+      "stage": {
+        "weaponId": "true-battle-wrench",
+        "levelTo": 0,
+        "synths": [
+          {
+            "kind": "item",
+            "name": "Rolling Log",
+            "count": 2
+          },
+          {
+            "kind": "item",
+            "name": "Sturdy Cloth",
+            "count": 2
+          }
+        ]
+      },
+      "buildsUpTo": "drill-wrench",
+      "stats": {
+        "at": 15,
+        "fl": 2,
+        "ch": 0,
+        "li": 0,
+        "cy": 0,
+        "sm": 9,
+        "ex": 0,
+        "be": 6,
+        "sc": 0
+      },
+      "requirements": {
+        "at": 15,
+        "fl": 2,
+        "ch": 0,
+        "li": 0,
+        "cy": 0,
+        "sm": 9,
+        "ex": 0,
+        "be": 5,
+        "sc": 0
+      },
+      "level": 0,
+      "spLeft": 8,
+      "abs": 0
+    },
+    {
+      "id": "s3",
+      "chapter": 2,
+      "stage": {
+        "weaponId": "drill-wrench",
+        "levelTo": 0,
+        "synths": []
+      },
+      "stats": {
+        "at": 16,
+        "fl": 2,
+        "ch": 0,
+        "li": 0,
+        "cy": 0,
+        "sm": 10,
+        "ex": 0,
+        "be": 6,
+        "sc": 0
+      },
+      "level": 0,
+      "spLeft": 8,
+      "abs": 0
+    }
+  ]
+}

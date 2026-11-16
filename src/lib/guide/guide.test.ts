@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { checklist, sections } from "@/lib/data";
 import legacyCuratedRaw from "./fixtures/legacy-curated.json";
-import { guide as legacyGuideSchema, type Guide as LegacyGuide } from "@/lib/guides/types";
+import { guide as legacyGuideSchema, type Guide as LegacyGuide } from "@/lib/guide/legacy-types";
 import { z } from "zod";
 
 const curatedGuides: LegacyGuide[] = z.array(legacyGuideSchema).parse(legacyCuratedRaw);
