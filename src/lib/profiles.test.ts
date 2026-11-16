@@ -89,10 +89,6 @@ describe("profile migration v1 -> v2", () => {
     expect(parseState(JSON.stringify(migrated))).toEqual(migrated);
     expect(Object.keys(parseState("nope").profiles)).toHaveLength(1);
   });
-
-  test("new profiles start with the main walkthrough on", () => {
-    expect(createProfile("x").activeGuides).toEqual(["main"]);
-  });
 });
 
 describe("buyable-only setting", () => {

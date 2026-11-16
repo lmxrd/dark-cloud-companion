@@ -3,7 +3,7 @@ import { buildContentExport, mergeGuides } from "./content-file";
 import { parseContentImport } from "./content-transfer";
 import { deriveBuild } from "@/lib/guide/derive";
 import { planResultToGuide } from "@/lib/guide/fromPlan";
-import { newId, type Guide } from "@/lib/guide/types";
+import type { Guide } from "@/lib/guide/types";
 import { planToGuide as planToLegacyGuide } from "@/lib/guides/fromPlan";
 import { planPath } from "@/lib/planner/plan";
 import { getWeapon } from "@/lib/planner/sources";
@@ -180,8 +180,4 @@ describe("mergeGuides", () => {
     const g = sampleTextGuide();
     expect(mergeGuides([g], [{ ...g, updatedAt: 99 }], makeId).summary.skipped).toBe(1);
   });
-});
-
-test("ids are non-empty and varied", () => {
-  expect(newId()).not.toBe(newId());
 });

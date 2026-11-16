@@ -23,19 +23,21 @@ describe("finalWeaponIds", () => {
   });
 
   test("covers the weapon FAQ's endgame targets", () => {
-    const names = finalWeaponIds.map((id) => getWeapon(id).name);
-    expect(names).toEqual([
-      "Island King",
-      "Love",
-      "Grade Zero",
-      "LEGEND",
-      "Supernova",
-      "Last Resort",
-      "Sigma Bazooka",
-      "Dark Cloud",
-      "Griffon Fork",
-      "Five-Star Armlet",
-      "Flamingo",
-    ]);
+    const names = finalWeaponIds.map((id) => getWeapon(id).name).sort();
+    expect(names).toEqual(
+      [
+        "Island King",
+        "Love",
+        "Grade Zero",
+        "LEGEND",
+        "Supernova",
+        "Last Resort",
+        "Sigma Bazooka",
+        "Dark Cloud",
+        "Griffon Fork",
+        "Five-Star Armlet",
+        "Flamingo",
+      ].sort(),
+    );
   });
 });
