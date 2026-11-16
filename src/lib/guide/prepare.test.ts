@@ -1,36 +1,18 @@
 import { describe, expect, test } from "vitest";
-import { readPlanFiles } from "../../../scripts/planner/plan-files";
 import { stepItems } from "./buildItems";
 import { deriveBuild } from "./derive";
+import unpreparedRaw from "./fixtures/unprepared-five-star-armlet.json";
 import { prepareSpheresEarly } from "./prepare";
 import type { Guide } from "./types";
 
-const guides = readPlanFiles().map((p) => p.guide);
-const unprepared = (g: Guide): Guide => ({
-  ...g,
-  steps: g.steps
-    .filter((s) => !s.prepare)
-    .map((s) =>
-      s.build
-        ? {
-            ...s,
-            build: {
-              ...s.build,
-              synths: s.build.synths.map((u) =>
-                u.kind === "sphere" ? { kind: "sphere" as const, recipe: u.recipe } : u,
-              ),
-            },
-          }
-        : s,
-    ),
-});
+// Five-Star Armlet Balanced frozen without its prepare steps (every sphere made where it is synthed).
+const base = unpreparedRaw as unknown as Guide;
 const problems = (g: Guide) => {
   const d = deriveBuild(g);
   return [...d.errors, ...[...d.steps.values()].flatMap((s) => s.errors)];
 };
 
 describe("preparing side weapons ahead of time", () => {
-  const base = unprepared(guides.find((g) => g.id.startsWith("five-star-armlet"))!);
   const prepared = prepareSpheresEarly(base);
 
   test("moves sphere work into earlier chapters without changing the total", () => {

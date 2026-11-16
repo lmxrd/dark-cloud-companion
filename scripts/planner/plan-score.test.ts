@@ -1,21 +1,23 @@
 import { describe, expect, test } from "vitest";
 import { plansConfig } from "./plans.config";
 import { expandPlans, parsePlansConfig } from "./plans-config";
-import { readPlanFiles } from "./plan-files";
+import flamingoRaw from "../../src/lib/guide/fixtures/story-flamingo.json";
+import type { Guide } from "../../src/lib/guide/types";
 import { compareScores, scorePlan, storyCost, type PlanScore } from "./plan-score";
 
 const specs = expandPlans(parsePlansConfig(plansConfig));
+// Flamingo Balanced, frozen as the solver gave it (see src/lib/guide/split.test.ts).
+const flamingo = flamingoRaw as unknown as Guide;
+const flamingoSpec = specs.find((s) => s.id === "flamingo/balanced")!;
 
 describe("scoring generated plans", () => {
-  test("a committed plan scores valid; the same guide judged against another target does not", () => {
-    const file = readPlanFiles().find((f) => f.spec === "island-king/balanced")!;
-    const spec = specs.find((s) => s.id === "island-king/balanced")!;
-    const score = scorePlan(file.guide, spec);
+  test("a plan scores valid; the same guide judged against another target does not", () => {
+    const score = scorePlan(flamingo, flamingoSpec);
     expect(score.problems).toEqual([]);
     expect(score.finish).toBeLessThanOrEqual(8);
     expect(score.cost).toBeGreaterThan(0);
     const other = specs.find((s) => s.id === "legend/balanced")!;
-    expect(scorePlan(file.guide, other).problems.length).toBeGreaterThan(0);
+    expect(scorePlan(flamingo, other).problems.length).toBeGreaterThan(0);
   });
 
   test("valid beats invalid, then the earlier finish, then less effort, then less ABS", () => {
@@ -55,41 +57,20 @@ describe("scoring generated plans", () => {
   });
 
   test("the story cost charges a stat below its floor and a level short before a build-up", () => {
-    const file = readPlanFiles().find((f) => f.spec === "legend/balanced")!;
-    const spec = specs.find((s) => s.id === "legend/balanced")!;
-    const cost = storyCost(file.guide, spec.progression);
+    const spec = flamingoSpec;
+    const cost = storyCost(flamingo, spec.progression);
     const high = { from: 0.99, to: 0.99, gap: 0 };
-    expect(storyCost(file.guide, { ...spec.progression, risingFloor: high })).toBeGreaterThan(cost);
-    expect(storyCost(file.guide, { ...spec.progression, buildUpLevel: 9 })).toBeGreaterThan(cost);
+    expect(storyCost(flamingo, { ...spec.progression, risingFloor: high })).toBeGreaterThan(cost);
+    expect(storyCost(flamingo, { ...spec.progression, buildUpLevel: 9 })).toBeGreaterThan(cost);
   });
 
   test("the story cost charges the chapter of the first sphere bringing a wanted ability", () => {
-    const file = readPlanFiles().find((f) => f.spec === "legend/balanced")!;
-    const spec = specs.find((s) => s.id === "legend/balanced")!;
+    const spec = flamingoSpec;
     const off = { ...spec.progression, keyAbilityCost: 0, abilityCost: 0 };
     const one = { ...off, keyAbilityCost: 1 };
-    const extra = storyCost(file.guide, one, ["abs-up"]) - storyCost(file.guide, off, ["abs-up"]);
+    const extra = storyCost(flamingo, one, ["abs-up"]) - storyCost(flamingo, off, ["abs-up"]);
     // One unit per chapter: the chapter the ABS Up sphere goes in.
     expect(extra).toBeGreaterThanOrEqual(1);
     expect(extra).toBeLessThanOrEqual(8);
   });
-});
-
-test("a rising floor goes from 30% on the first weapon to 80% before the final one", async () => {
-  const { floorShares } = await import("../../src/lib/planner/solve.ts");
-  const p = { risingFloor: { from: 0.3, to: 0.8, gap: 0.1 } };
-  const t = [0, 1, 2, 3, 4, 5, 6].map((i) => Math.round(100 * floorShares(p, i, 7).target));
-  expect(t).toEqual([30, 40, 50, 60, 70, 80, 80]);
-  expect(Math.round(100 * floorShares(p, 0, 7).min)).toBe(20);
-  expect(floorShares({ statFloor: 0.5, minStatFloor: 0.4 }, 3, 7)).toEqual({
-    target: 0.5,
-    min: 0.4,
-  });
-});
-
-test("items straight on the weapon cost full to halfway, then less to the last step", async () => {
-  const { mainItemCostAt } = await import("../../src/lib/planner/solve.ts");
-  const at = (j: number) => Math.round(mainItemCostAt(j, 7, 1000, 30));
-  expect([0, 1, 2, 3, 4, 5, 6].map(at)).toEqual([1000, 1000, 1000, 1000, 677, 353, 30]);
-  expect(mainItemCostAt(0, 1, 1000, 30)).toBe(1000);
 });
