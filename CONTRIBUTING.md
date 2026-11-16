@@ -67,7 +67,7 @@ pnpm plans <target>/<variant>      # re-solve one plan (keys are in scripts/plan
 pnpm plans --all                   # re-solve every plan
 ```
 
-Options: `--runs n` (parallel solves per plan, default 2), `--replace` (ignore the committed plan after a change of rules) and `--new` (keep the old guide and add a new one). A plan file only changes when a run beats the committed plan. Solving takes minutes per plan. Review the guides in the app before committing them; what "better" means is in [docs/planning.md](docs/planning.md).
+Options: `--runs n` (parallel solves per plan, default 2), `--jobs n` (solves at once, default 4; more at once leaves each one far less done in its time limit), `--replace` (ignore the committed plan after a change of rules) and `--new` (keep the old guide and add a new one). A plan file only changes when a run beats the committed plan. Solving takes minutes per plan. Review the guides in the app before committing them; what "better" means is in [docs/planning.md](docs/planning.md).
 
 ## Planner benchmarks
 

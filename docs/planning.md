@@ -312,8 +312,10 @@ pnpm plans --all --replace              # after changing settings: take the best
 pnpm plans island-king/story --new      # a new guide next to the old one (new id)
 ```
 
-Each plan is solved `--runs` times in parallel worker processes (360 s per route for Balanced, 120 s for Earliest and Gilda max; runs differ a
-little). The runs and the committed plan are scored (`plan-score.ts`) and the best is kept:
+Each plan is solved `--runs` times in parallel worker processes, `--jobs` at once (default 4: a
+solve sharing the machine gets much less done in its limit; Island King Balanced in 15 minutes ends
+at an 8% gap alone, 35% with 8 at once). Balanced gets 900 s per route, Earliest and Gilda max 120 s;
+runs differ a little. The runs and the committed plan are scored (`plan-score.ts`) and the best is kept:
 valid first (simulator-clean, maxed, every wanted ability); then, for story plans, the least story
 cost: the solver's objective recomputed from the guide with the plan's current settings
 (`storyCost`: effort-weighted ABS, chapter delay, early stats, items on the main weapon, stat floor,

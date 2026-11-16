@@ -9,6 +9,9 @@
 //                                     which are kept as standalone guides
 //   pnpm plans --all                  re-solve every configured plan
 //   --runs <n>                        solve each plan n times (default 2)
+//   --jobs <n>                        solves at once (default 4): solves sharing the machine get
+//                                     much less done in their time limit (Island King Balanced in
+//                                     15 minutes: gap 8% alone, 35% with 8 at once)
 //   --replace                         keep the ids but don't compare with the committed plans
 //                                     (after a change of settings, to take the new runs' best)
 // Each plan is solved `--runs` times (the solver stops at a time limit, so runs differ a little);
@@ -86,7 +89,11 @@ async function main(args: string[]) {
   const replace = args.includes("--replace");
   const runsAt = args.indexOf("--runs");
   const runs = runsAt >= 0 ? Math.max(1, Number(args[runsAt + 1]) || 1) : 2;
-  const keys = args.filter((a, i) => !a.startsWith("--") && args[i - 1] !== "--runs");
+  const jobsAt = args.indexOf("--jobs");
+  const jobs = jobsAt >= 0 ? Math.max(1, Number(args[jobsAt + 1]) || 1) : 4;
+  const keys = args.filter(
+    (a, i) => !a.startsWith("--") && args[i - 1] !== "--runs" && args[i - 1] !== "--jobs",
+  );
   const unknown = keys.filter((k) => !specs.some((s) => s.id === k));
   if (unknown.length)
     throw new Error(
@@ -115,7 +122,7 @@ async function main(args: string[]) {
       order.map((s) => `${s.id}@${run}`),
     ).flat();
     // Each worker loads its own solver (~100 MB); leave a core for the rest of the machine.
-    const workers = Math.max(1, Math.min(tasks.length, availableParallelism() - 1, 8));
+    const workers = Math.max(1, Math.min(tasks.length, availableParallelism() - 1, jobs));
     console.log(`predefined plans: ${order.length} plans × ${runs} runs on ${workers} processes`);
     const out = mkdtempSync(join(tmpdir(), "dcc-plans-"));
     const shares: string[][] = Array.from({ length: workers }, () => []);
