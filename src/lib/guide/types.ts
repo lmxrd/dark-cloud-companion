@@ -100,9 +100,11 @@ export const buildStart = z.object({
 });
 export type BuildStart = z.infer<typeof buildStart>;
 
+const TITLE_MAX = 200;
+
 export const guide = z.object({
   id: z.string().min(1),
-  title: z.string().min(1).max(200),
+  title: z.string().min(1).max(TITLE_MAX),
   description: z.string().max(2000).optional(),
   /** Built-in guides are generated and read-only; custom guides are the user's. */
   kind: z.enum(["builtin", "custom"]),
@@ -113,6 +115,10 @@ export const guide = z.object({
   updatedAt: z.number().optional(),
 });
 export type Guide = z.infer<typeof guide>;
+
+/** A title with a suffix such as " (copy)", shortened to stay within the limit. */
+export const titleWith = (title: string, suffix: string) =>
+  title.slice(0, TITLE_MAX - suffix.length) + suffix;
 
 // ---------- ids for progress ----------
 

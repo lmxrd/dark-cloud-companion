@@ -185,6 +185,33 @@ describe("loadState", () => {
     expect(r.state.activeProfile).toBe(Object.keys(s.profiles)[0]);
     expect(r.state.profiles).toEqual(s.profiles);
   });
+
+  test("one unreadable profile costs only itself; the rest load and the problem is reported", () => {
+    const s = valid();
+    const ok = Object.values(s.profiles)[0];
+    const bad = { ...createProfile("Broken"), checks: "nope" };
+    const r = loadState(
+      JSON.stringify({ ...s, activeProfile: bad.id, profiles: { ...s.profiles, [bad.id]: bad } }),
+    );
+    expect(r.problem).toBe("partial");
+    expect(Object.keys(r.state.profiles)).toEqual([ok.id]);
+    expect(r.state.activeProfile).toBe(ok.id);
+  });
+
+  test("remembered planner inputs that don't parse are dropped, the profile is kept", () => {
+    const s = valid();
+    const p = Object.values(s.profiles)[0];
+    const r = loadState(
+      JSON.stringify({ ...s, profiles: { [p.id]: { ...p, planner: { endStats: { fl: -5 } } } } }),
+    );
+    expect(r.problem).toBeUndefined();
+    expect(r.state.profiles[p.id].planner).toBeUndefined();
+  });
+
+  test("an old profile its migration can't convert is reported, not thrown", () => {
+    const old = { version: 2, activeProfile: "p", profiles: { p: { id: "p" } } };
+    expect(() => loadState(JSON.stringify(old))).not.toThrow();
+  });
 });
 
 describe("profile import", () => {

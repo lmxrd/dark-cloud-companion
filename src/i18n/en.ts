@@ -208,6 +208,10 @@ export const en = {
   "settings.title": "Settings",
   "storage.corrupt":
     "Your saved progress couldn't be read, so the app started a fresh profile. The old data was kept as a backup in this browser; download it before clearing site data.",
+  "storage.partial":
+    "Some of your saved profiles couldn't be read; the others were loaded. The unreadable data was kept as a backup in this browser; download it before clearing site data.",
+  "storage.notBackedUp":
+    "Your saved progress couldn't be read, and there was no room to back it up. It is left untouched and nothing you change here is saved; download it, then clear site data to start over.",
   "storage.newer":
     "This progress was saved by a newer version of the app. Reload to update; until then nothing you change here is saved, so the newer data stays intact.",
   "storage.save-failed":

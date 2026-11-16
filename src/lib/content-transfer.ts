@@ -29,6 +29,23 @@ export function parseContentImport(json: string): ParseResult {
     return { ok: false, error: "This is a profile export. Import it under Settings → Profiles." };
   }
   let file: ContentFile | undefined;
+  try {
+    file = readContent(data);
+  } catch {
+    // An older file that its schema let through but that can't be converted (e.g. an unknown weapon).
+    return { ok: false, error: "This file has guides that can't be read" };
+  }
+  if (!file) return { ok: false, error: "Not a Dark Chronicles Companion guides export" };
+  const errors = file.guides.flatMap((g) =>
+    validateGuide(g).map((e) => `Guide "${g.title}": ${e}`),
+  );
+  if (errors.length) return { ok: false, error: errors.slice(0, 5).join("\n") };
+  return { ok: true, file };
+}
+
+/** A content file of any version, converted to the current one (undefined: not a content file). */
+function readContent(data: unknown): ContentFile | undefined {
+  let file: ContentFile | undefined;
   const v3 = contentFile.safeParse(data);
   const v2 = contentFile.extend({ version: z.literal(2) }).safeParse(data);
   if (v3.success) file = v3.data;
@@ -58,10 +75,5 @@ export function parseContentImport(json: string): ParseResult {
       };
     }
   }
-  if (!file) return { ok: false, error: "Not a Dark Chronicles Companion guides export" };
-  const errors = file.guides.flatMap((g) =>
-    validateGuide(g).map((e) => `Guide "${g.title}": ${e}`),
-  );
-  if (errors.length) return { ok: false, error: errors.slice(0, 5).join("\n") };
-  return { ok: true, file };
+  return file;
 }

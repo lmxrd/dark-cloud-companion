@@ -39,7 +39,7 @@ export function useContentTransfer() {
     const { parseContentImport } = await import("@/lib/content-transfer");
     const parsed = parseContentImport(await file.text());
     if (!parsed.ok) setMessage(t("transfer.failed", { error: parsed.error }));
-    else setMessage(t("transfer.done", { ...applyContent(parsed.file) }));
+    else setMessage(t("transfer.done", { ...(await applyContent(parsed.file)) }));
     if (fileRef.current) fileRef.current.value = "";
   };
 

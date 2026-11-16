@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { guide, type Guide } from "@/lib/guide/types";
+import { guide, titleWith, type Guide } from "@/lib/guide/types";
 
 export const CONTENT_VERSION = 3;
 
@@ -33,11 +33,21 @@ const sameContent = (a: Guide, b: Guide) => {
   return strip(a) === strip(b);
 };
 
-/** Same id + same content is skipped; same id + different content is kept as a copy with a fresh id. */
-export function mergeGuides(existing: Guide[], incoming: Guide[], makeId: (old: string) => string) {
+/**
+ * Same id + same content is skipped; same id + different content is kept as a copy with a fresh id.
+ * A guide whose id is `reserved` (a built-in guide's) gets a fresh id first: it would be hidden
+ * behind the built-in one, and deleting it would clear the built-in guide's ticks.
+ */
+export function mergeGuides(
+  existing: Guide[],
+  incoming: Guide[],
+  makeId: (old: string) => string,
+  reserved: (id: string) => boolean = () => false,
+) {
   const list = [...existing];
   const summary: MergeSummary = { added: 0, copied: 0, skipped: 0 };
-  for (const g of incoming) {
+  for (const original of incoming) {
+    const g = reserved(original.id) ? { ...original, id: makeId(original.id) } : original;
     const clash = list.find((x) => x.id === g.id);
     if (!clash) {
       list.push(g);
@@ -45,7 +55,7 @@ export function mergeGuides(existing: Guide[], incoming: Guide[], makeId: (old: 
     } else if (sameContent(clash, g)) {
       summary.skipped++;
     } else {
-      list.push({ ...g, id: makeId(g.id), title: `${g.title} (imported)` });
+      list.push({ ...g, id: makeId(g.id), title: titleWith(g.title, " (imported)") });
       summary.copied++;
     }
   }

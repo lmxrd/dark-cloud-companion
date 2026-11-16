@@ -84,7 +84,7 @@ export function TargetSpecs({
                 max={max[k]}
                 value={stats[k]}
                 aria-label={`${t(`stat.${k}` as const)} ≤ ${max[k]}`}
-                onChange={(e) => set(k, Math.floor(Number(e.target.value) || 0))}
+                onChange={(e) => set(k, Math.max(0, Math.floor(Number(e.target.value) || 0)))}
                 className="w-full bg-transparent text-lg font-extrabold tabular-nums outline-none"
               />
               <span aria-hidden className="bg-muted h-1.5 overflow-hidden rounded-full">

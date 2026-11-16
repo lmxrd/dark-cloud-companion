@@ -20,7 +20,8 @@ export function StorageBanner() {
   const problem = useStorageProblem();
   if (!problem) return null;
 
-  const backup = problem.kind === "corrupt" ? problem.backupKey : null;
+  const unreadable = problem.kind === "corrupt" || problem.kind === "partial";
+  const message = unreadable && problem.backupKey === null ? "notBackedUp" : problem.kind;
   return (
     <div
       role="alert"
@@ -28,18 +29,18 @@ export function StorageBanner() {
     >
       <TriangleAlertIcon className="text-destructive mt-0.5 size-4 shrink-0" aria-hidden />
       <div className="flex min-w-0 flex-1 flex-col gap-2">
-        <p>{t(`storage.${problem.kind}` as const)}</p>
+        <p>{t(`storage.${message}` as const)}</p>
         <div className="flex flex-wrap gap-2">
           {problem.kind === "newer" && (
             <Button size="sm" onClick={() => location.reload()}>
               {t("storage.reload")}
             </Button>
           )}
-          {backup && (
+          {unreadable && (
             <Button
               size="sm"
               onClick={() => {
-                const text = readBackup(backup);
+                const text = readBackup(problem.backupKey);
                 if (text) downloadText("dcc-unreadable-backup.json", text);
               }}
             >

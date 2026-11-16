@@ -104,7 +104,8 @@ export const profile = z.object({
   activeGuides: z.array(z.string()),
   /** The user's own guides, including hand-made, pinned and imported ones. */
   guides: z.array(guide),
-  planner: plannerInputs.optional(),
+  /** Remembered planner inputs are only a convenience: inputs that don't parse are dropped. */
+  planner: plannerInputs.optional().catch(undefined),
   dashboard: z.object({
     view: dashboardView,
     /** Chapter shown by the dashboard's chapter view ("1"…"8"); null follows progress. */
@@ -200,9 +201,11 @@ export function createProfile(name: string, now = Date.now()): Profile {
   };
 }
 
-/** Reads persisted JSON of either version; falls back to a fresh state. */
-/** Why stored data could not be used as is. */
-export type LoadProblem = "corrupt" | "newer";
+/**
+ * Why stored data could not be used as is: none of it could be read (`corrupt`), only some of the
+ * profiles could (`partial`), or it is from a newer version of the app (`newer`).
+ */
+export type LoadProblem = "corrupt" | "partial" | "newer";
 
 export interface LoadResult {
   state: AppState;
@@ -236,22 +239,47 @@ export function loadState(raw: string | null): LoadResult {
       : undefined;
   if (typeof version === "number" && version > STATE_VERSION)
     return { state: fresh(), problem: "newer" };
-  const v3 = appState.safeParse(data);
-  if (v3.success) {
-    const s = withActiveProfile(v3.data);
-    return s ? { state: s } : { state: fresh() };
+  // A migration that fails on data its schema let through counts as unreadable, never as a crash.
+  try {
+    const v3 = appState.safeParse(data);
+    if (v3.success) {
+      const s = withActiveProfile(v3.data);
+      return s ? { state: s } : { state: fresh() };
+    }
+    const v2 = appStateV2.safeParse(data);
+    if (v2.success) {
+      const s = withActiveProfile(migrateStateV2(v2.data));
+      return s ? { state: s } : { state: fresh() };
+    }
+    const v1 = appStateV1.safeParse(data);
+    if (v1.success && Object.keys(v1.data.profiles).length > 0) {
+      const migrated = withActiveProfile(migrateState(v1.data));
+      if (migrated) return { state: migrated };
+    }
+  } catch {
+    return { state: fresh(), problem: "corrupt" };
   }
-  const v2 = appStateV2.safeParse(data);
-  if (v2.success) {
-    const s = withActiveProfile(migrateStateV2(v2.data));
-    return s ? { state: s } : { state: fresh() };
+  // One profile that doesn't parse must not cost the others: keep every one that does.
+  const salvaged = salvageProfiles(data);
+  return salvaged
+    ? { state: salvaged, problem: "partial" }
+    : { state: fresh(), problem: "corrupt" };
+}
+
+/** The current-version profiles of `data` that parse on their own, or null when there are none. */
+function salvageProfiles(data: unknown): AppState | null {
+  const d = data as { version?: unknown; activeProfile?: unknown; profiles?: unknown };
+  if (d?.version !== STATE_VERSION || !d.profiles || typeof d.profiles !== "object") return null;
+  const profiles: Record<string, Profile> = {};
+  for (const [id, p] of Object.entries(d.profiles)) {
+    const parsed = profile.safeParse(p);
+    if (parsed.success) profiles[id] = parsed.data;
   }
-  const v1 = appStateV1.safeParse(data);
-  if (v1.success && Object.keys(v1.data.profiles).length > 0) {
-    const migrated = withActiveProfile(migrateState(v1.data));
-    if (migrated) return { state: migrated };
-  }
-  return { state: fresh(), problem: "corrupt" };
+  return withActiveProfile({
+    version: STATE_VERSION,
+    activeProfile: typeof d.activeProfile === "string" ? d.activeProfile : "",
+    profiles,
+  });
 }
 
 /** Stored state, or a fresh one when it can't be used (see `loadState` for the reason). */

@@ -142,6 +142,20 @@ describe("content export/import", () => {
 });
 
 describe("mergeGuides", () => {
+  test("a guide with a built-in guide's id gets a fresh one", () => {
+    const g = { ...sampleTextGuide(), id: "main" };
+    const merged = mergeGuides([], [g], makeId, (id) => id === "main");
+    expect(merged.guides.map((x) => x.id)).toEqual(["main-copy"]);
+  });
+
+  test("a copy's title stays within the limit", () => {
+    const g = sampleTextGuide();
+    const long = { ...g, title: "x".repeat(200) };
+    const merged = mergeGuides([g], [long], makeId);
+    expect(merged.guides[1].title).toHaveLength(200);
+    expect(merged.guides[1].title).toMatch(/\(imported\)$/);
+  });
+
   test("adds new, skips identical, copies changed guides with the same id", () => {
     const g = sampleTextGuide();
     const first = mergeGuides([], [g], makeId);

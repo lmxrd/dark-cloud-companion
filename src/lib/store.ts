@@ -1,6 +1,5 @@
 import { atom, computed } from "nanostores";
 import { mergeGuides, type ContentFile, type MergeSummary } from "./content-file";
-import { findGuide } from "./guide/builtin";
 import type { Guide } from "./guide/types";
 import { addGoal, type GoalInput } from "./shopping-goals";
 import {
@@ -36,13 +35,22 @@ export const $checks = computed($profile, (p) => p.checks);
 
 /** Something is wrong with what is stored in this browser; the app shows a banner for it. */
 export type StorageProblem =
-  | { kind: "corrupt"; backupKey: string | null }
+  /**
+   * Stored data (`partial`: some of its profiles) couldn't be read. It is kept as a backup in this
+   * browser (`backupKey`); when even that failed, it is kept in place and nothing is saved over it.
+   */
+  | { kind: "corrupt" | "partial"; backupKey: string | null }
   | { kind: "newer" }
   | { kind: "save-failed" };
 export const $storageProblem = atom<StorageProblem | null>(null);
 
-/** False when the stored data is from a newer version of the app: never write over it. */
+/**
+ * False when the stored data is from a newer version of the app, or couldn't be read and couldn't be
+ * backed up either: never write over it.
+ */
 let writable = true;
+/** Stored data that couldn't be read, kept here too so it can be downloaded without a backup. */
+let unreadable: string | null = null;
 
 function persist(s: AppState) {
   if (!writable) return;
@@ -75,8 +83,14 @@ if (typeof window !== "undefined") {
   if (loaded.problem === "newer") {
     writable = false;
     $storageProblem.set({ kind: "newer" });
-  } else if (loaded.problem === "corrupt" && raw) {
-    $storageProblem.set({ kind: "corrupt", backupKey: backUp(raw) });
+  } else if ((loaded.problem === "corrupt" || loaded.problem === "partial") && raw) {
+    unreadable = raw;
+    const backupKey = backUp(raw);
+    $storageProblem.set({ kind: loaded.problem, backupKey });
+    if (backupKey) {
+      // Save what could be read right away, so the next load reads it instead of backing up again.
+      persist(loaded.state);
+    } else writable = false;
   }
   $state.set(loaded.state);
   $ready.set(true);
@@ -95,8 +109,9 @@ if (typeof window !== "undefined") {
   });
 }
 
-/** The raw text of a backup made by `backUp`, for downloading. */
-export function readBackup(key: string): string | null {
+/** The raw text of a backup made by `backUp` (null: the unreadable data itself), for downloading. */
+export function readBackup(key: string | null): string | null {
+  if (key === null) return unreadable;
   try {
     return localStorage.getItem(key);
   } catch {
@@ -171,8 +186,11 @@ export function addShoppingGoal(input: GoalInput) {
  * Returns a function that undoes all of it.
  */
 export async function completeShoppingGoal(goalId: string): Promise<() => void> {
-  // The recipe data is only needed here and on the shopping page: load it on demand.
-  const { completeGoal } = await import("./shopping");
+  // The recipe data and the built-in guides are only needed here: load them on demand.
+  const [{ completeGoal }, { findGuide }] = await Promise.all([
+    import("./shopping"),
+    import("./guide/builtin"),
+  ]);
   const s0 = $state.get();
   const before = s0.profiles[s0.activeProfile];
   let added: string[] = [];
@@ -231,15 +249,21 @@ export function deleteGuide(id: string) {
   }));
 }
 
+const importedId = (old: string) =>
+  `${old}-i${Date.now().toString(36)}${Math.random().toString(36).slice(2, 5)}`;
+
+/** Built-in guide ids (loaded on demand: the built-in guides are large). */
+async function builtinIds(): Promise<(id: string) => boolean> {
+  const { builtinGuideById } = await import("./guide/builtin");
+  return (id) => builtinGuideById.has(id);
+}
+
 /** Merges validated imported guides into the active profile; returns what happened. */
-export function applyContent(file: ContentFile): MergeSummary {
+export async function applyContent(file: ContentFile): Promise<MergeSummary> {
+  const reserved = await builtinIds();
   let summary: MergeSummary = { added: 0, copied: 0, skipped: 0 };
   updateProfile((p) => {
-    const merged = mergeGuides(
-      p.guides,
-      file.guides as Guide[],
-      (old) => `${old}-i${Date.now().toString(36)}${Math.random().toString(36).slice(2, 5)}`,
-    );
+    const merged = mergeGuides(p.guides, file.guides as Guide[], importedId, reserved);
     summary = merged.summary;
     return { ...p, guides: merged.guides };
   });
@@ -299,8 +323,16 @@ export async function readProfileImport(json: string): Promise<string | ProfileI
   } catch {
     return "Not valid JSON";
   }
-  const parsed = parseProfileExport(data);
+  let parsed: ExportFile | null;
+  try {
+    parsed = parseProfileExport(data);
+  } catch {
+    parsed = null;
+  }
   if (!parsed) return "Not a Dark Chronicles Companion export";
+  // A guide with a built-in guide's id gets a fresh one, its ticks and switch moved along.
+  const reserved = await builtinIds();
+  parsed = { ...parsed, profiles: parsed.profiles.map((p) => renameReserved(p, reserved)) };
   // Guides reference weapons, items and chapters: make sure they all exist before accepting.
   const { validateGuide } = await import("./content-validate");
   const errors = parsed.profiles.flatMap((p) =>
@@ -311,6 +343,25 @@ export async function readProfileImport(json: string): Promise<string | ProfileI
   return {
     file: parsed,
     replaces: parsed.profiles.flatMap((p) => (current[p.id] ? [current[p.id].name] : [])),
+  };
+}
+
+function renameReserved(p: Profile, reserved: (id: string) => boolean): Profile {
+  const renamed = new Map(
+    p.guides.filter((g) => reserved(g.id)).map((g) => [g.id, importedId(g.id)]),
+  );
+  if (!renamed.size) return p;
+  const tick = (k: string) => {
+    const m = k.match(/^g:([^:]+):(.*)$/);
+    return m && renamed.has(m[1]) ? `g:${renamed.get(m[1])}:${m[2]}` : k;
+  };
+  return {
+    ...p,
+    guides: p.guides.map((g) => (renamed.has(g.id) ? { ...g, id: renamed.get(g.id)! } : g)),
+    activeGuides: p.activeGuides.flatMap((id) => (renamed.has(id) ? [id, renamed.get(id)!] : [id])),
+    checks: Object.fromEntries(
+      Object.keys(p.checks).map((k) => [tick(k), true]),
+    ) as Profile["checks"],
   };
 }
 
