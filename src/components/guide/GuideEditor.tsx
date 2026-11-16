@@ -448,7 +448,12 @@ export function GuideEditor({ initial, persisted, onSave }: Props) {
   };
   const setStep = (i: number, s: Step) =>
     update({ steps: draft.steps.map((x, n) => (n === i ? s : x)) });
-  const derived = useMemo(() => deriveBuild(draft), [draft]);
+  // Only the build and the steps matter: typing a title or notes doesn't re-derive the build.
+  const { id, kind, build, steps } = draft;
+  const derived = useMemo(
+    () => deriveBuild({ id, kind, title: "", build, steps }),
+    [id, kind, build, steps],
+  );
 
   // The weapon the build is on after a step: its own weapon, or a build-up step's target.
   const weaponAfter = (s: Step) => s.buildUp?.weaponId ?? s.build?.weaponId;

@@ -4,7 +4,7 @@ import { useTranslations } from "@/i18n";
 import { deriveBuild } from "@/lib/guide/derive";
 import type { Guide } from "@/lib/guide/types";
 import { getWeapon } from "@/lib/planner/sources";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Segments } from "@/components/db/kit";
 import {
   PLAN_VIEWS,
@@ -16,7 +16,7 @@ import {
 /** Read-only preview of a generated guide's build steps (nothing is saved). */
 export function PlanPreview({ guide }: { guide: Guide }) {
   const t = useTranslations();
-  const derived = deriveBuild(guide);
+  const derived = useMemo(() => deriveBuild(guide), [guide]);
   const route = [
     ...new Set(
       guide.steps.flatMap((s) =>
