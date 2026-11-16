@@ -8,9 +8,7 @@ import {
   type AppState as AppStateV1,
   type Profile as ProfileV1,
 } from "./profiles-v1";
-import { fromLegacyGuide, fromLegacyWalkthrough, migrateTickId } from "./guide/legacy";
-import { MAIN_GUIDE_ID } from "./guide/main";
-import { buildStart, guide, type Guide } from "./guide/types";
+import { buildStart, guide, MAIN_GUIDE_ID } from "./guide/types";
 import { abilityId, stats } from "@/lib/schemas";
 import { migrateChapterKey, migrateChecks, migrateGuide } from "./gamedata/legacy";
 
@@ -140,50 +138,13 @@ export function migrateProfileV2(p: Profile): Profile {
   };
 }
 
-const migrateStateV2 = (s: Pick<AppStateV2, "activeProfile" | "profiles">): AppState => ({
+export const migrateStateV2 = (s: Pick<AppStateV2, "activeProfile" | "profiles">): AppState => ({
   version: STATE_VERSION,
   activeProfile: s.activeProfile,
   profiles: Object.fromEntries(
     Object.entries(s.profiles).map(([id, p]) => [id, migrateProfileV2(p)]),
   ),
 });
-
-export function migrateProfile(p: ProfileV1): Profile {
-  const guides: Guide[] = [
-    ...p.customGuides.map((g) => fromLegacyGuide(g)),
-    ...p.walkthroughs.map(fromLegacyWalkthrough),
-  ];
-  const checks = Object.fromEntries(
-    Object.keys(p.checks).map((k) => [migrateTickId(k), true as const]),
-  );
-  return {
-    id: p.id,
-    name: p.name,
-    createdAt: p.createdAt,
-    checks,
-    view: {
-      hideDone: p.view.hideDone,
-      hidePostgame: p.view.hidePostgame,
-      showFacts: p.view.layers.facts,
-      buyableOnly: true,
-    },
-    // The main walkthrough is on by default, including for migrated profiles.
-    activeGuides: [...new Set([MAIN_GUIDE_ID, ...p.activeGuides])],
-    guides,
-    dashboard: { view: "chapter", currentChapter: null },
-    shopping: emptyShopping(),
-  };
-}
-
-/** Version 1 → 3 (through version 2). */
-export function migrateState(s: AppStateV1): AppState {
-  return migrateStateV2({
-    activeProfile: s.activeProfile,
-    profiles: Object.fromEntries(
-      Object.entries(s.profiles).map(([id, p]) => [id, migrateProfile(p)]),
-    ),
-  });
-}
 
 export function createProfile(name: string, now = Date.now()): Profile {
   return {
@@ -203,9 +164,21 @@ export function createProfile(name: string, now = Date.now()): Profile {
 
 /**
  * Why stored data could not be used as is: none of it could be read (`corrupt`), only some of the
- * profiles could (`partial`), or it is from a newer version of the app (`newer`).
+ * profiles could (`partial`), it is from a newer version of the app (`newer`), or it is from the first
+ * version and needs its converters (`v1`: load again with `loadV1Migration()`).
  */
-export type LoadProblem = "corrupt" | "partial" | "newer";
+export type LoadProblem = "corrupt" | "partial" | "newer" | "v1";
+
+/**
+ * Converts version 1 data. Its converters rebuild weapons with the planner's data, which every page
+ * would otherwise load: only the rare version 1 data loads them (`loadV1Migration`).
+ */
+export interface V1Migration {
+  state: (s: AppStateV1) => AppState;
+  profile: (p: ProfileV1) => Profile;
+}
+export const loadV1Migration = (): Promise<V1Migration> =>
+  import("./profiles-migrate-v1").then((m) => m.v1Migration);
 
 export interface LoadResult {
   state: AppState;
@@ -224,7 +197,7 @@ function withActiveProfile(s: AppState): AppState | null {
  * Reads stored state. Unreadable data and data from a newer version of the app come back as a fresh
  * state plus a `problem`, so the caller can keep the original (back it up, or not write over it).
  */
-export function loadState(raw: string | null): LoadResult {
+export function loadState(raw: string | null, v1Migration?: V1Migration): LoadResult {
   const fresh = () => initialState();
   if (!raw) return { state: fresh() };
   let data: unknown;
@@ -253,7 +226,8 @@ export function loadState(raw: string | null): LoadResult {
     }
     const v1 = appStateV1.safeParse(data);
     if (v1.success && Object.keys(v1.data.profiles).length > 0) {
-      const migrated = withActiveProfile(migrateState(v1.data));
+      if (!v1Migration) return { state: fresh(), problem: "v1" };
+      const migrated = withActiveProfile(v1Migration.state(v1.data));
       if (migrated) return { state: migrated };
     }
   } catch {
@@ -283,7 +257,8 @@ function salvageProfiles(data: unknown): AppState | null {
 }
 
 /** Stored state, or a fresh one when it can't be used (see `loadState` for the reason). */
-export const parseState = (raw: string | null): AppState => loadState(raw).state;
+export const parseState = (raw: string | null, v1Migration?: V1Migration): AppState =>
+  loadState(raw, v1Migration).state;
 
 export type ViewSettings = z.infer<typeof viewSettings>;
 
@@ -300,19 +275,19 @@ export const exportFile = z.object({
 });
 export type ExportFile = z.infer<typeof exportFile>;
 
-/** Reads a profile export of any version; older files are migrated. */
-export function parseProfileExport(data: unknown): ExportFile | null {
+/** Reads a profile export of any version; older files are migrated (version 1 with `v1Migration`). */
+export function parseProfileExport(data: unknown, v1Migration?: V1Migration): ExportFile | null {
   const v3 = exportFile.safeParse(data);
   if (v3.success) return v3.data;
   const v2 = exportFile.extend({ version: z.literal(2) }).safeParse(data);
   if (v2.success)
     return { ...v2.data, version: STATE_VERSION, profiles: v2.data.profiles.map(migrateProfileV2) };
   const v1 = exportFileV1.safeParse(data);
-  if (v1.success) {
+  if (v1.success && v1Migration) {
     return {
       app: "dark-chronicles-companion",
       version: STATE_VERSION,
-      profiles: v1.data.profiles.map((p) => migrateProfileV2(migrateProfile(p))),
+      profiles: v1.data.profiles.map((p) => migrateProfileV2(v1Migration.profile(p))),
     };
   }
   return null;

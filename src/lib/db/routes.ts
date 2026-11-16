@@ -78,3 +78,7 @@ export const productHref = (p: {
       : p.ridepodPartId
         ? dbHref("ridepodPart", p.ridepodPartId)
         : dbHref("ridepodCore", p.ridepodCoreId ?? "");
+
+/** The Items list's tabs (here, not in lists.ts, so the list island needn't import the database). */
+export const ITEM_TABS = ["all", "synth", "usable", "gear", "materials", "coins", "other"] as const;
+export type ItemTab = (typeof ITEM_TABS)[number];

@@ -4,6 +4,7 @@
  * every way to get an item) without loading the big data files in the browser.
  */
 import type { Translate } from "@/i18n";
+import type { ItemTab } from "./routes";
 import type { Sources } from "@/lib/gamedata/types";
 import { STAT_KEYS, type StatKey } from "@/lib/schemas";
 import { statsOf } from "@/components/db/stats";
@@ -110,8 +111,6 @@ const cheapest = (s: Sources) => {
 
 // ─── items ────────────────────────────────────────────────────────────────────────────────────────
 
-export const ITEM_TABS = ["all", "synth", "usable", "gear", "materials", "coins", "other"] as const;
-export type ItemTab = (typeof ITEM_TABS)[number];
 
 export interface ItemRow {
   id: string;

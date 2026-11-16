@@ -116,6 +116,9 @@ export const guide = z.object({
 });
 export type Guide = z.infer<typeof guide>;
 
+/** The built-in main walkthrough's id. */
+export const MAIN_GUIDE_ID = "main";
+
 /** A title with a suffix such as " (copy)", shortened to stay within the limit. */
 export const titleWith = (title: string, suffix: string) =>
   title.slice(0, TITLE_MAX - suffix.length) + suffix;

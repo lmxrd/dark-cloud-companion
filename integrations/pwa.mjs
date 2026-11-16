@@ -2,7 +2,7 @@
 // except the pages of single database things (`/db/<kind>/<id>`, about 1,500 of them): those are
 // cached when first opened, or all at once from Settings ("Save all for offline").
 import { createHash } from "node:crypto";
-import { readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { join, relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -11,6 +11,21 @@ function walk(dir) {
     const p = join(dir, name);
     return statSync(p).isDirectory() ? walk(p) : [p];
   });
+}
+
+/**
+ * The solver's wasm is emitted twice: once for the planner's worker, which uses it, and once more by
+ * the main build, which nothing references. Every file is precached, so the stray copy would double
+ * the 3.5 MB solver download: remove wasm files no script refers to.
+ */
+function dropUnusedWasm(dir) {
+  if (!existsSync(dir)) return;
+  const names = readdirSync(dir);
+  const scripts = names
+    .filter((n) => n.endsWith(".js"))
+    .map((n) => readFileSync(join(dir, n), "utf8"));
+  for (const n of names)
+    if (n.endsWith(".wasm") && !scripts.some((s) => s.includes(n))) rmSync(join(dir, n));
 }
 
 /** @returns {import("astro").AstroIntegration} */
@@ -28,6 +43,7 @@ export default function pwa() {
       },
       "astro:build:done": ({ dir }) => {
         const root = fileURLToPath(dir);
+        dropUnusedWasm(join(root, "_astro"));
         const all = walk(root)
           .map((f) => relative(root, f).split(sep).join("/"))
           .filter((f) => f !== "sw.js" && !f.endsWith(".map"));

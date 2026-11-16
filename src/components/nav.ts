@@ -6,7 +6,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import type { Translate } from "@/i18n";
-import { MAIN_GUIDE_ID } from "@/lib/guide/main";
+import { MAIN_GUIDE_ID } from "@/lib/guide/types";
 import { DASHBOARD_SEGMENTS } from "@/components/dashboard/route";
 import { DB_KINDS, DB_LISTS, type DbList } from "@/lib/db/routes";
 

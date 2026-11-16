@@ -7,9 +7,9 @@ import {
   type ChecklistCategory,
   type ChecklistItem,
 } from "@/lib/data";
-import type { Entry, Guide, Step } from "./types";
+import { MAIN_GUIDE_ID, type Entry, type Guide, type Step } from "./types";
 
-export const MAIN_GUIDE_ID = "main";
+export { MAIN_GUIDE_ID };
 
 const categoryOrder: ChecklistCategory[] = [
   "scoop",

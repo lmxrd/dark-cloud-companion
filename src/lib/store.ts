@@ -11,6 +11,8 @@ import {
   initialState,
   parseProfileExport,
   loadState,
+  loadV1Migration,
+  type LoadResult,
   type AppState,
   type ExportFile,
   type PlannerInputs,
@@ -80,6 +82,16 @@ if (typeof window !== "undefined") {
     raw = localStorage.getItem(STORAGE_KEY);
   } catch {}
   const loaded = loadState(raw);
+  // Version 1 data needs its converters, which are loaded only for it.
+  if (loaded.problem === "v1")
+    void loadV1Migration().then(
+      (m) => start(raw, loadState(raw, m)),
+      () => start(raw, { state: loaded.state, problem: "corrupt" }),
+    );
+  else start(raw, loaded);
+}
+
+function start(raw: string | null, loaded: LoadResult) {
   if (loaded.problem === "newer") {
     writable = false;
     $storageProblem.set({ kind: "newer" });
@@ -325,7 +337,7 @@ export async function readProfileImport(json: string): Promise<string | ProfileI
   }
   let parsed: ExportFile | null;
   try {
-    parsed = parseProfileExport(data);
+    parsed = parseProfileExport(data, await loadV1Migration());
   } catch {
     parsed = null;
   }

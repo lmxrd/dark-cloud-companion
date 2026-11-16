@@ -5,8 +5,8 @@ import { AddToListButton } from "@/components/shopping/AddToListButton";
 import { useTranslations } from "@/i18n";
 import { useQueryChoice, useQueryText } from "@/lib/url";
 import { Gate } from "@/components/Gate";
-import { dbHref } from "@/lib/db/routes";
-import { ITEM_TABS, type ItemRow, type ItemTab } from "@/lib/db/lists";
+import { dbHref, ITEM_TABS, type ItemTab } from "@/lib/db/routes";
+import type { ItemRow } from "@/lib/db/lists";
 import {
   Chip,
   Chips,

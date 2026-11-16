@@ -10,13 +10,13 @@ import { getWeapon } from "@/lib/planner/sources";
 import { freshState } from "@/lib/weapons/mechanics";
 import { emptyWalkthrough } from "@/lib/walkthroughs/types";
 import { deriveBuild } from "@/lib/guide/derive";
+import { migrateProfile, v1Migration } from "./profiles-migrate-v1";
 import {
   appState,
   createProfile,
   importProfiles,
   importProfilesAsCopies,
   loadState,
-  migrateProfile,
   parseState,
 } from "./profiles";
 
@@ -76,7 +76,8 @@ describe("profile migration v1 -> v2", () => {
 
   test("a full v1 state parses into a valid v2 state; a v2 state round-trips; garbage resets", async () => {
     const v1 = initialStateV1();
-    const migrated = parseState(JSON.stringify(v1));
+    expect(loadState(JSON.stringify(v1)).problem).toBe("v1");
+    const migrated = parseState(JSON.stringify(v1), v1Migration);
     expect(appState.safeParse(migrated).success).toBe(true);
     expect(migrated.profiles[migrated.activeProfile].activeGuides).toContain("main");
     expect(parseState(JSON.stringify(migrated))).toEqual(migrated);
