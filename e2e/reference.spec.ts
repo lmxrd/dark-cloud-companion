@@ -200,12 +200,12 @@ test("a weapon guide has a map and a detailed map", async ({ page }) => {
   await go(page, "/guides/view?id=island-king-42c60d");
   const views = page.getByRole("radiogroup", { name: "View" });
   await views.getByRole("radio", { name: "Map", exact: true }).click();
-  await expect(page.getByRole("button", { name: "Bone Rapier", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Long Sword", exact: true })).toBeVisible();
   await expect(page.getByText("start").first()).toBeVisible();
   await views.getByRole("radio", { name: "Detailed map" }).click();
   await expect(page.getByText("Passes on").first()).toBeVisible();
   await expect(page.getByText("Spheres add").first()).toBeVisible();
   // A weapon in a map opens its step.
-  await page.getByRole("button", { name: "Bone Rapier", exact: true }).click();
+  await page.getByRole("button", { name: "Long Sword", exact: true }).click();
   await expect(views.getByRole("radio", { name: "Steps" })).toHaveAttribute("aria-checked", "true");
 });

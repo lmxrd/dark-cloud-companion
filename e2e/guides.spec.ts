@@ -283,10 +283,9 @@ test.describe("custom start and end weapons, one tab per weapon type", () => {
     await expect(page.getByText(/^0 \/ \d+ stages$/)).toBeVisible();
     // Each stage says when to do it, and a build-up lists the enemies it needs defeated first.
     await expect(page.getByText(/^Do this after .+ \(chapter \d\)$/).first()).toBeVisible();
-    await expect(
-      page.getByText("Dark Excalibur needs these enemies defeated first:"),
-    ).toBeVisible();
-    await expect(page.getByText(/Blackbeard/)).toBeVisible();
+    const kills = "Cross Heinder needs these enemies defeated first:";
+    await expect(page.getByText(kills)).toBeVisible();
+    await expect(page.getByRole("list", { name: kills }).getByText(/Blumo/)).toBeVisible();
     await page.getByRole("button", { name: /Continue at stage 1/ }).click();
     // Switching it on from the progress strip shows it under "On the dashboard".
     await page.getByRole("switch", { name: "Show on dashboard" }).click();
