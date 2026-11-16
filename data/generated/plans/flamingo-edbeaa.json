@@ -4,7 +4,7 @@
   "guide": {
     "id": "flamingo-edbeaa",
     "title": "Flamingo — Earliest",
-    "description": "Earliest · maxed stats · 8 abilities (side-weapon spheres first) · optimal start (Turkey) · done after Heim Rada Rebuilding (chapter 5) · no ABS grinding",
+    "description": "Earliest · maxed stats · 8 abilities (side-weapon spheres first) · optimal start (Turkey) · done after Heim Rada Rebuilding (chapter 5) · 3,670 ABS to grind · 906 gilda to farm",
     "kind": "builtin",
     "build": {
       "weaponId": "turkey",
@@ -31,55 +31,103 @@
     },
     "steps": [
       {
-        "id": "turkey+4",
+        "id": "turkey+8",
         "title": "Turkey",
-        "notes": "",
+        "notes": "Grind about 3,670 ABS more than the story gives by this point. Farm about 906 gilda more than the story pays by this point.",
         "chapterId": "2",
-        "sectionId": "frightening-forest",
+        "sectionId": "finishing-up-chapter-2",
         "entries": [],
         "build": {
           "weaponId": "turkey",
-          "levelTo": 4,
+          "levelTo": 8,
           "synths": [
             {
-              "kind": "item",
-              "name": "Bundle of Hay",
-              "count": 5
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "shop",
+                  "shop": "Milane's Weapon Shop",
+                  "price": 300,
+                  "chapter": 1
+                },
+                "stages": [
+                  {
+                    "weaponId": "gladius",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Antidote Drink",
+                        "count": 1
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Flour",
+                        "count": 1
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Gunpowder",
+                        "count": 2
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 2
+                      }
+                    ]
+                  }
+                ]
+              }
             },
             {
-              "kind": "item",
-              "name": "Sturdy Cloth",
-              "count": 5
-            }
-          ]
-        }
-      },
-      {
-        "id": "to-flamingo",
-        "title": "Turkey → Flamingo",
-        "notes": "",
-        "chapterId": "2",
-        "sectionId": "frightening-forest",
-        "entries": [],
-        "buildUp": {
-          "weaponId": "flamingo"
-        }
-      },
-      {
-        "id": "flamingo+10",
-        "title": "Flamingo",
-        "notes": "",
-        "chapterId": "5",
-        "sectionId": "heim-rada-rebuilding",
-        "entries": [],
-        "build": {
-          "weaponId": "flamingo",
-          "levelTo": 10,
-          "synths": [
-            {
-              "kind": "item",
-              "name": "Scrap of Metal",
-              "count": 3
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "shop",
+                  "shop": "Milane's Weapon Shop",
+                  "price": 200,
+                  "chapter": 1
+                },
+                "stages": [
+                  {
+                    "weaponId": "battle-wrench",
+                    "levelTo": 3,
+                    "synths": []
+                  },
+                  {
+                    "weaponId": "true-battle-wrench",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Glass Material",
+                        "count": 7
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Gunpowder",
+                        "count": 3
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Rolling Log",
+                        "count": 5
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 5
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Sturdy Cloth",
+                        "count": 5
+                      }
+                    ]
+                  }
+                ]
+              }
             },
             {
               "kind": "sphere",
@@ -94,7 +142,28 @@
                   {
                     "weaponId": "bone-rapier",
                     "levelTo": 5,
-                    "synths": []
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Flour",
+                        "count": 8
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Glass Material",
+                        "count": 2
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Rolling Log",
+                        "count": 5
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Sturdy Cloth",
+                        "count": 6
+                      }
+                    ]
                   }
                 ]
               }
@@ -105,18 +174,129 @@
                 "acquire": {
                   "kind": "shop",
                   "shop": "Milane's Weapon Shop",
-                  "price": 500,
-                  "chapter": 3
+                  "price": 200,
+                  "chapter": 1
                 },
                 "stages": [
                   {
-                    "weaponId": "kuberas-hand",
+                    "weaponId": "battle-wrench",
+                    "levelTo": 4,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Rolling Log",
+                        "count": 2
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Sturdy Cloth",
+                        "count": 3
+                      }
+                    ]
+                  },
+                  {
+                    "weaponId": "drill-wrench",
                     "levelTo": 5,
-                    "synths": []
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Antidote Drink",
+                        "count": 14
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Flour",
+                        "count": 10
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Rolling Log",
+                        "count": 5
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 1
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Sturdy Cloth",
+                        "count": 2
+                      }
+                    ]
                   }
                 ]
               }
             },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "shop",
+                  "shop": "Julia's Ringware",
+                  "price": 200,
+                  "chapter": 2
+                },
+                "stages": [
+                  {
+                    "weaponId": "magic-brassard",
+                    "levelTo": 4,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Bundle of Hay",
+                        "count": 9
+                      }
+                    ]
+                  },
+                  {
+                    "weaponId": "bandit-brassard",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Antidote Drink",
+                        "count": 5
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 13
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Sturdy Cloth",
+                        "count": 1
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "to-flamingo",
+        "title": "Turkey → Flamingo",
+        "notes": "",
+        "chapterId": "2",
+        "sectionId": "finishing-up-chapter-2",
+        "entries": [],
+        "buildUp": {
+          "weaponId": "flamingo"
+        }
+      },
+      {
+        "id": "flamingo+2",
+        "title": "Flamingo",
+        "notes": "",
+        "chapterId": "4",
+        "entries": [],
+        "build": {
+          "weaponId": "flamingo",
+          "levelTo": 2,
+          "synths": [
             {
               "kind": "sphere",
               "recipe": {
@@ -132,19 +312,28 @@
                     "synths": [
                       {
                         "kind": "item",
-                        "name": "Antidote Drink",
-                        "count": 12
-                      },
-                      {
-                        "kind": "item",
                         "name": "Scrap of Metal",
-                        "count": 15
+                        "count": 1
                       }
                     ]
                   }
                 ]
               }
-            },
+            }
+          ]
+        }
+      },
+      {
+        "id": "flamingo+8",
+        "title": "Flamingo",
+        "notes": "",
+        "chapterId": "5",
+        "sectionId": "heim-rada-rebuilding",
+        "entries": [],
+        "build": {
+          "weaponId": "flamingo",
+          "levelTo": 8,
+          "synths": [
             {
               "kind": "sphere",
               "recipe": {
@@ -157,7 +346,13 @@
                   {
                     "weaponId": "soul-breaker",
                     "levelTo": 5,
-                    "synths": []
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 1
+                      }
+                    ]
                   }
                 ]
               }
@@ -193,7 +388,13 @@
                   {
                     "weaponId": "pocklekul",
                     "levelTo": 5,
-                    "synths": []
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Antidote Drink",
+                        "count": 1
+                      }
+                    ]
                   }
                 ]
               }
@@ -211,7 +412,13 @@
                   {
                     "weaponId": "antique-sword",
                     "levelTo": 5,
-                    "synths": []
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 1
+                      }
+                    ]
                   }
                 ]
               }
@@ -232,7 +439,12 @@
                       {
                         "kind": "item",
                         "name": "Antidote Drink",
-                        "count": 16
+                        "count": 8
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 4
                       }
                     ]
                   }
@@ -245,5 +457,120 @@
     ],
     "createdAt": 0,
     "updatedAt": 0
+  },
+  "solution": {
+    "chain": [
+      "turkey",
+      "flamingo"
+    ],
+    "values": {
+      "vY0|sphere:gladius+5:empty": 1,
+      "vQ0|sphere:gladius+5:empty|item:Antidote Drink": 1,
+      "vQ0|sphere:gladius+5:empty|item:Flour": 1,
+      "vQ0|sphere:gladius+5:empty|item:Gunpowder": 2,
+      "vQ0|sphere:gladius+5:empty|item:Scrap of Metal": 2,
+      "vY0|sphere:battle-wrench>true-battle-wrench+5:empty": 1,
+      "vQ0|sphere:battle-wrench>true-battle-wrench+5:empty|item:Glass Material": 7,
+      "vQ0|sphere:battle-wrench>true-battle-wrench+5:empty|item:Gunpowder": 3,
+      "vQ0|sphere:battle-wrench>true-battle-wrench+5:empty|item:Rolling Log": 5,
+      "vQ0|sphere:battle-wrench>true-battle-wrench+5:empty|item:Scrap of Metal": 5,
+      "vQ0|sphere:battle-wrench>true-battle-wrench+5:empty|item:Sturdy Cloth": 5,
+      "vY0|sphere:bone-rapier+5:empty": 1,
+      "vQ0|sphere:bone-rapier+5:empty|item:Flour": 8,
+      "vQ0|sphere:bone-rapier+5:empty|item:Glass Material": 2,
+      "vQ0|sphere:bone-rapier+5:empty|item:Rolling Log": 5,
+      "vQ0|sphere:bone-rapier+5:empty|item:Sturdy Cloth": 6,
+      "vY0|sphere:battle-wrench>drill-wrench+5:empty": 1,
+      "vQ0|sphere:battle-wrench>drill-wrench+5:empty|item:Antidote Drink": 14,
+      "vQ0|sphere:battle-wrench>drill-wrench+5:empty|item:Flour": 10,
+      "vQ0|sphere:battle-wrench>drill-wrench+5:empty|item:Rolling Log": 5,
+      "vQ0|sphere:battle-wrench>drill-wrench+5:empty|item:Scrap of Metal": 1,
+      "vQ0|sphere:battle-wrench>drill-wrench+5:empty|item:Sturdy Cloth": 2,
+      "vY0|sphere:magic-brassard>bandit-brassard+5:empty": 1,
+      "vQ0|sphere:magic-brassard>bandit-brassard+5:empty|item:Antidote Drink": 5,
+      "vQ0|sphere:magic-brassard>bandit-brassard+5:empty|item:Scrap of Metal": 13,
+      "vQ0|sphere:magic-brassard>bandit-brassard+5:empty|item:Sturdy Cloth": 1,
+      "vY1|sphere:dark-viper+5:empty": 1,
+      "vQ1|sphere:dark-viper+5:empty|item:Scrap of Metal": 1,
+      "vY1|sphere:soul-breaker+5:empty": 1,
+      "vQ1|sphere:soul-breaker+5:empty|item:Scrap of Metal": 1,
+      "vY1|sphere:cubic-hammer+5:empty": 1,
+      "vY1|sphere:pocklekul+5:empty": 1,
+      "vQ1|sphere:pocklekul+5:empty|item:Antidote Drink": 1,
+      "vY1|sphere:antique-sword+5:empty": 1,
+      "vQ1|sphere:antique-sword+5:empty|item:Scrap of Metal": 1,
+      "vY1|sphere:rulers-sword+5:empty": 1,
+      "vQ1|sphere:rulers-sword+5:empty|item:Antidote Drink": 8,
+      "vQ1|sphere:rulers-sword+5:empty|item:Scrap of Metal": 4,
+      "vE0_at": 45,
+      "vE0_fl": 23,
+      "vE0_ch": 23,
+      "vE0_li": 24,
+      "vE0_cy": 27,
+      "vE0_sm": 27,
+      "vE0_ex": 22,
+      "vE0_be": 23,
+      "vE0_sc": 23,
+      "vE1_at": 61,
+      "vE1_fl": 60,
+      "vE1_ch": 60,
+      "vE1_li": 60,
+      "vE1_cy": 60,
+      "vE1_sm": 60,
+      "vE1_ex": 60,
+      "vE1_be": 60,
+      "vE1_sc": 60,
+      "vS0_ex": 1,
+      "vZ0_2": 1,
+      "vZ1_5": 1,
+      "vB0_2": 6336,
+      "vB1_5": 15400,
+      "vC_poison": 2,
+      "vC_stop": 5,
+      "vC_abs_up": 5,
+      "vC_steal": 2,
+      "vC_wealth": 5,
+      "vC_dark": 5,
+      "vC_durable": 5,
+      "vC_absorb": 5,
+      "vL0": 8,
+      "vA0": 2368,
+      "vT0|sphere:gladius+5:empty|fl": 2,
+      "vT0|sphere:battle-wrench>true-battle-wrench+5:empty|fl": 3,
+      "vT0|sphere:battle-wrench>true-battle-wrench+5:empty|ch": 8,
+      "vT0|sphere:bone-rapier+5:empty|ch": 3,
+      "vT0|sphere:gladius+5:empty|li": 2,
+      "vT0|sphere:battle-wrench>true-battle-wrench+5:empty|li": 6,
+      "vT0|sphere:battle-wrench>drill-wrench+5:empty|li": 1,
+      "vT0|sphere:magic-brassard>bandit-brassard+5:empty|li": 15,
+      "vT0|sphere:battle-wrench>true-battle-wrench+5:empty|sm": 6,
+      "vT0|sphere:bone-rapier+5:empty|sm": 6,
+      "vT0|sphere:battle-wrench>drill-wrench+5:empty|sm": 6,
+      "vT0|sphere:gladius+5:empty|ex": 1,
+      "vT0|sphere:bone-rapier+5:empty|ex": 9,
+      "vT0|sphere:battle-wrench>drill-wrench+5:empty|ex": 12,
+      "vT0|sphere:battle-wrench>true-battle-wrench+5:empty|be": 6,
+      "vT0|sphere:bone-rapier+5:empty|be": 7,
+      "vT0|sphere:battle-wrench>drill-wrench+5:empty|be": 3,
+      "vT0|sphere:magic-brassard>bandit-brassard+5:empty|be": 1,
+      "vT0|sphere:gladius+5:empty|sc": 1,
+      "vT0|sphere:battle-wrench>drill-wrench+5:empty|sc": 16,
+      "vT0|sphere:magic-brassard>bandit-brassard+5:empty|sc": 6,
+      "vL1": 8,
+      "vA1": 2960,
+      "vT1|sphere:dark-viper+5:empty|li": 1,
+      "vT1|sphere:antique-sword+5:empty|li": 1,
+      "vT1|sphere:rulers-sword+5:empty|li": 4,
+      "vT1|sphere:pocklekul+5:empty|sc": 1,
+      "vT1|sphere:rulers-sword+5:empty|sc": 9,
+      "vF_poison_0": 1,
+      "vF_stop_1": 1,
+      "vF_abs_up_1": 1,
+      "vF_steal_0": 1,
+      "vF_wealth_1": 1,
+      "vF_dark_1": 1,
+      "vF_durable_1": 1,
+      "vF_absorb_1": 1
+    }
   }
 }

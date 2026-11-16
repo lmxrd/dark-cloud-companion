@@ -35,7 +35,8 @@ Exact solves stop at a time limit and keep the best plan found. Measured over al
 against 60 s per route: 10 s costs about 3% more ABS, 15 s about 2%, 30 s under 1%; below about
 10 s solves often end without any plan (then one retry with 4× the time). Story plans solve a
 route twice when the first plan simulates a point short (a second try with a 3-point margin), so a
-Balanced plan can take several times its limit.
+Balanced plan can take several times its limit. The built-in Balanced plans get 15 minutes a solve:
+cold, Island King still improved after 12–15 minutes.
 
 **Warm starts.** A solve can start from a saved solution: the solver's own nonzero values, saved
 with each built-in plan under stable names (items by name, spheres by template id, not by their
@@ -96,7 +97,7 @@ added for a reason measured below. Only a few things are a plan's choice.
 | Effort weighting (`effortPower`) | 0.5                                                                                                            | ABS counts by how hard it is to earn in its chapter   |
 | Early stats (`earlyStatBonus`)   | 2 per point per stage                                                                                          | stats above the floor come earlier                    |
 | Items on the main weapon         | 1,000 each to halfway, then falling to 30 on the last step                                                     | the early SP count most: a sphere is worth some gilda |
-| Stat floor                       | 0.5 of the weapon's maximum when leaving it, 2,000 per point short; Balanced: under 0.4, 20,000 more per point | every stat rises along the way                        |
+| Stat floor                       | 0.5 of the weapon's maximum when leaving it, 2,000 per point short; Balanced: rising from 0.3 on the first weapon to 0.8 on the one before the final, and 0.1 lower 20,000 more per point | every stat rises along the way                        |
 | Least level before a build-up    | 3,000 per level short                                                                                          | soft, so the planner page always gets a plan          |
 
 | Choice                                         | Where                                        | Values                                       |

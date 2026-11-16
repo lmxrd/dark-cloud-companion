@@ -55,11 +55,11 @@ describe("scoring generated plans", () => {
   });
 
   test("the story cost charges a stat below its floor and a level short before a build-up", () => {
-    // LEGEND has the flat floor (Island King tries the rising one).
     const file = readPlanFiles().find((f) => f.spec === "legend/balanced")!;
     const spec = specs.find((s) => s.id === "legend/balanced")!;
     const cost = storyCost(file.guide, spec.progression);
-    expect(storyCost(file.guide, { ...spec.progression, statFloor: 0.99 })).toBeGreaterThan(cost);
+    const high = { from: 0.99, to: 0.99, gap: 0 };
+    expect(storyCost(file.guide, { ...spec.progression, risingFloor: high })).toBeGreaterThan(cost);
     expect(storyCost(file.guide, { ...spec.progression, buildUpLevel: 9 })).toBeGreaterThan(cost);
   });
 

@@ -28,6 +28,9 @@
 // given when it is first generated and kept when it is re-generated (see plan-files.ts).
 import type { PlansConfigInput } from "./plans-config.ts";
 
+/** Every Balanced plan: a stat floor rising along the chain (30% → 80%), up to 15 minutes a solve. */
+const BALANCED = { risingFloor: true, timeLimitSec: 900 } as const;
+
 export const plansConfig = {
   defaults: {
     goal: "max",
@@ -46,9 +49,7 @@ export const plansConfig = {
           objective: "abs",
           flow: "progression",
           label: "Balanced",
-          // Trying a floor that rises along the chain (30% → 80%), with up to 15 minutes a solve.
-          risingFloor: true,
-          timeLimitSec: 900,
+          ...BALANCED,
           // The weapon guide's "evil sword" route: Poison, Absorb and Dark come with it, no slow
           // 4-hit swords before the Island King, and Griffon Fork on the way is a fine stop.
           route: [
@@ -71,6 +72,7 @@ export const plansConfig = {
           objective: "abs",
           flow: "progression",
           label: "Balanced",
+          ...BALANCED,
           // The weapon guide's Grade Zero route (recipe 7.2).
           route: [
             "battle-wrench",
@@ -93,6 +95,7 @@ export const plansConfig = {
           objective: "abs",
           flow: "progression",
           label: "Balanced",
+          ...BALANCED,
           // +5 before each build-up: more SP along the way, less ABS farming on the last weapon.
           buildUpLevel: 5,
           // The weapon guide's LEGEND route (recipe 7.6): through the hammers.
@@ -117,6 +120,7 @@ export const plansConfig = {
           objective: "abs",
           flow: "progression",
           label: "Balanced",
+          ...BALANCED,
           // +5 before each build-up: more SP along the way, less ABS farming on the last weapon.
           buildUpLevel: 5,
           // The weapon guide's Supernova route (recipe 7.3).
@@ -140,6 +144,7 @@ export const plansConfig = {
           objective: "abs",
           flow: "progression",
           label: "Balanced",
+          ...BALANCED,
           // The weapon guide's Griffon Fork route (recipe 7.4).
           route: [
             "bone-rapier",
@@ -160,6 +165,7 @@ export const plansConfig = {
           objective: "abs",
           flow: "progression",
           label: "Balanced",
+          ...BALANCED,
           // Side weapons for its spheres levelled in earlier chapters (try-out on one plan).
           prepareSpheres: true,
           // +5 before each build-up: more SP along the way, less ABS farming on the last weapon.
@@ -185,6 +191,7 @@ export const plansConfig = {
           objective: "abs",
           flow: "progression",
           label: "Balanced",
+          ...BALANCED,
           // The weapon guide's Dark Cloud route (recipe 7.8).
           route: [
             "baselard",
@@ -206,6 +213,7 @@ export const plansConfig = {
           objective: "abs",
           flow: "progression",
           label: "Balanced",
+          ...BALANCED,
           // No guide recipe: the cheapest route the planner found (pinned for stable regeneration).
           route: [
             "magic-brassard",
@@ -228,6 +236,7 @@ export const plansConfig = {
           objective: "abs",
           flow: "progression",
           label: "Balanced",
+          ...BALANCED,
           // No guide recipe: the cheapest route the planner found (pinned for stable regeneration).
           route: [
             "classic-gun",
@@ -249,6 +258,7 @@ export const plansConfig = {
           objective: "abs",
           flow: "progression",
           label: "Balanced",
+          ...BALANCED,
           // No guide recipe: the cheapest route the planner found (pinned for stable regeneration).
           route: [
             "classic-gun",
@@ -265,7 +275,7 @@ export const plansConfig = {
       // Flamingo, the best Spheda club: no guide recipe, so the route is searched.
       targets: ["flamingo"],
       variants: [
-        { id: "balanced", objective: "abs", flow: "progression", label: "Balanced" },
+        { id: "balanced", objective: "abs", flow: "progression", label: "Balanced", ...BALANCED },
         {
           id: "earliest",
           objective: "abs",

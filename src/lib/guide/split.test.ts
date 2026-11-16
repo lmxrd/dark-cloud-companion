@@ -3,8 +3,30 @@ import { STAT_KEYS } from "@/lib/schemas";
 import { readPlanFiles } from "../../../scripts/planner/plan-files";
 import { deriveBuild } from "./derive";
 import { splitStepsEarly } from "./split";
+import type { Guide } from "./types";
 
-const story = readPlanFiles().filter((f) => !f.spec?.endsWith("/gilda-max"));
+/**
+ * The committed plans are already split (the generator splits them), so the test first joins each
+ * run of work steps on one weapon back into its last step, as the solver gave it.
+ */
+function unsplit(guide: Guide): Guide {
+  const steps: Guide["steps"] = [];
+  for (const s of guide.steps) {
+    const prev = steps[steps.length - 1];
+    if (s.build && prev?.build && prev.build.weaponId === s.build.weaponId) {
+      steps[steps.length - 1] = {
+        ...s,
+        build: { ...s.build, synths: [...prev.build.synths, ...s.build.synths] },
+      };
+    } else steps.push(s);
+  }
+  return { ...guide, steps };
+}
+
+const story = readPlanFiles()
+  .filter((f) => !f.spec?.endsWith("/gilda-max"))
+  .map((f) => ({ ...f, guide: unsplit(f.guide) }))
+  .filter((f) => deriveBuild(f.guide).errors.length === 0);
 const chapter = (id?: string) => Number(id ?? 8);
 
 describe("splitting work steps by chapter", () => {
