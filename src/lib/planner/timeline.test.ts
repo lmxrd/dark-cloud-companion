@@ -34,6 +34,16 @@ describe("placing plan stages on the story", () => {
     expect(placed.map((p) => p.sectionId)).toEqual(["battle-with-rats", "battle-with-rats"]);
   });
 
+  it("a stage with the solver's chapter is done in that chapter: not before, and not after", () => {
+    const free = { abs: 0, gilda: 0 };
+    const [early] = placeStages([free], [0], undefined, "story", [5]);
+    expect(core.sections[index(early.sectionId)].chapterNumber).toBe(5);
+    // Too costly for the story by then: still that chapter, the rest is ground.
+    const [late] = placeStages([{ abs: 1e9, gilda: 0 }], [0], undefined, "story", [3]);
+    expect(late.chapter).toBe(3);
+    expect(late.grindAbs).toBeGreaterThan(0);
+  });
+
   it("gilda the story hasn't paid yet has to be farmed in the earliest flow", () => {
     const [placed] = placeStages([{ abs: 0, gilda: 1_000_000 }], [0], undefined, "earliest");
     expect(placed.grindGilda).toBe(1_000_000 - (core.sections[0].gilda ?? 0));

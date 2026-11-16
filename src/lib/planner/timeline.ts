@@ -131,7 +131,10 @@ export function placeStages(
   unlocks: number[],
   acquire: Acquire | undefined,
   flow: Flow,
-  /** Chapter each stage must be done by (the story flow stops waiting there and grinds the rest). */
+  /**
+   * The chapter each stage is done in (the solver's, for story plans): it starts there at the
+   * earliest, and the story flow stops waiting at its end and grinds the rest.
+   */
   deadlines?: number[],
 ): PlacedStage[] {
   let t = acquire && acquire.kind !== "have" ? fromChapter(acquire.chapter) : 0;
@@ -143,10 +146,11 @@ export function placeStages(
   let gildaSpent = 0;
   const gildaAt = (i: number) => gildaUpTo[i] + gildaGround - gildaSpent;
   return cost.map(({ abs, gilda }, i) => {
-    let at = Math.max(t, unlocks[i]);
+    const deadline = deadlines?.[i];
+    // A stage with a chapter of its own (the solver's) is done in that chapter, not before.
+    let at = Math.max(t, unlocks[i], deadline === undefined ? 0 : fromChapter(deadline));
     if (flow === "story") {
       // Wait for the ABS and gilda, as long as the story (or the stage's chapter) has sections left.
-      const deadline = deadlines?.[i];
       const last =
         deadline === undefined
           ? lastIndex
