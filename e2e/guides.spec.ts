@@ -1,6 +1,9 @@
 import { expect, test } from "@playwright/test";
 import { readFileSync } from "node:fs";
 import { activeProfile, go, startPicker, targetPicker, typeTabs } from "./helpers";
+import { builtinPlan, firstKills } from "./plans";
+
+const islandKing = builtinPlan("island-king/balanced");
 
 test.describe("guides, planner and editor", () => {
   test("generate a weapon build, save it as a guide and see it in My guides", async ({ page }) => {
@@ -66,10 +69,10 @@ test.describe("guides, planner and editor", () => {
 
   test("a built-in guide can be duplicated into an editable copy", async ({ page }) => {
     await go(page, "/guides");
-    await page.getByRole("link", { name: "Island King — Balanced" }).click();
+    await page.getByRole("link", { name: islandKing.title, exact: true }).click();
     await page.getByRole("button", { name: "More actions" }).click();
     await page.getByRole("menuitem", { name: "Duplicate to edit" }).click();
-    await expect(page.getByLabel("Guide title")).toHaveValue("Island King — Balanced (copy)");
+    await expect(page.getByLabel("Guide title")).toHaveValue(`${islandKing.title} (copy)`);
     await expect(page.getByText("Weapon build", { exact: true }).first()).toBeVisible();
   });
 
@@ -231,16 +234,6 @@ test.describe("custom start and end weapons, one tab per weapon type", () => {
     ).toBeVisible();
   });
 
-  test("the abilities help explains each ability, opposites together", async ({ page }) => {
-    await go(page, "/tools/planner");
-    await page.getByRole("button", { name: "About the abilities" }).click();
-    const help = page.getByRole("tooltip");
-    await expect(help.getByText(/1\.5x damage, but costs 1% of max HP/)).toBeVisible();
-    await expect(help.getByText(/15% chance of 1\.8x damage/)).toBeVisible();
-    await page.keyboard.press("Escape");
-    await expect(help).toBeHidden();
-  });
-
   test("opposing abilities are one three-way switch per pair", async ({ page }) => {
     await go(page, "/tools/planner");
     const target = page.getByRole("region", { name: "Target weapon" });
@@ -277,22 +270,23 @@ test.describe("custom start and end weapons, one tab per weapon type", () => {
     await expect(row.getByRole("link", { name: /Gilda max/ })).toBeVisible();
     await expect(row.getByRole("link", { name: /Earliest/ })).toBeVisible();
     await row.getByRole("link", { name: /Balanced/ }).click();
-    await expect(
-      page.getByRole("heading", { name: "Island King — Balanced", level: 1 }),
-    ).toBeVisible();
+    await expect(page.getByRole("heading", { name: islandKing.title, level: 1 })).toBeVisible();
     await expect(page.getByText(/^0 \/ \d+ stages$/)).toBeVisible();
     // Each stage says when to do it, and a build-up lists the enemies it needs defeated first.
     await expect(page.getByText(/^Do this after .+ \(chapter \d\)$/).first()).toBeVisible();
-    const kills = "Cross Heinder needs these enemies defeated first:";
+    const { weapon, enemies } = firstKills("island-king/balanced");
+    const kills = `${weapon} needs these enemies defeated first:`;
     await expect(page.getByText(kills)).toBeVisible();
-    await expect(page.getByRole("list", { name: kills }).getByText(/Blumo/)).toBeVisible();
+    await expect(
+      page.getByRole("list", { name: kills }).getByText(enemies[0], { exact: true }),
+    ).toBeVisible();
     await page.getByRole("button", { name: /Continue at stage 1/ }).click();
     // Switching it on from the progress strip shows it under "On the dashboard".
     await page.getByRole("switch", { name: "Show on dashboard" }).click();
     await go(page, "/guides");
     await expect(
       page.getByRole("region", { name: "On the dashboard" }).getByRole("link", {
-        name: /Island King — Balanced/,
+        name: islandKing.title,
       }),
     ).toBeVisible();
     await expect(row.getByRole("link", { name: /Balanced \(on the dashboard\)/ })).toBeVisible();

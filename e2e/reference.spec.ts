@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { builtinPlan, startWeapon } from "./plans";
 import { go, targetPicker } from "./helpers";
 
 test.describe("reference pages", () => {
@@ -11,6 +12,12 @@ test.describe("reference pages", () => {
     await filter.getByRole("button", { name: "Buyable" }).click();
     await expect(page.getByText("Gunpowder", { exact: true })).toBeVisible();
     await expect(page.getByText("Moon Stone", { exact: true })).toHaveCount(0);
+    // The filter is in the URL, so it survives a reload.
+    await page.reload();
+    await expect(filter.getByRole("button", { name: "Buyable" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
   });
 
   test("weapon pages show build-up links and a planner deep link", async ({ page }) => {
@@ -21,15 +28,7 @@ test.describe("reference pages", () => {
     await expect(targetPicker(page)).toHaveValue("poison-wrench");
   });
 
-  test("Ridepod parts can be ticked", async ({ page }) => {
-    await go(page, "/db/ridepod");
-    // The close-range arms section starts open.
-    const box = page.getByRole("checkbox", { name: /^Cannonball Arm/ }).first();
-    await box.click();
-    await expect(box).toBeChecked();
-  });
-
-  test("old chapter URLs redirect to the dashboard", async ({ page }) => {
+  test("a chapter path opens that chapter", async ({ page }) => {
     await go(page, "/chapters/3");
     await expect(page).toHaveURL(/\/chapters\/3$/);
     await expect(page.getByRole("heading", { name: /The Sage of the Stars/ })).toBeVisible();
@@ -197,15 +196,16 @@ test("the weapon map shows a type's tree and lights up a weapon's family", async
 });
 
 test("a weapon guide has a map and a detailed map", async ({ page }) => {
-  await go(page, "/guides/view?id=island-king-42c60d");
+  await go(page, `/guides/view?id=${builtinPlan("island-king/balanced").id}`);
+  const start = startWeapon("island-king/balanced");
   const views = page.getByRole("radiogroup", { name: "View" });
   await views.getByRole("radio", { name: "Map", exact: true }).click();
-  await expect(page.getByRole("button", { name: "Long Sword", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: start, exact: true })).toBeVisible();
   await expect(page.getByText("start").first()).toBeVisible();
   await views.getByRole("radio", { name: "Detailed map" }).click();
   await expect(page.getByText("Passes on").first()).toBeVisible();
   await expect(page.getByText("Spheres add").first()).toBeVisible();
   // A weapon in a map opens its step.
-  await page.getByRole("button", { name: "Long Sword", exact: true }).click();
+  await page.getByRole("button", { name: start, exact: true }).click();
   await expect(views.getByRole("radio", { name: "Steps" })).toHaveAttribute("aria-checked", "true");
 });

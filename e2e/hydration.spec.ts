@@ -1,5 +1,8 @@
 import { expect, test } from "@playwright/test";
 import { go } from "./helpers";
+import { builtinPlan } from "./plans";
+
+const weaponGuide = builtinPlan("grade-zero/balanced").id;
 
 /** A profile with progress, so islands render something different from the server's defaults. */
 const profile = (id: string, name: string) => ({
@@ -13,13 +16,15 @@ const profile = (id: string, name: string) => ({
     "club:turkey": true,
   },
   view: { hideDone: true, hidePostgame: false, showFacts: false, buyableOnly: true },
-  activeGuides: ["main", "grade-zero-max-abs"],
+  activeGuides: ["main", weaponGuide],
   guides: [],
   dashboard: { view: "chapter", currentChapter: "c2" },
 });
 
 const pages = [
   "/",
+  `/guides/view?id=${weaponGuide}`,
+  `/guides/view?id=${weaponGuide}&view=map`,
   "/overview",
   "/by-guide",
   "/chapters/3",

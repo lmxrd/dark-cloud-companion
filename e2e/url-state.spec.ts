@@ -64,13 +64,6 @@ test.describe("navigation state in the URL", () => {
     await expect(page.getByLabel("Search weapons")).toHaveValue("blade");
   });
 
-  test("item filters survive a reload", async ({ page }) => {
-    await go(page, "/db/items?kind=found");
-    await expect(
-      page.getByRole("group", { name: "Get" }).getByRole("button", { name: "Found" }),
-    ).toHaveAttribute("aria-pressed", "true");
-  });
-
   test("the planner's editor tab is a path", async ({ page }) => {
     await go(page, "/tools/planner");
     await page.getByRole("tab", { name: /Create/ }).click();

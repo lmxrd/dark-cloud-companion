@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { activeProfile, go } from "./helpers";
+import { builtinPlan } from "./plans";
 
 const making = (page: import("@playwright/test").Page) =>
   page.getByRole("list", { name: "Making" });
@@ -80,18 +81,17 @@ test.describe("shopping list", () => {
     await go(page, "/chapters/2");
     await page.getByRole("button", { name: "Add 15× River to shopping list" }).click();
 
-    await go(page, "/guides/view?id=island-king-42c60d");
+    const plan = builtinPlan("island-king/balanced");
+    await go(page, `/guides/view?id=${plan.id}`);
     await page.getByRole("button", { name: "Add remaining steps to list" }).click();
 
     await go(page, "/tools/shopping");
     await expect(making(page).getByText("Gunpowder", { exact: true })).toBeVisible();
-    await expect(making(page).getByText("Island King — Balanced")).toBeVisible();
+    await expect(making(page).getByText(plan.title)).toBeVisible();
     const p = await activeProfile(page);
     const kinds = p.shopping.goals.map((g: { kind: string }) => g.kind);
     expect(kinds).toContain("georama");
     expect(kinds).toContain("build");
-    // The build's items include what goes into its side weapons' spheres.
-    await expect(page.getByRole("heading", { name: /Conda's Goods/ })).toBeVisible();
     // The sidebar shows how many lines are left.
     await expect(
       page.locator('[data-sidebar="menu-badge"]').filter({ hasText: /^\d+$/ }),

@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { go } from "./helpers";
+import { builtinPlan } from "./plans";
 
 test.describe("sidebar shell", () => {
   test("section sub-items link to their pages", async ({ page }) => {
@@ -72,7 +73,7 @@ test.describe("sidebar shell", () => {
 
   test("a guide page marks at most one Guides sub-item", async ({ page }) => {
     const sidebar = page.locator('[data-slot="sidebar"]');
-    await go(page, "/guides/view?id=grade-zero-max-abs");
+    await go(page, `/guides/view?id=${builtinPlan("grade-zero/balanced").id}`);
     await expect(sidebar.locator('[data-slot="sidebar-menu-sub-button"][data-active]')).toHaveCount(
       0,
     );

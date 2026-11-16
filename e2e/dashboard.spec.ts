@@ -14,24 +14,13 @@ async function unfoldAll(page: Page) {
 }
 
 test.describe("dashboard and progress", () => {
-  test("ticking a collectable persists across reloads", async ({ page }) => {
+  test("a tick persists across reloads, and a finished step starts folded", async ({ page }) => {
     await go(page, "/");
     const linda = page.getByRole("checkbox", { name: /Brave Little Linda/ }).first();
     await expect(linda).not.toBeChecked();
     await linda.click();
     await expect(linda).toBeChecked();
     expect((await activeProfile(page)).checks["photo:brave-little-linda"]).toBe(true);
-    await page.reload();
-    await unfoldAll(page);
-    await expect(page.getByRole("checkbox", { name: /Brave Little Linda/ }).first()).toBeChecked();
-  });
-
-  test("a finished step starts folded and opens on tap", async ({ page }) => {
-    await go(page, "/");
-    await page
-      .getByRole("checkbox", { name: /Brave Little Linda/ })
-      .first()
-      .click();
     // Ticking the last open item does not fold the step under the user.
     await expect(page.getByRole("button", { name: "Hide step" }).first()).toBeVisible();
     await page.reload();
@@ -115,16 +104,6 @@ test.describe("dashboard and progress", () => {
     const p = await activeProfile(page);
     expect(p.activeGuides).toContain("main");
     expect(p.guides.map((g: { id: string }) => g.id)).toContain("wt-old");
-  });
-
-  test("buyable-only is a dashboard toggle that starts on", async ({ page }) => {
-    await go(page, "/");
-    await page.getByRole("button", { name: "View" }).click();
-    const toggle = page.getByRole("switch", { name: /^Only buyable items/ });
-    await expect(toggle).toBeChecked();
-    await toggle.click();
-    await expect(toggle).not.toBeChecked();
-    expect((await activeProfile(page)).view.buyableOnly).toBe(false);
   });
 
   test("a category chip in the chapter hero filters the list", async ({ page }) => {

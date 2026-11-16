@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { go } from "./helpers";
+import { builtinPlan } from "./plans";
 
 const pages = [
   "/",
@@ -24,7 +25,7 @@ const pages = [
   "/db/trophies",
   "/db/weapons?view=table",
   "/db/weapons?type=sword&view=map",
-  "/guides/view?id=island-king-42c60d&view=detailed",
+  `/guides/view?id=${builtinPlan("island-king/balanced").id}&view=detailed`,
   "/db/items/treasure-chest-key",
   "/db/bestiary/arthur",
   "/db/floors/frightening-forest",
