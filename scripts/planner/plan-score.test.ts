@@ -3,7 +3,7 @@ import { plansConfig } from "./plans.config";
 import { expandPlans, parsePlansConfig } from "./plans-config";
 import flamingoRaw from "../../src/lib/guide/fixtures/story-flamingo.json";
 import type { Guide } from "../../src/lib/guide/types";
-import { compareScores, scorePlan, storyCost, type PlanScore } from "./plan-score";
+import { compareScores, scoreAll, scorePlan, storyCost, type PlanScore } from "./plan-score";
 import { planOne } from "./plan-one";
 
 const specs = expandPlans(parsePlansConfig(plansConfig));
@@ -45,6 +45,17 @@ describe("scoring generated plans", () => {
       [0, 8, 20, 30000],
       [1, 7, 20, 1],
     ]);
+  });
+
+  test("plans compared together use one delay formula, even if one has no solver values", () => {
+    const solution = { chain: [], values: { vZ0_2: 1, vZ1_5: 1 } };
+    const [withValues, without] = scoreAll(
+      [{ guide: flamingo, solution }, { guide: flamingo }],
+      flamingoSpec,
+    );
+    expect(withValues.score.cost).toBe(without.score.cost);
+    const [alone] = scoreAll([{ guide: flamingo, solution }], flamingoSpec);
+    expect(alone.score.cost).toBe(scorePlan(flamingo, flamingoSpec, solution).cost);
   });
 
   test("story plans compare by their story cost first", () => {

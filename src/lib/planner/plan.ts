@@ -886,7 +886,12 @@ export async function planPath(
     // The incumbent best cost prunes every branch that is not an improvement.
     const cutoff = bestKey < Infinity ? bestKey : undefined;
     // If the coins don't fit in the SP left over, retry with a larger reserve.
-    let r: Awaited<ReturnType<typeof solveChain>> | undefined;
+    let r: SolveResult | undefined;
+    /**
+     * The solve that gave `plan`. A retry that finds nothing leaves `r` without a plan while `plan`
+     * is still the earlier try's, so its value, chapters and solver values are kept from here.
+     */
+    let found: SolveResult | undefined;
     let plan: Plan | undefined;
     let sim: ReturnType<typeof simulatePlan> | undefined;
     let missing: AbilityId[] = [];
@@ -954,6 +959,7 @@ export async function planPath(
         break;
       }
       plan = r.plan;
+      found = r;
       missing = [];
       if (wanted.length) {
         const withCoins = addAbilities(
@@ -981,7 +987,7 @@ export async function planPath(
       // The model's sphere-transfer estimate can leave the finished weapon a point short; top it up
       // with items while it has SP left.
       if (!sim.errors.length && goalInputs.finalStats) {
-        const lastChapter = r.stageChapters?.at(-1) ?? req.maxChapter;
+        const lastChapter = found.stageChapters?.at(-1) ?? req.maxChapter;
         const topped = topUpFinal(
           plan,
           sim.state,
@@ -999,6 +1005,8 @@ export async function planPath(
       if (!sim.errors.length && !(prog && finalShort(sim.state, goalInputs.finalStats))) break;
     }
     if (!plan || !sim) continue;
+    // A retry that found nothing doesn't make this chain "skipped": its earlier plan is used.
+    if (found) o.status = found.status;
     solved++;
     // The simulator starts from an already-owned weapon; obtaining it is part of the plan's cost.
     sim.cost.gilda += acquireGilda(candidate.acquire);
@@ -1014,8 +1022,8 @@ export async function planPath(
     // Following the story, chains compare by the model's own objective: it is what the LP bounds
     // and the next solve's cutoff are in (effort-weighted ABS, delay, early stats, floors, ...).
     const key =
-      prog && r?.value !== undefined
-        ? r.value + acquireOffset(candidate.acquire, req.objective)
+      prog && found?.value !== undefined
+        ? found.value + acquireOffset(candidate.acquire, req.objective)
         : primary + 1e-3 * (req.objective === "abs" ? sim.cost.gilda : sim.cost.abs);
     if (key < bestKey) {
       bestKey = key;
@@ -1025,8 +1033,8 @@ export async function planPath(
         simulation: sim,
         missing,
         acquire: candidate.acquire,
-        ...(r?.stageChapters ? { stageChapters: r.stageChapters } : {}),
-        ...(r?.solution ? { solution: { chain: exactChain, values: r.solution } } : {}),
+        ...(found?.stageChapters ? { stageChapters: found.stageChapters } : {}),
+        ...(found?.solution ? { solution: { chain: exactChain, values: found.solution } } : {}),
       };
     }
   }

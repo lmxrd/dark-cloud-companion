@@ -150,6 +150,10 @@ export function solverChapters(solution?: SavedSolution): number[] | undefined {
   return chapters.length && !chapters.includes(undefined as never) ? chapters : undefined;
 }
 
+/**
+ * Scores a plan. `solution` gives the solver's stage chapters for the story cost's delay; plans that
+ * are compared with each other must all be scored with it or all without (`scoreAll`).
+ */
 export function scorePlan(guide: Guide, spec: PlanSpec, solution?: SavedSolution): PlanScore {
   const d = deriveBuild(guide);
   const problems = [...d.errors, ...[...d.steps.values()].flatMap((s) => s.errors)];
@@ -182,6 +186,22 @@ export function scorePlan(guide: Guide, spec: PlanSpec, solution?: SavedSolution
         }
       : {}),
   };
+}
+
+/**
+ * Scores plans to compare them. The story cost's delay is spread over the solver's stages when
+ * every plan has its solver values, and over the guide's work steps otherwise (an older plan saved
+ * without them): one formula for all, or the costs aren't comparable.
+ */
+export function scoreAll<T extends { guide: Guide; solution?: SavedSolution }>(
+  plans: T[],
+  spec: PlanSpec,
+): (T & { score: PlanScore })[] {
+  const all = plans.every((p) => solverChapters(p.solution));
+  return plans.map((p) => ({
+    ...p,
+    score: scorePlan(p.guide, spec, all ? p.solution : undefined),
+  }));
 }
 
 /**

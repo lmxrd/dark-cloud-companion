@@ -1,5 +1,5 @@
 // Generates the predefined plans (built-in guides), configured in scripts/planner/plans.config.ts.
-// Each plan is committed as data/generated/plans/<guide id>.json ({ name, spec, guide }; see
+// Each plan is committed as data/generated/plans/<guide id>.json ({ name, spec, guide, solution }; see
 // plan-files.ts). Plans are solved only when asked: a generated plan is reviewed, committed and
 // from then on independent of the code (builds and tests only assemble the files, see
 // integrations/plans.ts). Re-generating a plan keeps its guide id.
@@ -15,8 +15,9 @@
 //   --replace                         keep the ids but don't compare with the committed plans
 //                                     (after a change of settings, to take the new runs' best)
 // Each plan is solved `--runs` times (the solver stops at a time limit, so runs differ a little);
-// the best run and the committed plan are compared (plan-score.ts: valid, earliest finish, least
-// ABS, earliest pace, least gilda) and the committed file only changes when a run is better.
+// the best run and the committed plan are compared (plan-score.ts: valid, then for story plans the
+// least story cost, then earliest finish, least effort, least ABS, earliest pace, least gilda) and
+// the committed file only changes when a run is better.
 // The runs are spread over parallel worker processes (the script runs itself with --worker).
 import { spawn } from "node:child_process";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
@@ -27,7 +28,7 @@ import { plansConfig } from "./plans.config.ts";
 import { expandPlans, parsePlansConfig } from "./plans-config.ts";
 import { planOne } from "./plan-one.ts";
 import { newGuideId, planPath, readPlanFiles, type PlanFile } from "./plan-files.ts";
-import { compareScores, scorePlan, scoreText } from "./plan-score.ts";
+import { compareScores, scoreAll, scoreText } from "./plan-score.ts";
 import type { Guide } from "../../src/lib/guide/types.ts";
 import type { SavedSolution } from "../../src/lib/planner/plan.ts";
 
@@ -146,7 +147,7 @@ async function main(args: string[]) {
             }),
           });
       }
-      const scored = candidates.map((c) => ({ ...c, score: scorePlan(c.guide, spec, c.solution) }));
+      const scored = scoreAll(candidates, spec);
       scored.sort((a, b) => compareScores(a.score, b.score));
       console.log(`  ${spec.id}:`);
       for (const c of scored) console.log(`    ${c.label.padEnd(9)} ${scoreText(c.score)}`);
