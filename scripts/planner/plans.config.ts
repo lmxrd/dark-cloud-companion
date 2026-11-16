@@ -50,15 +50,16 @@ export const plansConfig = {
           flow: "progression",
           label: "Balanced",
           ...BALANCED,
-          // The weapon guide's "evil sword" route: Poison, Absorb and Dark come with it, no slow
-          // 4-hit swords before the Island King, and Griffon Fork on the way is a fine stop.
+          // A route test beat the weapon guide's "evil sword" route (Bone Rapier → Evilcise → …
+          // → Griffon Fork) by 12% in story cost, at the same ABS: one of the longest chains.
           route: [
-            "bone-rapier",
-            "evilcise",
-            "drain-seeker",
-            "sargatanas",
-            "dark-excalibur",
-            "griffon-fork",
+            "long-sword",
+            "broad-sword",
+            "sax",
+            "brave-ark",
+            "rulers-sword",
+            "cross-heinder",
+            "sword-of-zeus",
             "island-king",
           ],
         },
@@ -214,12 +215,13 @@ export const plansConfig = {
           flow: "progression",
           label: "Balanced",
           ...BALANCED,
-          // No guide recipe: the cheapest route the planner found (pinned for stable regeneration).
+          // No guide recipe: the best of a route test over every chain (23% under the next best
+          // tried), through Thorn Armlet for ABS Up in chapter 3.
           route: [
             "magic-brassard",
             "bandit-brassard",
-            "crystal-brassard",
-            "platinum-brassard",
+            "thorn-armlet",
+            "pocklekul",
             "athenas-armlet",
             "sun-armlet",
             "mobius-bangle",

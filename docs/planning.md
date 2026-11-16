@@ -283,8 +283,11 @@ weapon guide's recipes have the same shape (Island King: +6, +5, +3, +2, +2, +2,
 
 Configured in `scripts/planner/plans.config.ts`, keyed `<target>/<variant>`, three per final weapon:
 
-- **Balanced** (`<target>/balanced`): follows the story by the rules above, mostly on the weapon
-  guide's route (Love, Last Resort and Sigma Bazooka on the route a free search found).
+- **Balanced** (`<target>/balanced`): follows the story by the rules above, on a pinned route:
+  mostly the weapon guide's (Last Resort and Sigma Bazooka on the route a free search found).
+  Routes were tested against the longest chains (15-minute solves, story cost): Island King's and
+  Love's winners replaced the guide's and the earlier search's routes (12% and 23% cheaper); the
+  others' guide routes won or were within noise.
 - **Earliest** (`<target>/earliest`): every step as soon as the story unlocks it, grinding as much
   ABS as it takes (`earliestSteps`: the ABS grind allowance is unlimited and a chapter's delay costs
   1,000,000, more than any plan's ABS), with the story rules otherwise (items and gilda by chapter,
