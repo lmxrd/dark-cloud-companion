@@ -1,5 +1,4 @@
 import { useStore } from "@nanostores/react";
-import { useEffect } from "react";
 import { useTranslations } from "@/i18n";
 import { $draft } from "@/lib/guide/draft";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -18,18 +17,9 @@ export function PlannerPage() {
   const t = useTranslations();
   // The tab is the path: /planner generates, /planner/editor edits guides.
   const href = useHref();
-  // Older links opened the editor with /planner?edit=<id> or /planner?new (the URL is fixed below).
-  const legacy = /[?&](edit|new)(=|&|$)/.test(href);
-  const tab: Tab =
-    legacy || stripBase(href.split("?")[0]).startsWith(PATHS.create) ? "create" : "generate";
+  const tab: Tab = stripBase(href.split("?")[0]).startsWith(PATHS.create) ? "create" : "generate";
   const setTab = (next: Tab) => navigate(withBase(PATHS[next]));
   const draft = useStore($draft);
-
-  useEffect(() => {
-    if (legacy && !stripBase(location.pathname).startsWith(PATHS.create))
-      navigate(withBase(PATHS.create) + location.search, { replace: true });
-    // oxlint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const tabs: { id: Tab; label: string }[] = [
     { id: "generate", label: t("planner.tab.generate") },

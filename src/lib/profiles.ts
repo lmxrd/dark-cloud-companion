@@ -1,16 +1,8 @@
-// Profile/state schema for the unified guide model (state version 3) and the migrations from older versions.
-// Version 1 lives in profiles-v1.ts and is only read for migration. Version 2 has the same shape as
-// version 3 but uses the ids from before game data came from drizzle/game.db (see gamedata/legacy.ts).
+// Profile/state schema (state version 3) and reading it back from storage and export files. Only
+// the current version is read: data from anything else counts as unreadable (see `loadState`).
 import { z } from "zod";
-import {
-  appState as appStateV1,
-  exportFile as exportFileV1,
-  type AppState as AppStateV1,
-  type Profile as ProfileV1,
-} from "./profiles-v1";
 import { buildStart, guide, MAIN_GUIDE_ID } from "./guide/types";
 import { abilityId, stats } from "@/lib/schemas";
-import { migrateChapterKey, migrateChecks, migrateGuide } from "./gamedata/legacy";
 
 export const STORAGE_KEY = "dcc:state";
 export const STATE_VERSION = 3;
@@ -24,42 +16,34 @@ export const viewSettings = z.object({
   /** Show section facts (enemies, totals, medals) inside steps. */
   showFacts: z.boolean(),
   /** Planning and build steps only use items that can be bought; found-only items are flagged. */
-  buyableOnly: z.boolean().default(true),
+  buyableOnly: z.boolean(),
 });
 
-/** The planner's last inputs, remembered per profile (current shape). */
-const plannerInputsData = z.object({
+/** The planner's last inputs, remembered per profile. */
+export const plannerInputs = z.object({
   targetId: z.string(),
   objective: z.enum(["abs", "gilda", "steps"]),
   maxChapter: z.number().int().min(1).max(8),
   budget: z.string(),
   abilities: z.array(abilityId),
   /** Which bought items the planner may use: everyday +2 items, or those plus crystals (and Knight Boots). */
-  itemPool: z.enum(["cheap", "crystals"]).default("cheap"),
+  itemPool: z.enum(["cheap", "crystals"]),
   /** How long the planner may work on each route (see SOLVE_SECONDS in the planner page). */
-  solveTime: z.enum(["quick", "thorough", "best", "excellent"]).default("quick"),
+  solveTime: z.enum(["quick", "thorough", "best", "excellent"]),
   /** Plan like the built-in guides: each step in a chapter, within what the story pays by then. */
-  story: z.boolean().default(false),
+  story: z.boolean(),
   /** Where the abilities come from: side weapons' spheres first, or whichever is cheaper (see the planner's AbilitySource). */
-  abilitySource: z.enum(["spheres", "cheapest"]).default("spheres"),
+  abilitySource: z.enum(["spheres", "cheapest"]),
   /** Whether the start weapon is chosen by the planner (the line's first weapon) or set by hand. */
-  customStart: z.boolean().default(false),
+  customStart: z.boolean(),
   /** Minimum stats and level required for the finished weapon; the UI prefills the target's max stats. */
-  endStats: stats.default({ at: 0, fl: 0, ch: 0, li: 0, cy: 0, sm: 0, ex: 0, be: 0, sc: 0 }),
-  endLevel: z.number().int().min(0).max(99).default(0),
+  endStats: stats,
+  endLevel: z.number().int().min(0).max(99),
   /** Start weapon and specs (also holds the support-character bonus). */
   start: buildStart.omit({ acquire: true }),
 });
 
-/** Planner inputs as stored today; inputs saved by older versions (startMode/goal/endMode fields) still load. */
-export const plannerInputs = z.preprocess((v) => {
-  if (v && typeof v === "object" && !("customStart" in v)) {
-    const old = v as Record<string, unknown>;
-    return { ...old, customStart: old.startMode === "custom" };
-  }
-  return v;
-}, plannerInputsData);
-export type PlannerInputs = z.infer<typeof plannerInputsData>;
+export type PlannerInputs = z.infer<typeof plannerInputs>;
 
 /** One thing the player wants to make; the shopping list is derived from these (see `src/lib/shopping.ts`). */
 export const shoppingGoal = z.discriminatedUnion("kind", [
@@ -109,8 +93,7 @@ export const profile = z.object({
     /** Chapter shown by the dashboard's chapter view ("1"…"8"); null follows progress. */
     currentChapter: z.string().nullable(),
   }),
-  /** Added after version 2 shipped; older profiles get an empty list. */
-  shopping: shopping.default(emptyShopping),
+  shopping,
 });
 export type Profile = z.infer<typeof profile>;
 
@@ -120,31 +103,6 @@ export const appState = z.object({
   profiles: z.record(z.string(), profile),
 });
 export type AppState = z.infer<typeof appState>;
-
-/** State version 2: same shape, old ids. */
-const appStateV2 = appState.extend({ version: z.literal(2) });
-type AppStateV2 = z.infer<typeof appStateV2>;
-
-/** Version 2 → 3: ticks, guide references and chapter keys move to the game-data ids. */
-export function migrateProfileV2(p: Profile): Profile {
-  return {
-    ...p,
-    checks: migrateChecks(p.checks),
-    guides: p.guides.map(migrateGuide),
-    dashboard: {
-      ...p.dashboard,
-      currentChapter: p.dashboard.currentChapter && migrateChapterKey(p.dashboard.currentChapter),
-    },
-  };
-}
-
-export const migrateStateV2 = (s: Pick<AppStateV2, "activeProfile" | "profiles">): AppState => ({
-  version: STATE_VERSION,
-  activeProfile: s.activeProfile,
-  profiles: Object.fromEntries(
-    Object.entries(s.profiles).map(([id, p]) => [id, migrateProfileV2(p)]),
-  ),
-});
 
 export function createProfile(name: string, now = Date.now()): Profile {
   return {
@@ -164,21 +122,9 @@ export function createProfile(name: string, now = Date.now()): Profile {
 
 /**
  * Why stored data could not be used as is: none of it could be read (`corrupt`), only some of the
- * profiles could (`partial`), it is from a newer version of the app (`newer`), or it is from the first
- * version and needs its converters (`v1`: load again with `loadV1Migration()`).
+ * profiles could (`partial`), or it is from a newer version of the app (`newer`).
  */
-export type LoadProblem = "corrupt" | "partial" | "newer" | "v1";
-
-/**
- * Converts version 1 data. Its converters rebuild weapons with the planner's data, which every page
- * would otherwise load: only the rare version 1 data loads them (`loadV1Migration`).
- */
-export interface V1Migration {
-  state: (s: AppStateV1) => AppState;
-  profile: (p: ProfileV1) => Profile;
-}
-export const loadV1Migration = (): Promise<V1Migration> =>
-  import("./profiles-migrate-v1").then((m) => m.v1Migration);
+export type LoadProblem = "corrupt" | "partial" | "newer";
 
 export interface LoadResult {
   state: AppState;
@@ -197,7 +143,7 @@ function withActiveProfile(s: AppState): AppState | null {
  * Reads stored state. Unreadable data and data from a newer version of the app come back as a fresh
  * state plus a `problem`, so the caller can keep the original (back it up, or not write over it).
  */
-export function loadState(raw: string | null, v1Migration?: V1Migration): LoadResult {
+export function loadState(raw: string | null): LoadResult {
   const fresh = () => initialState();
   if (!raw) return { state: fresh() };
   let data: unknown;
@@ -212,26 +158,10 @@ export function loadState(raw: string | null, v1Migration?: V1Migration): LoadRe
       : undefined;
   if (typeof version === "number" && version > STATE_VERSION)
     return { state: fresh(), problem: "newer" };
-  // A migration that fails on data its schema let through counts as unreadable, never as a crash.
-  try {
-    const v3 = appState.safeParse(data);
-    if (v3.success) {
-      const s = withActiveProfile(v3.data);
-      return s ? { state: s } : { state: fresh() };
-    }
-    const v2 = appStateV2.safeParse(data);
-    if (v2.success) {
-      const s = withActiveProfile(migrateStateV2(v2.data));
-      return s ? { state: s } : { state: fresh() };
-    }
-    const v1 = appStateV1.safeParse(data);
-    if (v1.success && Object.keys(v1.data.profiles).length > 0) {
-      if (!v1Migration) return { state: fresh(), problem: "v1" };
-      const migrated = withActiveProfile(v1Migration.state(v1.data));
-      if (migrated) return { state: migrated };
-    }
-  } catch {
-    return { state: fresh(), problem: "corrupt" };
+  const parsed = appState.safeParse(data);
+  if (parsed.success) {
+    const s = withActiveProfile(parsed.data);
+    return s ? { state: s } : { state: fresh() };
   }
   // One profile that doesn't parse must not cost the others: keep every one that does.
   const salvaged = salvageProfiles(data);
@@ -257,8 +187,7 @@ function salvageProfiles(data: unknown): AppState | null {
 }
 
 /** Stored state, or a fresh one when it can't be used (see `loadState` for the reason). */
-export const parseState = (raw: string | null, v1Migration?: V1Migration): AppState =>
-  loadState(raw, v1Migration).state;
+export const parseState = (raw: string | null): AppState => loadState(raw).state;
 
 export type ViewSettings = z.infer<typeof viewSettings>;
 
@@ -275,22 +204,10 @@ export const exportFile = z.object({
 });
 export type ExportFile = z.infer<typeof exportFile>;
 
-/** Reads a profile export of any version; older files are migrated (version 1 with `v1Migration`). */
-export function parseProfileExport(data: unknown, v1Migration?: V1Migration): ExportFile | null {
-  const v3 = exportFile.safeParse(data);
-  if (v3.success) return v3.data;
-  const v2 = exportFile.extend({ version: z.literal(2) }).safeParse(data);
-  if (v2.success)
-    return { ...v2.data, version: STATE_VERSION, profiles: v2.data.profiles.map(migrateProfileV2) };
-  const v1 = exportFileV1.safeParse(data);
-  if (v1.success && v1Migration) {
-    return {
-      app: "dark-chronicles-companion",
-      version: STATE_VERSION,
-      profiles: v1.data.profiles.map((p) => migrateProfileV2(v1Migration.profile(p))),
-    };
-  }
-  return null;
+/** Reads a profile export, or null when it isn't one of the current version. */
+export function parseProfileExport(data: unknown): ExportFile | null {
+  const parsed = exportFile.safeParse(data);
+  return parsed.success ? parsed.data : null;
 }
 
 /** Merge imported profiles into state. Same-id profiles are replaced; others added. */

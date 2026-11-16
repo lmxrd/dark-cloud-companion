@@ -37,7 +37,7 @@ test.describe("guides, planner and editor", () => {
   test("create a guide by hand: text step, checklist items and a referenced collectable", async ({
     page,
   }) => {
-    await go(page, "/tools/planner?new");
+    await go(page, "/tools/planner/editor?new");
     await page.getByLabel("Guide title").fill("My e2e guide");
     await page.getByRole("button", { name: "Create" }).click();
     await page.getByLabel("Step title").fill("Photos in town");
@@ -79,7 +79,7 @@ test.describe("guides, planner and editor", () => {
   test("export and import round-trips; importing the same file again changes nothing", async ({
     page,
   }) => {
-    await go(page, "/tools/planner?new");
+    await go(page, "/tools/planner/editor?new");
     await page.getByLabel("Guide title").fill("Round trip");
     await page.getByRole("button", { name: "Create" }).click();
     await page.getByRole("button", { name: "Save guide" }).click();
@@ -120,7 +120,7 @@ test("remembered planner inputs that point at unknown weapons are ignored instea
     localStorage.setItem(
       "dcc:state",
       JSON.stringify({
-        version: 2,
+        version: 3,
         activeProfile: id,
         profiles: {
           [id]: {
@@ -132,13 +132,19 @@ test("remembered planner inputs that point at unknown weapons are ignored instea
             activeGuides: ["main"],
             guides: [],
             dashboard: { view: "chapter", currentChapter: null },
+            shopping: { goals: [], have: {}, invent: [], group: "stops" },
             planner: {
               targetId: "no-such-weapon",
               objective: "abs",
               maxChapter: 3,
               budget: "",
               abilities: [],
+              itemPool: "cheap",
+              solveTime: "quick",
+              story: false,
+              abilitySource: "spheres",
               customStart: false,
+              endStats: stats,
               endLevel: 0,
               start: {
                 weaponId: "gone-weapon",

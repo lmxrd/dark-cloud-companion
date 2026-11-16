@@ -1,16 +1,6 @@
 import { describe, expect, test } from "vitest";
-import { weaponGuides } from "@/lib/guide/builtin";
-import {
-  createProfile as createProfileV1,
-  initialState as initialStateV1,
-} from "@/lib/profiles-v1";
-import legacyDrillWrench from "@/lib/guide/fixtures/legacy-drill-wrench.json";
-import { guide as legacyGuide } from "@/lib/guide/legacy-types";
 import { getWeapon } from "@/lib/planner/sources";
 import { freshState } from "@/lib/weapons/mechanics";
-import { emptyWalkthrough } from "@/lib/walkthroughs/types";
-import { deriveBuild } from "@/lib/guide/derive";
-import { migrateProfile, v1Migration } from "./profiles-migrate-v1";
 import {
   appState,
   createProfile,
@@ -19,82 +9,6 @@ import {
   loadState,
   parseState,
 } from "./profiles";
-
-/** A version 1 profile with a saved weapon guide (frozen as the old app stored it) and a walkthrough. */
-function legacyProfile() {
-  const p = createProfileV1("Old", 5);
-  const g = legacyGuide.parse(legacyDrillWrench);
-  const w = emptyWalkthrough("Route", 10);
-  w.steps = [
-    { id: "s1", chapterId: "c1", title: "T", notes: "", checklist: [{ id: "i1", text: "Clock" }] },
-  ];
-  return {
-    ...p,
-    customGuides: [g],
-    walkthroughs: [w],
-    activeGuides: ["custom-a", w.id, weaponGuides[0].id],
-    checks: {
-      "c1-scoop-brave-little-linda": true as const,
-      "guide:custom-a:s1": true as const,
-      [`wt:${w.id}:s1`]: true as const,
-      [`wt:${w.id}:s1:i1`]: true as const,
-    },
-    view: { ...p.view, hideDone: true },
-  };
-}
-
-describe("profile migration v1 -> v2", () => {
-  test("merges custom guides and walkthroughs into guides and rewrites ticks", async () => {
-    const old = await legacyProfile();
-    const next = migrateProfile(old);
-    expect(next.guides.map((g) => g.id)).toEqual(["custom-a", old.walkthroughs[0].id]);
-    expect(Object.keys(next.checks).sort()).toEqual(
-      [
-        "c1-scoop-brave-little-linda",
-        "g:custom-a:s1",
-        `g:${old.walkthroughs[0].id}:s1`,
-        `g:${old.walkthroughs[0].id}:s1:i1`,
-      ].sort(),
-    );
-    expect(next.view).toEqual({
-      hideDone: true,
-      hidePostgame: false,
-      showFacts: true,
-      buyableOnly: true,
-    });
-    // Main walkthrough on by default, existing toggles kept.
-    expect(next.activeGuides[0]).toBe("main");
-    expect(next.activeGuides).toContain("custom-a");
-    expect(next.dashboard).toEqual({ view: "chapter", currentChapter: null });
-  }, 60000);
-
-  test("the migrated build guide still derives without errors", async () => {
-    const next = migrateProfile(await legacyProfile());
-    const g = next.guides.find((x) => x.id === "custom-a")!;
-    expect(deriveBuild(g).errors).toEqual([]);
-  }, 60000);
-
-  test("a full v1 state parses into a valid v2 state; a v2 state round-trips; garbage resets", async () => {
-    const v1 = initialStateV1();
-    expect(loadState(JSON.stringify(v1)).problem).toBe("v1");
-    const migrated = parseState(JSON.stringify(v1), v1Migration);
-    expect(appState.safeParse(migrated).success).toBe(true);
-    expect(migrated.profiles[migrated.activeProfile].activeGuides).toContain("main");
-    expect(parseState(JSON.stringify(migrated))).toEqual(migrated);
-    expect(Object.keys(parseState("nope").profiles)).toHaveLength(1);
-  });
-});
-
-describe("buyable-only setting", () => {
-  test("defaults to on for new, migrated and older v2 profiles", () => {
-    expect(createProfile("x").view.buyableOnly).toBe(true);
-    const old = createProfile("old");
-    // A v2 state saved before the setting existed has no such key.
-    const { buyableOnly: _drop, ...view } = old.view;
-    const state = { version: 2, activeProfile: old.id, profiles: { [old.id]: { ...old, view } } };
-    expect(parseState(JSON.stringify(state)).profiles[old.id].view.buyableOnly).toBe(true);
-  });
-});
 
 describe("planner inputs", () => {
   test("are optional, validated and round-trip through state", async () => {
@@ -110,41 +24,20 @@ describe("planner inputs", () => {
         maxChapter: 7,
         budget: "15000",
         abilities: ["poison" as const],
+        itemPool: "cheap" as const,
+        solveTime: "quick" as const,
+        story: false,
+        abilitySource: "spheres" as const,
         customStart: false,
+        endStats: { at: 0, fl: 0, ch: 0, li: 0, cy: 0, sm: 0, ex: 0, be: 0, sc: 0 },
         endLevel: 0,
         start,
       },
     };
-    const state = { version: 2, activeProfile: p.id, profiles: { [p.id]: withInputs } };
+    const state = { version: 3, activeProfile: p.id, profiles: { [p.id]: withInputs } };
     const planner = parseState(JSON.stringify(state)).profiles[p.id].planner;
     expect(planner?.targetId).toBe("grade-zero");
     expect(planner?.customStart).toBe(false);
-    // Inputs remembered by an older version (startMode/goal/endMode) still load.
-    const legacy = parseState(
-      JSON.stringify({
-        ...state,
-        profiles: {
-          [p.id]: {
-            ...withInputs,
-            planner: {
-              targetId: "grade-zero",
-              baseGuideId: "",
-              objective: "abs",
-              goal: "max",
-              maxChapter: 7,
-              budget: "",
-              abilities: [],
-              startMode: "custom",
-              endMode: "existing",
-              start,
-            },
-          },
-        },
-      }),
-    ).profiles[p.id].planner;
-    expect(legacy?.customStart).toBe(true);
-    // Inputs saved before the ability source existed take side-weapon spheres.
-    expect(legacy?.abilitySource).toBe("spheres");
     // Invalid inputs make the whole state fall back rather than corrupt the planner.
     const bad = {
       ...state,
@@ -209,9 +102,9 @@ describe("loadState", () => {
     expect(r.state.profiles[p.id].planner).toBeUndefined();
   });
 
-  test("an old profile its migration can't convert is reported, not thrown", () => {
-    const old = { version: 2, activeProfile: "p", profiles: { p: { id: "p" } } };
-    expect(() => loadState(JSON.stringify(old))).not.toThrow();
+  test("data from an older version is unreadable (kept as a backup by the store)", () => {
+    const s = valid();
+    expect(loadState(JSON.stringify({ ...s, version: 2 })).problem).toBe("corrupt");
   });
 });
 
@@ -251,96 +144,9 @@ describe("profile import", () => {
   });
 });
 
-describe("profile migration v2 -> v3 (game-data ids)", () => {
-  const v2 = () => {
-    const p = createProfile("Old ids", 7);
-    p.checks = {
-      "c1-scoop-brave-little-linda": true,
-      "c1-rats:timeAttack": true,
-      "c2-recruit-parn-julia": true,
-      "c1-powerup-fruit-of-eden": true,
-      "ridepod:cannonball-arm": true,
-      "monster:beast:badge": true,
-      "g:custom:s1:t1": true,
-      "something-unknown": true,
-    };
-    p.dashboard.currentChapter = "c3";
-    p.guides = [
-      {
-        id: "custom",
-        title: "Mine",
-        kind: "custom",
-        steps: [
-          {
-            id: "s1",
-            title: "Step",
-            notes: "",
-            chapterId: "c1",
-            sectionId: "c1-rats",
-            entries: [
-              { kind: "text", id: "t1", text: "Clock" },
-              { kind: "item", ref: "c2-recruit-parn-julia" },
-              { kind: "section", ref: "c1-rats" },
-            ],
-          },
-        ],
-      },
-    ];
-    return { version: 2, activeProfile: p.id, profiles: { [p.id]: p } };
-  };
-
-  test("ticks, guide references and chapter keys move to the new ids; unknown ticks stay", () => {
-    const { state, problem } = loadState(JSON.stringify(v2()));
-    expect(problem).toBeUndefined();
-    expect(state.version).toBe(3);
-    const p = Object.values(state.profiles)[0];
-    expect(Object.keys(p.checks).sort()).toEqual(
-      [
-        "photo:brave-little-linda",
-        "medal:battle-with-rats:time-attack",
-        "recruit:parn",
-        "recruit:julia",
-        "pickup:1",
-        "part:cannonball-arm",
-        "badge:beast",
-        "g:custom:s1:t1",
-        "something-unknown",
-      ].sort(),
-    );
-    expect(p.dashboard.currentChapter).toBe("3");
-    const step = p.guides[0].steps[0];
-    expect(step.chapterId).toBe("1");
-    expect(step.sectionId).toBe("battle-with-rats");
-    expect(step.entries).toEqual([
-      { kind: "text", id: "t1", text: "Clock" },
-      { kind: "item", ref: "recruit:parn" },
-      { kind: "item", ref: "recruit:julia" },
-      { kind: "section", ref: "battle-with-rats" },
-    ]);
-  });
-
-  test("migrating twice changes nothing", () => {
-    const once = loadState(JSON.stringify(v2())).state;
-    expect(loadState(JSON.stringify(once)).state).toEqual(once);
-  });
-});
-
 describe("shopping list state", () => {
-  test("older v2 profiles without a shopping list load with an empty one", () => {
-    const p = createProfile("Old v2");
-    const { shopping: _drop, ...older } = p;
-    const raw = JSON.stringify({ version: 2, activeProfile: p.id, profiles: { [p.id]: older } });
-    expect(parseState(raw).profiles[p.id].shopping).toEqual({
-      goals: [],
-      have: {},
-      invent: [],
-      group: "stops",
-    });
-  });
-
-  test("new and migrated profiles start empty; goals round-trip", async () => {
+  test("new profiles start empty; goals round-trip", () => {
     expect(createProfile("New").shopping.goals).toEqual([]);
-    expect(migrateProfile(await legacyProfile()).shopping.goals).toEqual([]);
     const p = createProfile("Shopper");
     p.shopping = {
       goals: [

@@ -10,15 +10,16 @@ const profile = (id: string, name: string) => ({
   name,
   createdAt: 1,
   checks: {
-    "c1-scoop-brave-little-linda": true,
-    "ridepod:cannonball-arm": true,
-    "monster:flora:badge": true,
-    "club:turkey": true,
+    "photo:brave-little-linda": true,
+    "part:cannonball-arm": true,
+    "badge:flora": true,
+    "weapon:turkey": true,
   },
   view: { hideDone: true, hidePostgame: false, showFacts: false, buyableOnly: true },
   activeGuides: ["main", weaponGuide],
   guides: [],
-  dashboard: { view: "chapter", currentChapter: "c2" },
+  dashboard: { view: "chapter", currentChapter: "2" },
+  shopping: { goals: [], have: {}, invent: [], group: "stops" },
 });
 
 const pages = [
@@ -28,7 +29,7 @@ const pages = [
   "/overview",
   "/by-guide",
   "/chapters/3",
-  "/?chapter=c3&cat=medal&q=a",
+  "/chapters/3?cat=medal&q=a",
   "/guides?q=zero",
   "/db/weapons?type=sword&finals=1&sort=abs&q=a",
   "/db/items?kind=found&gives=at&q=a",
@@ -52,7 +53,7 @@ const pages = [
 test.describe("saved progress", () => {
   test.beforeEach(async ({ page }) => {
     await page.addInitScript((s) => localStorage.setItem("dcc:state", JSON.stringify(s)), {
-      version: 2,
+      version: 3,
       activeProfile: "p1",
       profiles: { p1: profile("p1", "Alpha"), p2: profile("p2", "Beta") },
     });

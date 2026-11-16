@@ -1,21 +1,7 @@
-import { fromLegacyGuide, fromLegacyWalkthrough } from "@/lib/guide/legacy";
-import { guide as legacyGuide } from "@/lib/guide/legacy-types";
-import { walkthrough as legacyWalkthrough } from "@/lib/walkthroughs/types";
-import { z } from "zod";
-import { CONTENT_VERSION, contentFile, type ContentFile } from "./content-file";
-import { migrateGuide } from "./gamedata/legacy";
+import { contentFile, type ContentFile } from "./content-file";
 import { validateGuide } from "./content-validate";
 
 export type ParseResult = { ok: true; file: ContentFile } | { ok: false; error: string };
-
-/** Version 1 content files (separate build guides and walkthroughs) are converted to unified guides. */
-const legacyContent = z.object({
-  app: z.literal("dark-chronicles-companion"),
-  kind: z.literal("content"),
-  version: z.literal(1),
-  guides: z.array(legacyGuide).default([]),
-  walkthroughs: z.array(legacyWalkthrough).default([]),
-});
 
 /** Parses and deeply validates an imported file. Nothing is returned unless every guide is valid. */
 export function parseContentImport(json: string): ParseResult {
@@ -28,52 +14,12 @@ export function parseContentImport(json: string): ParseResult {
   if (typeof data === "object" && data !== null && "profiles" in data) {
     return { ok: false, error: "This is a profile export. Import it under Settings → Profiles." };
   }
-  let file: ContentFile | undefined;
-  try {
-    file = readContent(data);
-  } catch {
-    // An older file that its schema let through but that can't be converted (e.g. an unknown weapon).
-    return { ok: false, error: "This file has guides that can't be read" };
-  }
-  if (!file) return { ok: false, error: "Not a Dark Chronicles Companion guides export" };
+  const parsed = contentFile.safeParse(data);
+  if (!parsed.success) return { ok: false, error: "Not a Dark Chronicles Companion guides export" };
+  const file = parsed.data;
   const errors = file.guides.flatMap((g) =>
     validateGuide(g).map((e) => `Guide "${g.title}": ${e}`),
   );
   if (errors.length) return { ok: false, error: errors.slice(0, 5).join("\n") };
   return { ok: true, file };
-}
-
-/** A content file of any version, converted to the current one (undefined: not a content file). */
-function readContent(data: unknown): ContentFile | undefined {
-  let file: ContentFile | undefined;
-  const v3 = contentFile.safeParse(data);
-  const v2 = contentFile.extend({ version: z.literal(2) }).safeParse(data);
-  if (v3.success) file = v3.data;
-  else if (v2.success)
-    // Version 2 files use the ids from before game data came from the database.
-    file = {
-      ...v2.data,
-      version: CONTENT_VERSION,
-      guides: v2.data.guides.map((g) => ({ ...migrateGuide(g), kind: "custom" as const })),
-    };
-  else {
-    const v1 = legacyContent.safeParse(data);
-    if (v1.success) {
-      file = {
-        app: "dark-chronicles-companion",
-        kind: "content",
-        version: CONTENT_VERSION,
-        guides: [
-          ...v1.data.guides
-            .filter((g) => g.kind === "custom")
-            .map((g) => ({ ...migrateGuide(fromLegacyGuide(g)), kind: "custom" as const })),
-          ...v1.data.walkthroughs.map((w) => ({
-            ...migrateGuide(fromLegacyWalkthrough(w)),
-            kind: "custom" as const,
-          })),
-        ],
-      };
-    }
-  }
-  return file;
 }

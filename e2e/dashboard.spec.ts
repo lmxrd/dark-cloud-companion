@@ -1,17 +1,5 @@
 import { expect, test } from "@playwright/test";
-import type { Page } from "@playwright/test";
-import { activeProfile, v1State, go } from "./helpers";
-
-/** Finished steps start folded; open them all so their checkboxes can be asserted on. */
-async function unfoldAll(page: Page) {
-  const folded = page.getByRole("button", { name: "Show step" });
-  // Folding happens right after hydration.
-  await folded
-    .first()
-    .waitFor({ timeout: 5000 })
-    .catch(() => {});
-  while ((await folded.count()) > 0) await folded.first().click();
-}
+import { activeProfile, go } from "./helpers";
 
 test.describe("dashboard and progress", () => {
   test("a tick persists across reloads, and a finished step starts folded", async ({ page }) => {
@@ -85,25 +73,6 @@ test.describe("dashboard and progress", () => {
     await chip.click();
     await expect(chip).toHaveAttribute("aria-pressed", "true");
     await expect(linda).toHaveCount(0);
-  });
-
-  test("a profile saved by the first version of the app is migrated, keeping progress and walkthroughs", async ({
-    page,
-  }) => {
-    await page.addInitScript((state) => {
-      if (!localStorage.getItem("dcc:state"))
-        localStorage.setItem("dcc:state", JSON.stringify(state));
-    }, v1State);
-    await go(page, "/");
-    await unfoldAll(page);
-    await expect(page.getByRole("checkbox", { name: /Brave Little Linda/ }).first()).toBeChecked();
-    // Any change writes the migrated (version 2) state back.
-    const linda = page.getByRole("checkbox", { name: /Brave Little Linda/ }).first();
-    await linda.click();
-    await linda.click();
-    const p = await activeProfile(page);
-    expect(p.activeGuides).toContain("main");
-    expect(p.guides.map((g: { id: string }) => g.id)).toContain("wt-old");
   });
 
   test("a category chip in the chapter hero filters the list", async ({ page }) => {

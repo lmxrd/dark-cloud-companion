@@ -30,12 +30,6 @@ test.describe("navigation state in the URL", () => {
     await expect(page.getByLabel("Chapter", { exact: true })).toHaveValue("3");
   });
 
-  test("old ?chapter= links move to the chapter's path", async ({ page }) => {
-    await go(page, "/?chapter=c4");
-    await expect(page).toHaveURL(/\/chapters\/4$/);
-    await expect(page.getByLabel("Chapter", { exact: true })).toHaveValue("4");
-  });
-
   test("weapon filters survive a reload", async ({ page }) => {
     await go(page, "/db/weapons");
     const type = page.getByRole("group", { name: "Type" });
@@ -73,8 +67,6 @@ test.describe("navigation state in the URL", () => {
       "aria-selected",
       "true",
     );
-    await go(page, "/tools/planner?new");
-    await expect(page).toHaveURL(/\/tools\/planner\/editor\?new$/);
   });
 
   test("a weapon page's plan link picks the target, then leaves the URL clean", async ({

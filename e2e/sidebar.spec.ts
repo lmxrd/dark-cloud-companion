@@ -37,6 +37,7 @@ test.describe("sidebar shell", () => {
       activeGuides: ["main"],
       guides: [],
       dashboard: { view: "chapter", currentChapter: null },
+      shopping: { goals: [], have: {}, invent: [], group: "stops" },
     });
     await page.addInitScript(
       (s) => {
@@ -44,7 +45,7 @@ test.describe("sidebar shell", () => {
           localStorage.setItem("dcc:state", JSON.stringify(s));
       },
       {
-        version: 2,
+        version: 3,
         activeProfile: "p1",
         profiles: { p1: profile("p1", "Alpha", 1), p2: profile("p2", "Beta", 2) },
       },

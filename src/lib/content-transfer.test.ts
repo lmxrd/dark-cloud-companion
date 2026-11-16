@@ -4,11 +4,9 @@ import { parseContentImport } from "./content-transfer";
 import { deriveBuild } from "@/lib/guide/derive";
 import { planResultToGuide } from "@/lib/guide/fromPlan";
 import type { Guide } from "@/lib/guide/types";
-import legacyDrillWrench from "@/lib/guide/fixtures/legacy-drill-wrench.json";
 import { planPath } from "@/lib/planner/plan";
 import { getWeapon } from "@/lib/planner/sources";
 import { freshState } from "@/lib/weapons/mechanics";
-import { emptyWalkthrough } from "@/lib/walkthroughs/types";
 
 async function sampleBuildGuide(): Promise<Guide> {
   const start = freshState(getWeapon("battle-wrench"));
@@ -108,36 +106,6 @@ describe("content export/import", () => {
     expect(run(b)).toMatchObject({ ok: false });
     const { build: _drop, ...noStart } = structuredClone(guide);
     expect(run(noStart as Guide)).toMatchObject({ ok: false });
-  }, 60000);
-
-  test("version 1 files (separate guides and walkthroughs) are converted", async () => {
-    // A weapon guide as version 1 stored it (frozen).
-    const legacyGuide = { ...legacyDrillWrench, id: "custom-old", title: "Old pinned" };
-    const w = emptyWalkthrough("Old walkthrough", 100);
-    w.steps = [
-      {
-        id: "s1",
-        chapterId: "c1",
-        title: "T",
-        notes: "",
-        checklist: [{ id: "i1", text: "Clock" }],
-      },
-    ];
-    const v1 = {
-      app: "dark-chronicles-companion",
-      kind: "content",
-      version: 1,
-      guides: [legacyGuide],
-      walkthroughs: [w],
-    };
-    const parsed = parseContentImport(JSON.stringify(v1));
-    expect(parsed.ok).toBe(true);
-    if (parsed.ok) {
-      expect(parsed.file.guides.map((g) => g.id)).toEqual(["custom-old", w.id]);
-      expect(parsed.file.guides[1].steps[0].entries).toEqual([
-        { kind: "text", id: "i1", text: "Clock" },
-      ]);
-    }
   }, 60000);
 });
 

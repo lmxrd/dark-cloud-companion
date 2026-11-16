@@ -5,22 +5,20 @@ const isChapter = (id: string) => ["1", "3"].includes(id);
 
 describe("dashboard routes", () => {
   it("reads views and chapters from the path", () => {
-    expect(parseDashboardPath("/", "", isChapter)).toEqual({ view: "chapter", chapter: null });
-    expect(parseDashboardPath("/overview", "", isChapter)).toEqual({
+    expect(parseDashboardPath("/", isChapter)).toEqual({ view: "chapter", chapter: null });
+    expect(parseDashboardPath("/overview", isChapter)).toEqual({
       view: "overview",
       chapter: null,
     });
-    expect(parseDashboardPath("/by-guide/", "", isChapter).view).toBe("byGuide");
-    expect(parseDashboardPath("/chapters/3", "", isChapter)).toEqual({
+    expect(parseDashboardPath("/by-guide/", isChapter).view).toBe("byGuide");
+    expect(parseDashboardPath("/chapters/3", isChapter)).toEqual({
       view: "chapter",
       chapter: "3",
     });
   });
 
-  it("accepts the old ?chapter= links and ignores unknown chapters", () => {
-    expect(parseDashboardPath("/", "?chapter=c1", isChapter).chapter).toBe("1");
-    expect(parseDashboardPath("/chapters/c3", "", isChapter).chapter).toBe("3");
-    expect(parseDashboardPath("/chapters/9", "", isChapter).chapter).toBeNull();
+  it("ignores unknown chapters", () => {
+    expect(parseDashboardPath("/chapters/9", isChapter).chapter).toBeNull();
   });
 
   it("round-trips", () => {
@@ -30,6 +28,6 @@ describe("dashboard routes", () => {
       { view: "overview", chapter: null },
       { view: "byGuide", chapter: null },
     ] as const)
-      expect(parseDashboardPath(dashboardPath(r), "", isChapter)).toEqual(r);
+      expect(parseDashboardPath(dashboardPath(r), isChapter)).toEqual(r);
   });
 });

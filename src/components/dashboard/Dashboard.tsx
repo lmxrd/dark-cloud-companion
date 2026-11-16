@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { SearchIcon, SlidersHorizontalIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,7 @@ import { chapterById } from "@/lib/data";
 import { firstIncompleteChapter } from "@/lib/guide/dashboard";
 import type { DashboardView } from "@/lib/profiles";
 import { stripBase, withBase } from "@/lib/base";
-import { navigate, usePathname, useQueryParam, useQueryText } from "@/lib/url";
+import { navigate, usePathname, useQueryText } from "@/lib/url";
 import { Gate } from "@/components/Gate";
 import { dashboardPath, parseDashboardPath, type DashboardRoute } from "./route";
 import { ByGuideView } from "./ByGuideView";
@@ -28,21 +28,10 @@ function DashboardInner({ path }: { path: string }) {
   const { profile, checks, guides } = useActiveGuides();
   // The view and the chapter are the path (`/overview`, `/chapters/3`), the search is `?q=`.
   const pathname = stripBase(usePathname(withBase(path)));
-  const legacyChapter = useQueryParam("chapter");
-  const route = parseDashboardPath(
-    pathname,
-    legacyChapter ? `?chapter=${legacyChapter}` : "",
-    isChapter,
-  );
+  const route = parseDashboardPath(pathname, isChapter);
   const [needle, setNeedle] = useQueryText("q");
   const [searchOpen, setSearchOpen] = useState(false);
   const isMobile = useIsMobile();
-
-  // Older links asked for a chapter with /?chapter=c3: move them to the chapter's own path.
-  useEffect(() => {
-    if (legacyChapter && route.chapter) navigate(withBase(dashboardPath(route)), { replace: true });
-    // oxlint-disable-next-line react-hooks/exhaustive-deps
-  }, [legacyChapter]);
 
   // Switching back to the chapter tab returns to the chapter last looked at on this page.
   const lastChapter = useRef(route.chapter);

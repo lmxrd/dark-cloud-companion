@@ -82,8 +82,9 @@ test.describe("stored data problems", () => {
       activeGuides: ["main"],
       guides: [],
       dashboard: { view: "chapter", currentChapter: null },
+      shopping: { goals: [], have: {}, invent: [], group: "stops" },
     };
-    await seed(page, JSON.stringify({ version: 2, activeProfile: "gone", profiles: { p1: p } }));
+    await seed(page, JSON.stringify({ version: 3, activeProfile: "gone", profiles: { p1: p } }));
     await go(page, "/settings");
     await expect(page.getByRole("button", { name: "Switch to Kept" })).toBeVisible();
     await expect(page.getByRole("alert")).toHaveCount(0);
