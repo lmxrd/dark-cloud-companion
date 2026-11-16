@@ -217,7 +217,8 @@ export function buildModel(input: SolveInput) {
   const hasFinal = input.finalStats !== undefined || input.finalLevel !== undefined;
   const nStages = hasFinal ? chain.length : chain.length - 1;
 
-  const model: LpModel = { objective: new Map(), rows: [], integers: [] };
+  const upper = new Map<string, number>();
+  const model: LpModel = { objective: new Map(), rows: [], integers: [], upper };
   const rows = new Map<string, LpRow>();
   const row = (name: string, bounds: { min?: number; max?: number }) => {
     const r: LpRow = { name, coeffs: new Map(), ...bounds };
@@ -287,6 +288,10 @@ export function buildModel(input: SolveInput) {
 
   const lStart: number[] = [];
   const spPerLevel: number[] = [];
+  /** Most SP a stage can have spent by its end (every weapon so far at its level cap). */
+  const spCap: number[] = [];
+  /** Most ABS a stage's levelling can cost (its weapon's run levelled to the cap). */
+  const levelAbsCap: number[] = [];
   const spend: { v: string; amount: number }[][] = [];
 
   // A stage on the same weapon as the one before continues it (no build-up in between): its level,
@@ -323,6 +328,10 @@ export function buildModel(input: SolveInput) {
       coef(`cLmin${j}`, L, 1);
     }
     const levelCap = Math.max(ls, input.stageMaxLevels?.[j] ?? maxLevel);
+    // SP over the run telescopes to spPerLevel · (last level − ls); earlier runs are done.
+    const runSp = spPerLevel[j] * Math.max(0, levelCap - ls);
+    const before = first > 0 ? spCap[first - 1] : start.sp;
+    spCap.push(before + runSp);
     row(`cLmax${j}`, { max: levelCap });
     coef(`cLmax${j}`, L, 1);
     const minLevel = Math.min(input.stageMinLevels?.[j] ?? 0, levelCap);
@@ -336,6 +345,7 @@ export function buildModel(input: SolveInput) {
     }
     const stored = first === 0 ? start.abs : 0;
     const absAt = (m: number) => Math.max(0, absBetween(w.baseAbs, ls, m) - stored);
+    levelAbsCap.push(absAt(levelCap));
     for (let m = ls; m < levelCap; m++) {
       const slope = absAt(m + 1) - absAt(m);
       const c = `cCurve${j}_${m}`;
@@ -386,6 +396,7 @@ export function buildModel(input: SolveInput) {
     items.forEach((it, i) => {
       const v = `vX${j}_${i}`;
       model.integers.push(v);
+      upper.set(v, Math.floor(spCap[j]));
       cost(v, 0, it.price ?? 0, 0.01);
       if (gildaRow) coef("cBudget", v, it.price ?? 0);
       spend[j].push({ v, amount: 1 });
@@ -395,6 +406,7 @@ export function buildModel(input: SolveInput) {
     templates.forEach((t, ti) => {
       const v = `vY${j}_${ti}`;
       model.integers.push(v);
+      if (t.level > 0) upper.set(v, Math.floor(spCap[j] / t.level));
       cost(v, t.abs, t.gilda, 1);
       if (gildaRow) coef("cBudget", v, t.gilda);
       spend[j].push({ v, amount: t.level });
@@ -486,8 +498,17 @@ export function buildModel(input: SolveInput) {
     // side weapons that carry its abilities); the delay cost keeps it as early as it can be.
     const windowOf = (j: number) =>
       j === 0 && p.firstStageWindow !== undefined ? p.firstStageWindow : (p.chapterWindow ?? 8);
-    /** A generous upper bound on how many of one item or sphere a stage can take. */
-    const MANY = 200;
+    // What the story (plus grinding) has paid by the end of each chapter: no stage placed there
+    // spends more, which bounds every count and ABS a chapter choice switches on.
+    const absCap = (c: number) => p.storyAbs[c] + p.grindAbs[c];
+    const gildaCap = (c: number) => Math.max(0, p.storyGilda[c] + p.grindGilda[c] - p.spentGilda);
+    /** Most of one item or sphere a stage placed in chapter c can take (its SP, ABS and gilda). */
+    const most = (v: string, c: number, abs: number, gilda: number) =>
+      Math.min(
+        upper.get(v) ?? Infinity,
+        abs > 0 ? Math.floor(absCap(c) / abs) : Infinity,
+        gilda > 0 ? Math.floor(gildaCap(c) / gilda) : Infinity,
+      );
     for (let j = 0; j < nStages; j++) {
       const open = chapters.filter(
         (c) => c >= (p.stageUnlock[j] ?? 1) && c <= (p.stageUnlock[j] ?? 1) + windowOf(j),
@@ -513,19 +534,24 @@ export function buildModel(input: SolveInput) {
         ))
           coef(`cOrder${j}`, `vZ${j - 1}_${c}`, -c);
       }
-      // Items and spheres only once they are available: x ≤ MANY · Σ z[c] over chapters ≥ theirs.
-      const gate = (v: string, from: number) => {
+      // Items and spheres only once they are available: x ≤ Σ most(c) · z[c] over chapters ≥ theirs.
+      const gate = (v: string, from: number, abs: number, gilda: number) => {
         if (from <= Math.min(...open)) return;
         const c = `cAvail_${v}`;
         row(c, { max: 0 });
         coef(c, v, 1);
-        for (const ch of open) if (ch >= from) coef(c, z(ch), -MANY);
+        for (const ch of open)
+          if (ch >= from) {
+            const m = most(v, ch, abs, gilda);
+            coef(c, z(ch), -(Number.isFinite(m) ? m : 1000));
+          }
       };
-      items.forEach((_, i) => gate(`vX${j}_${i}`, p.itemChapter[i] ?? 1));
+      items.forEach((it, i) => gate(`vX${j}_${i}`, p.itemChapter[i] ?? 1, 0, it.price ?? 0));
       templates.forEach((t, ti) => {
-        gate(`vY${j}_${ti}`, t.chapter);
+        gate(`vY${j}_${ti}`, t.chapter, t.abs, t.gilda);
         if (t.shell)
-          for (const { i } of shellItems) gate(`vQ${j}_${ti}_${i}`, p.itemChapter[i] ?? 1);
+          for (const { it, i } of shellItems)
+            gate(`vQ${j}_${ti}_${i}`, p.itemChapter[i] ?? 1, 0, it.price ?? 0);
       });
       // ABS and gilda spent so far within what the story (plus grinding) has paid by then.
       const absRow = `cStoryAbs${j}`;
@@ -555,7 +581,13 @@ export function buildModel(input: SolveInput) {
     // its spheres) counts at its chapter's weight. B[j][c] carries stage j's ABS when it is placed in
     // chapter c (and is 0 otherwise); its ABS no longer counts at weight 1.
     if (p.absWeights && objective === "abs") {
-      const BIG = 1_000_000;
+      // A stage's ABS is part of what is spent by its chapter, so at most that chapter's cap; and
+      // at most its levelling plus all its SP in the spheres with the most ABS per SP.
+      const absPerSp = Math.max(
+        0,
+        ...templates.map((t) => (t.level > 0 ? t.abs / t.level : t.abs > 0 ? Infinity : 0)),
+      );
+      const stageAbsCap = levelAbsCap.map((a, j) => Math.ceil(a + absPerSp * spCap[j]));
       for (let j = 0; j < nStages; j++) {
         const open = chapters.filter(
           (c) => c >= (p.stageUnlock[j] ?? 1) && c <= (p.stageUnlock[j] ?? 1) + windowOf(j),
@@ -576,7 +608,7 @@ export function buildModel(input: SolveInput) {
           model.objective.set(b, SCALE * p.absWeights[c]);
           row(`cEffZ${j}_${c}`, { max: 0 });
           coef(`cEffZ${j}_${c}`, b, 1);
-          coef(`cEffZ${j}_${c}`, `vZ${j}_${c}`, -BIG);
+          coef(`cEffZ${j}_${c}`, `vZ${j}_${c}`, -Math.min(absCap(c), stageAbsCap[j]));
         }
       }
     }
@@ -600,15 +632,16 @@ export function buildModel(input: SolveInput) {
         templates.forEach((t, ti) => {
           if (t.abilities?.includes(ability)) coef(has, `vY${j}_${ti}`, -1);
         });
-        // C ≥ chapter(j) − 8 · (1 − F[j])
-        const at = `cFirstCh_${a}_${j}`;
-        row(at, { min: -8 });
-        coef(at, when, 1);
-        coef(at, first, -8);
-        for (const c of chapters.filter(
+        // C ≥ chapter(j) − last · (1 − F[j]), last being the latest chapter stage j can be in.
+        const open = chapters.filter(
           (c) => c >= (p.stageUnlock[j] ?? 1) && c <= (p.stageUnlock[j] ?? 1) + windowOf(j),
-        ))
-          coef(at, `vZ${j}_${c}`, -c);
+        );
+        const last = Math.max(...open);
+        const at = `cFirstCh_${a}_${j}`;
+        row(at, { min: -last });
+        coef(at, when, 1);
+        coef(at, first, -last);
+        for (const c of open) coef(at, `vZ${j}_${c}`, -c);
       }
     }
   }

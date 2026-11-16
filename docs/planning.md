@@ -41,8 +41,15 @@ Balanced plan can take several times its limit.
 with each built-in plan under stable names (items by name, spheres by template id, not by their
 position in this solve's lists). HiGHS checks them, completes or repairs them, and only has to
 improve on them; a stale value matches nothing and is skipped. The generator logs each exact solve:
-its time, when the first plan came, how often it improved, the gap to the proven bound when it
-stopped, and how much of the start matched.
+its time, when the first plan came, how often it improved and when last, the gap to the proven
+bound when it stopped, and how much of the start matched.
+
+**Tight bounds.** Every count and switch in the model is bounded by what the game allows rather than
+a large constant, so the solver's lower bound means something and the gap closes faster: a stage
+takes at most as many of an item or sphere as its SP pays for (every weapon so far at its level
+cap), a chapter choice allows at most what the story's ABS and gilda (plus grinding) by then pay
+for, and a stage's ABS in a chapter is at most that chapter's ABS and at most its levelling plus all
+its SP in the spheres with the most ABS per SP.
 
 ## Story plans
 

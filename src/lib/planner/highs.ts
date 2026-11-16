@@ -68,6 +68,8 @@ export interface SolveStats {
   firstSec?: number;
   /** How many times the best plan improved. */
   improvements: number;
+  /** When the best plan last improved. */
+  lastSec?: number;
   /** Relative gap between the best plan and the proven bound when it stopped (0: proven optimal). */
   gap?: number;
   /** Starting values given and how many of them matched a variable of the model. */
@@ -129,10 +131,12 @@ export async function solveLp(
     }
     let firstSec: number | undefined;
     let improvements = 0;
+    let lastSec: number | undefined;
     const run = model.run({
       [highs.constants.callbackType.mipImprovingSolution](event) {
         improvements++;
         firstSec ??= event.data.running_time;
+        lastSec = event.data.running_time;
       },
     });
     const S = highs.constants.modelStatus;
@@ -147,6 +151,7 @@ export async function solveLp(
       seconds: (Date.now() - t0) / 1000,
       ...(firstSec !== undefined ? { firstSec } : {}),
       improvements,
+      ...(lastSec !== undefined ? { lastSec } : {}),
       ...(m.integers.length && info("mip_gap") !== undefined ? { gap: info("mip_gap") } : {}),
       ...(start ? { start } : {}),
     };

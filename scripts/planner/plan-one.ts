@@ -33,7 +33,7 @@ const solveText = (s: SolveLog) => {
   const parts = [
     `${Math.round(st?.seconds ?? 0)}/${s.limit}s`,
     st?.firstSec !== undefined ? `first plan ${st.firstSec.toFixed(1)}s` : "no plan",
-    `${st?.improvements ?? 0} better`,
+    `${st?.improvements ?? 0} better${st?.lastSec !== undefined ? ` (last ${st.lastSec.toFixed(0)}s)` : ""}`,
     ...(st?.gap !== undefined ? [`gap ${(100 * st.gap).toFixed(2)}%`] : []),
     ...(st?.start ? [`start ${st.start.matched}/${st.start.given}`] : []),
   ];
