@@ -218,8 +218,11 @@ export function GuideViewPage() {
         <div className="flex flex-wrap items-center gap-3">
           {guide.build && (
             <p className="text-muted-foreground text-sm">
-              {t("planner.totalAbs", { n: Math.round(derived.total.abs).toLocaleString() })} ·{" "}
-              {t("planner.totalGilda", { n: Math.round(derived.total.gilda).toLocaleString() })}
+              {t("planner.totalAbs", { n: Math.round(derived.total.abs).toLocaleString("en-US") })}{" "}
+              ·{" "}
+              {t("planner.totalGilda", {
+                n: Math.round(derived.total.gilda).toLocaleString("en-US"),
+              })}
             </p>
           )}
           {remaining.length > 0 && (

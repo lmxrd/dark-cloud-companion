@@ -346,11 +346,12 @@ export function Hero({
   actions?: ReactNode;
 }) {
   const shown = (facts ?? []).filter((f): f is { label: ReactNode; value: ReactNode } => !!f);
+  const shownKinds = (kinds ?? []).filter(Boolean);
   return (
     <section className="bg-card shadow-sticker flex flex-col gap-4 rounded-xl border-2 p-4">
-      {kinds && kinds.length > 0 && (
+      {shownKinds.length > 0 && (
         <div className="flex flex-wrap items-center gap-2 text-xs font-bold tracking-wider uppercase">
-          {kinds.map((k, i) => (
+          {shownKinds.map((k, i) => (
             <span key={i} className="rounded-full border-2 px-2 py-0.5">
               {k}
             </span>

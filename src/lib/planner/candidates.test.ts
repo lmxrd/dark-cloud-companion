@@ -33,6 +33,5 @@ describe("buyable vs found-only items", () => {
 
 test("a later item never knocks out an earlier one (story plans use items by chapter)", () => {
   const all = itemCandidates({ maxChapter: 8, pool: "all" });
-  for (const name of ["Tasty Water", "Thick Hide"])
-    expect(all.map((i) => i.name)).toContain(name);
+  for (const name of ["Tasty Water", "Thick Hide"]) expect(all.map((i) => i.name)).toContain(name);
 });

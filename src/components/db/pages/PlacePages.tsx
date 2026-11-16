@@ -208,7 +208,8 @@ export function TownPage({ town: tw }: { town: Town }) {
 /** A dungeon: its floors in order, totals, the weapons in its chests and its fish. */
 export function DungeonPage({ dungeon: d }: { dungeon: Dungeon }) {
   const t = useTranslations();
-  const sections = (sectionsOfDungeon.get(d.id) ?? []).sort(
+  // A copy: the lists in db/data are shared by every page.
+  const sections = [...(sectionsOfDungeon.get(d.id) ?? [])].sort(
     (a, b) => a.chapterNumber - b.chapterNumber || a.position - b.position,
   );
   const total = (k: "abs" | "gilda") => sections.reduce((a, s) => a + (s[k] ?? 0), 0);

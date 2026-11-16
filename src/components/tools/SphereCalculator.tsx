@@ -89,7 +89,9 @@ export function SphereCalculator() {
   const [receiverAt, setReceiverAt] = useState(() => getWeapon("island-king").baseStats.at);
   /** Built up from these weapons first ("" = the weapon as bought), and their levels. */
   const [route, setRoute] = useState("battle-wrench");
-  const [earlierLevels, setEarlierLevels] = useState<number[]>([3]);
+  const [earlierLevels, setEarlierLevels] = useState(() =>
+    lowestLevels(["battle-wrench"], "true-battle-wrench", true),
+  );
 
   const weapon = getWeapon(weaponId);
   const routes = useMemo(() => routesInto(weaponId), [weaponId]);
@@ -201,14 +203,19 @@ export function SphereCalculator() {
             <input
               type="checkbox"
               checked={support}
-              onChange={(e) => setSupport(e.target.checked)}
+              onChange={(e) => {
+                const on = e.target.checked;
+                setSupport(on);
+                // The levels picked for the route depend on the SP per level.
+                setEarlierLevels(route ? lowestLevels(route.split(">"), weaponId, on) : []);
+              }}
             />
             {t("planner.support")}
           </label>
         </div>
         <p className={cn("text-sm tabular-nums", spLeft < 0 && "text-destructive")}>
           {t("sphere.sp", { used: spUsed, total: levelled.sp })} ·{" "}
-          {t("sphere.absCost", { n: made.cost.abs.toLocaleString() })}
+          {t("sphere.absCost", { n: Math.round(made.cost.abs).toLocaleString("en-US") })}
         </p>
         {made.errors.length > 0 && (
           <ul className="text-destructive list-disc pl-5 text-xs">

@@ -3,9 +3,10 @@
  * Run by the `gamedata` Astro integration (dev, build, `astro sync`), by the test setup, and by
  * `pnpm db:export`. The shapes are in `src/lib/gamedata/types.ts`.
  */
-import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { DatabaseSync } from "node:sqlite";
-import { join } from "node:path";
+import { join, relative } from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import type {
   Chapter,
   ChapterDetail,
@@ -539,24 +540,34 @@ export function buildGameData(db: DatabaseSync) {
 
 export type GameData = ReturnType<typeof buildGameData>;
 
-/** Writes the files into `outDir`, replacing what was there. Returns the paths written. */
+/**
+ * Writes the files into `outDir`, replacing what was there. Files whose content is unchanged are
+ * left alone (a running dev server and tests reading them never see them missing, and Vite keeps
+ * its cache); files no longer exported are removed. Returns the paths of all the files.
+ */
 export function writeGameData(data: GameData, outDir: string): string[] {
-  rmSync(outDir, { recursive: true, force: true });
   mkdirSync(join(outDir, "chapter"), { recursive: true });
   const written: string[] = [];
   const write = (file: string, value: unknown) => {
     const path = join(outDir, file);
-    writeFileSync(path, JSON.stringify(value));
+    const text = JSON.stringify(value);
+    if (!existsSync(path) || readFileSync(path, "utf8") !== text) writeFileSync(path, text);
     written.push(path);
   };
   const { chapterDetails, ...files } = data;
   for (const [name, value] of Object.entries(files)) write(`${name}.json`, value);
   for (const [number, detail] of chapterDetails) write(`chapter/${number}.json`, detail);
+  const keep = new Set(written.map((p) => relative(outDir, p)));
+  for (const f of readdirSync(outDir, { recursive: true, withFileTypes: true }))
+    if (f.isFile()) {
+      const path = join(f.parentPath, f.name);
+      if (!keep.has(relative(outDir, path))) rmSync(path);
+    }
   return written;
 }
 
-export const DB_PATH = new URL("../../drizzle/game.db", import.meta.url).pathname;
-export const OUT_DIR = new URL("../../src/gamedata/", import.meta.url).pathname;
+export const DB_PATH = fileURLToPath(new URL("../../drizzle/game.db", import.meta.url));
+export const OUT_DIR = fileURLToPath(new URL("../../src/gamedata/", import.meta.url));
 
 /** Exports `drizzle/game.db` into `src/gamedata/`. */
 export function exportGameData(dbPath = DB_PATH, outDir = OUT_DIR): string[] {
@@ -568,7 +579,7 @@ export function exportGameData(dbPath = DB_PATH, outDir = OUT_DIR): string[] {
   }
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const written = exportGameData();
   const bytes = written.reduce((n, p) => n + readFileSync(p).length, 0);
   console.log(`game data: ${written.length} files, ${Math.round(bytes / 1024)} KB in ${OUT_DIR}`);

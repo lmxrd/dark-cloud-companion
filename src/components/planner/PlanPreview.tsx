@@ -40,9 +40,15 @@ export function PlanPreview({ guide }: { guide: Guide }) {
     <div className="flex flex-col gap-4">
       <dl className="grid grid-cols-3 gap-2">
         {[
-          { label: t("planner.bigAbs"), value: Math.round(derived.total.abs).toLocaleString() },
-          { label: t("planner.bigGilda"), value: Math.round(derived.total.gilda).toLocaleString() },
-          { label: t("planner.bigSteps"), value: derived.total.steps.toLocaleString() },
+          {
+            label: t("planner.bigAbs"),
+            value: Math.round(derived.total.abs).toLocaleString("en-US"),
+          },
+          {
+            label: t("planner.bigGilda"),
+            value: Math.round(derived.total.gilda).toLocaleString("en-US"),
+          },
+          { label: t("planner.bigSteps"), value: derived.total.steps.toLocaleString("en-US") },
         ].map((x) => (
           <div key={x.label} className="bg-card flex flex-col rounded-lg border-2 px-3 py-2">
             <dt className="text-muted-foreground text-[11px] font-bold tracking-wider uppercase">

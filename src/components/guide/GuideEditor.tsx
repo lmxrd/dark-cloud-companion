@@ -279,8 +279,8 @@ function SphereAdder({ spBonus, onAdd }: { spBonus: number; onAdd: (t: Template)
               className="h-auto w-full justify-start py-1 text-left whitespace-normal"
               onClick={() => onAdd(x)}
             >
-              {getWeapon(x.weaponId).name} +{x.level} · {Math.round(x.abs).toLocaleString()} ABS ·{" "}
-              {Math.round(x.gilda).toLocaleString()} gilda ·{" "}
+              {getWeapon(x.weaponId).name} +{x.level} · {Math.round(x.abs).toLocaleString("en-US")}{" "}
+              ABS · {Math.round(x.gilda).toLocaleString("en-US")} gilda ·{" "}
               {t("guides.stepChapter", { n: x.chapter })}
             </Button>
           </li>
@@ -762,7 +762,14 @@ export function GuideEditor({ initial, persisted, onSave }: Props) {
         >
           {t("editor.save")}
         </Button>
-        <Button variant="ghost" onClick={() => setDraft(initial)} disabled={saved}>
+        <Button
+          variant="ghost"
+          onClick={() => {
+            setDraft(initial);
+            setSaved(persisted);
+          }}
+          disabled={saved}
+        >
           {t("editor.discard")}
         </Button>
         {!saved && <span className="text-muted-foreground text-xs">{t("editor.unsaved")}</span>}

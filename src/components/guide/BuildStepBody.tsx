@@ -272,8 +272,8 @@ export function BuildStepBody({
         <>
           <p className="text-muted-foreground text-xs">
             {t("planner.step.cost", {
-              abs: Math.round(derived.cost.abs).toLocaleString(),
-              gilda: Math.round(derived.cost.gilda).toLocaleString(),
+              abs: Math.round(derived.cost.abs).toLocaleString("en-US"),
+              gilda: Math.round(derived.cost.gilda).toLocaleString("en-US"),
             })}{" "}
             · {t("planner.after", { level: derived.level, sp: derived.sp })}
           </p>
@@ -403,8 +403,8 @@ function PrepareBody({
       {derived && (
         <p className="text-muted-foreground text-xs">
           {t("planner.step.cost", {
-            abs: Math.round(derived.cost.abs).toLocaleString(),
-            gilda: Math.round(derived.cost.gilda).toLocaleString(),
+            abs: Math.round(derived.cost.abs).toLocaleString("en-US"),
+            gilda: Math.round(derived.cost.gilda).toLocaleString("en-US"),
           })}
         </p>
       )}
