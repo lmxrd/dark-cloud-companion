@@ -77,8 +77,11 @@ plan you can follow while playing:
   parts available earlier (spheres whose side weapons can be made, items on sale) into an earlier
   step on the same weapon, after the build-up into it, levelled just enough for their SP: from
   chapter 2, earliest chapter first, when the story's ABS and gilda by then (plus the grind
-  allowance) cover it and the simulator still gives a valid build with the same end. The solver
-  doesn't see the split, so it never chooses a plan for it.
+  allowance) cover it and the simulator still gives a valid build with the same end. Then a sphere
+  on a later weapon that is ready chapters before it moves onto the weapon held then, into its step
+  of that chapter or a new one after its build-up, under the same checks (stats carry over the
+  build-ups; the end-as-strong check catches what a lower cap would cut). The solver doesn't see
+  the split, so it never chooses a plan for it.
 - **Abilities** come from spheres placed where no later build-up brings the opposite, as early as
   they can (see "Early abilities").
 - **Margins.** Requirements get a 1-point margin; a retry uses 3 and keeps a few SP spare.
@@ -88,17 +91,18 @@ plan you can follow while playing:
 A story plan follows fixed rules (`STORY_RULES` in `plan.ts`), the same for every plan; each was
 added for a reason measured below. Only a few things are a plan's choice.
 
-| Rule                             | Value                                                                                                          | Why                                                   |
-| -------------------------------- | -------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
-| Grind allowance                  | 30% of what the story pays                                                                                     | a little grinding, not an insane amount               |
-| Chapter delay (`delayCost`)      | 40,000 over all stages                                                                                         | work happens as early as the story allows             |
-| Level caps                       | +10 on the way, +15 last                                                                                       | no over-levelling mid-game                            |
-| Start weapon                     | obtainable by chapter 2                                                                                        | the weapon is used through the story                  |
-| Effort weighting (`effortPower`) | 0.5                                                                                                            | ABS counts by how hard it is to earn in its chapter   |
-| Early stats (`earlyStatBonus`)   | 2 per point per stage                                                                                          | stats above the floor come earlier                    |
-| Items on the main weapon         | 1,000 each to halfway, then falling to 30 on the last step                                                     | the early SP count most: a sphere is worth some gilda |
+| Rule                             | Value                                                                                                                                                                                     | Why                                                   |
+| -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| Grind allowance                  | 30% of what the story pays                                                                                                                                                                | a little grinding, not an insane amount               |
+| Chapter delay (`delayCost`)      | 40,000 over all stages                                                                                                                                                                    | work happens as early as the story allows             |
+| Level caps                       | +10 on the way, +15 last                                                                                                                                                                  | no over-levelling mid-game                            |
+| Start weapon                     | obtainable by chapter 2                                                                                                                                                                   | the weapon is used through the story                  |
+| Effort weighting (`effortPower`) | 0.5                                                                                                                                                                                       | ABS counts by how hard it is to earn in its chapter   |
+| Early stats (`earlyStatBonus`)   | 2 per point per chapter held                                                                                                                                                              | stats above the floor come earlier                    |
+| Lost stats (`lostStatCost`)      | 20 per point lost to a cap                                                                                                                                                                | spheres go where their stats fit                      |
+| Items on the main weapon         | 1,000 each to halfway, then falling to 30 on the last step                                                                                                                                | the early SP count most: a sphere is worth some gilda |
 | Stat floor                       | 0.5 of the weapon's maximum when leaving it, 2,000 per point short; Balanced: rising from 0.3 on the first weapon to 0.8 on the one before the final, and 0.1 lower 20,000 more per point | every stat rises along the way                        |
-| Least level before a build-up    | 3,000 per level short                                                                                          | soft, so the planner page always gets a plan          |
+| Least level before a build-up    | 3,000 per level short                                                                                                                                                                     | soft, so the planner page always gets a plan          |
 
 | Choice                                         | Where                                        | Values                                       |
 | ---------------------------------------------- | -------------------------------------------- | -------------------------------------------- |
@@ -123,14 +127,15 @@ about ±3% ABS between runs (same settings, re-solved), so smaller differences a
 
 The objective adds up (in ABS-equivalent units):
 
-| Term                        | What it does                                                  | Rule                                                                |
-| --------------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------- |
-| ABS, weighted by **effort** | ABS spent in a chapter counts by how hard it is to earn there | `effortPower`                                                       |
-| Chapter delay               | every stage one chapter later costs this much in all          | `delayCost` 40,000                                                  |
-| Early stats                 | each stat point at the end of each stage is worth this        | `earlyStatBonus` 2                                                  |
-| Items on the main weapon    | each costs this (its SP is gone for good)                     | `mainItemCost` 1,000, from halfway falling to `mainItemCostLast` 30 |
-| Stat floor                  | each point a stat is below its floor when leaving a weapon    | `statFloorCost` 2,000                                               |
-| Early abilities             | each chapter of the first sphere bringing a wanted ability    | `keyAbilityCost` 20,000 (ABS Up, Wealth), `abilityCost` 5,000       |
+| Term                        | What it does                                                   | Rule                                                                |
+| --------------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------- |
+| ABS, weighted by **effort** | ABS spent in a chapter counts by how hard it is to earn there  | `effortPower`                                                       |
+| Chapter delay               | every stage one chapter later costs this much in all           | `delayCost` 40,000                                                  |
+| Early stats                 | each stat point a stage adds, per chapter to the end           | `earlyStatBonus` 2                                                  |
+| Lost stats                  | each point lost to a cap (gains a weapon can't hold, At aside) | `lostStatCost` 20                                                   |
+| Items on the main weapon    | each costs this (its SP is gone for good)                      | `mainItemCost` 1,000, from halfway falling to `mainItemCostLast` 30 |
+| Stat floor                  | each point a stat is below its floor when leaving a weapon     | `statFloorCost` 2,000                                               |
+| Early abilities             | each chapter of the first sphere bringing a wanted ability     | `keyAbilityCost` 20,000 (ABS Up, Wealth), `abilityCost` 5,000       |
 
 **Effort.** The story pays far more ABS later: an ABS-paying floor or fight pays about 230 ABS in
 chapter 2, 540 in 3, 1,100 in 4, 1,600 in 5, 1,750 in 6, 3,500 in 7. So 1,000 ABS is about four

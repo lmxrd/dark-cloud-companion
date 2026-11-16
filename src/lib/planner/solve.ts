@@ -143,11 +143,17 @@ export interface Progression {
   /** The same for the first stage (0: work on the first weapon starts as soon as it can). */
   firstStageWindow?: number;
   /**
-   * Reward (in objective units) per stat point the weapon has at the end of each stage: stats gained
-   * earlier count in more stages, so items go into the earliest spheres that can hold them and the
-   * weapon is stronger sooner. Keep it well below what a stat point costs, or it buys extra spheres.
+   * Reward (in objective units) per stat point per chapter the weapon holds it: a point gained in a
+   * stage counts from that stage's chapter to the end of the story, so the weapon is stronger sooner
+   * (stages in the same chapter are alike, the first weapon gets nothing for being first). Keep it
+   * well below what a stat point costs, or it buys extra spheres.
    */
   earlyStatBonus?: number;
+  /**
+   * Cost per stat point lost to a cap (At aside): gains a stage's weapon can't hold, including those
+   * a build-up into a weapon with a lower maximum cuts, so spheres go where their stats fit.
+   */
+  lostStatCost?: number;
   /**
    * Every stat should be at least this share of the weapon's maximum when the plan leaves it: at the
    * end of its last stage before the build-up, and on the final weapon (capped by the final target).
@@ -366,10 +372,18 @@ export function buildModel(input: SolveInput) {
     coef(`cGb${j}`, L, -1);
 
     // Stat rows first so item/sphere columns can attach to them.
+    const lostCost = input.progression?.lostStatCost;
     for (const k of STAT_KEYS) {
       const base = j === 0 ? start.stats[k] : cont ? 0 : buildUpBonus(w.baseStats[k]);
-      row(`cSt${j}_${k}`, { max: base });
+      // Gains the weapon can't hold are lost: with a cost on them, the row is exact and vW (the
+      // points lost) carries the difference.
+      const lose = lostCost && k !== "at";
+      row(`cSt${j}_${k}`, lose ? { min: base, max: base } : { max: base });
       coef(`cSt${j}_${k}`, `vE${j}_${k}`, 1);
+      if (lose) {
+        coef(`cSt${j}_${k}`, `vW${j}_${k}`, 1);
+        model.objective.set(`vW${j}_${k}`, SCALE * lostCost);
+      }
       if (j > 0) coef(`cSt${j}_${k}`, `vE${j - 1}_${k}`, -1);
       if (k === "at") coef(`cSt${j}_${k}`, a, -1);
       // Levelling At is cumulative over the run: this stage adds only what came since the last one.
@@ -457,12 +471,6 @@ export function buildModel(input: SolveInput) {
         );
         model.objective.set(v, (model.objective.get(v) ?? 0) + SCALE * each);
       });
-  if (p?.earlyStatBonus)
-    for (let j = 0; j < nStages; j++)
-      for (const k of STAT_KEYS) {
-        const v = `vE${j}_${k}`;
-        model.objective.set(v, (model.objective.get(v) ?? 0) - SCALE * p.earlyStatBonus);
-      }
   if (p?.statFloor && p.statFloorCost) {
     const weapons = chain.filter((id, j) => j === 0 || id !== chain[j - 1]);
     for (let j = 0; j < nStages; j++) {
@@ -574,6 +582,37 @@ export function buildModel(input: SolveInput) {
             for (const { it, i: ii } of shellItems)
               coef(gildaRow, `vQ${i}_${ti}_${ii}`, it.price ?? 0);
         });
+      }
+    }
+
+    // Early stats: the points a stage adds (S[j], all stats) count once per chapter from the stage's
+    // chapter to the end. U[j][c] carries S[j] when the stage is in chapter c (0 otherwise); N[j]
+    // takes a stage that loses points overall, charged at its latest chapter's full weight.
+    if (p.earlyStatBonus) {
+      const end = p.lastChapter ?? 8;
+      for (let j = 0; j < nStages; j++) {
+        const open = chapters.filter(
+          (c) => c >= (p.stageUnlock[j] ?? 1) && c <= (p.stageUnlock[j] ?? 1) + windowOf(j),
+        );
+        const w = getWeapon(chain[j]);
+        const most = STAT_KEYS.reduce((n, k) => n + w.maxStats[k], 0);
+        const gain = `cGain${j}`;
+        const held = (c: number) => end + 1 - c;
+        row(gain, { max: j === 0 ? -STAT_KEYS.reduce((n, k) => n + start.stats[k], 0) : 0 });
+        for (const k of STAT_KEYS) {
+          coef(gain, `vE${j}_${k}`, -1);
+          if (j > 0) coef(gain, `vE${j - 1}_${k}`, 1);
+        }
+        coef(gain, `vN${j}`, -1);
+        model.objective.set(`vN${j}`, SCALE * p.earlyStatBonus * held(Math.min(...open)));
+        for (const c of open) {
+          const u = `vU${j}_${c}`;
+          coef(gain, u, 1);
+          model.objective.set(u, -SCALE * p.earlyStatBonus * held(c));
+          row(`cGainZ${j}_${c}`, { max: 0 });
+          coef(`cGainZ${j}_${c}`, u, 1);
+          coef(`cGainZ${j}_${c}`, `vZ${j}_${c}`, -most);
+        }
       }
     }
 

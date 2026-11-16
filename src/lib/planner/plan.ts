@@ -93,6 +93,8 @@ export interface ProgressionOptions {
   startBy: number;
   /** See `Progression.earlyStatBonus` (0: off). */
   earlyStatBonus?: number;
+  /** See `Progression.lostStatCost` (0: off). */
+  lostStatCost?: number;
   /** See `Progression.mainItemCost` (0: off). */
   mainItemCost?: number;
   /** See `Progression.mainItemCostLast`. */
@@ -157,6 +159,7 @@ export const STORY_RULES = {
   startBy: 2,
   effortPower: 0.5,
   earlyStatBonus: 2,
+  lostStatCost: 20,
   mainItemCost: 1000,
   mainItemCostLast: 30,
   statFloor: 0.5,
@@ -785,6 +788,7 @@ export async function planPath(
       firstStageWindow: 0,
       ...(req.maxChapter < 8 ? { lastChapter: req.maxChapter } : {}),
       ...(prog.earlyStatBonus ? { earlyStatBonus: prog.earlyStatBonus } : {}),
+      ...(prog.lostStatCost ? { lostStatCost: prog.lostStatCost } : {}),
       ...(prog.mainItemCost
         ? {
             mainItemCost: prog.mainItemCost,

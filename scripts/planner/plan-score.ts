@@ -4,7 +4,7 @@
 import { floorShares, mainItemCostAt } from "../../src/lib/planner/solve.ts";
 import { deriveBuild } from "../../src/lib/guide/derive.ts";
 import type { Guide } from "../../src/lib/guide/types.ts";
-import { getWeapon } from "../../src/lib/planner/sources.ts";
+import { getWeapon, synthSourceByName } from "../../src/lib/planner/sources.ts";
 import {
   ABS_PER_FLOOR,
   earlyAbilityCosts,
@@ -12,7 +12,7 @@ import {
   type ProgressionOptions,
 } from "../../src/lib/planner/plan.ts";
 import { STAT_KEYS, type AbilityId } from "../../src/lib/schemas.ts";
-import { OPPOSITES } from "../../src/lib/weapons/mechanics.ts";
+import { buildUpBonus, OPPOSITES } from "../../src/lib/weapons/mechanics.ts";
 import type { PlanSpec } from "./plans-config.ts";
 
 export interface PlanScore {
@@ -33,7 +33,8 @@ export interface PlanScore {
 /**
  * The story objective (in ABS units, see docs/planning.md) recomputed from a guide's derived steps,
  * so committed plans and new runs are judged by what the solver trades off: effort-weighted ABS,
- * chapter delay, early stats, items straight on the main weapon, the stat floor and build-up levels.
+ * chapter delay, early stats (points times the chapters they are held), stats lost to caps, items
+ * straight on the main weapon, the stat floor and build-up levels.
  */
 export function storyCost(
   guide: Guide,
@@ -52,9 +53,13 @@ export function storyCost(
   }
   const ids = work.map((s) => s.build!.weaponId);
   const chainWeapons = ids.filter((id, i) => i === 0 || id !== ids[i - 1]);
+  const end = 8;
+  let prev: Record<string, number> | undefined;
   work.forEach((s, i) => {
     const st = d.steps.get(s.id);
     if (!st) return;
+    const before = prev ?? st.start?.stats ?? st.stats;
+    prev = st.stats;
     const c = Number(s.chapterId ?? 8);
     const w = getWeapon(s.build!.weaponId);
     cost += st.cost.abs * (prog.effortPower ? effortWeights[c] ** prog.effortPower : 1);
@@ -63,8 +68,24 @@ export function storyCost(
     // The stat floor counts where the plan leaves the weapon, and on the last step.
     const leaving = next !== w.id;
     const share = floorShares(prog, chainWeapons.lastIndexOf(w.id), chainWeapons.length);
+    // Early stats: the points this step adds, once per chapter to the end of the story.
+    const added = STAT_KEYS.reduce((n, k) => n + st.stats[k] - before[k], 0);
+    cost -= (prog.earlyStatBonus ?? 0) * added * (end + 1 - c);
+    // Stats lost to caps: what the step brings (the build-up's bonus, its spheres and items) beyond
+    // what the weapon holds at its end.
+    if (prog.lostStatCost) {
+      const builtUp = i > 0 && ids[i] !== ids[i - 1];
+      for (const k of STAT_KEYS) {
+        if (k === "at") continue;
+        let brought = before[k] + (builtUp ? buildUpBonus(w.baseStats[k]) : 0);
+        for (const g of st.spheres) brought += g.gains[k] ?? 0;
+        for (const x of s.build!.synths ?? [])
+          if (x.kind === "item")
+            brought += (synthSourceByName.get(x.name)?.gains[k] ?? 0) * (x.count ?? 1);
+        cost += prog.lostStatCost * Math.max(0, brought - st.stats[k]);
+      }
+    }
     for (const k of STAT_KEYS) {
-      cost -= (prog.earlyStatBonus ?? 0) * st.stats[k];
       if (leaving && prog.statFloor && prog.statFloorCost)
         cost +=
           prog.statFloorCost * Math.max(0, Math.round(share.target * w.maxStats[k]) - st.stats[k]);
