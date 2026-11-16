@@ -29,7 +29,8 @@ async function worker(limit: number, ids: string[]) {
   for (const id of ids) {
     const spec = specs.find((s) => s.id === id)!;
     const t0 = Date.now();
-    const { result } = await planOne(spec, limit);
+    // The limit under test, not the spec's own.
+    const { result } = await planOne({ ...spec, timeLimitSec: limit }, limit);
     const c = result.simulation!.cost;
     const row: Row = { id, limit, ...c, seconds: (Date.now() - t0) / 1000 };
     console.log(`RESULT ${JSON.stringify(row)}`);

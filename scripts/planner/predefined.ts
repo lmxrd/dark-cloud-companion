@@ -146,7 +146,7 @@ async function main(args: string[]) {
             }),
           });
       }
-      const scored = candidates.map((c) => ({ ...c, score: scorePlan(c.guide, spec) }));
+      const scored = candidates.map((c) => ({ ...c, score: scorePlan(c.guide, spec, c.solution) }));
       scored.sort((a, b) => compareScores(a.score, b.score));
       console.log(`  ${spec.id}:`);
       for (const c of scored) console.log(`    ${c.label.padEnd(9)} ${scoreText(c.score)}`);

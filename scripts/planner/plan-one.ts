@@ -60,8 +60,9 @@ export async function planOne(
       maxChapter,
       spBonus: spec.spBonus,
       // Never spend more than the story has paid out by the end of the chapter (unless any gilda goes).
+      // (No budget at all rather than an infinite one, which would still add a row to the model.)
       maxGilda: spec.anyGilda
-        ? (spec.maxGilda ?? Infinity)
+        ? spec.maxGilda
         : Math.min(spec.maxGilda ?? Infinity, storyGilda(maxChapter)),
       abilities: spec.abilities,
       abilitySource: spec.abilitySource,

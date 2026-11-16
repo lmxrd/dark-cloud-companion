@@ -41,6 +41,8 @@ export function itemCandidates(filter: ItemFilter): SynthSource[] {
     return !pool.some((b, j) => {
       if (i === j) return false;
       const gb = statGains(b);
+      // Only an item available as early can replace another (story plans use items by chapter).
+      if ((b.fromChapter ?? 1) > (a.fromChapter ?? 1)) return false;
       const geq = gb.every((g, n) => g >= ga[n]);
       const strictlyBetter = gb.some((g, n) => g > ga[n]) || price(b) < price(a);
       return geq && price(b) <= price(a) && (strictlyBetter || j < i);

@@ -599,7 +599,8 @@ function topUpFinal(
   if (!add.size) return undefined;
   const perLevel = weapon.spPerLevel + allyBonus(weapon, spBonus);
   const levels = sp > state.sp ? Math.ceil((sp - state.sp) / perLevel) : 0;
-  if (state.level + levels > maxLevel) return undefined;
+  // Levelling is the only thing capped: a finished weapon above the cap can still take items.
+  if (levels > 0 && state.level + levels > maxLevel) return undefined;
   const next = structuredClone(plan);
   const last = next.stages[next.stages.length - 1];
   last.levelTo = Math.max(last.levelTo, state.level + levels);
@@ -1010,13 +1011,12 @@ export async function planPath(
         : req.objective === "gilda"
           ? sim.cost.gilda
           : sim.cost.steps;
-    // Following the story, later chapters cost as in the model.
-    const chapters = r?.stageChapters ?? [];
-    const delay =
-      prog && chapters.length
-        ? (prog.delayCost * chapters.reduce((n, c) => n + c, 0)) / chapters.length
-        : 0;
-    const key = primary + 1e-3 * (req.objective === "abs" ? sim.cost.gilda : sim.cost.abs) + delay;
+    // Following the story, chains compare by the model's own objective: it is what the LP bounds
+    // and the next solve's cutoff are in (effort-weighted ABS, delay, early stats, floors, ...).
+    const key =
+      prog && r?.value !== undefined
+        ? r.value + acquireOffset(candidate.acquire, req.objective)
+        : primary + 1e-3 * (req.objective === "abs" ? sim.cost.gilda : sim.cost.abs);
     if (key < bestKey) {
       bestKey = key;
       best = {

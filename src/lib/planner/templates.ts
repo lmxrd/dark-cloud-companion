@@ -90,11 +90,17 @@ function makeTemplate(
   };
 }
 
-/** a dominates b: no worse everywhere (stats, costs, chapter, and every ability b passes on) and strictly better somewhere. */
+/**
+ * a dominates b: the same abilities, no worse everywhere else (stats, costs, chapter) and strictly
+ * better somewhere. An ability is not simply a bonus: it can be the opposite of a wanted one (and
+ * then the sphere is dropped), so a sphere with other abilities never replaces one without them.
+ */
 function dominates(a: Template, b: Template) {
   if (a.abs > b.abs || a.gilda > b.gilda || a.level > b.level || a.chapter > b.chapter)
     return false;
-  if ((b.abilities ?? []).some((x) => !(a.abilities ?? []).includes(x))) return false;
+  const aa = a.abilities ?? [];
+  const ba = b.abilities ?? [];
+  if (aa.length !== ba.length || ba.some((x) => !aa.includes(x))) return false;
   let strict = a.abs < b.abs || a.gilda < b.gilda || a.level < b.level || a.chapter < b.chapter;
   // Shells also need as much room to fill: SP, and headroom under the side weapon's caps.
   if (!!a.shell !== !!b.shell) return false;

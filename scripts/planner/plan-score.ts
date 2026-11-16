@@ -10,6 +10,7 @@ import {
   earlyAbilityCosts,
   effortWeights,
   type ProgressionOptions,
+  type SavedSolution,
 } from "../../src/lib/planner/plan.ts";
 import { STAT_KEYS, type AbilityId } from "../../src/lib/schemas.ts";
 import { buildUpBonus, OPPOSITES } from "../../src/lib/weapons/mechanics.ts";
@@ -40,6 +41,12 @@ export function storyCost(
   guide: Guide,
   prog: ProgressionOptions,
   wanted: readonly AbilityId[] = [],
+  /**
+   * The solver's own stages' chapters (`solverChapters`). The chapter delay is spread over the
+   * solver's stages; the guide's work steps differ once split (more steps, earlier chapters), so
+   * counting them instead would favour plans that split more.
+   */
+  stageChapters?: number[],
 ): number {
   const d = deriveBuild(guide);
   const work = guide.steps.filter((s) => s.build);
@@ -63,7 +70,7 @@ export function storyCost(
     const c = Number(s.chapterId ?? 8);
     const w = getWeapon(s.build!.weaponId);
     cost += st.cost.abs * (prog.effortPower ? effortWeights[c] ** prog.effortPower : 1);
-    cost += (prog.delayCost * c) / work.length;
+    if (!stageChapters?.length) cost += (prog.delayCost * c) / work.length;
     const next = work[i + 1]?.build?.weaponId;
     // The stat floor counts where the plan leaves the weapon, and on the last step.
     const leaving = next !== w.id;
@@ -103,6 +110,8 @@ export function storyCost(
     );
     for (const x of s.build!.synths ?? []) if (x.kind === "item") cost += each * (x.count ?? 1);
   });
+  if (stageChapters?.length)
+    cost += (prog.delayCost * stageChapters.reduce((n, c) => n + c, 0)) / stageChapters.length;
   // Early abilities: the chapter of the first sphere bringing each wanted one, after the last
   // build-up into a weapon with the opposite (that would cancel it). Abilities a chain weapon
   // brings need no sphere.
@@ -130,7 +139,18 @@ export function storyCost(
   return cost;
 }
 
-export function scorePlan(guide: Guide, spec: PlanSpec): PlanScore {
+/** The chapter of each of the solver's stages, from its saved values (`vZ<stage>_<chapter>` = 1). */
+export function solverChapters(solution?: SavedSolution): number[] | undefined {
+  if (!solution) return undefined;
+  const chapters: number[] = [];
+  for (const [name, v] of Object.entries(solution.values)) {
+    const m = name.match(/^vZ(\d+)_(\d+)$/);
+    if (m && Math.round(v) === 1) chapters[Number(m[1])] = Number(m[2]);
+  }
+  return chapters.length && !chapters.includes(undefined as never) ? chapters : undefined;
+}
+
+export function scorePlan(guide: Guide, spec: PlanSpec, solution?: SavedSolution): PlanScore {
   const d = deriveBuild(guide);
   const problems = [...d.errors, ...[...d.steps.values()].flatMap((s) => s.errors)];
   const final = d.final;
@@ -157,7 +177,9 @@ export function scorePlan(guide: Guide, spec: PlanSpec): PlanScore {
     gilda: d.total.gilda,
     pace: chapters.reduce((n, c) => n + c, 0),
     ...(spec.flow === "progression"
-      ? { cost: storyCost(guide, spec.progression, spec.abilities) }
+      ? {
+          cost: storyCost(guide, spec.progression, spec.abilities, solverChapters(solution)),
+        }
       : {}),
   };
 }
