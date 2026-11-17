@@ -51,7 +51,7 @@ test.describe("sidebar shell", () => {
       },
     );
     await go(page, "/");
-    const trigger = page.locator('[data-slot="sidebar-footer"] button');
+    const trigger = page.locator('[data-slot="sidebar-footer"] [data-sidebar="menu-button"]');
     await expect(trigger).toContainText("Alpha");
     await trigger.click();
     await page.getByRole("menuitem", { name: "Beta" }).click();
@@ -88,13 +88,21 @@ test.describe("sidebar shell", () => {
     );
   });
 
-  test("the profile menu's theme option follows a change made in Settings", async ({ page }) => {
+  test("the sidebar's theme button follows a change made in Settings and switches back", async ({
+    page,
+  }) => {
     await go(page, "/settings");
     await page
       .getByRole("radiogroup", { name: "Appearance" })
       .getByRole("radio", { name: "Dark" })
       .click();
-    await page.locator('[data-slot="sidebar-footer"] button').click();
-    await expect(page.getByRole("menuitem", { name: "Switch to light theme" })).toBeVisible();
+    const footer = page.locator('[data-slot="sidebar-footer"]');
+    await footer.getByRole("button", { name: "Switch to light theme" }).click();
+    await expect(page.locator("html")).not.toHaveClass(/dark/);
+    expect(await page.evaluate(() => localStorage.getItem("theme"))).toBe("light");
+    await expect(footer.getByRole("link", { name: "Source code on GitHub" })).toHaveAttribute(
+      "href",
+      "https://github.com/lmxrd/dark-cloud-companion",
+    );
   });
 });

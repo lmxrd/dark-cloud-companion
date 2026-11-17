@@ -78,6 +78,8 @@ test.describe("saved progress", () => {
     await go(page, "/db/spheda");
     await expect(page.getByRole("checkbox", { name: "I own Turkey" })).toBeChecked();
     await go(page, "/settings");
-    await expect(page.getByRole("button", { name: /^Switch to / })).toHaveCount(2);
+    await expect(
+      page.getByRole("button", { name: /^Switch to (?!(light|dark) theme)/ }),
+    ).toHaveCount(2);
   });
 });

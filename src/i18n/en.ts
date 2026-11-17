@@ -119,6 +119,7 @@ export const en = {
   "people.req.spheda": "win {n} Spheda games",
   "people.req.time": "beat {s} seconds",
   "people.req.code": "say “{code}”",
+  "nav.github": "Source code on GitHub",
   "theme.light": "Switch to light theme",
   "theme.dark": "Switch to dark theme",
 

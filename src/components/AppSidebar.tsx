@@ -1,7 +1,7 @@
 import { useAppState, useProfile, useReady } from "@/lib/useAppStore";
 import { withBase } from "@/lib/base";
 import { useEffect, useState } from "react";
-import { ChevronsUpDownIcon, MoonIcon, SunIcon } from "lucide-react";
+import { ChevronsUpDownIcon } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -32,9 +32,7 @@ import {
 import { useTranslations } from "@/i18n";
 import { activeChild, isSectionActive, mainNav, type NavItem } from "@/components/nav";
 import { switchProfile } from "@/lib/store";
-import { setThemePref } from "@/lib/theme";
-
-const applyTheme = (dark: boolean) => setThemePref(dark ? "dark" : "light");
+import { AppLinks } from "@/components/AppLinks";
 
 /** Top-level section link with its sub-items always visible while expanded (sidebar-03 structure). */
 function NavLink({
@@ -155,7 +153,7 @@ function ProfileAvatar({ initials }: { initials: string }) {
   );
 }
 
-/** Profile switcher, Settings, About and the theme toggle. */
+/** Profile switcher, Settings and About. */
 function ProfileMenuContent({
   side,
   align,
@@ -168,16 +166,6 @@ function ProfileMenuContent({
   const t = useTranslations();
   const state = useAppState();
   const { name, initials, mounted } = useProfileName();
-  // Follow the page's theme, also when Settings changes it while this menu is mounted.
-  const [dark, setDark] = useState(false);
-  useEffect(() => {
-    const html = document.documentElement;
-    const read = () => setDark(html.classList.contains("dark"));
-    read();
-    const observer = new MutationObserver(read);
-    observer.observe(html, { attributes: true, attributeFilter: ["class"] });
-    return () => observer.disconnect();
-  }, []);
   const profiles = Object.values(state.profiles);
 
   return (
@@ -210,14 +198,6 @@ function ProfileMenuContent({
         {t("nav.settings")}
       </DropdownMenuItem>
       <DropdownMenuItem render={<a href={withBase("/about")} />}>{t("nav.about")}</DropdownMenuItem>
-      <DropdownMenuItem
-        onClick={() => {
-          applyTheme(!dark);
-        }}
-      >
-        {dark ? <SunIcon /> : <MoonIcon />}
-        {dark ? t("theme.light") : t("theme.dark")}
-      </DropdownMenuItem>
     </DropdownMenuContent>
   );
 }
@@ -340,6 +320,7 @@ export function AppSidebar({ pathname }: { pathname: string }) {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
+        <AppLinks className="justify-end group-data-[collapsible=icon]:flex-col" />
         <SidebarMenu>
           <SidebarMenuItem>
             <NavUser />

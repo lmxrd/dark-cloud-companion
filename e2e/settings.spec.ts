@@ -10,7 +10,9 @@ test.describe("settings", () => {
 
     const card = page.getByRole("button", { name: "Switch to New Game+" });
     await expect(card).toHaveAttribute("aria-pressed", "true");
-    await page.getByRole("button", { name: /^Switch to (?!New Game\+)/ }).click();
+    await page
+      .getByRole("button", { name: /^Switch to (?!New Game\+|(light|dark) theme)/ })
+      .click();
     await expect(card).toHaveAttribute("aria-pressed", "false");
 
     await page.getByRole("button", { name: "Actions for New Game+" }).click();

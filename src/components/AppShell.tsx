@@ -11,6 +11,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarProvider, SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import { AppSidebar, ProfileButton } from "@/components/AppSidebar";
+import { AppLinks } from "@/components/AppLinks";
 import { BottomNav } from "@/components/BottomNav";
 import { StorageBanner } from "@/components/StorageBanner";
 import { UpdatePrompt } from "@/components/UpdatePrompt";
@@ -64,7 +65,8 @@ function AppHeader({
           ))}
         </BreadcrumbList>
       </Breadcrumb>
-      <ProfileButton className="ml-auto md:hidden" />
+      <AppLinks className="ml-auto md:hidden" />
+      <ProfileButton className="md:hidden" />
     </header>
   );
 }
