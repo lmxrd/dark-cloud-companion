@@ -1,0 +1,2 @@
+# Do not install a release until it is a day old (in minutes).
+minimumReleaseAge: 1440

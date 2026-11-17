@@ -1,0 +1,19 @@
+# All npm updates arrive in one pull request: version updates weekly, security
+# updates as one grouped pull request when an advisory comes out. A release must
+# be a day old before Dependabot offers it, the same as pnpm's minimumReleaseAge
+# (pnpm-workspace.yaml). Security updates are not held back.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 1
+    groups:
+      npm:
+        applies-to: version-updates
+        patterns: ["*"]
+      npm-security:
+        applies-to: security-updates
+        patterns: ["*"]
