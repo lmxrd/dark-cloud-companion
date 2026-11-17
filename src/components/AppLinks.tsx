@@ -43,7 +43,7 @@ export function AppLinks({ className }: { className?: string }) {
         rel="noreferrer"
         aria-label={t("nav.github")}
         title={t("nav.github")}
-        className={buttonVariants({ variant: "outline", size: "icon" })}
+        className={cn(buttonVariants({ variant: "outline", size: "icon" }))}
       >
         <GitHubIcon className="size-4" />
       </a>
