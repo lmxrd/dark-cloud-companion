@@ -1,0 +1,13 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { PageHeader } from "@/components/PageHeader";
+import { SphedaTracker } from "@/components/minigames/SphedaTracker";
+import { useTranslations } from "@/i18n";
+
+const t = useTranslations();
+---
+
+<Layout title={`${t("spheda.title")} · ${t("app.name")}`}>
+  <PageHeader title={t("spheda.title")} />
+  <SphedaTracker client:load />
+</Layout>

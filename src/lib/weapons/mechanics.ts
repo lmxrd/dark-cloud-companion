@@ -31,8 +31,6 @@ export interface WeaponState {
   abilities: AbilityId[];
 }
 
-export const emptyStats = (): Stats => Object.fromEntries(STAT_KEYS.map((k) => [k, 0])) as Stats;
-
 /** A fresh weapon exactly as bought or found: base stats, +0. */
 export function freshState(w: Weapon): WeaponState {
   return {
@@ -79,7 +77,7 @@ export function attackPerLevel(weapon: Weapon, levelBefore: number): number {
   return weapon.requiresKills.length > 0 ? 3 : 2;
 }
 
-/** Applies one level-up. `spBonus` is +1 with the matching support character (Cedric/Gerald/Milane/Lin). */
+/** Applies one level-up. `spBonus`: extra SP per level from a support ally (see planner `allyBonus`). */
 export function levelUp(state: WeaponState, weapon: Weapon, spBonus = 0): WeaponState {
   if (state.level >= MAX_LEVEL) return state;
   const stats = { ...state.stats };

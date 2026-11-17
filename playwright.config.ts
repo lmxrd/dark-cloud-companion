@@ -15,6 +15,8 @@ export default defineConfig({
     command: `pnpm build && pnpm astro preview --port ${PORT} --ignore-lock`,
     url: `http://localhost:${PORT}${basePath}`,
     reuseExistingServer: false,
+    // The site is built for the GitHub Pages base path the tests use.
+    env: { PUBLIC_SITE_URL: `http://localhost:${PORT}${basePath}` },
     timeout: 180_000,
   },
   projects: [

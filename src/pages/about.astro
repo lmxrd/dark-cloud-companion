@@ -1,5 +1,6 @@
 ---
 import Layout from "@/layouts/Layout.astro";
+import { PageHeader } from "@/components/PageHeader";
 import { useTranslations } from "@/i18n";
 
 const t = useTranslations();
@@ -7,7 +8,7 @@ const t = useTranslations();
 
 <Layout title={`${t("about.title")} · ${t("app.name")}`}>
   <div class="flex max-w-2xl flex-col gap-4 text-sm">
-    <h1 class="text-2xl font-semibold">{t("about.title")}</h1>
+    <PageHeader className="mb-2" title={t("about.title")} />
     <p>{t("about.intro")}</p>
     <h2 class="text-lg font-semibold">{t("about.dataTitle")}</h2>
     <p>{t("about.data")}</p>

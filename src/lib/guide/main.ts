@@ -1,10 +1,15 @@
-// The built-in main walkthrough, generated from the extracted data (no source prose): per chapter an overview step
+// The built-in main walkthrough, generated from the game data (no source prose): per chapter an overview step
 // with the items not tied to a section, then one step per section with its facts/medals and the items found there.
-import type { ChecklistCategory, ChecklistItem } from "@/lib/schemas";
-import { chapters, checklist, itemsOf, sectionsOf } from "@/lib/data";
-import type { Entry, Guide, Step } from "./types";
+import {
+  chapters,
+  itemsOf,
+  sectionsOf,
+  type ChecklistCategory,
+  type ChecklistItem,
+} from "@/lib/data";
+import { MAIN_GUIDE_ID, type Entry, type Guide, type Step } from "./types";
 
-export const MAIN_GUIDE_ID = "main";
+export { MAIN_GUIDE_ID };
 
 const categoryOrder: ChecklistCategory[] = [
   "scoop",
@@ -24,28 +29,15 @@ function itemEntries(items: ChecklistItem[]): Entry[] {
 
 export function buildMainWalkthrough(): Guide {
   const steps: Step[] = [];
-  // Items that only become available after the story ends are collected in the post-game chapter,
-  // wherever in the world they are found.
-  const postgameItems = checklist.filter((i) => i.postgame);
   for (const chapter of chapters) {
-    if (chapter.phase === "postgame") {
-      if (postgameItems.length) {
-        steps.push({
-          id: `ch-${chapter.id}`,
-          title: chapter.title,
-          notes: "",
-          chapterId: chapter.id,
-          entries: itemEntries(postgameItems),
-        });
-      }
-      continue;
-    }
-    const items = itemsOf(chapter.id).filter((i) => !i.postgame);
-    const loose = items.filter((i) => !i.sectionId);
+    const items = itemsOf(chapter.id);
+    const here = new Set(sectionsOf(chapter.id).map((s) => s.id));
+    // Items placed in a section of another chapter (available "after" it) are listed loose.
+    const loose = items.filter((i) => !i.sectionId || !here.has(i.sectionId));
     if (loose.length) {
       steps.push({
         id: `ch-${chapter.id}`,
-        title: chapter.phase === "main" ? `${chapter.number}. ${chapter.title}` : chapter.title,
+        title: `${chapter.number}. ${chapter.title}`,
         notes: "",
         chapterId: chapter.id,
         entries: itemEntries(loose),
@@ -53,11 +45,7 @@ export function buildMainWalkthrough(): Guide {
     }
     for (const section of sectionsOf(chapter.id)) {
       const here = items.filter((i) => i.sectionId === section.id);
-      const hasFacts =
-        !!section.medals ||
-        section.enemies.length > 0 ||
-        !!section.boss ||
-        !!section.georamaBuild.length;
+      const hasFacts = !!section.medals || section.kind === "dungeon" || section.kind === "boss";
       const entries: Entry[] = [
         ...(hasFacts ? [{ kind: "section" as const, ref: section.id }] : []),
         ...itemEntries(here),

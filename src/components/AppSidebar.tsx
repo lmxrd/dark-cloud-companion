@@ -1,16 +1,7 @@
-import { useStore } from "@nanostores/react";
+import { useAppState, useProfile, useReady } from "@/lib/useAppStore";
 import { withBase } from "@/lib/base";
 import { useEffect, useState } from "react";
-import {
-  BookOpenIcon,
-  ChevronsUpDownIcon,
-  DatabaseIcon,
-  LayoutDashboardIcon,
-  MoonIcon,
-  RouteIcon,
-  SunIcon,
-  type LucideIcon,
-} from "lucide-react";
+import { ChevronsUpDownIcon, MoonIcon, SunIcon } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -29,6 +20,7 @@ import {
   SidebarGroupContent,
   SidebarHeader,
   SidebarMenu,
+  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarMenuSub,
@@ -38,23 +30,11 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { useTranslations } from "@/i18n";
-import { MAIN_GUIDE_ID } from "@/lib/guide/main";
-import { $ready, $state, switchProfile } from "@/lib/store";
+import { activeChild, isSectionActive, mainNav, type NavItem } from "@/components/nav";
+import { switchProfile } from "@/lib/store";
+import { setThemePref } from "@/lib/theme";
 
-type NavChild = { title: string; href: string };
-type NavItem = { title: string; href: string; icon: LucideIcon; children?: NavChild[] };
-
-function applyTheme(dark: boolean) {
-  document.documentElement.classList.toggle("dark", dark);
-  try {
-    localStorage.setItem("theme", dark ? "dark" : "light");
-  } catch {}
-}
-
-const isActive = (href: string, pathname: string) => {
-  const path = href.split("?")[0];
-  return path === "/" ? pathname === "/" : pathname === path || pathname.startsWith(`${path}/`);
-};
+const applyTheme = (dark: boolean) => setThemePref(dark ? "dark" : "light");
 
 /** Top-level section link with its sub-items always visible while expanded (sidebar-03 structure). */
 function NavLink({
@@ -66,8 +46,11 @@ function NavLink({
   pathname: string;
   collapsed: boolean;
 }) {
-  const active =
-    isActive(item.href, pathname) || (item.children ?? []).some((c) => isActive(c.href, pathname));
+  const active = isSectionActive(item, pathname);
+  // The query (?id=…) is only known in the browser; until then no sub-item that needs one is marked.
+  const [search, setSearch] = useState("");
+  useEffect(() => setSearch(location.search), []);
+  const current = activeChild(item, pathname, search);
   const activeClasses =
     "data-active:border-2 data-active:border-sidebar-border data-active:shadow-sticker";
 
@@ -114,17 +97,27 @@ function NavLink({
   return (
     <SidebarMenuItem>
       {button}
+      {item.badge ? (
+        <SidebarMenuBadge className="border-sidebar-border bg-accent text-accent-foreground border font-mono">
+          {item.badge}
+        </SidebarMenuBadge>
+      ) : null}
       {item.children && (
         <SidebarMenuSub className="border-l-2">
           {item.children.map((child) => (
             <SidebarMenuSubItem key={child.href}>
               <SidebarMenuSubButton
                 render={<a href={withBase(child.href)} />}
-                isActive={isActive(child.href, pathname)}
+                isActive={child.href === current}
                 className="data-active:border-2 data-active:border-sidebar-border data-active:shadow-sticker-sm"
               >
                 <span>{child.title}</span>
               </SidebarMenuSubButton>
+              {child.badge ? (
+                <SidebarMenuBadge className="border-sidebar-border bg-accent text-accent-foreground top-0.5 border font-mono">
+                  {child.badge}
+                </SidebarMenuBadge>
+              ) : null}
             </SidebarMenuSubItem>
           ))}
         </SidebarMenuSub>
@@ -133,19 +126,13 @@ function NavLink({
   );
 }
 
-function NavUser() {
+/** The active profile's name and initials; a placeholder until mounted (matches the server render). */
+function useProfileName() {
   const t = useTranslations();
-  const ready = useStore($ready);
-  const state = useStore($state);
-  // Profile names come from localStorage: render a placeholder until mounted (matches the server).
+  const ready = useReady();
+  const state = useAppState();
   const [mounted, setMounted] = useState(false);
-  const [dark, setDark] = useState(false);
-  useEffect(() => {
-    setDark(document.documentElement.classList.contains("dark"));
-    setMounted(true);
-  }, []);
-
-  const profiles = Object.values(state.profiles);
+  useEffect(() => setMounted(true), []);
   const current = state.profiles[state.activeProfile];
   const name = mounted && ready && current ? current.name : t("nav.profile");
   const initials = name
@@ -155,14 +142,89 @@ function NavUser() {
     .map((word) => word[0])
     .join("")
     .toUpperCase();
-  const avatar = (
+  return { name, initials, mounted: mounted && ready };
+}
+
+function ProfileAvatar({ initials }: { initials: string }) {
+  return (
     <Avatar className="size-8 rounded-md border-2 border-border bg-secondary">
       <AvatarFallback className="rounded-md bg-transparent text-xs font-bold text-secondary-foreground">
         {initials || "?"}
       </AvatarFallback>
     </Avatar>
   );
+}
 
+/** Profile switcher, Settings, About and the theme toggle. */
+function ProfileMenuContent({
+  side,
+  align,
+  className,
+}: {
+  side: "top" | "bottom";
+  align: "start" | "end";
+  className?: string;
+}) {
+  const t = useTranslations();
+  const state = useAppState();
+  const { name, initials, mounted } = useProfileName();
+  // Follow the page's theme, also when Settings changes it while this menu is mounted.
+  const [dark, setDark] = useState(false);
+  useEffect(() => {
+    const html = document.documentElement;
+    const read = () => setDark(html.classList.contains("dark"));
+    read();
+    const observer = new MutationObserver(read);
+    observer.observe(html, { attributes: true, attributeFilter: ["class"] });
+    return () => observer.disconnect();
+  }, []);
+  const profiles = Object.values(state.profiles);
+
+  return (
+    <DropdownMenuContent side={side} align={align} className={className ?? "w-56"}>
+      {/* The label is a Menu.GroupLabel and must sit inside a group. */}
+      <DropdownMenuGroup>
+        <DropdownMenuLabel className="flex items-center gap-2">
+          <ProfileAvatar initials={initials} />
+          <span className="flex min-w-0 flex-col leading-tight">
+            <span className="truncate font-semibold">{name}</span>
+            <span className="truncate text-xs text-muted-foreground">{t("profiles.title")}</span>
+          </span>
+        </DropdownMenuLabel>
+      </DropdownMenuGroup>
+      {mounted && profiles.length > 1 && (
+        <>
+          <DropdownMenuSeparator />
+          <DropdownMenuGroup>
+            {profiles.map((p) => (
+              <DropdownMenuItem key={p.id} onClick={() => switchProfile(p.id)}>
+                {p.id === state.activeProfile ? "✓ " : ""}
+                {p.name}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuGroup>
+        </>
+      )}
+      <DropdownMenuSeparator />
+      <DropdownMenuItem render={<a href={withBase("/settings")} />}>
+        {t("nav.settings")}
+      </DropdownMenuItem>
+      <DropdownMenuItem render={<a href={withBase("/about")} />}>{t("nav.about")}</DropdownMenuItem>
+      <DropdownMenuItem
+        onClick={() => {
+          applyTheme(!dark);
+        }}
+      >
+        {dark ? <SunIcon /> : <MoonIcon />}
+        {dark ? t("theme.light") : t("theme.dark")}
+      </DropdownMenuItem>
+    </DropdownMenuContent>
+  );
+}
+
+function NavUser() {
+  const t = useTranslations();
+  const { name, initials } = useProfileName();
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
@@ -174,56 +236,61 @@ function NavUser() {
           />
         }
       >
-        {avatar}
+        <ProfileAvatar initials={initials} />
         <span className="flex min-w-0 flex-col leading-tight">
           <span className="truncate font-semibold">{name}</span>
           <span className="truncate text-xs text-muted-foreground">{t("nav.profile")}</span>
         </span>
         <ChevronsUpDownIcon className="ml-auto size-4" />
       </DropdownMenuTrigger>
-      <DropdownMenuContent side="top" align="start" className="w-56">
-        {/* The label is a Menu.GroupLabel and must sit inside a group. */}
-        <DropdownMenuGroup>
-          <DropdownMenuLabel className="flex items-center gap-2">
-            {avatar}
-            <span className="flex min-w-0 flex-col leading-tight">
-              <span className="truncate font-semibold">{name}</span>
-              <span className="truncate text-xs text-muted-foreground">{t("profiles.title")}</span>
-            </span>
-          </DropdownMenuLabel>
-        </DropdownMenuGroup>
-        {mounted && ready && profiles.length > 1 && (
-          <>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              {profiles.map((p) => (
-                <DropdownMenuItem key={p.id} onClick={() => switchProfile(p.id)}>
-                  {p.id === state.activeProfile ? "✓ " : ""}
-                  {p.name}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuGroup>
-          </>
-        )}
-        <DropdownMenuSeparator />
-        <DropdownMenuItem render={<a href={withBase("/settings")} />}>
-          {t("nav.settings")}
-        </DropdownMenuItem>
-        <DropdownMenuItem render={<a href={withBase("/about")} />}>
-          {t("nav.about")}
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => {
-            applyTheme(!dark);
-            setDark(!dark);
-          }}
-        >
-          {dark ? <SunIcon /> : <MoonIcon />}
-          {dark ? t("theme.light") : t("theme.dark")}
-        </DropdownMenuItem>
-      </DropdownMenuContent>
+      <ProfileMenuContent side="top" align="start" />
     </DropdownMenu>
   );
+}
+
+/** Phone header: the avatar alone opens the same profile menu (the sidebar is hidden there). */
+export function ProfileButton({ className }: { className?: string }) {
+  const t = useTranslations();
+  const { name, initials } = useProfileName();
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        aria-label={`${t("nav.profile")}: ${name}`}
+        className={`rounded-md outline-none focus-visible:ring-2 focus-visible:ring-ring ${className ?? ""}`}
+      >
+        <ProfileAvatar initials={initials} />
+      </DropdownMenuTrigger>
+      <ProfileMenuContent side="bottom" align="end" />
+    </DropdownMenu>
+  );
+}
+
+/**
+ * Lines still to buy on the shopping list. Read after mounting (localStorage), and the shopping module (with its
+ * recipe data) is loaded lazily so it stays out of every page's first load.
+ */
+function useShoppingLeft(): number {
+  const ready = useReady();
+  const profile = useProfile();
+  const [left, setLeft] = useState(0);
+  useEffect(() => {
+    if (!ready) return;
+    if (!profile.shopping.goals.length) return setLeft(0);
+    let live = true;
+    void Promise.all([import("@/lib/shopping"), import("@/lib/guide/builtin")]).then(
+      ([{ shoppingList }, { findGuide }]) => {
+        const list = shoppingList(profile.shopping, {
+          chapter: 8,
+          findGuide: (id) => findGuide(id, profile.guides),
+        });
+        if (live) setLeft(list.left);
+      },
+    );
+    return () => {
+      live = false;
+    };
+  }, [ready, profile.shopping, profile.guides]);
+  return left;
 }
 
 /** The flat, always-visible app navigation (collapses to an icon rail). */
@@ -231,32 +298,15 @@ export function AppSidebar({ pathname }: { pathname: string }) {
   const t = useTranslations();
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
+  const shoppingLeft = useShoppingLeft();
 
-  const items: NavItem[] = [
-    { title: t("nav.dashboard"), href: "/", icon: LayoutDashboardIcon },
-    {
-      title: t("nav.guides"),
-      href: "/guides",
-      icon: BookOpenIcon,
-      children: [
-        { title: t("nav.main"), href: `/guides/view?id=${MAIN_GUIDE_ID}` },
-        { title: t("guides.custom"), href: "/guides" },
-      ],
-    },
-    { title: t("nav.planner"), href: "/planner", icon: RouteIcon },
-    {
-      title: t("nav.reference"),
-      href: "/weapons",
-      icon: DatabaseIcon,
-      children: [
-        { title: t("nav.weapons"), href: "/weapons" },
-        { title: t("nav.items"), href: "/items" },
-        { title: t("nav.ridepod"), href: "/ridepod" },
-        { title: t("nav.monsters"), href: "/monsters" },
-        { title: t("nav.spheda"), href: "/spheda" },
-      ],
-    },
-  ];
+  // The shopping list shows how many lines are still to buy.
+  const items: NavItem[] = mainNav(t).map((item) => ({
+    ...item,
+    children: item.children?.map((c) =>
+      c.href === "/tools/shopping" ? { ...c, badge: shoppingLeft } : c,
+    ),
+  }));
 
   return (
     <Sidebar collapsible="icon" className="border-r-2">

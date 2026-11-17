@@ -1,10 +1,13 @@
 import { expect, test } from "@playwright/test";
 import { readFileSync } from "node:fs";
 import { activeProfile, go, startPicker, targetPicker, typeTabs } from "./helpers";
+import { builtinPlan, firstKills } from "./plans";
+
+const islandKing = builtinPlan("island-king/balanced");
 
 test.describe("guides, planner and editor", () => {
   test("generate a weapon build, save it as a guide and see it in My guides", async ({ page }) => {
-    await go(page, "/planner");
+    await go(page, "/tools/planner");
     await targetPicker(page).selectOption({ label: "Smash Wrench" });
     await page.getByRole("button", { name: "Generate plan" }).click();
     await expect(page.getByText(/Build-up route:/)).toBeVisible({ timeout: 60_000 });
@@ -15,11 +18,15 @@ test.describe("guides, planner and editor", () => {
     ).toBeVisible();
     await page.getByRole("button", { name: "Save as guide" }).click();
     await go(page, "/guides");
-    await expect(page.getByRole("link", { name: "Smash Wrench — Least ABS" })).toBeVisible();
+    await expect(
+      page
+        .getByRole("region", { name: "My guides" })
+        .getByRole("link", { name: /Smash Wrench — Least ABS/ }),
+    ).toBeVisible();
   });
 
   test("the planner remembers its inputs", async ({ page }) => {
-    await go(page, "/planner");
+    await go(page, "/tools/planner");
     await targetPicker(page).selectOption({ label: "LEGEND" });
     await page.getByLabel("Optimise for").selectOption("gilda");
     await page.reload();
@@ -30,7 +37,7 @@ test.describe("guides, planner and editor", () => {
   test("create a guide by hand: text step, checklist items and a referenced collectable", async ({
     page,
   }) => {
-    await go(page, "/planner?new");
+    await go(page, "/tools/planner/editor?new");
     await page.getByLabel("Guide title").fill("My e2e guide");
     await page.getByRole("button", { name: "Create" }).click();
     await page.getByLabel("Step title").fill("Photos in town");
@@ -47,12 +54,11 @@ test.describe("guides, planner and editor", () => {
 
     // Switch it on and tick its text item from the dashboard.
     await go(page, "/guides");
-    await page
-      .locator('[data-slot="card"]', { hasText: "My e2e guide" })
-      .getByRole("switch")
-      .click();
+    await page.getByRole("switch", { name: "Show on dashboard: My e2e guide" }).click();
     await go(page, "/");
     await page.getByRole("tab", { name: "By guide" }).click();
+    // Only the first guide starts open.
+    await page.getByRole("button", { name: "Show guide" }).click();
     await page.getByRole("checkbox", { name: "Clock", exact: true }).click();
     expect(
       Object.keys((await activeProfile(page)).checks).some((k) =>
@@ -63,30 +69,31 @@ test.describe("guides, planner and editor", () => {
 
   test("a built-in guide can be duplicated into an editable copy", async ({ page }) => {
     await go(page, "/guides");
-    await page
-      .locator('[data-slot="card"]', { hasText: "Grade Zero — Least ABS" })
-      .first()
-      .getByRole("button", { name: "Duplicate to edit" })
-      .click();
-    await expect(page.getByLabel("Guide title")).toHaveValue("Grade Zero — Least ABS (copy)");
+    await page.getByRole("link", { name: islandKing.title, exact: true }).click();
+    await page.getByRole("button", { name: "More actions" }).click();
+    await page.getByRole("menuitem", { name: "Duplicate to edit" }).click();
+    await expect(page.getByLabel("Guide title")).toHaveValue(`${islandKing.title} (copy)`);
     await expect(page.getByText("Weapon build", { exact: true }).first()).toBeVisible();
   });
 
   test("export and import round-trips; importing the same file again changes nothing", async ({
     page,
   }) => {
-    await go(page, "/planner?new");
+    await go(page, "/tools/planner/editor?new");
     await page.getByLabel("Guide title").fill("Round trip");
     await page.getByRole("button", { name: "Create" }).click();
     await page.getByRole("button", { name: "Save guide" }).click();
     await go(page, "/guides");
     const [download] = await Promise.all([
       page.waitForEvent("download"),
-      page.getByRole("button", { name: "Export all my guides" }).click(),
+      page
+        .getByRole("button", { name: "More actions" })
+        .click()
+        .then(() => page.getByRole("menuitem", { name: "Export all my guides" }).click()),
     ]);
     const path = await download.path();
     const file = JSON.parse(readFileSync(path, "utf8"));
-    expect(file).toMatchObject({ app: "dark-chronicles-companion", kind: "content", version: 2 });
+    expect(file).toMatchObject({ app: "dark-chronicles-companion", kind: "content", version: 3 });
     expect(file.guides.map((g: { title: string }) => g.title)).toContain("Round trip");
 
     await page.locator('input[type="file"]').setInputFiles(path);
@@ -113,7 +120,7 @@ test("remembered planner inputs that point at unknown weapons are ignored instea
     localStorage.setItem(
       "dcc:state",
       JSON.stringify({
-        version: 2,
+        version: 3,
         activeProfile: id,
         profiles: {
           [id]: {
@@ -125,13 +132,19 @@ test("remembered planner inputs that point at unknown weapons are ignored instea
             activeGuides: ["main"],
             guides: [],
             dashboard: { view: "chapter", currentChapter: null },
+            shopping: { goals: [], have: {}, invent: [], group: "stops" },
             planner: {
               targetId: "no-such-weapon",
               objective: "abs",
               maxChapter: 3,
               budget: "",
               abilities: [],
+              itemPool: "cheap",
+              solveTime: "quick",
+              story: false,
+              abilitySource: "spheres",
               customStart: false,
+              endStats: stats,
               endLevel: 0,
               start: {
                 weaponId: "gone-weapon",
@@ -149,14 +162,14 @@ test("remembered planner inputs that point at unknown weapons are ignored instea
       }),
     );
   });
-  await go(page, "/planner");
+  await go(page, "/tools/planner");
   await expect(targetPicker(page)).toBeVisible();
   await expect(page.getByRole("alert")).toHaveCount(0);
 });
 
 test.describe("custom start and end weapons, one tab per weapon type", () => {
   test("the target weapon is picked from weapon-type tabs", async ({ page }) => {
-    await go(page, "/planner");
+    await go(page, "/tools/planner");
     // Wrenches (the first tab) are active by default, with the type's final weapon selected.
     await expect(typeTabs(page).getByRole("tab").first()).toHaveAttribute("aria-selected", "true");
     await expect(targetPicker(page)).toHaveValue("grade-zero");
@@ -189,7 +202,7 @@ test.describe("custom start and end weapons, one tab per weapon type", () => {
   test("custom start weapon (specs + abilities) and custom end weapon (required specs)", async ({
     page,
   }) => {
-    await go(page, "/planner");
+    await go(page, "/tools/planner");
     await targetPicker(page).selectOption({ label: "Smash Wrench" });
     const startSection = page.getByRole("region", { name: "Start point" });
     const targetSection = page.getByRole("region", { name: "Target weapon" });
@@ -220,7 +233,68 @@ test.describe("custom start and end weapons, one tab per weapon type", () => {
       abilities: ["dark"],
     });
     expect(stored.planner.start).toMatchObject({ level: 3, abilities: ["poison"] });
-    // The plan starts from the custom weapon, so its first stage doesn't level a fresh weapon from +0.
-    await expect(page.getByText("Dark Coin").first()).toBeVisible();
+    // The route finishes in chapter 1: no side weapon with Dark is available then, so the plan
+    // falls back on the Dark Coin, a Spheda prize in chapter 1 (bought only from chapter 2).
+    await expect(
+      page.getByRole("list", { name: "Items to synth" }).getByText("Dark Coin"),
+    ).toBeVisible();
+  });
+
+  test("opposing abilities are one three-way switch per pair", async ({ page }) => {
+    await go(page, "/tools/planner");
+    const target = page.getByRole("region", { name: "Target weapon" });
+    const pair = target.getByRole("radiogroup", { name: "Critical / Dark" });
+    await expect(pair.getByLabel("Neither Critical nor Dark")).toBeChecked();
+    await pair.getByLabel("Dark", { exact: true }).check();
+    await pair.getByLabel("Critical", { exact: true }).check();
+    await expect(pair.getByLabel("Dark", { exact: true })).not.toBeChecked();
+    await target.getByLabel("Steal", { exact: true }).check();
+    await expect
+      .poll(async () => (await activeProfile(page)).planner.abilities)
+      .toEqual(["critical", "steal"]);
+    await target.getByRole("button", { name: "Clear" }).click();
+    await expect(pair.getByLabel("Neither Critical nor Dark")).toBeChecked();
+  });
+
+  test("weapon builds are a table per weapon type and a guide resumes at its next stage", async ({
+    page,
+  }) => {
+    await go(page, "/guides");
+    const builds = page.getByRole("table", { name: "Weapon builds" });
+    await expect(builds.getByRole("columnheader")).toHaveText([
+      "Starred weapon",
+      "Balanced",
+      "Earliest",
+      "Gilda max",
+    ]);
+    await expect(builds.getByRole("rowheader", { name: "Monica · Swords" })).toBeVisible();
+    const row = builds.getByRole("row").filter({ hasText: "Island King" });
+    // A balanced, an earliest and a gilda max plan per starred weapon, in that order.
+    await expect(row.getByRole("link")).toHaveCount(3);
+    await expect(row.getByRole("link").first()).toContainText("Balanced");
+    await expect(row.getByText(/^ch \d · \d+k ABS$/).first()).toBeVisible();
+    await expect(row.getByRole("link", { name: /Gilda max/ })).toBeVisible();
+    await expect(row.getByRole("link", { name: /Earliest/ })).toBeVisible();
+    await row.getByRole("link", { name: /Balanced/ }).click();
+    await expect(page.getByRole("heading", { name: islandKing.title, level: 1 })).toBeVisible();
+    await expect(page.getByText(/^0 \/ \d+ stages$/)).toBeVisible();
+    // Each stage says when to do it, and a build-up lists the enemies it needs defeated first.
+    await expect(page.getByText(/^Do this after .+ \(chapter \d\)$/).first()).toBeVisible();
+    const { weapon, enemies } = firstKills("island-king/balanced");
+    const kills = `${weapon} needs these enemies defeated first:`;
+    await expect(page.getByText(kills)).toBeVisible();
+    await expect(
+      page.getByRole("list", { name: kills }).getByText(enemies[0], { exact: true }),
+    ).toBeVisible();
+    await page.getByRole("button", { name: /Continue at stage 1/ }).click();
+    // Switching it on from the progress strip shows it under "On the dashboard".
+    await page.getByRole("switch", { name: "Show on dashboard" }).click();
+    await go(page, "/guides");
+    await expect(
+      page.getByRole("region", { name: "On the dashboard" }).getByRole("link", {
+        name: islandKing.title,
+      }),
+    ).toBeVisible();
+    await expect(row.getByRole("link", { name: /Balanced \(on the dashboard\)/ })).toBeVisible();
   });
 });

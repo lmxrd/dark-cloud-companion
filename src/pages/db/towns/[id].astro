@@ -1,0 +1,17 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { useTranslations } from "@/i18n";
+import { core } from "@/lib/db/data";
+import { TownPage } from "@/components/db/pages/PlacePages";
+
+export function getStaticPaths() {
+  return core.towns.map((t) => ({ params: { id: t.id }, props: { town: t } }));
+}
+
+const t = useTranslations();
+const { town } = Astro.props;
+---
+
+<Layout title={`${town.name} · ${t("app.name")}`} page={town.name}>
+  <TownPage town={town} />
+</Layout>

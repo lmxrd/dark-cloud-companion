@@ -1,4 +1,3 @@
-import { useMemo } from "react";
 import { deriveBuild, type DerivedBuild } from "./derive";
 import type { Guide } from "./types";
 
@@ -13,5 +12,3 @@ export function derivedFor(guide: Guide): DerivedBuild {
   }
   return d;
 }
-
-export const useDerived = (guide: Guide) => useMemo(() => derivedFor(guide), [guide]);

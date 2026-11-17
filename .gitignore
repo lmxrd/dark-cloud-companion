@@ -2,6 +2,9 @@
 dist/
 # generated types
 .astro/
+# game data exported from drizzle/game.db, and the built-in plans generated from it
+src/gamedata/
+src/data/
 
 # dependencies
 node_modules/
@@ -27,3 +30,4 @@ pnpm-debug.log*
 # playwright
 test-results/
 playwright-report/
+.claude

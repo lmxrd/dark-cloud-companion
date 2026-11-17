@@ -3,12 +3,10 @@ import { buildContentExport, mergeGuides } from "./content-file";
 import { parseContentImport } from "./content-transfer";
 import { deriveBuild } from "@/lib/guide/derive";
 import { planResultToGuide } from "@/lib/guide/fromPlan";
-import { newId, type Guide } from "@/lib/guide/types";
-import { planToGuide as planToLegacyGuide } from "@/lib/guides/fromPlan";
+import type { Guide } from "@/lib/guide/types";
 import { planPath } from "@/lib/planner/plan";
 import { getWeapon } from "@/lib/planner/sources";
 import { freshState } from "@/lib/weapons/mechanics";
-import { emptyWalkthrough } from "@/lib/walkthroughs/types";
 
 async function sampleBuildGuide(): Promise<Guide> {
   const start = freshState(getWeapon("battle-wrench"));
@@ -33,11 +31,11 @@ function sampleTextGuide(): Guide {
         id: "s1",
         title: "Photos",
         notes: "Take a picture of the clock.",
-        chapterId: "c1",
+        chapterId: "1",
         entries: [
           { kind: "text", id: "i1", text: "Clock" },
-          { kind: "item", ref: "c1-scoop-night-stalker" },
-          { kind: "section", ref: "c1-rats" },
+          { kind: "item", ref: "photo:night-stalker" },
+          { kind: "section", ref: "battle-with-rats" },
         ],
       },
       { id: "s2", title: "Anytime thing", notes: "", entries: [] },
@@ -83,10 +81,10 @@ describe("content export/import", () => {
       mutate(g);
       return parseContentImport(JSON.stringify(buildContentExport([g])));
     };
-    expect(bad((g) => (g.steps[0].chapterId = "c99"))).toMatchObject({ ok: false });
-    expect(bad((g) => (g.steps[0].sectionId = "c1-rats"))).toMatchObject({ ok: true });
+    expect(bad((g) => (g.steps[0].chapterId = "99"))).toMatchObject({ ok: false });
+    expect(bad((g) => (g.steps[0].sectionId = "battle-with-rats"))).toMatchObject({ ok: true });
     expect(
-      bad((g) => ((g.steps[0].chapterId = "c2"), (g.steps[0].sectionId = "c1-rats"))),
+      bad((g) => ((g.steps[0].chapterId = "2"), (g.steps[0].sectionId = "battle-with-rats"))),
     ).toMatchObject({ ok: false });
     expect(bad((g) => g.steps[0].entries.push({ kind: "item", ref: "nope" }))).toMatchObject({
       ok: false,
@@ -109,53 +107,23 @@ describe("content export/import", () => {
     const { build: _drop, ...noStart } = structuredClone(guide);
     expect(run(noStart as Guide)).toMatchObject({ ok: false });
   }, 60000);
-
-  test("version 1 files (separate guides and walkthroughs) are converted", async () => {
-    const start = freshState(getWeapon("battle-wrench"));
-    const result = await planPath({
-      start,
-      targetId: "drill-wrench",
-      objective: "abs",
-      goal: { kind: "reach" },
-      maxChapter: 2,
-      spBonus: 1,
-    });
-    const legacyGuide = planToLegacyGuide({
-      id: "custom-old",
-      title: "Old pinned",
-      kind: "custom",
-      summary: "s",
-      result,
-    });
-    const w = emptyWalkthrough("Old walkthrough", 100);
-    w.steps = [
-      {
-        id: "s1",
-        chapterId: "c1",
-        title: "T",
-        notes: "",
-        checklist: [{ id: "i1", text: "Clock" }],
-      },
-    ];
-    const v1 = {
-      app: "dark-chronicles-companion",
-      kind: "content",
-      version: 1,
-      guides: [legacyGuide],
-      walkthroughs: [w],
-    };
-    const parsed = parseContentImport(JSON.stringify(v1));
-    expect(parsed.ok).toBe(true);
-    if (parsed.ok) {
-      expect(parsed.file.guides.map((g) => g.id)).toEqual(["custom-old", w.id]);
-      expect(parsed.file.guides[1].steps[0].entries).toEqual([
-        { kind: "text", id: "i1", text: "Clock" },
-      ]);
-    }
-  }, 60000);
 });
 
 describe("mergeGuides", () => {
+  test("a guide with a built-in guide's id gets a fresh one", () => {
+    const g = { ...sampleTextGuide(), id: "main" };
+    const merged = mergeGuides([], [g], makeId, (id) => id === "main");
+    expect(merged.guides.map((x) => x.id)).toEqual(["main-copy"]);
+  });
+
+  test("a copy's title stays within the limit", () => {
+    const g = sampleTextGuide();
+    const long = { ...g, title: "x".repeat(200) };
+    const merged = mergeGuides([g], [long], makeId);
+    expect(merged.guides[1].title).toHaveLength(200);
+    expect(merged.guides[1].title).toMatch(/\(imported\)$/);
+  });
+
   test("adds new, skips identical, copies changed guides with the same id", () => {
     const g = sampleTextGuide();
     const first = mergeGuides([], [g], makeId);
@@ -168,12 +136,16 @@ describe("mergeGuides", () => {
     expect(clash.guides[1].title).toMatch(/\(imported\)$/);
   });
 
+  test("duplicate ids inside one file never produce two guides with the same id", () => {
+    const g = sampleTextGuide();
+    const merged = mergeGuides([], [g, g, { ...g, title: "Other" }], makeId);
+    expect(merged.summary).toEqual({ added: 1, copied: 1, skipped: 1 });
+    const ids = merged.guides.map((x) => x.id);
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+
   test("timestamps alone don't make two copies differ", () => {
     const g = sampleTextGuide();
     expect(mergeGuides([g], [{ ...g, updatedAt: 99 }], makeId).summary.skipped).toBe(1);
   });
-});
-
-test("ids are non-empty and varied", () => {
-  expect(newId()).not.toBe(newId());
 });

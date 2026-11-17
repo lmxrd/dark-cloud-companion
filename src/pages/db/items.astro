@@ -1,0 +1,15 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { PageHeader } from "@/components/PageHeader";
+import { ItemsList } from "@/components/items/ItemsList";
+import { useTranslations } from "@/i18n";
+import { itemRows } from "@/lib/db/lists";
+
+const t = useTranslations();
+const rows = itemRows(t);
+---
+
+<Layout title={`${t("items.title")} · ${t("app.name")}`}>
+  <PageHeader title={t("items.title")} />
+  <ItemsList client:load rows={rows} />
+</Layout>

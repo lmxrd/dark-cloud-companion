@@ -1,0 +1,19 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { useTranslations } from "@/i18n";
+import { misc } from "@/lib/db/data";
+import { PersonPage } from "@/components/db/pages/MorePages";
+import { TickToggle } from "@/components/db/TickToggle";
+import { tick } from "@/lib/gamedata/ticks";
+import { byId } from "@/lib/db/data";
+export function getStaticPaths() {
+  return misc.npcs.map((n) => ({ params: { id: n.id }, props: { npc: n } }));
+}
+
+const t = useTranslations();
+const { npc } = Astro.props;
+---
+
+<Layout title={`${npc.name} · ${t("app.name")}`} page={npc.name}>
+  <PersonPage npc={npc}>{byId.recruit.has(npc.id) && <TickToggle slot="actions" client:load tickId={tick.recruit(npc.id)} label={t("db.recruited")} />}</PersonPage>
+</Layout>

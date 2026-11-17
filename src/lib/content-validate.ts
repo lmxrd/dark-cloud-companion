@@ -36,7 +36,8 @@ export function validateGuide(g: Guide): string[] {
   const errors: string[] = [];
   if (g.build && !weaponById.has(g.build.weaponId))
     errors.push(`unknown start weapon "${g.build.weaponId}"`);
-  if (g.steps.some((s) => s.build) && !g.build) errors.push("has build steps but no start weapon");
+  if (g.steps.some((s) => s.build || s.buildUp) && !g.build)
+    errors.push("has build steps but no start weapon");
   const stepIds = new Set<string>();
   g.steps.forEach((s, i) => {
     const at = `step ${i + 1}`;
@@ -61,6 +62,11 @@ export function validateGuide(g: Guide): string[] {
         errors.push(`${at}: unknown section "${e.ref}"`);
     }
     if (s.build) checkStage(s.build, at, errors);
+    for (const r of s.prepare?.recipes ?? []) for (const st of r.stages) checkStage(st, at, errors);
+    if (s.prepare && !weaponById.has(s.prepare.weaponId))
+      errors.push(`${at}: unknown weapon "${s.prepare.weaponId}"`);
+    if (s.buildUp && !weaponById.has(s.buildUp.weaponId))
+      errors.push(`${at}: unknown weapon "${s.buildUp.weaponId}"`);
   });
   return errors;
 }

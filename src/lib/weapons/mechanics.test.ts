@@ -1,6 +1,5 @@
 import { describe, expect, test } from "vitest";
-import raw from "@/data/weapons.json";
-import { weaponsData } from "@/lib/schemas";
+import { weaponData } from "@/lib/planner/sources";
 import {
   absBetween,
   absForNextLevel,
@@ -17,8 +16,7 @@ import {
   synth,
 } from "./mechanics";
 
-const data = weaponsData.parse(raw);
-const w = (id: string) => data.weapons.find((x) => x.id === id)!;
+const w = (id: string) => weaponData.weapons.find((x) => x.id === id)!;
 
 describe("ABS formulas (FAQ 4.1)", () => {
   test("Battle Wrench requirement sequence is 32, 32, 48, 64, 80", () => {

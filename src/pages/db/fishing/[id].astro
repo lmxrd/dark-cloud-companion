@@ -1,0 +1,17 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { useTranslations } from "@/i18n";
+import { fishing } from "@/lib/db/data";
+import { FishPage } from "@/components/db/pages/MorePages";
+
+export function getStaticPaths() {
+  return fishing.fish.map((f) => ({ params: { id: f.id }, props: { fish: f } }));
+}
+
+const t = useTranslations();
+const { fish } = Astro.props;
+---
+
+<Layout title={`${fish.name} · ${t("app.name")}`} page={fish.name}>
+  <FishPage fish={fish} />
+</Layout>

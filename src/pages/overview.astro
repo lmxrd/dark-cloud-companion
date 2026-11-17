@@ -1,0 +1,12 @@
+---
+// The dashboard's overview tab (the dashboard reads its view from the path).
+import Layout from "@/layouts/Layout.astro";
+import { Dashboard } from "@/components/dashboard/Dashboard";
+import { useTranslations } from "@/i18n";
+
+const t = useTranslations();
+---
+
+<Layout title={`${t("dash.views.overview")} · ${t("app.name")}`}>
+  <Dashboard client:load path="/overview" />
+</Layout>

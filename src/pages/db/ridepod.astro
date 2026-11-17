@@ -1,0 +1,13 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { PageHeader } from "@/components/PageHeader";
+import { RidepodTracker } from "@/components/minigames/RidepodTracker";
+import { useTranslations } from "@/i18n";
+
+const t = useTranslations();
+---
+
+<Layout title={`${t("ridepod.title")} · ${t("app.name")}`}>
+  <PageHeader title={t("ridepod.title")} />
+  <RidepodTracker client:load />
+</Layout>

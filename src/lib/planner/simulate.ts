@@ -13,11 +13,11 @@ import {
   type WeaponState,
 } from "@/lib/weapons/mechanics";
 import { STAT_KEYS, type AbilityId } from "@/lib/schemas";
-import { getWeapon, synthSourceByName } from "./sources";
+import { allyBonus, getWeapon, synthSourceByName } from "./sources";
 import type { Acquire, Cost, LogEntry, Plan, Recipe, SimulationResult, Stage } from "./types";
 
 export interface SimOptions {
-  /** Extra SP per level from the matching support character (Cedric/Gerald/Milane/Lin). */
+  /** 1: the support ally for each weapon type is along (+1 SP per level where one exists; see allyBonus). */
   spBonus: number;
   /** Enemy types already killed; undefined means "assume all requirements are met". */
   killed?: ReadonlySet<string>;
@@ -50,11 +50,12 @@ function runStages(
       );
       return;
     }
+    const start = { level: run.state.level, stats: { ...run.state.stats }, du: run.state.du };
 
     if (stage.levelTo > run.state.level) {
       const from = run.state.level;
       const abs = Math.max(0, absBetween(weapon.baseAbs, from, stage.levelTo) - run.state.abs);
-      run.state = levelUpTo(run.state, weapon, stage.levelTo, opts.spBonus);
+      run.state = levelUpTo(run.state, weapon, stage.levelTo, allyBonus(weapon, opts.spBonus));
       run.cost.abs += abs;
       run.cost.steps += 1;
       run.log.push({ type: "level", weaponId: weapon.id, from, to: stage.levelTo, abs, depth });
@@ -100,9 +101,12 @@ function runStages(
         });
       } else {
         const sub = simulateRecipe(use.recipe, opts, depth + 1);
-        run.cost.abs += sub.cost.abs;
-        run.cost.gilda += sub.cost.gilda;
-        run.cost.steps += sub.cost.steps + 1;
+        if (!use.prepared) {
+          run.cost.abs += sub.cost.abs;
+          run.cost.gilda += sub.cost.gilda;
+          run.cost.steps += sub.cost.steps;
+        }
+        run.cost.steps += 1;
         run.log.push(...sub.log);
         run.errors.push(...sub.errors);
         const aux = sub.state;
@@ -115,19 +119,16 @@ function runStages(
           );
           continue;
         }
-        run.state = synth(
-          run.state,
-          weapon,
-          { ...sphere.gains, du: sphere.du },
-          sphere.sp,
-          aux.level >= MIN_SPHERE_LEVEL ? aux.abilities : [],
-        );
+        const passed = aux.level >= MIN_SPHERE_LEVEL ? aux.abilities : [];
+        run.state = synth(run.state, weapon, { ...sphere.gains, du: sphere.du }, sphere.sp, passed);
         run.log.push({
           type: "sphere",
           weaponId: aux.weaponId,
           level: aux.level,
           sp: sphere.sp,
           gains: sphere.gains,
+          du: sphere.du,
+          abilities: [...passed],
           depth,
         });
       }
@@ -139,12 +140,15 @@ function runStages(
       level: run.state.level,
       sp: run.state.sp,
       stats: { ...run.state.stats },
+      du: run.state.du,
       abilities: [...run.state.abilities],
+      start,
       depth,
     });
 
     const next = stages[i + 1];
-    if (next) {
+    // A next stage on the same weapon continues it (an in-between step while the build-up waits).
+    if (next && next.weaponId !== stage.weaponId) {
       const target = getWeapon(next.weaponId);
       if (!weapon.buildsUpTo.includes(target.id)) {
         run.errors.push(`${weapon.name} cannot build up to ${target.name}`);

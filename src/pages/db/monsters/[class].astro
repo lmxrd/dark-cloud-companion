@@ -1,0 +1,18 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { useTranslations } from "@/i18n";
+import { collectables } from "@/lib/db/data";
+import { MonsterClassPage } from "@/components/db/pages/MonsterPages";
+import { TickToggle } from "@/components/db/TickToggle";
+import { tick } from "@/lib/gamedata/ticks";
+export function getStaticPaths() {
+  return collectables.monsterClasses.map((c) => ({ params: { class: c.id }, props: { cls: c } }));
+}
+
+const t = useTranslations();
+const { cls } = Astro.props;
+---
+
+<Layout title={`${cls.name} · ${t("app.name")}`} page={cls.name}>
+  <MonsterClassPage cls={cls}><Fragment slot="actions"><TickToggle client:load tickId={tick.badge(cls.id)} label={t("monsters.badge")} /><TickToggle client:load tickId={tick.mastered(cls.id)} label={t("monsters.mastered")} /></Fragment></MonsterClassPage>
+</Layout>

@@ -1,13 +1,12 @@
-import { useStore } from "@nanostores/react";
+import { useChecks, useProfile } from "@/lib/useAppStore";
 import { useMemo } from "react";
-import { builtinGuideById, findGuide } from "@/lib/guide/builtin";
+import { findGuide } from "@/lib/guide/builtin";
 import type { Guide } from "@/lib/guide/types";
-import { $checks, $profile } from "@/lib/store";
 
 /** The profile's switched-on guides (missing ids are ignored), plus the profile and ticks. */
 export function useActiveGuides() {
-  const profile = useStore($profile);
-  const checks = useStore($checks);
+  const profile = useProfile();
+  const checks = useChecks();
   const guides = useMemo(
     () =>
       profile.activeGuides
@@ -19,6 +18,5 @@ export function useActiveGuides() {
     profile,
     checks,
     guides,
-    mainActive: profile.activeGuides.includes("main") && builtinGuideById.has("main"),
   };
 }

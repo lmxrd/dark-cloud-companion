@@ -1,7 +1,11 @@
 // Which chapter the dashboard follows, and which steps of a guide belong to a chapter.
-import { chapters, checklist } from "@/lib/data";
+import { allMedals, chapters, checklist } from "@/lib/data";
+import { CHECKLIST_CATEGORIES, type ChecklistItem } from "@/lib/data";
 import { stepTickIds } from "./progress";
 import type { Guide, Step } from "./types";
+
+const checklistById = new Map(checklist.map((i) => [i.id, i]));
+const medalIds = new Set(allMedals.map((m) => m.id));
 
 export const MAIN_CHAPTERS = chapters.filter((c) => c.phase === "main");
 
@@ -81,4 +85,39 @@ export function openMissable(
         if ((chapterNumber(item.chapterId) ?? 99) <= upToChapterNumber) out.push(item);
       }
   return out;
+}
+
+/** A chapter filter chip: a collectable category, or the section medals and prizes. */
+export type ChapterCategory = ChecklistItem["category"] | "medal";
+
+/** Display order of the chapter categories: collectables in data order, then medals. */
+export const CATEGORY_ORDER: ChapterCategory[] = [...CHECKLIST_CATEGORIES, "medal"];
+
+/**
+ * Per-category progress of a chapter across the switched-on guides, in data order. Only collectables
+ * and medals count; text and step ticks belong to no category.
+ */
+export function chapterCategoryProgress(
+  guides: Guide[],
+  chapterId: string,
+  checks: Record<string, true>,
+): { category: ChapterCategory; done: number; total: number }[] {
+  const ids = new Set<string>();
+  for (const g of guides)
+    for (const { step } of stepsInChapter(g, chapterId))
+      for (const id of stepTickIds(g, step)) ids.add(id);
+  const counts = new Map<ChapterCategory, { done: number; total: number }>();
+  for (const id of ids) {
+    const category: ChapterCategory | undefined =
+      checklistById.get(id)?.category ?? (medalIds.has(id) ? "medal" : undefined);
+    if (!category) continue;
+    const c = counts.get(category) ?? { done: 0, total: 0 };
+    c.total++;
+    if (checks[id]) c.done++;
+    counts.set(category, c);
+  }
+  return CATEGORY_ORDER.filter((category) => counts.has(category)).map((category) => ({
+    category,
+    ...counts.get(category)!,
+  }));
 }

@@ -1,44 +1,211 @@
 import { expect, test } from "@playwright/test";
+import { builtinPlan, startWeapon } from "./plans";
 import { go, targetPicker } from "./helpers";
 
 test.describe("reference pages", () => {
   test("items can be filtered by buyable / found-only", async ({ page }) => {
-    await go(page, "/items");
-    await page.getByLabel("Items", { exact: true }).selectOption("found");
+    await go(page, "/db/items");
+    const filter = page.getByRole("group", { name: "Get" });
+    await filter.getByRole("button", { name: "Found" }).click();
     await expect(page.getByText("Moon Stone", { exact: true })).toBeVisible();
     await expect(page.getByText("Gunpowder", { exact: true })).toHaveCount(0);
-    await page.getByLabel("Items", { exact: true }).selectOption("buyable");
+    await filter.getByRole("button", { name: "Buyable" }).click();
     await expect(page.getByText("Gunpowder", { exact: true })).toBeVisible();
     await expect(page.getByText("Moon Stone", { exact: true })).toHaveCount(0);
+    // The filter is in the URL, so it survives a reload.
+    await page.reload();
+    await expect(filter.getByRole("button", { name: "Buyable" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
   });
 
   test("weapon pages show build-up links and a planner deep link", async ({ page }) => {
-    await go(page, "/weapons/poison-wrench");
+    await go(page, "/db/weapons/poison-wrench");
     await expect(page.getByRole("heading", { name: "Poison Wrench" })).toBeVisible();
     await expect(page.getByRole("link", { name: "Sigma Breaker" })).toBeVisible();
-    await page.getByRole("link", { name: "Plan a build-up to this weapon" }).click();
+    await page.getByRole("link", { name: "Plan this weapon" }).click();
     await expect(targetPicker(page)).toHaveValue("poison-wrench");
   });
 
-  test("Ridepod parts can be ticked", async ({ page }) => {
-    await go(page, "/ridepod");
-    // The close-range arms section starts open.
-    const box = page.getByRole("checkbox", { name: /^Cannonball Arm/ }).first();
-    await box.click();
-    await expect(box).toBeChecked();
-  });
-
-  test("old chapter URLs redirect to the dashboard", async ({ page }) => {
-    await go(page, "/chapters/c3");
-    await expect(page).toHaveURL(/\/\?chapter=c3$/);
+  test("a chapter path opens that chapter", async ({ page }) => {
+    await go(page, "/chapters/3");
+    await expect(page).toHaveURL(/\/chapters\/3$/);
     await expect(page.getByRole("heading", { name: /The Sage of the Stars/ })).toBeVisible();
   });
 });
 
-test("the weapons list has one tab per weapon type", async ({ page }) => {
-  await go(page, "/weapons");
-  await expect(page.getByRole("tab")).toHaveCount(6); // All + 5 types
-  await page.getByRole("tab", { name: "Armbands" }).click();
+test("the weapons list has one filter per weapon type", async ({ page }) => {
+  await go(page, "/db/weapons");
+  const types = page.getByRole("group", { name: "Type" });
+  await expect(types.getByRole("button")).toHaveCount(6); // All + 5 types
+  await types.getByRole("button", { name: "Armbands" }).click();
   await expect(page.getByRole("link", { name: /Five-Star Armlet/ })).toBeVisible();
   await expect(page.getByRole("link", { name: /Grade Zero/ })).toHaveCount(0);
+});
+
+test("the Gives filter lists items that add a stat, sortable by the gain", async ({ page }) => {
+  await go(page, "/db/items");
+  await page
+    .getByRole("group", { name: "Gives" })
+    .getByRole("button", { name: "Lightning" })
+    .click();
+  const section = page.getByRole("heading", { name: "Items that add Lightning" });
+  await expect(section).toBeVisible();
+  const sort = page.getByRole("group", { name: "Sort" });
+  await sort.getByRole("button", { name: "Gain" }).click();
+  await sort.getByRole("button", { name: "Lowest first" }).click();
+  await expect(sort.getByRole("button", { name: "Highest first" })).toBeVisible();
+  // Every row carries a Lightning chip, and the list is sorted by it, largest first.
+  const values = await page
+    .locator("li")
+    .filter({ hasText: /Li \+\d+/ })
+    .evaluateAll((rows) =>
+      rows.map((r) => Number(/Li \+(\d+)/.exec(r.textContent ?? "")?.[1] ?? 0)),
+    );
+  expect(values.length).toBeGreaterThan(3);
+  expect([...values].sort((a, b) => b - a)).toEqual(values);
+});
+
+test("the weapons list groups by owner and can show finals only", async ({ page }) => {
+  await go(page, "/db/weapons");
+  await expect(page.getByRole("heading", { name: "Max · Wrenches & hammers" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Monica · Swords" })).toBeVisible();
+  await page.getByRole("button", { name: "Finals" }).click();
+  await expect(page.getByRole("link", { name: /Grade Zero/ })).toBeVisible();
+  await expect(page.getByRole("link", { name: /Battle Wrench/ })).toHaveCount(0);
+});
+
+test("database pages link to each other", async ({ page }) => {
+  await go(page, "/db/items/treasure-chest-key");
+  await expect(page.getByRole("heading", { name: "Treasure Chest Key", level: 1 })).toBeVisible();
+  await page.getByRole("link", { name: "Donny Mart" }).first().click();
+  await expect(page.getByRole("heading", { name: "Donny Mart", level: 1 })).toBeVisible();
+  await go(page, "/db/bestiary/arthur");
+  await page.getByRole("link", { name: "Chronicle Sword" }).click();
+  await expect(page.getByRole("heading", { name: "Chronicle Sword", level: 1 })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Arthur" })).toBeVisible();
+});
+
+test("a weapon page counts the ABS between two levels", async ({ page }) => {
+  await go(page, "/db/weapons/battle-wrench");
+  const from = page.getByLabel("From");
+  await expect(page.getByText(/\d[\d,]* ABS$/).first()).toBeVisible();
+  const before = await page.locator("output").textContent();
+  await from.fill("3");
+  await expect(page.locator("output")).not.toHaveText(before ?? "");
+});
+
+test("the weapon table compares a type's stats", async ({ page }) => {
+  await go(page, "/db/weapons?type=sword&view=table");
+  await expect(page.getByRole("table")).toBeVisible();
+  await page.getByRole("columnheader", { name: /Li/ }).getByRole("button").click();
+  await expect(page.getByRole("columnheader", { name: /Li ↑/ })).toBeVisible();
+});
+
+test("the database home finds anything by name", async ({ page }) => {
+  await go(page, "/db");
+  await page.getByLabel(/Search .* things/).fill("geron");
+  await page.getByRole("link", { name: /Geron.*Transformation/ }).click();
+  await expect(page.getByRole("heading", { name: "Geron", level: 1 })).toBeVisible();
+  await expect(page.getByRole("navigation", { name: "breadcrumb" })).toContainText("Aquatic");
+});
+
+test.describe("trackers", () => {
+  test("the jump chips open a group and the hero counts ticks", async ({ page }) => {
+    await go(page, "/db/ridepod");
+    const parts = page.getByRole("progressbar", { name: "Parts built" });
+    await expect(parts).toHaveAttribute("aria-valuenow", "0");
+    await page
+      .getByRole("navigation", { name: "Jump to a group" })
+      .getByRole("button", { name: /^Legs/ })
+      .click();
+    const legs = page.locator("#group-legs");
+    const box = legs.getByRole("checkbox").first();
+    await box.click();
+    await expect(box).toBeChecked();
+    await expect(
+      page
+        .getByRole("navigation", { name: "Jump to a group" })
+        .getByRole("button", { name: /^Legs 1\// }),
+    ).toBeVisible();
+  });
+
+  test("monster classes have Badge and Mastered toggles and a form tree", async ({ page }) => {
+    await go(page, "/db/monsters");
+    const flora = page.locator("#group-flora");
+    await expect(flora.getByRole("list", { name: "Forms" })).toContainText("Mandora");
+    await flora.getByRole("checkbox", { name: /Badge owned/ }).check();
+    await expect(page.getByRole("progressbar", { name: "Badges" })).toHaveAttribute(
+      "aria-valuenow",
+      "10",
+    );
+  });
+
+  test("Spheda clubs can be marked as owned", async ({ page }) => {
+    await go(page, "/db/spheda");
+    const club = page.getByRole("checkbox", { name: /^I own / }).first();
+    await club.check();
+    await expect(club).toBeChecked();
+    await expect(page.getByRole("progressbar", { name: "Clubs owned" })).not.toHaveAttribute(
+      "aria-valuenow",
+      "0",
+    );
+  });
+});
+
+test("a Gives filter with no matches says so", async ({ page }) => {
+  await go(page, "/db/items");
+  await page.getByRole("group", { name: "Gives" }).getByRole("button", { name: "Flame" }).click();
+  await page.getByLabel("Search items").fill("zzz");
+  await expect(page.getByText("No items match.")).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Items that add/ })).toHaveCount(0);
+});
+
+test("the synth sphere calculator shows what a filled sphere passes on", async ({ page }) => {
+  await go(page, "/tools/spheres");
+  // The planner's recipe by default: Battle Wrench +3 → True Battle Wrench +5, 33 SP, 368 ABS.
+  await expect(page.getByText(/SP used: 0 \/ 33 · 368 ABS to make/)).toBeVisible();
+  // Scrap of Metal adds Lightning (capped at 19).
+  await page.getByLabel("Add item").selectOption("Scrap of Metal");
+  await page.getByRole("button", { name: "Fill SP" }).click();
+  await expect(page.getByText(/SP used: 33 \/ 33/)).toBeVisible();
+  // As bought, the same weapon has less to fill.
+  await page.getByLabel("Built up from").selectOption("");
+  await expect(page.getByText(/SP used: 33 \/ 21/)).toBeVisible();
+  const lightning = page.getByRole("row").filter({ hasText: "Lightning" });
+  await expect(lightning).toContainText("19 / 19");
+  await expect(lightning).toContainText("+11");
+  await expect(page.getByText("Costs 5 SP on the receiving weapon")).toBeVisible();
+});
+
+test("the weapon map shows a type's tree and lights up a weapon's family", async ({ page }) => {
+  await go(page, "/db/weapons?type=sword&view=map");
+  const map = page.getByRole("group", { name: "Monica · Swords" });
+  const card = map.getByRole("link", { name: /^Chronicle Sword/ });
+  await expect(card).toContainText("At 111/152");
+  await card.click();
+  // The first tap lights up its family; the page stays.
+  await expect(page).toHaveURL(/view=map/);
+  await expect(page.getByRole("button", { name: "Show all" })).toBeVisible();
+  await card.click();
+  await expect(page.getByRole("heading", { name: "Chronicle Sword", level: 1 })).toBeVisible();
+  // A weapon's page maps everything it comes from and becomes.
+  await expect(page.getByRole("link", { name: /^Chronicle 2/ })).toBeVisible();
+  await expect(page.getByRole("link", { name: /^Ruler's Sword/ })).toBeVisible();
+});
+
+test("a weapon guide has a map and a detailed map", async ({ page }) => {
+  await go(page, `/guides/view?id=${builtinPlan("island-king/balanced").id}`);
+  const start = startWeapon("island-king/balanced");
+  const views = page.getByRole("radiogroup", { name: "View" });
+  await views.getByRole("radio", { name: "Map", exact: true }).click();
+  await expect(page.getByRole("button", { name: start, exact: true })).toBeVisible();
+  await expect(page.getByText("start").first()).toBeVisible();
+  await views.getByRole("radio", { name: "Detailed map" }).click();
+  await expect(page.getByText("Passes on").first()).toBeVisible();
+  await expect(page.getByText("Spheres add").first()).toBeVisible();
+  // A weapon in a map opens its step.
+  await page.getByRole("button", { name: start, exact: true }).click();
+  await expect(views.getByRole("radio", { name: "Steps" })).toHaveAttribute("aria-checked", "true");
 });

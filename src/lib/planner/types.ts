@@ -1,4 +1,4 @@
-import type { Stats } from "@/lib/schemas";
+import type { AbilityId, Stats } from "@/lib/schemas";
 
 /** How a weapon enters the plan. */
 export type Acquire =
@@ -16,6 +16,11 @@ export interface ItemUse {
 export interface SphereUse {
   kind: "sphere";
   recipe: Recipe;
+  /**
+   * Made earlier (in a guide's prepare step) and kept until now: its levelling and items are counted
+   * there, so here it only costs the SP to synth it.
+   */
+  prepared?: boolean;
 }
 
 export type SynthUse = ItemUse | SphereUse;
@@ -58,6 +63,10 @@ export type LogEntry =
       level: number;
       sp: number;
       gains: Partial<Stats>;
+      /** Durability it passes on. */
+      du: number;
+      /** Abilities it passes on. */
+      abilities: AbilityId[];
       depth: number;
     }
   | { type: "buildup"; from: string; to: string; depth: number }
@@ -68,7 +77,10 @@ export type LogEntry =
       level: number;
       sp: number;
       stats: Stats;
+      du: number;
       abilities: string[];
+      /** The weapon when the stage began (after any build-up into it). */
+      start: { level: number; stats: Stats; du: number };
       depth: number;
     };
 

@@ -1,117 +1,189 @@
-import { useStore } from "@nanostores/react";
+import { useChecks } from "@/lib/useAppStore";
 import { CheckRow } from "@/components/chapter/CheckRow";
-import { Badge } from "@/components/ui/badge";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import ridepodRaw from "@/data/ridepod.json";
-import { ridepodData, type RidepodPart } from "@/lib/schemas";
+import { TrackerLayout, type TrackerGroup } from "./TrackerLayout";
+import { collectables, names, type Invention, type RidepodPart } from "@/lib/gamedata";
+import { ridepod } from "@/lib/gamedata/ridepod";
+import { tick } from "@/lib/gamedata/ticks";
 import { useTranslations } from "@/i18n";
-import { ingredientIdByName } from "@/lib/data";
-import { $checks, setChecked } from "@/lib/store";
+import { setChecked } from "@/lib/store";
+import { Ref } from "@/components/db/kit";
+import { dbHref } from "@/lib/db/routes";
 
-const data = ridepodData.parse(ridepodRaw);
 const categories = ["short", "long", "armor", "legs", "pack"] as const;
+type Category = (typeof categories)[number];
 
-const partCheckId = (p: RidepodPart) => `ridepod:${p.id}`;
-const coreCheckId = (name: string) => `ridepod-core:${name}`;
+/** Close-range arm families; the others are long-range (schema: RIDEPOD_WEAPON_SUB_TYPES). */
+const SHORT_RANGE = new Set([
+  "cannonball-arm",
+  "clown-hand",
+  "samurai-arm",
+  "hammer-arm",
+  "drill-arm",
+]);
 
-function ready(p: RidepodPart, checks: Record<string, true>) {
-  const ok = (list: RidepodPart["invent"]) =>
-    list.every((i) => checks[ingredientIdByName.get(i.name.toLowerCase()) ?? ""]);
-  return ok(p.invent) || (!!p.alternate && ok(p.alternate));
-}
+const categoryOf = (p: RidepodPart): Category =>
+  p.weapon
+    ? SHORT_RANGE.has(p.weapon.subType)
+      ? "short"
+      : "long"
+    : p.type === "body"
+      ? "armor"
+      : p.type === "legs"
+        ? "legs"
+        : "pack";
 
-const recipeText = (list: RidepodPart["invent"]) =>
-  list.map((i) => (i.scoop ? `${i.name} (scoop)` : i.name)).join(" + ");
+const inventionOf = new Map<string, Invention>(
+  collectables.inventions.filter((i) => i.ridepodPartId).map((i) => [i.ridepodPartId!, i]),
+);
+
+const ready = (inv: Invention | undefined, checks: Record<string, true>) =>
+  !!inv && inv.recipes.some((r) => r.every((photo) => checks[tick.photo(photo)]));
+
+const recipeText = (recipe: string[]) => recipe.map((id) => names.photos[id] ?? id).join(" + ");
+
+/** ABS price at Cedric's (or G-Parts), when it can be bought. */
+const price = (sources: RidepodPart["sources"]) => sources.shops?.[0]?.price;
+
+const WEAPON_STATS = [
+  "attack",
+  "flame",
+  "chill",
+  "lightning",
+  "cyclone",
+  "smash",
+  "exorcism",
+  "beast",
+  "scale",
+] as const;
 
 export function RidepodTracker() {
   const t = useTranslations();
-  const checks = useStore($checks);
+  const checks = useChecks();
+  const count = (ids: string[]) => ({
+    done: ids.filter((id) => checks[id]).length,
+    total: ids.length,
+  });
+  const partId = (p: RidepodPart) => tick.ridepodPart(p.id);
+  const allParts = count(ridepod.parts.map(partId));
+  const cores = count(ridepod.cores.map((c) => tick.ridepodCore(c.id)));
+  const readyCount = ridepod.parts.filter(
+    (p) => !checks[partId(p)] && ready(inventionOf.get(p.id), checks),
+  ).length;
+
+  const groups: TrackerGroup[] = [
+    ...categories.map((cat) => {
+      // Lowest tier first, then by capacity.
+      const parts = ridepod.parts
+        .filter((p) => categoryOf(p) === cat)
+        .sort((a, b) => (a.weapon?.tier ?? 0) - (b.weapon?.tier ?? 0) || a.capacity - b.capacity);
+      return {
+        id: cat,
+        label: t(`ridepod.cat.${cat}` as const),
+        title: t(`ridepod.cat.${cat}` as const),
+        count: count(parts.map(partId)),
+        defaultOpen: cat === "short",
+        children: parts.map((p) => {
+          const built = !!checks[partId(p)];
+          const inv = inventionOf.get(p.id);
+          const numbers = [
+            t("ridepod.capacity", { n: p.capacity }),
+            p.weapon ? t("ridepod.whp", { n: p.weapon.weaponHp }) : undefined,
+            p.body ? t("ridepod.armorValue", { n: p.body.armor }) : undefined,
+            p.energyPack ? t("ridepod.energyValue", { n: p.energyPack.energy }) : undefined,
+          ].filter(Boolean);
+          const cost = price(p.sources);
+          const extra = [
+            p.legs ? t("ridepod.speedValue", { n: p.legs.speed }) : undefined,
+            ...WEAPON_STATS.flatMap((k) => (p.weapon?.[k] ? [`${p.weapon[k]} ${k}`] : [])),
+            cost !== undefined ? t("ridepod.buy", { abs: cost }) : undefined,
+          ].filter(Boolean);
+          return (
+            <CheckRow
+              key={p.id}
+              checked={built}
+              onChange={(v) => setChecked(partId(p), v)}
+              label={<Ref href={dbHref("ridepodPart", p.id)}>{p.name}</Ref>}
+              badges={
+                !built && ready(inv, checks) ? (
+                  <span className="bg-accent text-accent-foreground rounded-full border-2 px-2 py-0.5 text-[11px] font-bold">
+                    {t("ridepod.ready")}
+                  </span>
+                ) : undefined
+              }
+              aside={numbers.map((n) => (
+                <span key={n} className="block whitespace-nowrap">
+                  {n}
+                </span>
+              ))}
+              detail={
+                <>
+                  {extra.length > 0 && <span className="block">{extra.join(" · ")}</span>}
+                  {inv && (
+                    <span className="block">
+                      {t("ridepod.recipe")}: {recipeText(inv.recipes[0] ?? [])}
+                      {inv.recipes[1]
+                        ? ` · ${t("ridepod.alternate")}: ${recipeText(inv.recipes[1])}`
+                        : ""}
+                    </span>
+                  )}
+                  {inv && inv.items.length > 0 && (
+                    <span className="block">
+                      {t("ridepod.resources")}:{" "}
+                      {inv.items.map((r) => `${r.quantity}× ${names.items[r.itemId]}`).join(", ")}
+                    </span>
+                  )}
+                </>
+              }
+            />
+          );
+        }),
+      };
+    }),
+    {
+      id: "cores",
+      label: t("ridepod.cores"),
+      title: t("ridepod.cores"),
+      count: cores,
+      children: ridepod.cores.map((c) => {
+        const cost = price(c.sources);
+        return (
+          <CheckRow
+            key={c.id}
+            checked={!!checks[tick.ridepodCore(c.id)]}
+            onChange={(v) => setChecked(tick.ridepodCore(c.id), v)}
+            label={<Ref href={dbHref("ridepodCore", c.id)}>{c.name}</Ref>}
+            detail={cost !== undefined ? t("ridepod.coreExp", { abs: cost }) : undefined}
+            aside={
+              <>
+                <span className="block whitespace-nowrap">
+                  {t("ridepod.capacity", { n: c.capacity })}
+                </span>
+                <span className="block whitespace-nowrap">
+                  {t("ridepod.coreArmor", { n: c.armorCapacity })}
+                </span>
+              </>
+            }
+          />
+        );
+      }),
+    },
+  ];
 
   return (
-    <div className="flex flex-col gap-4">
-      <p className="text-muted-foreground text-sm">{t("ridepod.intro")}</p>
-
-      <Collapsible defaultOpen>
-        <CollapsibleTrigger className="flex w-full items-center justify-between rounded-md border px-3 py-3 text-left font-medium">
-          <span>{t("ridepod.cores")}</span>
-          <span className="text-muted-foreground text-sm tabular-nums">
-            {data.cores.filter((c) => checks[coreCheckId(c.name)]).length} / {data.cores.length}
-          </span>
-        </CollapsibleTrigger>
-        <CollapsibleContent className="pt-2">
-          {data.cores.map((c) => (
-            <CheckRow
-              key={c.name}
-              checked={!!checks[coreCheckId(c.name)]}
-              onChange={(v) => setChecked(coreCheckId(c.name), v)}
-              label={c.name}
-              detail={[
-                c.exp ? t("ridepod.coreExp", { exp: c.exp }) : undefined,
-                t("ridepod.coreStats", { capacity: c.capacity, armor: c.armor }),
-              ]
-                .filter(Boolean)
-                .join(" · ")}
-            />
-          ))}
-        </CollapsibleContent>
-      </Collapsible>
-
-      {categories.map((cat) => {
-        const parts = data.parts.filter((p) => p.category === cat);
-        const done = parts.filter((p) => checks[partCheckId(p)]).length;
-        return (
-          <Collapsible key={cat} defaultOpen={cat === "short"}>
-            <CollapsibleTrigger className="flex w-full items-center justify-between rounded-md border px-3 py-3 text-left font-medium">
-              <span>{t(`ridepod.cat.${cat}` as const)}</span>
-              <span className="text-muted-foreground text-sm tabular-nums">
-                {done} / {parts.length}
-              </span>
-            </CollapsibleTrigger>
-            <CollapsibleContent className="pt-2">
-              {parts.map((p) => {
-                const built = !!checks[partCheckId(p)];
-                const main = [
-                  t("ridepod.capacity", { n: p.capacity }),
-                  p.whp !== undefined ? t("ridepod.whp", { n: p.whp }) : undefined,
-                  p.armor !== undefined ? t("ridepod.armorValue", { n: p.armor }) : undefined,
-                  p.energy !== undefined ? t("ridepod.energyValue", { n: p.energy }) : undefined,
-                  p.speed ? t("ridepod.speedValue", { n: p.speed }) : undefined,
-                  ...Object.entries(p.stats ?? {}).map(([k, v]) => `${v} ${k}`),
-                  p.buyExp ? t("ridepod.buy", { exp: p.buyExp }) : undefined,
-                ]
-                  .filter(Boolean)
-                  .join(" · ");
-                return (
-                  <CheckRow
-                    key={p.id}
-                    checked={built}
-                    onChange={(v) => setChecked(partCheckId(p), v)}
-                    label={p.name}
-                    badges={
-                      !built && ready(p, checks) ? <Badge>{t("ready.badge")}</Badge> : undefined
-                    }
-                    detail={
-                      <>
-                        <span className="block">{main}</span>
-                        <span className="block">
-                          {t("ridepod.recipe")}: {recipeText(p.invent)}
-                          {p.alternate
-                            ? ` · ${t("ridepod.alternate")}: ${recipeText(p.alternate)}`
-                            : ""}
-                        </span>
-                        <span className="block">
-                          {t("ridepod.resources")}:{" "}
-                          {p.resources.map((r) => `${r.qty}× ${r.name}`).join(", ")}
-                        </span>
-                      </>
-                    }
-                  />
-                );
-              })}
-            </CollapsibleContent>
-          </Collapsible>
-        );
-      })}
-    </div>
+    <TrackerLayout
+      intro={t("ridepod.intro")}
+      totals={[
+        { label: t("ridepod.totalParts"), ...allParts },
+        { label: t("ridepod.cores"), ...cores },
+      ]}
+      before={
+        readyCount > 0 ? (
+          <p className="bg-accent text-accent-foreground w-fit rounded-md border-2 px-3 py-1.5 text-sm font-semibold">
+            {t("ridepod.readyCount", { n: readyCount })}
+          </p>
+        ) : undefined
+      }
+      groups={groups}
+    />
   );
 }

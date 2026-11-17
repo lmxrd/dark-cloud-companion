@@ -1,4 +1,5 @@
 import { useStore } from "@nanostores/react";
+import { useProfile } from "@/lib/useAppStore";
 import { withBase } from "@/lib/base";
 import { useEffect, useState } from "react";
 import { GuideEditor } from "@/components/guide/GuideEditor";
@@ -10,13 +11,13 @@ import { allGuides, builtinGuideById } from "@/lib/guide/builtin";
 import { $draft } from "@/lib/guide/draft";
 import { duplicateGuide, emptyGuide } from "@/lib/guide/ops";
 import type { Guide } from "@/lib/guide/types";
-import { $profile, saveGuide } from "@/lib/store";
+import { saveGuide } from "@/lib/store";
 import { selectClass } from "./WeaponSelect";
 
 /** Creates or edits a guide. Drafts handed over by the generator open here without being saved. */
 export function EditorSection() {
   const t = useTranslations();
-  const profile = useStore($profile);
+  const profile = useProfile();
   const draft = useStore($draft);
   const [title, setTitle] = useState("");
   const [templateId, setTemplateId] = useState("");

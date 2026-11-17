@@ -1,0 +1,20 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { useTranslations } from "@/i18n";
+import { items } from "@/lib/db/data";
+import { ItemPage } from "@/components/db/pages/ItemPage";
+import { AddToListButton } from "@/components/shopping/AddToListButton";
+
+export function getStaticPaths() {
+  return items.items.map((i) => ({ params: { id: i.id }, props: { item: i } }));
+}
+
+const t = useTranslations();
+const { item } = Astro.props;
+---
+
+<Layout title={`${item.name} · ${t("app.name")}`} page={item.name}>
+  <ItemPage item={item}>
+    <AddToListButton slot="actions" client:load size="sm" goal={{ kind: "item", name: item.name }} />
+  </ItemPage>
+</Layout>

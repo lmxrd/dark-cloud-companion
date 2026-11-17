@@ -1,16 +1,11 @@
 import { describe, expect, test } from "vitest";
 import { checklist, sections } from "@/lib/data";
-import legacyCuratedRaw from "./fixtures/legacy-curated.json";
-import { guide as legacyGuideSchema, type Guide as LegacyGuide } from "@/lib/guides/types";
-import { z } from "zod";
 
-const curatedGuides: LegacyGuide[] = z.array(legacyGuideSchema).parse(legacyCuratedRaw);
 import { deriveBuild } from "./derive";
-import { fromLegacyGuide, fromLegacyWalkthrough, migrateTickId } from "./legacy";
+import lastResortRaw from "./fixtures/story-last-resort.json";
 import { mainWalkthrough } from "./main";
 import { entryTickIds, knownItemIds, knownSectionIds } from "./refs";
-import { guide as guideSchema, textTickId } from "./types";
-import { emptyWalkthrough } from "@/lib/walkthroughs/types";
+import { guide as guideSchema, type Guide } from "./types";
 
 describe("main walkthrough", () => {
   test("validates and has unique step ids", () => {
@@ -45,10 +40,10 @@ describe("main walkthrough", () => {
     expect(new Set(ticks).size).toBe(ticks.length);
   });
 
-  test("post-game items are gathered in the post-game chapter", () => {
-    const post = mainWalkthrough.steps.find((s) => s.chapterId === "postgame");
-    expect(post).toBeTruthy();
-    const refs = post!.entries.flatMap((e) => (e.kind === "item" ? [e.ref] : []));
+  test("post-game items are in chapter 8, the post-game chapter", () => {
+    const refs = mainWalkthrough.steps
+      .filter((s) => s.chapterId === "8")
+      .flatMap((s) => s.entries.flatMap((e) => (e.kind === "item" ? [e.ref] : [])));
     expect(new Set(refs)).toEqual(new Set(checklist.filter((i) => i.postgame).map((i) => i.id)));
   });
 
@@ -61,52 +56,8 @@ describe("main walkthrough", () => {
   });
 });
 
-describe("legacy conversion", () => {
-  test("all built-in build guides convert to valid guides whose derived cost matches the original", () => {
-    expect(curatedGuides.length).toBeGreaterThan(0);
-    for (const legacy of curatedGuides) {
-      const g = fromLegacyGuide(legacy);
-      expect(guideSchema.safeParse(g).success, g.id).toBe(true);
-      const derived = deriveBuild(g);
-      expect(derived.errors, g.id).toEqual([]);
-      for (const d of derived.steps.values()) expect(d.errors, `${g.id} ${d.stepId}`).toEqual([]);
-      // The legacy total also counts the start weapon's purchase price; ABS must match exactly.
-      expect(derived.total.abs, g.id).toBe(legacy.totals.abs);
-      expect(g.steps).toHaveLength(legacy.steps.length);
-    }
-  });
-
-  test("derived stats equal the stats stored in the legacy guide", () => {
-    const legacy = curatedGuides[0];
-    const derived = deriveBuild(fromLegacyGuide(legacy));
-    legacy.steps.forEach((s) => {
-      const d = derived.steps.get(s.id)!;
-      expect(d.stats).toEqual(s.stats);
-      expect(d.level).toBe(s.level);
-      expect(d.sp).toBe(s.spLeft);
-    });
-  });
-
-  test("walkthroughs convert to text steps and keep ids so ticks carry over", () => {
-    const w = emptyWalkthrough("Mine", 1000);
-    w.steps = [
-      {
-        id: "s1",
-        chapterId: "c1",
-        title: "T",
-        notes: "n",
-        checklist: [{ id: "i1", text: "Clock" }],
-      },
-    ];
-    const g = fromLegacyWalkthrough(w);
-    expect(guideSchema.safeParse(g).success).toBe(true);
-    expect(g.steps[0].entries).toEqual([{ kind: "text", id: "i1", text: "Clock" }]);
-    expect(migrateTickId(`wt:${w.id}:s1:i1`)).toBe(textTickId(w.id, "s1", "i1"));
-    expect(migrateTickId(`wt:${w.id}:s1`)).toBe(`g:${w.id}:s1`);
-    expect(migrateTickId(`guide:custom-a:s2`)).toBe("g:custom-a:s2");
-    expect(migrateTickId("c1-scoop-brave-little-linda")).toBe("c1-scoop-brave-little-linda");
-  });
-});
+/** A story plan as the solver gave it (see split.test.ts). */
+const lastResort = lastResortRaw as unknown as Guide;
 
 describe("deriveBuild", () => {
   test("a guide without build steps derives nothing", () => {
@@ -114,19 +65,20 @@ describe("deriveBuild", () => {
   });
 
   test("reports per-step errors when an edited build no longer works", () => {
-    const g = fromLegacyGuide(curatedGuides[0]);
-    // Drop all synths from the second stage so its build-up requirements can't be met.
-    const broken = structuredClone(g);
-    broken.steps[1].build!.synths = [];
-    broken.steps[1].build!.levelTo = 0;
+    // Drop every synth and level, so no build-up's requirements can be met.
+    const broken = structuredClone(lastResort);
+    for (const s of broken.steps)
+      if (s.build) {
+        s.build.synths = [];
+        s.build.levelTo = 0;
+      }
     const d = deriveBuild(broken);
     expect([...d.steps.values()].some((x) => x.errors.length > 0)).toBe(true);
   });
 
   test("a build guide without a start weapon is reported", () => {
-    const g = fromLegacyGuide(curatedGuides[0]);
-    const { build: _drop, ...rest } = g;
-    expect(deriveBuild(rest as typeof g).errors.length).toBeGreaterThan(0);
+    const { build: _drop, ...rest } = lastResort;
+    expect(deriveBuild(rest as Guide).errors.length).toBeGreaterThan(0);
   });
 });
 
@@ -159,7 +111,70 @@ describe("appendPlanToGuide", () => {
     const d = deriveBuild(combined);
     expect(d.errors).toEqual([]);
     for (const s of d.steps.values()) expect(s.errors).toEqual([]);
-    expect(combined.steps.at(-1)!.build!.weaponId).toBe("smash-wrench");
+    // The plans just reach the weapon: they end with the build-up into it.
+    expect(combined.steps.at(-1)!.buildUp!.weaponId).toBe("smash-wrench");
+    expect(combined.steps.some((s) => s.buildUp?.weaponId === "drill-wrench")).toBe(true);
     expect(d.final!.weaponId).toBe("smash-wrench");
   }, 120000);
+});
+
+describe("build-up steps", () => {
+  const base = async () => {
+    const { getWeapon } = await import("@/lib/planner/sources");
+    const { freshState } = await import("@/lib/weapons/mechanics");
+    const { stateToBuildStart } = await import("./fromPlan");
+    return stateToBuildStart(freshState(getWeapon("battle-wrench")), 1);
+  };
+  const work = (id: string, weaponId: string, levelTo: number) => ({
+    id,
+    title: id,
+    notes: "",
+    entries: [],
+    build: { weaponId, levelTo, synths: [] },
+  });
+  const up = (id: string, weaponId: string) => ({
+    id,
+    title: id,
+    notes: "",
+    entries: [],
+    buildUp: { weaponId },
+  });
+
+  test("a build-up step builds up between work steps and owns the build-up's checks", async () => {
+    const g: Guide = {
+      id: "g",
+      title: "T",
+      kind: "custom",
+      build: await base(),
+      steps: [
+        work("a", "battle-wrench", 3),
+        up("b", "true-battle-wrench"),
+        work("c", "true-battle-wrench", 2),
+      ],
+    };
+    const d = deriveBuild(g);
+    expect(d.errors).toEqual([]);
+    expect(d.final!.weaponId).toBe("true-battle-wrench");
+    expect(d.steps.get("b")!.nextWeaponId).toBe("true-battle-wrench");
+    expect(d.steps.get("b")!.stats).toEqual(d.steps.get("a")!.stats);
+    // The work step leaves the build-up to the build-up step.
+    expect(d.steps.get("a")!.nextWeaponId).toBeUndefined();
+    expect(d.steps.get("a")!.requirements).toBeDefined();
+  });
+
+  test("a build-up at the end still builds up; one into the wrong weapon is reported", async () => {
+    const ends: Guide = {
+      id: "g",
+      title: "T",
+      kind: "custom",
+      build: await base(),
+      steps: [work("a", "battle-wrench", 3), up("b", "true-battle-wrench")],
+    };
+    expect(deriveBuild(ends).final!.weaponId).toBe("true-battle-wrench");
+    const wrong: Guide = {
+      ...ends,
+      steps: [...ends.steps, work("c", "battle-wrench", 4)],
+    };
+    expect(deriveBuild(wrong).steps.get("b")!.errors.join(" ")).toMatch(/next step works on/);
+  });
 });

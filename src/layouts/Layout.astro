@@ -6,10 +6,14 @@ import { stripBase, withBase } from "@/lib/base";
 
 interface Props {
   title?: string;
+  /** The page's name in the breadcrumb, when the path doesn't say it (a weapon's id). */
+  page?: string;
+  /** Crumbs between a database list and the page (a monster form's class). */
+  parents?: { label: string; href?: string }[];
 }
 
 const t = useTranslations();
-const { title = t("app.name") } = Astro.props;
+const { title = t("app.name"), page, parents } = Astro.props;
 const pathname = stripBase(Astro.url.pathname);
 ---
 
@@ -17,7 +21,7 @@ const pathname = stripBase(Astro.url.pathname);
   <head>
     <meta charset="utf-8" />
     <link rel="icon" type="image/svg+xml" href={withBase("/favicon.svg")} />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="generator" content={Astro.generator} />
     <link rel="manifest" href={withBase("/manifest.webmanifest")} />
     <link rel="apple-touch-icon" href={withBase("/icon-192.png")} />
@@ -29,17 +33,25 @@ const pathname = stripBase(Astro.url.pathname);
         const dark = t ? t === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
         document.documentElement.classList.toggle("dark", dark);
       } catch {}
+      // Tell gated islands (see Gate.tsx) what their server render could not know about.
+      const pending = [];
+      if (location.search || location.hash) pending.push("url");
+      try {
+        if (localStorage.getItem("dcc:state")) pending.push("state");
+      } catch {}
+      document.documentElement.dataset.pending = pending.join(" ");
     </script>
   </head>
   <body class="bg-background text-foreground min-h-screen font-sans antialiased">
-    <AppShell client:load pathname={pathname}>
+    <AppShell client:load pathname={pathname} page={page} parents={parents}>
       <slot />
     </AppShell>
     <script>
       import { withBase } from "@/lib/base";
+      import { registerServiceWorker } from "@/lib/sw";
       if ("serviceWorker" in navigator) {
         if (import.meta.env.PROD) {
-          navigator.serviceWorker.register(withBase("/sw.js")).catch(() => {});
+          registerServiceWorker(withBase("/sw.js"));
         } else {
           // A service worker left over from an earlier production preview on this origin would serve stale pages
           // in development; remove it.

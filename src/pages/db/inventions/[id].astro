@@ -1,0 +1,19 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { useTranslations } from "@/i18n";
+import { collectables } from "@/lib/db/data";
+import { InventionPage } from "@/components/db/pages/MorePages";
+import { TickToggle } from "@/components/db/TickToggle";
+import { AddToListButton } from "@/components/shopping/AddToListButton";
+import { tick } from "@/lib/gamedata/ticks";
+export function getStaticPaths() {
+  return collectables.inventions.map((v) => ({ params: { id: v.id }, props: { invention: v } }));
+}
+
+const t = useTranslations();
+const { invention } = Astro.props;
+---
+
+<Layout title={`${invention.name} · ${t("app.name")}`} page={invention.name}>
+  <InventionPage invention={invention}><Fragment slot="actions"><TickToggle client:load tickId={tick.invention(invention.id)} label={t("db.invented")} /><AddToListButton client:load size="sm" goal={{ kind: "invention", name: invention.name }} /></Fragment></InventionPage>
+</Layout>

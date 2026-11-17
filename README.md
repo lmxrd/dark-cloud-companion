@@ -1,89 +1,43 @@
 # Dark Chronicles Companion
 
-An unofficial companion web app for **Dark Chronicles (Dark Cloud 2)**, meant to be used on a phone while playing. It is a fully static site (Astro + React islands) that stores everything you track in your browser and works offline once loaded.
+An unofficial companion web app for **Dark Chronicles (Dark Cloud 2)**, made to be used on a phone while playing. It is a static site: everything you track stays in your browser, and it works offline once loaded.
+
+It is published at <https://lmxrd.github.io/dark-cloud-companion/>.
 
 ## Features
 
-- **Dashboard** – follow your current chapter (chapter picker, "set as current", auto-follow), an overview of all chapters, or a per-guide view. Shows collectables (scoops, photo ideas, inventions, power-ups, Georama, recruits, badges), medals and prizes, section facts, missable warnings and the steps of every guide you switched on. Progress is tracked **per switched-on guide**; the main walkthrough is on by default.
-- **Guides** – the generated main walkthrough, built-in weapon build guides, and your own guides. Everything is a guide: steps with optional chapter/section, notes, checklists (free text, collectables, section facts) and optionally weapon-build stages. Duplicate any guide to edit it; export/import your guides as JSON (content only, never progress).
-- **Planner** – generate an optimal weapon build (least ABS, gilda or steps; chapter limit; gilda budget; ability coins; buyable-only items) from an existing, custom (own specs/abilities) or guide-continued start weapon to an existing or custom (required stats/level/abilities) end weapon. Weapons are picked from one tab per weapon type. Results can be opened in the guide editor or saved as a guide. The editor can also hand-craft guides, including build steps with items and sphere weapons.
-- **Reference** – weapons (stats, build-up tree, where to get them), items (buyable vs found-only), Ridepod parts, monster classes, Spheda prizes.
-- **Profiles** – several playthroughs, JSON export/import of whole profiles, schema migrations from earlier versions.
+- **Dashboard** – follow your current chapter, see an overview of all chapters, or follow one guide at a time. Each chapter shows its collectables (scoops, photo ideas, inventions, power-ups, Georama, recruits, badges), medals and prizes, floor facts, missable warnings and the steps of every guide you switched on. Progress counts only the guides you switched on; the main walkthrough is on by default.
+- **Guides** – the main walkthrough, built-in weapon guides and your own guides. There are three built-in guides per final weapon: a **Balanced** guide that follows the story (each step placed in the chapter it can be done, with the ally to bring, what each sphere passes on and the enemies a build-up needs), an **Earliest** guide that follows the same rules but maxes the weapon out as early as possible by grinding, and a **Gilda max** guide with the best path no matter the cost (any gilda, gems and coins). A weapon guide also shows as a map of its steps with each step's stats, or a detailed map of every sphere and item that goes in. Duplicate any guide to edit it; export and import your guides as JSON.
+- **Tools**
+  - **Planner** – an optimal weapon build from any start weapon to any end weapon (existing or custom), by least ABS, gilda or steps, with limits on chapter, gilda and items, and optionally following the story. Save the result as a guide or edit it.
+  - **Shopping list** – add inventions, Georama parts, build steps or items and get one list of what to buy, grouped by shop.
+  - **Synth sphere calculator** – what a filled sphere passes on.
+- **Database** – a page for every weapon, item, enemy, monster, Ridepod part, shop, person, fish, invention, photo, Georama part, town, dungeon, floor and ability, linked to each other; lists to browse and compare them, and build-up maps; the Ridepod, Monster and Spheda trackers; and a search across everything.
+- **Profiles** – several playthroughs side by side, with JSON export and import.
 
-## Development
+## Offline and your data
+
+Your progress, guides and settings are stored in your browser (`localStorage`) and never leave it; export a profile from Settings to back it up or move it. After the first visit the app works offline. Database pages are saved when you open them; Settings → Offline database saves all of them at once.
+
+## Run it yourself
 
 ```sh
 pnpm install
-pnpm dev            # astro dev
-pnpm build          # static site in dist/ (also writes the service worker)
-pnpm preview
-pnpm check          # oxfmt --check + oxlint (pnpm fmt to format)
-pnpm typecheck      # tsc --noEmit
-pnpm test           # vitest: logic, planner, data cross-checks
-pnpm e2e            # Playwright: builds the site, drives it in Chromium (desktop + phone), incl. offline mode
-pnpm test:all       # everything above
+pnpm dev
 ```
 
-Requires Node ≥ 22.12 and pnpm. `PUBLIC_SITE_URL` sets Astro's `site`; the app is served from the **root** of its origin. CI (`.github/workflows/ci.yml`) runs format/lint, type check, unit and end-to-end tests.
+Node ≥ 22.12 and pnpm 10. Setting up, the checks and how the game data and built-in plans are maintained: [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ### Deploying
 
-`pnpm build` produces a static `dist/`. Any static host works; set `PUBLIC_SITE_URL` to the final URL. Recommended headers: `Cache-Control: no-cache` for `/sw.js`, long-lived caching for `/_astro/*` (hashed), and `application/wasm` for the HiGHS solver file. The service worker precaches the whole site after the first visit.
+`pnpm build` writes a static site to `dist/`; any static host works. Set `PUBLIC_SITE_URL` to the final URL: its path becomes the site's base (the GitHub Pages deploy in `.github/workflows/ci.yml` uses `/dark-cloud-companion`). Recommended headers: `Cache-Control: no-cache` for `sw.js`, long-lived caching for `_astro/*` (hashed file names), and `application/wasm` for the planner's solver file.
 
-### Profiling the planner
+## Documentation
 
-`scripts/planner/profile.ts` times the planner's heaviest realistic request: the final weapon of each build-up line (Island King, Love, Grade Zero, LEGEND, Supernova, Last Resort, Sigma Bazooka, Dark Cloud, Griffon Fork, Five-Star Armlet), planned from its line's root weapon (the "optimal start point") through the full build-up chain, with the max-stats goal, chapter 8, support bonus, buyable-only items and least-ABS objective.
-
-```sh
-pnpm exec vite-node --config vitest.config.ts scripts/planner/profile.ts
-```
-
-Measured with warm sphere templates (as in the app, which pre-warms them from the planner form); every plan below is simulator-verified. Indicative numbers from a developer machine (Node 26) — re-run after touching the solver settings:
-
-| Type    | Final weapon     | Start (root)        | Build-ups | Time   |
-| ------- | ---------------- | ------------------- | --------- | ------ |
-| sword   | Island King      | Holy Daedalus Blade | 4         | 0.50 s |
-| armband | Love             | Magic Brassard      | 7         | 7.77 s |
-| wrench  | Grade Zero       | Battle Wrench       | 7         | 3.25 s |
-| wrench  | LEGEND           | Battle Wrench       | 7         | 3.25 s |
-| gun     | Supernova        | Jurak Gun           | 3         | 1.03 s |
-| gun     | Last Resort      | Dryer Gun           | 6         | 2.34 s |
-| gun     | Sigma Bazooka    | Classic Gun         | 5         | 1.75 s |
-| sword   | Dark Cloud       | Baselard            | 6         | 1.75 s |
-| sword   | Griffon Fork     | Baselard            | 6         | 2.85 s |
-| armband | Five-Star Armlet | Magic Brassard      | 6         | 2.19 s |
-
-Sphere templates are generated once (~1.3 s) and cached per option set in the worker. The worst case stays bounded by the solver settings in `src/lib/planner/plan.ts`: every exact solve accepts a 1 % optimality gap and a 3 s cap (`EXACT_GAP`), later chains are pruned by the incumbent's cost (`objective_bound`), and chains whose LP bound cannot beat the incumbent are skipped. Shorter requests (e.g. only the final build-up into a top-tier weapon) finish in well under a second.
-
-## Data pipeline
-
-The structured data in `src/data/` was extracted once from two community guides that are **not** part of this repository (they live in the git-ignored `.local/guides/`):
-
-| Script                                                 | Output                                                                                                       |
-| ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------ |
-| `scripts/extract/dc.ts`                                | chapters, sections (medals, enemies, bosses, recruits, photos…), checklists                                  |
-| `scripts/extract/gamedata.ts`                          | inventions, Georama parts/requirements, shops, items, fishing, photo rewards                                 |
-| `scripts/extract/minigames.ts`                         | Ridepod parts, monster classes                                                                               |
-| `scripts/extract/shops.ts`                             | item prices and first chapter stocked                                                                        |
-| `scripts/extract/weapons-walkthrough.ts`, `weapons.ts` | weapons, build-up, synth items, shops, recipes (FAQ + walkthrough, cross-checked)                            |
-| `scripts/extract/crosscheck.ts`                        | `src/data/INCONSISTENCIES.md` – every difference between the two guides (run `pnpm fmt` after)               |
-| `scripts/planner/curated.ts`                           | built-in weapon guides, produced by the planner itself (~20 min); `convert-guides.ts` is a one-off converter |
-| `scripts/planner/profile.ts`                           | planner timings: final weapons, root → full build-up chain, max stats                                        |
-| `scripts/icons.ts`                                     | PNG app icons from `public/favicon.svg`                                                                      |
-
-Run extractors with `node scripts/extract/<name>.ts` (Node ≥ 22.18 or 24+ for TypeScript); planner scripts with `pnpm exec vite-node --config vitest.config.ts scripts/planner/<name>.ts`. Only facts (names, numbers, recipes, locations) are kept — no guide prose. Tests under `src/data/` cross-check the sources against each other.
-
-## Structure
-
-- `src/lib/weapons` – game mechanics (ABS, levelling, spectrumize, build-up).
-- `src/lib/planner` – rule-checking simulator and MILP optimiser (HiGHS WebAssembly, run in a web worker), sphere-weapon templates, item/shop data joins.
-- `src/lib/guide` – unified guide model, main-walkthrough generator, derived build data, dashboard helpers, legacy converters.
-- `src/lib/profiles.ts`, `src/lib/store.ts` – profiles, progress, migration, persistence (`localStorage`, key `dcc:state`).
-- `src/components`, `src/pages` – UI (Astro + React islands, shadcn/ui, Tailwind). `src/i18n` – message catalogue (English; all UI strings go through it).
-- `integrations/pwa.mjs` – generates the service worker at build time. `e2e/` – Playwright specs.
-
-See `AGENTS.md` for contributor/agent conventions and `.local/plan.md` (git-ignored) for decisions, status and backlog.
+- [CONTRIBUTING.md](CONTRIBUTING.md) – setup, commands, checks and workflows.
+- [AGENTS.md](AGENTS.md) – where things are in the code, the conventions that keep it working, and known pitfalls (written for coding agents, useful for anyone changing the code).
+- [docs/planning.md](docs/planning.md) – how the weapon planner and the built-in plans work, and the measurements behind their rules.
 
 ## Credits and legal
 
-Unofficial fan project, not affiliated with Level-5 or Sony Interactive Entertainment. Dark Cloud 2 / Dark Chronicles is © Level-5 / Sony Interactive Entertainment. Data derived from the _Dark Cloud 2 Walkthrough_ v1.20 by Sky Render and the _Dark Cloud 2 Weapon FAQ_ v3.1 by JungleJim; none of their prose is reproduced.
+Unofficial fan project, not affiliated with Level-5 or Sony Interactive Entertainment. Dark Cloud 2 / Dark Chronicles is © Level-5 / Sony Interactive Entertainment. The game data was cross-checked against the _Dark Cloud 2 Walkthrough_ v1.20 by Sky Render and the _Dark Cloud 2 Weapon FAQ_ v3.1 by JungleJim; none of their prose is reproduced. Licence: see [LICENSE](LICENSE).

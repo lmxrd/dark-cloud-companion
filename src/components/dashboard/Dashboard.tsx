@@ -1,15 +1,19 @@
-import { useEffect, useMemo, useState } from "react";
-import { withBase } from "@/lib/base";
+import { useRef, useState } from "react";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
+import { SearchIcon, SlidersHorizontalIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useViewToggles, ViewToggles } from "./ViewToggles";
 import type { StepFilters } from "@/components/guide/StepCard";
 import { useTranslations } from "@/i18n";
 import { chapterById } from "@/lib/data";
 import { firstIncompleteChapter } from "@/lib/guide/dashboard";
-import { guideProgress } from "@/lib/guide/progress";
 import type { DashboardView } from "@/lib/profiles";
-import { setDashboardView, setView } from "@/lib/store";
+import { stripBase, withBase } from "@/lib/base";
+import { navigate, usePathname, useQueryText } from "@/lib/url";
+import { Gate } from "@/components/Gate";
+import { dashboardPath, parseDashboardPath, type DashboardRoute } from "./route";
 import { ByGuideView } from "./ByGuideView";
 import { ChapterView, FilterBar } from "./ChapterView";
 import { OverviewView } from "./OverviewView";
@@ -17,26 +21,30 @@ import { useActiveGuides } from "./useActiveGuides";
 
 const views: DashboardView[] = ["chapter", "overview", "byGuide"];
 
-function DashboardInner() {
+const isChapter = (id: string) => chapterById.has(id);
+
+function DashboardInner({ path }: { path: string }) {
   const t = useTranslations();
   const { profile, checks, guides } = useActiveGuides();
-  const [needle, setNeedle] = useState("");
-  const [viewChapter, setViewChapter] = useState<string | null>(null);
+  // The view and the chapter are the path (`/overview`, `/chapters/3`), the search is `?q=`.
+  const pathname = stripBase(usePathname(withBase(path)));
+  const route = parseDashboardPath(pathname, isChapter);
+  const [needle, setNeedle] = useQueryText("q");
+  const [searchOpen, setSearchOpen] = useState(false);
+  const isMobile = useIsMobile();
 
-  // A chapter can be requested with ?chapter=c3 (e.g. from redirected old links).
-  useEffect(() => {
-    const id = new URLSearchParams(location.search).get("chapter");
-    if (id && chapterById.has(id)) setViewChapter(id);
-  }, []);
+  // Switching back to the chapter tab returns to the chapter last looked at on this page.
+  const lastChapter = useRef(route.chapter);
+  if (route.chapter) lastChapter.current = route.chapter;
+  const go = (to: DashboardRoute) => {
+    const q = needle ? `?q=${encodeURIComponent(needle)}` : "";
+    navigate(withBase(dashboardPath(to)) + q);
+  };
+  const viewChapter = route.chapter;
+  const view = route.view;
 
   const currentId = profile.dashboard.currentChapter ?? firstIncompleteChapter(guides, checks);
   const chapterId = viewChapter ?? currentId;
-  // Each switched-on guide tracks its own progress; nothing is shown for guides that are off.
-  const perGuide = useMemo(
-    () => guides.map((g) => ({ guide: g, progress: guideProgress(g, checks) })),
-    [guides, checks],
-  );
-
   const filters: StepFilters = {
     hideDone: profile.view.hideDone,
     hidePostgame: profile.view.hidePostgame,
@@ -45,109 +53,96 @@ function DashboardInner() {
     needle: needle.trim().toLowerCase(),
   };
 
-  const openChapter = (id: string) => {
-    setViewChapter(id);
-    setDashboardView("chapter");
-  };
+  const openChapter = (id: string) => go({ view: "chapter", chapter: id });
+  const openView = (v: DashboardView) =>
+    go({ view: v, chapter: v === "chapter" ? lastChapter.current : null });
+
+  const { activeCount: activeToggles } = useViewToggles();
+  const canSearch = view !== "overview";
 
   return (
-    <div className="flex flex-col gap-5">
-      <section className="flex flex-col gap-3">
-        <h1 className="text-2xl font-semibold">{t("nav.dashboard")}</h1>
-        {perGuide.length === 0 ? (
-          <p className="text-muted-foreground text-sm">
-            {t("dash.noActive")}{" "}
-            <a className="underline" href={withBase("/guides")}>
-              {t("nav.guides")}
-            </a>
-          </p>
-        ) : (
-          <ul className="grid gap-3 sm:grid-cols-2">
-            {perGuide.map(({ guide, progress }) => {
-              const pct = progress.total ? Math.round((progress.done / progress.total) * 100) : 0;
-              return (
-                <li key={guide.id} className="flex flex-col gap-1">
-                  <div className="flex items-baseline justify-between gap-3 text-sm">
-                    <a
-                      className="truncate hover:underline"
-                      href={withBase(`/guides/view?id=${encodeURIComponent(guide.id)}`)}
-                    >
-                      {guide.title}
-                    </a>
-                    <span className="text-muted-foreground tabular-nums">
-                      {t("step.progress", { done: progress.done, total: progress.total })}
-                    </span>
-                  </div>
-                  <div
-                    className="bg-muted h-2 overflow-hidden rounded-full"
-                    role="progressbar"
-                    aria-label={guide.title}
-                    aria-valuenow={pct}
-                    aria-valuemin={0}
-                    aria-valuemax={100}
-                  >
-                    <div className="bg-primary h-full" style={{ width: `${pct}%` }} />
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-        )}
-      </section>
-
-      <div role="tablist" className="flex flex-wrap gap-1 border-b">
-        {views.map((v) => (
-          <button
-            key={v}
-            role="tab"
-            aria-selected={profile.dashboard.view === v}
-            onClick={() => setDashboardView(v)}
-            className={`-mb-px border-b-2 px-3 py-2 text-sm ${profile.dashboard.view === v ? "border-primary font-medium" : "text-muted-foreground border-transparent"}`}
-          >
-            {t(`dash.views.${v}` as const)}
-          </button>
-        ))}
+    <div className="flex flex-col gap-3">
+      <h1 className="sr-only">{t("nav.dashboard")}</h1>
+      <div className="flex items-center gap-1.5">
+        <div
+          role="tablist"
+          aria-label={t("dash.viewsLabel")}
+          className="bg-muted/60 flex min-w-0 flex-1 rounded-lg border-2 p-0.5 sm:flex-none"
+        >
+          {views.map((v) => (
+            <button
+              key={v}
+              role="tab"
+              aria-selected={view === v}
+              onClick={() => openView(v)}
+              className={`min-w-0 flex-1 truncate rounded-md px-2.5 py-1.5 text-xs font-semibold whitespace-nowrap sm:flex-none sm:text-sm ${view === v ? "bg-card shadow-sticker-sm border-2" : "text-muted-foreground border-2 border-transparent"}`}
+            >
+              {v === "chapter" ? (
+                <>
+                  <span className="sm:hidden">{t("dash.views.chapterShort")}</span>
+                  <span className="hidden sm:inline">{t("dash.views.chapter")}</span>
+                </>
+              ) : (
+                t(`dash.views.${v}` as const)
+              )}
+            </button>
+          ))}
+        </div>
+        <div className="ml-auto flex shrink-0 gap-1.5">
+          {canSearch && (
+            <Button
+              variant="outline"
+              size="icon"
+              aria-label={t("dash.search")}
+              aria-pressed={searchOpen || needle !== ""}
+              onClick={() => setSearchOpen((o) => !o)}
+            >
+              <SearchIcon />
+            </Button>
+          )}
+          <Sheet>
+            <SheetTrigger
+              render={<Button variant="outline" size="icon" className="relative" />}
+              aria-label={t("dash.viewMenu")}
+            >
+              <SlidersHorizontalIcon />
+              {activeToggles > 0 && (
+                <span
+                  aria-hidden
+                  className="bg-accent text-accent-foreground absolute -top-2 -right-2 grid size-5 place-items-center rounded-full border-2 text-[10px] font-bold tabular-nums"
+                >
+                  {activeToggles}
+                </span>
+              )}
+            </SheetTrigger>
+            <SheetContent
+              side={isMobile ? "bottom" : "right"}
+              className="gap-2 pb-[env(safe-area-inset-bottom)]"
+            >
+              <SheetHeader>
+                <SheetTitle>{t("dash.viewMenu")}</SheetTitle>
+              </SheetHeader>
+              <ViewToggles className="px-4 pb-4" />
+            </SheetContent>
+          </Sheet>
+        </div>
       </div>
-
-      <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-        <Toggle
-          label={t("view.facts")}
-          checked={profile.view.showFacts}
-          onChange={(v) => setView({ showFacts: v })}
-        />
-        <Toggle
-          label={t("view.buyableOnly")}
-          hint={t("view.buyableOnlyHint")}
-          checked={profile.view.buyableOnly}
-          onChange={(v) => setView({ buyableOnly: v })}
-        />
-        <Toggle
-          label={t("view.hideDone")}
-          checked={profile.view.hideDone}
-          onChange={(v) => setView({ hideDone: v })}
-        />
-        <Toggle
-          label={t("view.hidePostgame")}
-          checked={profile.view.hidePostgame}
-          onChange={(v) => setView({ hidePostgame: v })}
-        />
-      </div>
-      {profile.dashboard.view !== "overview" && (
-        <FilterBar filters={filters} needle={needle} onNeedle={setNeedle} />
+      {canSearch && (searchOpen || needle !== "") && (
+        <FilterBar needle={needle} onNeedle={setNeedle} />
       )}
 
-      {profile.dashboard.view === "chapter" && (
+      {view === "chapter" && (
         <ChapterView
           guides={guides}
           profile={profile}
           checks={checks}
           chapterId={chapterId}
           currentId={currentId}
-          onChapter={setViewChapter}
+          onChapter={openChapter}
           filters={filters}
         />
       )}
-      {profile.dashboard.view === "overview" && (
+      {view === "overview" && (
         <OverviewView
           guides={guides}
           checks={checks}
@@ -155,36 +150,20 @@ function DashboardInner() {
           onChapter={openChapter}
         />
       )}
-      {profile.dashboard.view === "byGuide" && (
-        <ByGuideView guides={guides} checks={checks} filters={filters} />
-      )}
+      {view === "byGuide" && <ByGuideView guides={guides} checks={checks} filters={filters} />}
     </div>
   );
 }
 
-function Toggle({
-  label,
-  checked,
-  onChange,
-  hint,
-}: {
-  label: string;
-  checked: boolean;
-  onChange: (v: boolean) => void;
-  hint?: string;
-}) {
+/** `path` is the page's base-less path (the server render can't see the URL otherwise). */
+export function Dashboard({ path }: { path: string }) {
+  const t = useTranslations();
   return (
-    <Label className="flex items-center gap-2 text-sm" title={hint}>
-      <Switch checked={checked} onCheckedChange={onChange} />
-      {label}
-    </Label>
-  );
-}
-
-export function Dashboard() {
-  return (
-    <ErrorBoundary label="the dashboard">
-      <DashboardInner />
+    <ErrorBoundary label={t("error.dashboard")}>
+      {/* Hidden until saved progress and the query are applied, so the defaults never flash. */}
+      <Gate on={["url", "state"]}>
+        <DashboardInner path={path} />
+      </Gate>
     </ErrorBoundary>
   );
 }

@@ -1,6 +1,5 @@
 import { StepCard, type StepFilters } from "@/components/guide/StepCard";
 import { withBase } from "@/lib/base";
-import { chapters } from "@/lib/data";
 import type { DerivedBuild } from "@/lib/guide/derive";
 import type { PlacedStep } from "@/lib/guide/dashboard";
 import type { Guide } from "@/lib/guide/types";
@@ -40,6 +39,7 @@ export function GuideBlock({
           derived={derived.steps.get(step.id)}
           filters={filters}
           showWhere={false}
+          collapseDone
           carriedFrom={
             from !== undefined && chapterNumber !== undefined && from < chapterNumber
               ? from
@@ -50,5 +50,3 @@ export function GuideBlock({
     </section>
   );
 }
-
-export const chapterNumberOf = (id: string) => chapters.find((c) => c.id === id)?.number;

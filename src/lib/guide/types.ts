@@ -2,7 +2,7 @@
 // carries a checklist of entries, and may be one stage of a weapon build.
 import { z } from "zod";
 import { abilityId, STAT_KEYS, type StatKey } from "@/lib/schemas";
-import type { Stage } from "@/lib/planner/types";
+import type { Recipe, Stage } from "@/lib/planner/types";
 
 const stat = z.number().int().min(0).max(999);
 const stats = z.object(
@@ -48,12 +48,35 @@ export const step = z.object({
   title: z.string().max(200),
   /** Free text shown as written (never interpreted as markup). */
   notes: z.string().max(20000),
-  /** Optional placement: chapter id such as "c3" or "postgame", and a section of that chapter. */
+  /** Optional placement: a chapter ("1"…"8") and a section of that chapter. */
   chapterId: z.string().optional(),
   sectionId: z.string().optional(),
   entries: z.array(entry).max(300),
-  /** Present when this step is a stage of the guide's weapon build. */
+  /** Present when this step is a stage of the guide's weapon build (work on one weapon). */
   build: stage.optional(),
+  /**
+   * Present when this step builds the weapon up into another one. Without such a step, two build
+   * steps on different weapons still imply the build-up between them (guides from before it).
+   */
+  buildUp: z.object({ weaponId: z.string() }).optional(),
+  /**
+   * Present when this step prepares side weapons for spheres ahead of time: they are levelled (and
+   * filled) here and kept until a later work step on `weaponId` synths them (marked `prepared`).
+   */
+  prepare: z
+    .object({
+      weaponId: z.string(),
+      recipes: z.array(
+        z.custom<Recipe>(
+          (v) =>
+            typeof v === "object" &&
+            v !== null &&
+            "acquire" in v &&
+            Array.isArray((v as Recipe).stages),
+        ),
+      ),
+    })
+    .optional(),
 });
 export type Step = z.infer<typeof step>;
 
@@ -77,9 +100,11 @@ export const buildStart = z.object({
 });
 export type BuildStart = z.infer<typeof buildStart>;
 
+const TITLE_MAX = 200;
+
 export const guide = z.object({
   id: z.string().min(1),
-  title: z.string().min(1).max(200),
+  title: z.string().min(1).max(TITLE_MAX),
   description: z.string().max(2000).optional(),
   /** Built-in guides are generated and read-only; custom guides are the user's. */
   kind: z.enum(["builtin", "custom"]),
@@ -90,6 +115,13 @@ export const guide = z.object({
   updatedAt: z.number().optional(),
 });
 export type Guide = z.infer<typeof guide>;
+
+/** The built-in main walkthrough's id. */
+export const MAIN_GUIDE_ID = "main";
+
+/** A title with a suffix such as " (copy)", shortened to stay within the limit. */
+export const titleWith = (title: string, suffix: string) =>
+  title.slice(0, TITLE_MAX - suffix.length) + suffix;
 
 // ---------- ids for progress ----------
 

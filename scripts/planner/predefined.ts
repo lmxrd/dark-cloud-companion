@@ -1,91 +1,188 @@
-// Generates the predefined plans (built-in guides) into src/data/plans.json.
-// What gets generated is configured in scripts/planner/plans.config.ts.
-// Build flow (see integrations/plans.ts): if the static data files or the plan generation logic
-// changed (content hash vs the one committed in src/data/plans.json), the planner runs here and
-// logs each plan as it is made; otherwise the build skips straight to the rest of the build.
-// By hand:
-//   pnpm plans          regenerate only when stale
-//   pnpm plans:force    regenerate always
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
-import { planResultToGuide } from "../../src/lib/guide/fromPlan.ts";
-import { guide as guideSchema, type Guide } from "../../src/lib/guide/types.ts";
-import { planPath } from "../../src/lib/planner/plan.ts";
-import { getWeapon } from "../../src/lib/planner/sources.ts";
-import { freshState } from "../../src/lib/weapons/mechanics.ts";
-import { plansHash } from "../../integrations/plans.ts";
+// Generates the predefined plans (built-in guides), configured in scripts/planner/plans.config.ts.
+// Each plan is committed as data/generated/plans/<guide id>.json ({ name, spec, guide, solution }; see
+// plan-files.ts). Plans are solved only when asked: a generated plan is reviewed, committed and
+// from then on independent of the code (builds and tests only assemble the files, see
+// integrations/plans.ts). Re-generating a plan keeps its guide id.
+//   pnpm plans                        solve the configured plans that have no file yet
+//   pnpm plans <target>/<variant>…    re-solve these plans (same guide ids)
+//   pnpm plans <key>… --new           solve them as new guides (new ids) alongside the old ones,
+//                                     which are kept as standalone guides
+//   pnpm plans --all                  re-solve every configured plan
+//   --runs <n>                        solve each plan n times (default 2)
+//   --jobs <n>                        solves at once (default 4): solves sharing the machine get
+//                                     much less done in their time limit (Island King Balanced in
+//                                     15 minutes: gap 8% alone, 35% with 8 at once)
+//   --replace                         keep the ids but don't compare with the committed plans
+//                                     (after a change of settings, to take the new runs' best)
+// Each plan is solved `--runs` times (the solver stops at a time limit, so runs differ a little);
+// the best run and the committed plan are compared (plan-score.ts: valid, then for story plans the
+// least story cost, then earliest finish, least effort, least ABS, earliest pace, least gilda) and
+// the committed file only changes when a run is better.
+// The runs are spread over parallel worker processes (the script runs itself with --worker).
+import { spawn } from "node:child_process";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { availableParallelism, tmpdir } from "node:os";
+import { join } from "node:path";
+import { assemblePlans, PLANS_DIR, ROOT } from "../../integrations/plans.ts";
 import { plansConfig } from "./plans.config.ts";
 import { expandPlans, parsePlansConfig } from "./plans-config.ts";
+import { planOne } from "./plan-one.ts";
+import { newGuideId, planPath, readPlanFiles, type PlanFile } from "./plan-files.ts";
+import { compareScores, scoreAll, scoreText } from "./plan-score.ts";
+import type { Guide } from "../../src/lib/guide/types.ts";
+import type { SavedSolution } from "../../src/lib/planner/plan.ts";
 
-const outPath = fileURLToPath(new URL("../../src/data/plans.json", import.meta.url));
-const force = process.argv.includes("--force");
-const hash = plansHash();
-if (!force && existsSync(outPath)) {
-  const stored = JSON.parse(readFileSync(outPath, "utf8")) as { hash?: string };
-  if (stored.hash === hash) {
-    console.log("predefined plans are up to date");
-    process.exit(0);
+const specs = expandPlans(parsePlansConfig(plansConfig));
+const fileFor = (key: string) => readPlanFiles().find((p) => p.spec === key);
+const write = (file: PlanFile) =>
+  writeFileSync(planPath(file.guide.id), JSON.stringify(file, null, 2) + "\n");
+
+/** A run's candidate file: <out>/<key with / as __>@<run>.json holding the guide. */
+const candidatePath = (out: string, key: string, run: number) =>
+  join(out, `${key.replace("/", "__")}@${run}.json`);
+
+/** Worker: solves the given runs ("<key>@<run>") and writes each candidate guide to `out`. */
+async function worker(tasks: string[], out: string) {
+  for (const task of tasks) {
+    const [key, run] = task.split("@");
+    const spec = specs.find((s) => s.id === key)!;
+    const t0 = Date.now();
+    try {
+      // Start from the committed plan's solver values (a fresh guide with --new has none).
+      const { guide, log, result } = await planOne(spec, undefined, fileFor(key)?.solution);
+      writeFileSync(
+        candidatePath(out, key, Number(run)),
+        JSON.stringify({ guide, solution: result.solution }),
+      );
+      console.log(`  ${key} run ${run}: ${log} (${((Date.now() - t0) / 1000).toFixed(1)}s)`);
+    } catch (err) {
+      console.log(`  ${key} run ${run}: failed (${String(err)})`);
+    }
   }
 }
 
-const specs = expandPlans(parsePlansConfig(plansConfig));
-const began = Date.now();
-console.log(`predefined plans: generating ${specs.length} plans (inputs changed)`);
-const guides: Guide[] = [];
-for (const [i, spec] of specs.entries()) {
-  const target = getWeapon(spec.targetId);
-  const t0 = Date.now();
-  const result = await planPath({
-    // optimalStart picks the cheapest acquirable weapon in the line; the start field is unused.
-    start: freshState(target),
-    optimalStart: true,
-    targetId: spec.targetId,
-    objective: spec.objective,
-    goal: spec.goal === "max" ? { kind: "max" } : { kind: "reach" },
-    maxChapter: spec.maxChapter,
-    spBonus: spec.spBonus,
-    ...(spec.maxGilda !== undefined ? { maxGilda: spec.maxGilda } : {}),
-    abilities: spec.abilities,
-    // Generation is one-off, so let the exact solves run longer than the interactive default.
-    timeLimitSec: 10,
-  });
-  if (result.status !== "ok")
-    throw new Error(
-      `${spec.id}: planning failed (${result.status}${result.message ? `: ${result.message}` : ""})`,
+/** Runs this script as a worker process for a share of the runs. */
+function runWorker(tasks: string[], out: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const child = spawn(
+      "pnpm",
+      [
+        "exec",
+        "vite-node",
+        "--config",
+        "vitest.config.ts",
+        "scripts/planner/predefined.ts",
+        "--worker",
+        tasks.join(","),
+        out,
+      ],
+      { stdio: "inherit", cwd: ROOT },
     );
-  if (result.abilitiesMissing?.length)
-    throw new Error(`${spec.id}: missing abilities ${result.abilitiesMissing.join(", ")}`);
-  const start = freshState(getWeapon(result.plan!.stages[0].weaponId));
-  const cost = result.simulation!.cost;
-  const startName = getWeapon(start.weaponId).name;
-  const description = [
-    spec.label,
-    spec.goal === "max" ? "maxed stats" : "reach the weapon",
-    ...(spec.abilities.length ? [`${spec.abilities.length} abilities`] : []),
-    `optimal start (${startName})`,
-    `up to chapter ${spec.maxChapter}`,
-  ].join(" · ");
-  guides.push(
-    guideSchema.parse(
-      planResultToGuide({
-        id: spec.id,
-        title: `${target.name} — ${spec.label}`,
-        description,
-        kind: "builtin",
-        result,
-        start,
-        spBonus: spec.spBonus,
-        acquire: result.acquire,
-        createdAt: 0,
-      }),
-    ),
-  );
-  console.log(
-    `  [${i + 1}/${specs.length}] ${spec.id} — from ${startName} · ${cost.abs} ABS · ${cost.gilda} gilda · ${cost.steps} steps (${((Date.now() - t0) / 1000).toFixed(1)}s)`,
-  );
+    child.on("error", reject);
+    child.on("exit", (code) =>
+      code === 0 ? resolve() : reject(new Error(`plan worker failed (${tasks.join(", ")})`)),
+    );
+  });
 }
 
-writeFileSync(outPath, JSON.stringify({ hash, guides }, null, 2) + "\n");
-console.log(
-  `predefined plans: ${guides.length} guides written to src/data/plans.json in ${((Date.now() - began) / 1000).toFixed(1)}s`,
-);
+async function main(args: string[]) {
+  const fresh = args.includes("--new");
+  const replace = args.includes("--replace");
+  const runsAt = args.indexOf("--runs");
+  const runs = runsAt >= 0 ? Math.max(1, Number(args[runsAt + 1]) || 1) : 2;
+  const jobsAt = args.indexOf("--jobs");
+  const jobs = jobsAt >= 0 ? Math.max(1, Number(args[jobsAt + 1]) || 1) : 4;
+  const keys = args.filter(
+    (a, i) => !a.startsWith("--") && args[i - 1] !== "--runs" && args[i - 1] !== "--jobs",
+  );
+  const unknown = keys.filter((k) => !specs.some((s) => s.id === k));
+  if (unknown.length)
+    throw new Error(
+      `unknown plan(s): ${unknown.join(", ")} (configured: ${specs.map((s) => s.id).join(", ")})`,
+    );
+  const todo = args.includes("--all")
+    ? specs
+    : keys.length
+      ? specs.filter((s) => keys.includes(s.id))
+      : specs.filter((s) => !fileFor(s.id));
+
+  // New guides: the current ones stay as standalone guides (no longer tied to the config entry).
+  if (fresh)
+    for (const s of todo) {
+      const old = fileFor(s.id);
+      if (old) write({ name: old.name, guide: old.guide });
+    }
+
+  const began = Date.now();
+  if (todo.length) {
+    // Earliest plans take several solves: start them first so they don't end up last on a worker.
+    const order = [...todo].sort(
+      (a, b) => Number(b.flow === "earliest") - Number(a.flow === "earliest"),
+    );
+    const tasks = Array.from({ length: runs }, (_, run) =>
+      order.map((s) => `${s.id}@${run}`),
+    ).flat();
+    // Each worker loads its own solver (~100 MB); leave a core for the rest of the machine.
+    const workers = Math.max(1, Math.min(tasks.length, availableParallelism() - 1, jobs));
+    console.log(`predefined plans: ${order.length} plans × ${runs} runs on ${workers} processes`);
+    const out = mkdtempSync(join(tmpdir(), "dcc-plans-"));
+    const shares: string[][] = Array.from({ length: workers }, () => []);
+    tasks.forEach((task, i) => shares[i % workers].push(task));
+    await Promise.all(shares.map((share) => runWorker(share, out)));
+
+    // Keep the best of the runs and the committed plan.
+    for (const spec of order) {
+      const current = fresh ? undefined : fileFor(spec.id);
+      const candidates: { label: string; guide: Guide; solution?: SavedSolution }[] = [];
+      if (current && !replace)
+        candidates.push({ label: "committed", guide: current.guide, solution: current.solution });
+      for (let run = 0; run < runs; run++) {
+        const path = candidatePath(out, spec.id, run);
+        if (existsSync(path))
+          candidates.push({
+            label: `run ${run + 1}`,
+            ...(JSON.parse(readFileSync(path, "utf8")) as {
+              guide: Guide;
+              solution?: SavedSolution;
+            }),
+          });
+      }
+      const scored = scoreAll(candidates, spec);
+      scored.sort((a, b) => compareScores(a.score, b.score));
+      console.log(`  ${spec.id}:`);
+      for (const c of scored) console.log(`    ${c.label.padEnd(9)} ${scoreText(c.score)}`);
+      const best = scored[0];
+      if (!best || best.label === "committed") {
+        console.log(`    → ${best ? "keeps the committed plan" : "no plan"}`);
+        continue;
+      }
+      if (best.score.problems.length) {
+        console.log("    → no valid plan; nothing written");
+        continue;
+      }
+      const guide = best.guide;
+      guide.id = current?.guide.id ?? newGuideId(spec.targetId, guide);
+      mkdirSync(PLANS_DIR, { recursive: true });
+      write({
+        name: guide.title,
+        spec: spec.id,
+        guide,
+        ...(best.solution ? { solution: best.solution } : {}),
+      });
+      console.log(`    → ${best.label} written as ${guide.id}`);
+    }
+    rmSync(out, { recursive: true, force: true });
+    console.log(`predefined plans: done in ${((Date.now() - began) / 1000).toFixed(1)}s`);
+  } else console.log("predefined plans: every configured plan has a file");
+
+  const standalone = readPlanFiles().filter((p) => !p.spec || !specs.some((s) => s.id === p.spec));
+  if (standalone.length)
+    console.log(
+      `standalone guides (kept, not re-solved): ${standalone.map((p) => p.guide.id).join(", ")}`,
+    );
+  assemblePlans();
+}
+
+const workerAt = process.argv.indexOf("--worker");
+if (workerAt >= 0) await worker(process.argv[workerAt + 1].split(","), process.argv[workerAt + 2]);
+else await main(process.argv.slice(2));

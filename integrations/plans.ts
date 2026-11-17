@@ -1,63 +1,44 @@
-// Predefined plans (built-in guides) are generated into src/data/plans.json at build time so they
-// stay in sync with the planner and the game data. The committed file makes this a fast no-op on
-// unchanged trees; when it is stale (config, planner, mechanics or data changed) the generation
-// script runs before pages render. The plans themselves are configured in
-// scripts/planner/plans.config.ts.
+// Predefined plans (built-in guides) are committed, one file per plan, in data/generated/plans/.
+// They are generated on purpose (`pnpm plans`, see scripts/planner/predefined.ts), reviewed and
+// committed, and are independent of the code from then on: builds and tests never re-solve them.
+// Whenever Astro starts (dev, build, `astro sync`) and before the tests, the files are only
+// assembled into src/data/plans.json (git-ignored), which the app reads.
 import type { AstroIntegration } from "astro";
-import { spawnSync } from "node:child_process";
-import { createHash } from "node:crypto";
-import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
-import { basename, join } from "node:path";
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 export const ROOT = fileURLToPath(new URL("..", import.meta.url));
+export const PLANS_OUT = join(ROOT, "src/data/plans.json");
+/** The committed plans, one JSON file per plan. */
+export const PLANS_DIR = join(ROOT, "data/generated/plans");
 
-/** Everything that can change what the plans contain. Outputs and tests are never inputs. */
-const INPUTS = ["scripts/planner", "src/data"];
-const SKIP_FILES = new Set(["plans.json", "INCONSISTENCIES.md"]);
-
-function walk(dir: string): string[] {
-  return readdirSync(dir).flatMap((name) => {
-    const p = join(dir, name);
-    return statSync(p).isDirectory() ? walk(p) : [p];
-  });
-}
-
-/** Content hash over every input; stored in src/data/plans.json to detect staleness. */
-export function plansHash(): string {
-  const files = INPUTS.flatMap((p) =>
-    statSync(join(ROOT, p)).isDirectory() ? walk(join(ROOT, p)) : [join(ROOT, p)],
-  )
-    .filter(
-      (f) => /\.(ts|json)$/.test(f) && !f.endsWith(".test.ts") && !SKIP_FILES.has(basename(f)),
-    )
-    .sort();
-  const hash = createHash("sha256");
-  for (const f of files) hash.update(f).update(readFileSync(f));
-  return hash.digest("hex");
+/** Writes src/data/plans.json from the committed plan files (in file-name order). */
+export function assemblePlans(log: (m: string) => void = console.log): void {
+  const files = existsSync(PLANS_DIR)
+    ? readdirSync(PLANS_DIR)
+        .filter((f) => f.endsWith(".json"))
+        .sort()
+    : [];
+  const plans = files.map((f) => JSON.parse(readFileSync(join(PLANS_DIR, f), "utf8")));
+  const guides = plans.map((p) => p.guide);
+  // Each configured plan's variant ("balanced", "earliest", "gilda-max", from its <target>/<variant>
+  // config key), by guide id: the guides table groups by it rather than by the title's wording.
+  const variants = Object.fromEntries(
+    plans.filter((p) => p.spec).map((p) => [p.guide.id, p.spec.split("/")[1]]),
+  );
+  const json = JSON.stringify({ guides, variants }, null, 2) + "\n";
+  if (existsSync(PLANS_OUT) && readFileSync(PLANS_OUT, "utf8") === json) return;
+  mkdirSync(dirname(PLANS_OUT), { recursive: true });
+  writeFileSync(PLANS_OUT, json);
+  log(`predefined plans: ${guides.length} assembled into src/data/plans.json`);
 }
 
 export default function plans(): AstroIntegration {
   return {
     name: "dcc-predefined-plans",
     hooks: {
-      "astro:build:start": () => {
-        const out = join(ROOT, "src/data/plans.json");
-        const stored = existsSync(out) ? JSON.parse(readFileSync(out, "utf8")).hash : undefined;
-        if (stored === plansHash()) {
-          console.log("predefined plans are up to date");
-          return;
-        }
-        console.log("predefined plans: inputs changed — regenerating");
-        const r = spawnSync(
-          "pnpm",
-          ["exec", "vite-node", "--config", "vitest.config.ts", "scripts/planner/predefined.ts"],
-          { stdio: "inherit", cwd: ROOT },
-        );
-        if (r.error || r.status !== 0) {
-          throw new Error("predefined plan generation failed");
-        }
-      },
+      "astro:config:setup": ({ logger }) => assemblePlans((m) => logger.info(m)),
     },
   };
 }

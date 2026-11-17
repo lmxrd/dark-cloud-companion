@@ -1,0 +1,3 @@
+# Show SQLite databases as SQL text in git diffs. Needs a one-time local setting:
+#   git config diff.sqlite.textconv "echo .dump | sqlite3"
+*.db diff=sqlite

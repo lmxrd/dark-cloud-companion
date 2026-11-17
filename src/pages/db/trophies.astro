@@ -1,0 +1,15 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { PageHeader } from "@/components/PageHeader";
+import { TrophiesPage } from "@/components/db/ListPages";
+import { useTranslations } from "@/i18n";
+import { trophyRows } from "@/lib/db/lists";
+
+const t = useTranslations();
+
+---
+
+<Layout title={`${t("nav.trophies")} · ${t("app.name")}`}>
+  <PageHeader title={t("nav.trophies")} description={t("db.intro.trophies")} />
+  <TrophiesPage client:load rows={trophyRows()} />
+</Layout>

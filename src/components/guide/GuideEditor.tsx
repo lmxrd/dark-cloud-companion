@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useProfile } from "@/lib/useAppStore";
 import { BuildStepBody } from "@/components/guide/BuildStepBody";
 import { StartSpecs } from "@/components/planner/StartSpecs";
 import { WeaponSelect, selectClass } from "@/components/planner/WeaponSelect";
@@ -7,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useTranslations } from "@/i18n";
-import { chapters, checklist, sectionById, sectionsOf, sections } from "@/lib/data";
+import { chapters, checklist, sectionsOf, sections } from "@/lib/data";
 import { deriveBuild, startToState } from "@/lib/guide/derive";
 import { emptyStep } from "@/lib/guide/ops";
 import { resolveEntry } from "@/lib/guide/refs";
@@ -16,8 +17,6 @@ import { getWeapon, itemAvailability, synthSources } from "@/lib/planner/sources
 import type { Stage } from "@/lib/planner/types";
 import { loadTemplates } from "@/lib/planner/client";
 import type { Template } from "@/lib/planner/solve";
-import { $profile } from "@/lib/store";
-import { useStore } from "@nanostores/react";
 import { freshState, type WeaponState } from "@/lib/weapons/mechanics";
 
 const itemSources = synthSources.filter(
@@ -210,7 +209,7 @@ function AddEntries({ chapterId, onAdd }: { chapterId?: string; onAdd: (e: Entry
 /** Adds a sphere weapon (a side weapon prepared and spectrumized onto this one) from the planner's templates. */
 function SphereAdder({ spBonus, onAdd }: { spBonus: number; onAdd: (t: Template) => void }) {
   const t = useTranslations();
-  const { view } = useStore($profile);
+  const { view } = useProfile();
   const [open, setOpen] = useState(false);
   const [maxChapter, setMaxChapter] = useState(8);
   const [templates, setTemplates] = useState<Template[] | null>(null);
@@ -280,9 +279,13 @@ function SphereAdder({ spBonus, onAdd }: { spBonus: number; onAdd: (t: Template)
               className="h-auto w-full justify-start py-1 text-left whitespace-normal"
               onClick={() => onAdd(x)}
             >
-              {getWeapon(x.weaponId).name} +{x.level} · {Math.round(x.abs).toLocaleString()} ABS ·{" "}
-              {Math.round(x.gilda).toLocaleString()} gilda ·{" "}
-              {t("guides.stepChapter", { n: x.chapter })}
+              {t("editor.sphereChoice", {
+                weapon: getWeapon(x.weaponId).name,
+                level: x.level,
+                abs: Math.round(x.abs).toLocaleString("en-US"),
+                gilda: Math.round(x.gilda).toLocaleString("en-US"),
+                chapter: t("guides.stepChapter", { n: x.chapter }),
+              })}
             </Button>
           </li>
         ))}
@@ -449,17 +452,31 @@ export function GuideEditor({ initial, persisted, onSave }: Props) {
   };
   const setStep = (i: number, s: Step) =>
     update({ steps: draft.steps.map((x, n) => (n === i ? s : x)) });
-  const derived = useMemo(() => deriveBuild(draft), [draft]);
+  // Only the build and the steps matter: typing a title or notes doesn't re-derive the build.
+  const { id, kind, build, steps } = draft;
+  const derived = useMemo(
+    () => deriveBuild({ id, kind, title: "", build, steps }),
+    [id, kind, build, steps],
+  );
 
-  // Which weapons a build step may use: the first stage can be any weapon the start state can reach; later ones follow the chain.
-  const buildSteps = draft.steps.filter((s) => s.build);
-  const lastBuildWeapon = buildSteps.at(-1)?.build?.weaponId ?? draft.build?.weaponId;
+  // The weapon the build is on after a step: its own weapon, or a build-up step's target.
+  const weaponAfter = (s: Step) => s.buildUp?.weaponId ?? s.build?.weaponId;
+  const lastBuildWeapon =
+    draft.steps.map(weaponAfter).filter(Boolean).at(-1) ?? draft.build?.weaponId;
+  // Which weapons a work step may use: the weapon in hand (after a build-up step, its target), or,
+  // as in guides from before build-up steps, a build-up target of it (an implied build-up).
   const allowedFor = (stepIndex: number): Set<string> => {
-    const before = draft.steps.slice(0, stepIndex).filter((s) => s.build);
-    const prev = before.at(-1)?.build?.weaponId;
-    // The first stage is the start weapon itself; every later stage is a build-up target of the previous one.
+    const prev = draft.steps.slice(0, stepIndex).findLast((s) => s.build || s.buildUp);
     if (!prev) return new Set(draft.build ? [draft.build.weaponId] : []);
-    return new Set(getWeapon(prev).buildsUpTo);
+    if (prev.buildUp) return new Set([prev.buildUp.weaponId]);
+    const w = prev.build!.weaponId;
+    return new Set([w, ...getWeapon(w).buildsUpTo]);
+  };
+  /** Which weapons a build-up step may build into: the targets of the weapon in hand before it. */
+  const targetsFor = (stepIndex: number): Set<string> => {
+    const prev = draft.steps.slice(0, stepIndex).findLast((s) => s.build || s.buildUp);
+    const w = prev ? weaponAfter(prev) : draft.build?.weaponId;
+    return new Set(w ? getWeapon(w).buildsUpTo : []);
   };
 
   const addBuild = () => {
@@ -533,7 +550,7 @@ export function GuideEditor({ initial, persisted, onSave }: Props) {
               onClick={() => {
                 if (!confirm(t("editor.removeBuildConfirm"))) return;
                 const { build: _b, ...rest } = draft;
-                setDraft({ ...rest, steps: draft.steps.filter((s) => !s.build) });
+                setDraft({ ...rest, steps: draft.steps.filter((s) => !s.build && !s.buildUp) });
                 setSaved(false);
               }}
             >
@@ -648,6 +665,20 @@ export function GuideEditor({ initial, persisted, onSave }: Props) {
                   <BuildStepBody step={s} derived={derived.steps.get(s.id)} />
                 </>
               )}
+              {s.buildUp && (
+                <>
+                  <Label className="flex flex-col items-start gap-1 text-xs">
+                    {t("editor.buildUpTo")}
+                    <WeaponSelect
+                      value={s.buildUp.weaponId}
+                      ids={new Set([s.buildUp.weaponId, ...targetsFor(i)])}
+                      className={`${selectClass} h-9`}
+                      onChange={(id) => setStep(i, { ...s, buildUp: { weaponId: id } })}
+                    />
+                  </Label>
+                  <BuildStepBody step={s} derived={derived.steps.get(s.id)} />
+                </>
+              )}
               <fieldset className="flex flex-col gap-2">
                 <legend className="text-muted-foreground mb-1 text-xs">
                   {t("editor.entries")}
@@ -700,9 +731,8 @@ export function GuideEditor({ initial, persisted, onSave }: Props) {
           <Button
             variant="outline"
             onClick={() => {
-              const w = lastBuildWeapon ?? draft.build!.weaponId;
-              // A new stage builds up from the previous one, so default to its first build-up target.
-              const weaponId = buildSteps.length ? (getWeapon(w).buildsUpTo[0] ?? w) : w;
+              // Work on the weapon in hand (after a build-up step, its target).
+              const weaponId = lastBuildWeapon ?? draft.build!.weaponId;
               const stage: Stage = { weaponId, levelTo: 0, synths: [] };
               const step: Step = {
                 ...emptyStep(draft.steps.at(-1)?.chapterId),
@@ -715,6 +745,23 @@ export function GuideEditor({ initial, persisted, onSave }: Props) {
             {t("editor.addBuildStep")}
           </Button>
         )}
+        {draft.build && lastBuildWeapon && getWeapon(lastBuildWeapon).buildsUpTo.length > 0 && (
+          <Button
+            variant="outline"
+            onClick={() => {
+              const from = lastBuildWeapon;
+              const to = getWeapon(from).buildsUpTo[0];
+              const step: Step = {
+                ...emptyStep(draft.steps.at(-1)?.chapterId),
+                title: `${getWeapon(from).name} → ${getWeapon(to).name}`,
+                buildUp: { weaponId: to },
+              };
+              update({ steps: [...draft.steps, step] });
+            }}
+          >
+            {t("editor.addBuildUpStep")}
+          </Button>
+        )}
         <Button
           onClick={() => {
             onSave(draft);
@@ -724,7 +771,14 @@ export function GuideEditor({ initial, persisted, onSave }: Props) {
         >
           {t("editor.save")}
         </Button>
-        <Button variant="ghost" onClick={() => setDraft(initial)} disabled={saved}>
+        <Button
+          variant="ghost"
+          onClick={() => {
+            setDraft(initial);
+            setSaved(persisted);
+          }}
+          disabled={saved}
+        >
           {t("editor.discard")}
         </Button>
         {!saved && <span className="text-muted-foreground text-xs">{t("editor.unsaved")}</span>}
@@ -732,5 +786,3 @@ export function GuideEditor({ initial, persisted, onSave }: Props) {
     </div>
   );
 }
-
-export { sectionById };

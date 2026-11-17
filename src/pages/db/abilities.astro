@@ -1,0 +1,15 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { PageHeader } from "@/components/PageHeader";
+import { AbilitiesPage } from "@/components/db/ListPages";
+import { useTranslations } from "@/i18n";
+import { abilityRows } from "@/lib/db/lists";
+
+const t = useTranslations();
+
+---
+
+<Layout title={`${t("nav.abilities")} · ${t("app.name")}`}>
+  <PageHeader title={t("nav.abilities")} description={t("db.intro.abilities")} />
+  <AbilitiesPage rows={abilityRows()} />
+</Layout>

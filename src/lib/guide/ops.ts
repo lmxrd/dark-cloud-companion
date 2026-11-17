@@ -1,9 +1,9 @@
-import { newId, type Guide, type Step } from "./types";
+import { newId, titleWith, type Guide, type Step } from "./types";
 
 export const newGuideId = () => `g-${Date.now().toString(36)}-${newId()}`;
 
 /** A custom copy of any guide (built-in guides are read-only; copying is how you edit them). */
-export function duplicateGuide(g: Guide, title = `${g.title} (copy)`): Guide {
+export function duplicateGuide(g: Guide, title = titleWith(g.title, " (copy)")): Guide {
   const now = Date.now();
   return {
     ...structuredClone(g),

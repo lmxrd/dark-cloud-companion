@@ -1,10 +1,9 @@
-import { useStore } from "@nanostores/react";
+import { useProfile } from "@/lib/useAppStore";
 import { useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
 import { buildContentExport } from "@/lib/content-file";
 import { useTranslations } from "@/i18n";
 import type { Guide } from "@/lib/guide/types";
-import { $profile, applyContent } from "@/lib/store";
+import { applyContent } from "@/lib/store";
 
 export function downloadGuides(filename: string, guides: Guide[]) {
   const blob = new Blob([JSON.stringify(buildContentExport(guides), null, 2)], {
@@ -24,10 +23,13 @@ export const fileSafe = (s: string) =>
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "") || "export";
 
-/** Export-all and import controls for the user's own guides (content only, no progress). */
-export function ContentTransfer() {
+/**
+ * Export-all and import for the user's own guides (content only, no progress). The caller places the
+ * actions (a menu) and renders `input` and `message` somewhere on the page.
+ */
+export function useContentTransfer() {
   const t = useTranslations();
-  const { guides } = useStore($profile);
+  const { guides } = useProfile();
   const fileRef = useRef<HTMLInputElement>(null);
   const [message, setMessage] = useState<string | null>(null);
 
@@ -37,39 +39,27 @@ export function ContentTransfer() {
     const { parseContentImport } = await import("@/lib/content-transfer");
     const parsed = parseContentImport(await file.text());
     if (!parsed.ok) setMessage(t("transfer.failed", { error: parsed.error }));
-    else setMessage(t("transfer.done", { ...applyContent(parsed.file) }));
+    else setMessage(t("transfer.done", { ...(await applyContent(parsed.file)) }));
     if (fileRef.current) fileRef.current.value = "";
   };
 
-  return (
-    <div className="flex flex-col gap-2">
-      <p className="text-muted-foreground text-xs">{t("transfer.hint")}</p>
-      <div className="flex flex-wrap gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          disabled={guides.length === 0}
-          title={guides.length === 0 ? t("transfer.empty") : undefined}
-          onClick={() => downloadGuides("dcc-guides.json", guides)}
-        >
-          {t("transfer.exportAll")}
-        </Button>
-        <Button variant="outline" size="sm" onClick={() => fileRef.current?.click()}>
-          {t("transfer.import")}
-        </Button>
-        <input
-          ref={fileRef}
-          type="file"
-          accept="application/json"
-          hidden
-          onChange={(e) => onImport(e.target.files?.[0])}
-        />
-      </div>
-      {message && (
-        <p className="text-sm whitespace-pre-line" role="status">
-          {message}
-        </p>
-      )}
-    </div>
-  );
+  return {
+    canExport: guides.length > 0,
+    exportAll: () => downloadGuides("dcc-guides.json", guides),
+    openImport: () => fileRef.current?.click(),
+    input: (
+      <input
+        ref={fileRef}
+        type="file"
+        accept="application/json"
+        hidden
+        onChange={(e) => onImport(e.target.files?.[0])}
+      />
+    ),
+    message: message && (
+      <p className="text-sm whitespace-pre-line" role="status">
+        {message}
+      </p>
+    ),
+  };
 }

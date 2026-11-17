@@ -1,0 +1,17 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { useTranslations } from "@/i18n";
+import { shops } from "@/lib/db/data";
+import { ShopPage } from "@/components/db/pages/MorePages";
+
+export function getStaticPaths() {
+  return shops.shops.map((s) => ({ params: { id: s.id }, props: { shop: s } }));
+}
+
+const t = useTranslations();
+const { shop } = Astro.props;
+---
+
+<Layout title={`${shop.name} · ${t("app.name")}`} page={shop.name}>
+  <ShopPage shop={shop} />
+</Layout>

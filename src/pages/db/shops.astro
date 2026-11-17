@@ -1,0 +1,16 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { PageHeader } from "@/components/PageHeader";
+import { ShopsPage } from "@/components/db/ShopsPage";
+import { useTranslations } from "@/i18n";
+import { shopRows } from "@/lib/db/lists";
+import { core } from "@/lib/db/data";
+
+const t = useTranslations();
+const towns = core.towns.map((x) => ({ id: x.id, name: x.name }));
+---
+
+<Layout title={`${t("shops.title")} · ${t("app.name")}`}>
+  <PageHeader title={t("shops.title")} description={t("shops.intro")} />
+  <ShopsPage client:load rows={shopRows()} towns={towns} />
+</Layout>

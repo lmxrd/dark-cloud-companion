@@ -1,0 +1,17 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { useTranslations } from "@/i18n";
+import { georama } from "@/lib/db/data";
+import { GeoramaPartPage } from "@/components/db/pages/MorePages";
+import { AddToListButton } from "@/components/shopping/AddToListButton";
+export function getStaticPaths() {
+  return georama.parts.map((p) => ({ params: { id: p.id }, props: { part: p } }));
+}
+
+const t = useTranslations();
+const { part } = Astro.props;
+---
+
+<Layout title={`${part.name} · ${t("app.name")}`} page={part.name}>
+  <GeoramaPartPage part={part}><AddToListButton slot="actions" client:load size="sm" goal={{ kind: "georama", name: part.name }} /></GeoramaPartPage>
+</Layout>

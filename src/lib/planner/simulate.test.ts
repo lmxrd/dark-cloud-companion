@@ -23,6 +23,21 @@ describe("simulator", () => {
     expect(r.state.sp).toBe(33);
   });
 
+  test("a stage on the same weapon continues it: split levelling costs the same as one stage", () => {
+    const split: Recipe = {
+      ...tbw,
+      stages: [
+        { weaponId: "battle-wrench", levelTo: 2, synths: [] },
+        { weaponId: "battle-wrench", levelTo: 3, synths: [] },
+        { weaponId: "true-battle-wrench", levelTo: 5, synths: [] },
+      ],
+    };
+    const r = simulateRecipe(split, { spBonus: 1 });
+    expect(r.errors).toEqual([]);
+    expect(r.cost.abs).toBe(368);
+    expect(r.state.sp).toBe(33);
+  });
+
   test("without the support bonus SP is 25", () => {
     expect(simulateRecipe(tbw, { spBonus: 0 }).state.sp).toBe(25);
   });
@@ -74,5 +89,26 @@ describe("simulator", () => {
     // 8 Gunpowder = +16 Fl on the TBW (capped at 19), then 60% of it moves to the main weapon.
     expect(r.state.stats.fl).toBeGreaterThan(start.stats.fl + 5);
     expect(r.cost.abs).toBe(368 + 32 + 32 + 48 + 64 + 80 + 96 + 112);
+  });
+});
+
+describe("support allies", () => {
+  test("+1 SP per level only for weapon types an ally boosts (not armbands: Lin is temporary)", async () => {
+    const { allyBonus, supportAllyByType } = await import("./sources");
+    expect(supportAllyByType.get("sword")?.name).toBe("Milane");
+    expect(supportAllyByType.get("wrench")?.name).toBe("Cedric");
+    expect(supportAllyByType.get("gun")?.name).toBe("Gerald");
+    expect(allyBonus(getWeapon("moon-armlet"), 1)).toBe(0);
+    expect(allyBonus(getWeapon("bone-rapier"), 1)).toBe(1);
+    expect(allyBonus(getWeapon("bone-rapier"), 0)).toBe(0);
+    const armlet = simulateRecipe(
+      { acquire: { kind: "have" }, stages: [{ weaponId: "moon-armlet", levelTo: 5, synths: [] }] },
+      { spBonus: 1 },
+    );
+    const without = simulateRecipe(
+      { acquire: { kind: "have" }, stages: [{ weaponId: "moon-armlet", levelTo: 5, synths: [] }] },
+      { spBonus: 0 },
+    );
+    expect(armlet.state.sp).toBe(without.state.sp);
   });
 });

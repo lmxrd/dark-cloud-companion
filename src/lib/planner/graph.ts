@@ -26,10 +26,11 @@ export const rootWeaponIds = new Set(
 );
 
 /**
- * The final weapon of each build-up line — the weapon FAQ's endgame targets. They get their own
- * tier above the SP tiers in the planner's target dropdown, and tab defaults prefer them. Not all
- * are leaves of the build-up tree: Griffon Fork builds up into Island King, yet the FAQ treats
- * both as endgame targets.
+ * The starred weapons: the final weapon of each build-up line — the weapon FAQ's endgame targets —
+ * plus Flamingo, the best Spheda club (Albatross sits a tier higher but plays worse). They get their
+ * own tier above the SP tiers in the planner's target dropdown, tab defaults prefer them, and each
+ * gets built-in plans. Not all are leaves of the build-up tree: Griffon Fork builds up into Island
+ * King, and Flamingo into Falcon.
  */
 export const finalWeaponIds: string[] = [
   "island-king",
@@ -42,4 +43,5 @@ export const finalWeaponIds: string[] = [
   "dark-cloud",
   "griffon-fork",
   "five-star-armlet",
+  "flamingo",
 ];

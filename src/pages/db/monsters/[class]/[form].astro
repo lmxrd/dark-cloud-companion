@@ -1,0 +1,18 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { useTranslations } from "@/i18n";
+import { monsters, names } from "@/lib/db/data";
+import { dbHref } from "@/lib/db/routes";
+import { MonsterFormPage } from "@/components/db/pages/MonsterPages";
+
+export function getStaticPaths() {
+  return monsters.forms.map((f) => ({ params: { class: f.classId, form: f.id }, props: { form: f } }));
+}
+
+const t = useTranslations();
+const { form } = Astro.props;
+---
+
+<Layout title={`${form.name} · ${t("app.name")}`} page={form.name} parents={[{ label: names.monsterClasses[form.classId], href: dbHref("monsterClass", form.classId) }]}>
+  <MonsterFormPage form={form} />
+</Layout>

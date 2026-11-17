@@ -1,0 +1,945 @@
+{
+  "name": "Grade Zero — Gilda max",
+  "spec": "grade-zero/gilda-max",
+  "guide": {
+    "id": "grade-zero-079b4c",
+    "title": "Grade Zero — Gilda max",
+    "description": "Gilda max · maxed stats · 8 abilities (side-weapon spheres first) · optimal start (Battle Wrench) · done after Palace Watchdog (chapter 7) · no ABS grinding",
+    "kind": "builtin",
+    "build": {
+      "weaponId": "battle-wrench",
+      "level": 0,
+      "abs": 0,
+      "stats": {
+        "at": 8,
+        "fl": 2,
+        "ch": 0,
+        "li": 0,
+        "cy": 0,
+        "sm": 5,
+        "ex": 0,
+        "be": 0,
+        "sc": 0
+      },
+      "du": 0,
+      "sp": 1,
+      "abilities": [],
+      "spBonus": 1,
+      "acquire": {
+        "kind": "have"
+      }
+    },
+    "steps": [
+      {
+        "id": "battle-wrench+14",
+        "title": "Battle Wrench",
+        "notes": "",
+        "chapterId": "3",
+        "sectionId": "warrior-in-starlight-canyon",
+        "entries": [],
+        "build": {
+          "weaponId": "battle-wrench",
+          "levelTo": 14,
+          "synths": [
+            {
+              "kind": "item",
+              "name": "Flame Crystal",
+              "count": 2
+            },
+            {
+              "kind": "item",
+              "name": "Hunter Crystal",
+              "count": 5
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "shop",
+                  "shop": "Milane's Weapon Shop",
+                  "price": 200,
+                  "chapter": 1
+                },
+                "stages": [
+                  {
+                    "weaponId": "battle-wrench",
+                    "levelTo": 1,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Knight Boots",
+                        "count": 2
+                      }
+                    ]
+                  },
+                  {
+                    "weaponId": "true-battle-wrench",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Chill Crystal",
+                        "count": 6
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Destruction Crystal",
+                        "count": 4
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Flame Crystal",
+                        "count": 5
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Holy Crystal",
+                        "count": 6
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Hunter Crystal",
+                        "count": 2
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "to-drill-wrench",
+        "title": "Battle Wrench → Drill Wrench",
+        "notes": "",
+        "chapterId": "3",
+        "sectionId": "warrior-in-starlight-canyon",
+        "entries": [],
+        "buildUp": {
+          "weaponId": "drill-wrench"
+        }
+      },
+      {
+        "id": "drill-wrench+7",
+        "title": "Drill Wrench",
+        "notes": "",
+        "chapterId": "3",
+        "sectionId": "dangerous-treasure-chest",
+        "entries": [],
+        "build": {
+          "weaponId": "drill-wrench",
+          "levelTo": 7,
+          "synths": [
+            {
+              "kind": "item",
+              "name": "Lightning Crystal",
+              "count": 3
+            },
+            {
+              "kind": "item",
+              "name": "Rolling Log",
+              "count": 1
+            },
+            {
+              "kind": "item",
+              "name": "Sea Dragon Crystal",
+              "count": 2
+            },
+            {
+              "kind": "item",
+              "name": "Wind Crystal",
+              "count": 1
+            }
+          ]
+        }
+      },
+      {
+        "id": "to-smash-wrench",
+        "title": "Drill Wrench → Smash Wrench",
+        "notes": "",
+        "chapterId": "3",
+        "sectionId": "dangerous-treasure-chest",
+        "entries": [],
+        "buildUp": {
+          "weaponId": "smash-wrench"
+        }
+      },
+      {
+        "id": "smash-wrench+4",
+        "title": "Smash Wrench",
+        "notes": "",
+        "chapterId": "5",
+        "sectionId": "heim-rada-rebuilding",
+        "entries": [],
+        "build": {
+          "weaponId": "smash-wrench",
+          "levelTo": 4,
+          "synths": [
+            {
+              "kind": "item",
+              "name": "Holy Crystal",
+              "count": 1
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "shop",
+                  "shop": "G-Weapons",
+                  "price": 960,
+                  "chapter": 5
+                },
+                "stages": [
+                  {
+                    "weaponId": "choora",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 27
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "to-stinger-wrench",
+        "title": "Smash Wrench → Stinger Wrench",
+        "notes": "",
+        "chapterId": "5",
+        "sectionId": "heim-rada-rebuilding",
+        "entries": [],
+        "buildUp": {
+          "weaponId": "stinger-wrench"
+        }
+      },
+      {
+        "id": "stinger-wrench+3",
+        "title": "Stinger Wrench",
+        "notes": "",
+        "chapterId": "5",
+        "sectionId": "heim-rada-rebuilding",
+        "entries": [],
+        "build": {
+          "weaponId": "stinger-wrench",
+          "levelTo": 3,
+          "synths": [
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "shop",
+                  "shop": "G-Weapons",
+                  "price": 960,
+                  "chapter": 5
+                },
+                "stages": [
+                  {
+                    "weaponId": "choora",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 27
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "to-poison-wrench",
+        "title": "Stinger Wrench → Poison Wrench",
+        "notes": "",
+        "chapterId": "5",
+        "sectionId": "heim-rada-rebuilding",
+        "entries": [],
+        "buildUp": {
+          "weaponId": "poison-wrench"
+        }
+      },
+      {
+        "id": "poison-wrench+2",
+        "title": "Poison Wrench",
+        "notes": "",
+        "chapterId": "5",
+        "sectionId": "heim-rada-rebuilding",
+        "entries": [],
+        "build": {
+          "weaponId": "poison-wrench",
+          "levelTo": 2,
+          "synths": [
+            {
+              "kind": "item",
+              "name": "Flame Crystal",
+              "count": 14
+            },
+            {
+              "kind": "item",
+              "name": "Wind Crystal",
+              "count": 1
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "shop",
+                  "shop": "Gerald's Guns",
+                  "price": 900,
+                  "chapter": 5
+                },
+                "stages": [
+                  {
+                    "weaponId": "wild-cat",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 27
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "to-sigma-breaker",
+        "title": "Poison Wrench → Sigma Breaker",
+        "notes": "",
+        "chapterId": "6",
+        "sectionId": "looking-for-the-water-gem",
+        "entries": [],
+        "buildUp": {
+          "weaponId": "sigma-breaker"
+        }
+      },
+      {
+        "id": "sigma-breaker+2",
+        "title": "Sigma Breaker",
+        "notes": "",
+        "chapterId": "6",
+        "sectionId": "looking-for-the-water-gem",
+        "entries": [],
+        "build": {
+          "weaponId": "sigma-breaker",
+          "levelTo": 2,
+          "synths": [
+            {
+              "kind": "item",
+              "name": "Holy Crystal",
+              "count": 1
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "shop",
+                  "shop": "G-Weapons",
+                  "price": 960,
+                  "chapter": 5
+                },
+                "stages": [
+                  {
+                    "weaponId": "choora",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 27
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "to-grade-zero",
+        "title": "Sigma Breaker → Grade Zero",
+        "notes": "",
+        "chapterId": "7",
+        "sectionId": "palace-watchdog",
+        "entries": [],
+        "buildUp": {
+          "weaponId": "grade-zero"
+        }
+      },
+      {
+        "id": "grade-zero+2",
+        "title": "Grade Zero",
+        "notes": "",
+        "chapterId": "7",
+        "sectionId": "palace-watchdog",
+        "entries": [],
+        "build": {
+          "weaponId": "grade-zero",
+          "levelTo": 2,
+          "synths": [
+            {
+              "kind": "item",
+              "name": "Knight Boots",
+              "count": 17
+            },
+            {
+              "kind": "item",
+              "name": "Lightning Crystal",
+              "count": 1
+            },
+            {
+              "kind": "item",
+              "name": "Sea Dragon Crystal",
+              "count": 9
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "invent",
+                  "chapter": 5,
+                  "gilda": 800
+                },
+                "stages": [
+                  {
+                    "weaponId": "heavy-hammer",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Chill Crystal",
+                        "count": 6
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Destruction Crystal",
+                        "count": 13
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Flame Crystal",
+                        "count": 18
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "shop",
+                  "shop": "G-Weapons",
+                  "price": 960,
+                  "chapter": 5
+                },
+                "stages": [
+                  {
+                    "weaponId": "choora",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Chill Crystal",
+                        "count": 27
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "invent",
+                  "chapter": 5,
+                  "gilda": 4400
+                },
+                "stages": [
+                  {
+                    "weaponId": "rulers-sword",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 27
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "shop",
+                  "shop": "Milane's Weapon Shop",
+                  "price": 200,
+                  "chapter": 1
+                },
+                "stages": [
+                  {
+                    "weaponId": "battle-wrench",
+                    "levelTo": 1,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Knight Boots",
+                        "count": 2
+                      }
+                    ]
+                  },
+                  {
+                    "weaponId": "true-battle-wrench",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Chill Crystal",
+                        "count": 6
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Destruction Crystal",
+                        "count": 4
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Flame Crystal",
+                        "count": 5
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Holy Crystal",
+                        "count": 6
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Hunter Crystal",
+                        "count": 2
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "shop",
+                  "shop": "Milane's Weapon Shop",
+                  "price": 200,
+                  "chapter": 1
+                },
+                "stages": [
+                  {
+                    "weaponId": "battle-wrench",
+                    "levelTo": 1,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Knight Boots",
+                        "count": 2
+                      }
+                    ]
+                  },
+                  {
+                    "weaponId": "true-battle-wrench",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Chill Crystal",
+                        "count": 6
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Destruction Crystal",
+                        "count": 4
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Flame Crystal",
+                        "count": 5
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Holy Crystal",
+                        "count": 6
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Hunter Crystal",
+                        "count": 2
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "shop",
+                  "shop": "Milane's Weapon Shop",
+                  "price": 200,
+                  "chapter": 1
+                },
+                "stages": [
+                  {
+                    "weaponId": "battle-wrench",
+                    "levelTo": 1,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Knight Boots",
+                        "count": 2
+                      }
+                    ]
+                  },
+                  {
+                    "weaponId": "true-battle-wrench",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Chill Crystal",
+                        "count": 6
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Destruction Crystal",
+                        "count": 4
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Flame Crystal",
+                        "count": 5
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Holy Crystal",
+                        "count": 6
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Hunter Crystal",
+                        "count": 2
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "shop",
+                  "shop": "Milane's Weapon Shop",
+                  "price": 200,
+                  "chapter": 1
+                },
+                "stages": [
+                  {
+                    "weaponId": "battle-wrench",
+                    "levelTo": 1,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Knight Boots",
+                        "count": 2
+                      }
+                    ]
+                  },
+                  {
+                    "weaponId": "true-battle-wrench",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Chill Crystal",
+                        "count": 6
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Destruction Crystal",
+                        "count": 4
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Flame Crystal",
+                        "count": 5
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Holy Crystal",
+                        "count": 6
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Hunter Crystal",
+                        "count": 2
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "shop",
+                  "shop": "Milane's Weapon Shop",
+                  "price": 200,
+                  "chapter": 1
+                },
+                "stages": [
+                  {
+                    "weaponId": "battle-wrench",
+                    "levelTo": 1,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Knight Boots",
+                        "count": 2
+                      }
+                    ]
+                  },
+                  {
+                    "weaponId": "true-battle-wrench",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Chill Crystal",
+                        "count": 6
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Destruction Crystal",
+                        "count": 4
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Flame Crystal",
+                        "count": 5
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Holy Crystal",
+                        "count": 6
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Hunter Crystal",
+                        "count": 2
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "shop",
+                  "shop": "Milane's Weapon Shop",
+                  "price": 200,
+                  "chapter": 1
+                },
+                "stages": [
+                  {
+                    "weaponId": "battle-wrench",
+                    "levelTo": 1,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Knight Boots",
+                        "count": 2
+                      }
+                    ]
+                  },
+                  {
+                    "weaponId": "true-battle-wrench",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Chill Crystal",
+                        "count": 6
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Destruction Crystal",
+                        "count": 4
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Flame Crystal",
+                        "count": 5
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Holy Crystal",
+                        "count": 6
+                      },
+                      {
+                        "kind": "item",
+                        "name": "Hunter Crystal",
+                        "count": 2
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "shop",
+                  "shop": "Jurak Arms",
+                  "price": 880,
+                  "chapter": 5
+                },
+                "stages": [
+                  {
+                    "weaponId": "antique-sword",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 27
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "shop",
+                  "shop": "Julia's Ringware",
+                  "price": 860,
+                  "chapter": 5
+                },
+                "stages": [
+                  {
+                    "weaponId": "pocklekul",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 22
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "invent",
+                  "chapter": 5,
+                  "gilda": 1890
+                },
+                "stages": [
+                  {
+                    "weaponId": "soul-breaker",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 27
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "shop",
+                  "shop": "G-Weapons",
+                  "price": 950,
+                  "chapter": 5
+                },
+                "stages": [
+                  {
+                    "weaponId": "cubic-hammer",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 27
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "kind": "sphere",
+              "recipe": {
+                "acquire": {
+                  "kind": "invent",
+                  "chapter": 4,
+                  "gilda": 840
+                },
+                "stages": [
+                  {
+                    "weaponId": "dark-viper",
+                    "levelTo": 5,
+                    "synths": [
+                      {
+                        "kind": "item",
+                        "name": "Scrap of Metal",
+                        "count": 27
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "createdAt": 0,
+    "updatedAt": 0
+  }
+}

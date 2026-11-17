@@ -1,0 +1,13 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { PageHeader } from "@/components/PageHeader";
+import { WeaponList } from "@/components/weapons/WeaponList";
+import { useTranslations } from "@/i18n";
+
+const t = useTranslations();
+---
+
+<Layout title={`${t("weapons.title")} · ${t("app.name")}`}>
+  <PageHeader title={t("weapons.title")} />
+  <WeaponList client:load />
+</Layout>

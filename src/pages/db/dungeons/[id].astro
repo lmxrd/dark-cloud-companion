@@ -1,0 +1,17 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { useTranslations } from "@/i18n";
+import { core } from "@/lib/db/data";
+import { DungeonPage } from "@/components/db/pages/PlacePages";
+
+export function getStaticPaths() {
+  return core.dungeons.map((d) => ({ params: { id: d.id }, props: { dungeon: d } }));
+}
+
+const t = useTranslations();
+const { dungeon } = Astro.props;
+---
+
+<Layout title={`${dungeon.name} · ${t("app.name")}`} page={dungeon.name}>
+  <DungeonPage dungeon={dungeon} />
+</Layout>

@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { freshState } from "@/lib/weapons/mechanics";
-import { findChains, planPath, startOptions } from "./plan";
+import { itemCandidates } from "./candidates";
+import { findChains, planPath, startOptions, STORY_DEFAULTS } from "./plan";
 import { getWeapon } from "./sources";
 
 const start = (id: string) => freshState(getWeapon(id));
@@ -193,7 +194,7 @@ describe("optimal start search", () => {
 });
 
 describe("ability goals", () => {
-  test("coins are added so the finished weapon carries the wanted abilities", async () => {
+  test("side weapons' spheres, not coins, give the finished weapon the wanted abilities", async () => {
     const r = await planPath({
       start: start("battle-wrench"),
       targetId: "smash-wrench",
@@ -208,11 +209,33 @@ describe("ability goals", () => {
     expect(r.simulation!.state.abilities).toEqual(expect.arrayContaining(["poison", "dark"]));
     expect(r.abilitiesMissing).toBeUndefined();
     const last = r.plan!.stages.at(-1)!;
-    expect(last.synths.some((s) => s.kind === "item" && s.name === "Poison Coin")).toBe(true);
-    expect(last.synths.some((s) => s.kind === "item" && s.name === "Dark Coin")).toBe(true);
+    expect(last.synths.some((s) => s.kind === "item" && s.name.endsWith(" Coin"))).toBe(false);
+    const sphereAbilities = last.synths.flatMap((s) =>
+      s.kind === "sphere" ? getWeapon(s.recipe.stages.at(-1)!.weaponId).abilities : [],
+    );
+    expect(sphereAbilities).toEqual(expect.arrayContaining(["poison", "dark"]));
   }, 60000);
 
-  test("abilities whose coin isn't sold yet are reported as missing, the rest are still added", async () => {
+  test("with coins as the cheaper option, bought coins replace the spheres", async () => {
+    const r = await planPath({
+      start: start("battle-wrench"),
+      targetId: "smash-wrench",
+      objective: "abs",
+      goal: { kind: "reach" },
+      maxChapter: 8,
+      spBonus: 1,
+      abilities: ["poison", "dark"],
+      abilitySource: "cheapest",
+    });
+    expect(r.status).toBe("ok");
+    expect(r.simulation!.errors).toEqual([]);
+    const last = r.plan!.stages.at(-1)!;
+    expect(last.synths.some((s) => s.kind === "item" && s.name === "Poison Coin")).toBe(true);
+    expect(last.synths.some((s) => s.kind === "item" && s.name === "Dark Coin")).toBe(true);
+    expect(last.synths.some((s) => s.kind === "sphere")).toBe(false);
+  }, 60000);
+
+  test("abilities neither a sphere nor a coin can give yet are reported as missing, the rest are still added", async () => {
     const r = await planPath({
       start: start("battle-wrench"),
       targetId: "smash-wrench",
@@ -220,11 +243,11 @@ describe("ability goals", () => {
       goal: { kind: "reach" },
       maxChapter: 3,
       spBonus: 1,
-      abilities: ["poison", "dark"],
+      abilities: ["poison", "absorb"],
     });
     expect(r.status).toBe("ok");
-    expect(r.abilitiesMissing).toEqual(["poison"]);
-    expect(r.simulation!.state.abilities).toContain("dark");
+    expect(r.abilitiesMissing).toEqual(["absorb"]);
+    expect(r.simulation!.state.abilities).toContain("poison");
   }, 60000);
 
   test("an opposite ability on the weapon takes a second coin", async () => {
@@ -241,4 +264,73 @@ describe("ability goals", () => {
     expect(r.status).toBe("ok");
     expect(r.simulation!.state.abilities).toContain("wealth");
   }, 90000);
+});
+
+describe("item pools", () => {
+  test("cheap is the everyday +2 items (Conda's Goods and Antidote Drink); crystals adds the crystals", () => {
+    const cheap = itemCandidates({ maxChapter: 8, pool: "cheap" }).map((i) => i.name);
+    expect(cheap).toEqual(expect.arrayContaining(["Scrap of Metal", "Antidote Drink"]));
+    expect(cheap).not.toContain("Knight Boots");
+    expect(cheap.some((n) => n.endsWith("Crystal"))).toBe(false);
+    const crystals = itemCandidates({ maxChapter: 8, pool: "crystals" }).map((i) => i.name);
+    expect(crystals).toContain("Flame Crystal");
+  });
+});
+
+describe("following the story", () => {
+  test("stages get chapters in order, use only what is available by then, and simulate cleanly", async () => {
+    const r = await planPath({
+      start: start("battle-wrench"),
+      targetId: "smash-wrench",
+      objective: "abs",
+      goal: { kind: "max" },
+      maxChapter: 8,
+      spBonus: 1,
+      itemPool: "cheap",
+      progression: {
+        grindShare: 0.2,
+        delayCost: 10000,
+        levelCap: 10,
+        finalLevelCap: 15,
+        startBy: 2,
+      },
+      timeLimitSec: 20,
+    });
+    expect(r.status).toBe("ok");
+    expect(r.simulation!.errors).toEqual([]);
+    const chapters = r.stageChapters!;
+    expect(chapters).toHaveLength(r.plan!.stages.length);
+    expect([...chapters].sort((a, b) => a - b)).toEqual(chapters);
+    for (const s of r.plan!.stages.slice(0, -1)) expect(s.levelTo).toBeLessThanOrEqual(10);
+    const cheap = new Set(itemCandidates({ maxChapter: 8, pool: "cheap" }).map((i) => i.name));
+    for (const s of r.plan!.stages)
+      for (const u of s.synths) if (u.kind === "item") expect(cheap.has(u.name)).toBe(true);
+  }, 120000);
+
+  test("a saved solution starts the next solve: a plan from the start, never a worse one", async () => {
+    const req = {
+      start: start("battle-wrench"),
+      targetId: "smash-wrench",
+      objective: "abs" as const,
+      goal: { kind: "max" as const },
+      maxChapter: 8,
+      spBonus: 1,
+      itemPool: "cheap" as const,
+      route: ["battle-wrench", "true-battle-wrench", "drill-wrench", "smash-wrench"],
+      progression: STORY_DEFAULTS,
+      timeLimitSec: 20,
+    };
+    const first = await planPath(req);
+    expect(first.status).toBe("ok");
+    expect(first.solution).toBeDefined();
+    // Saved values name items and spheres, not list positions.
+    expect(Object.keys(first.solution!.values).some((k) => k.includes("|item:"))).toBe(true);
+    const again = await planPath({ ...req, warmStart: first.solution, timeLimitSec: 5 });
+    expect(again.status).toBe("ok");
+    const solve = again.solves![0];
+    expect(solve.stats?.start?.matched).toBeGreaterThan(0);
+    // The start gives a plan right away (how fast depends on the machine, so not timed here).
+    expect(solve.stats?.firstSec).toBeDefined();
+    expect(again.simulation!.cost.abs).toBeLessThanOrEqual(first.simulation!.cost.abs);
+  }, 120000);
 });

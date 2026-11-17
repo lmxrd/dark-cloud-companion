@@ -1,0 +1,114 @@
+import { describe, expect, test } from "vitest";
+import { plansConfig } from "./plans.config";
+import { expandPlans, parsePlansConfig } from "./plans-config";
+import flamingoRaw from "../../src/lib/guide/fixtures/story-flamingo.json";
+import type { Guide } from "../../src/lib/guide/types";
+import { compareScores, scoreAll, scorePlan, storyCost, type PlanScore } from "./plan-score";
+import { planOne } from "./plan-one";
+
+const specs = expandPlans(parsePlansConfig(plansConfig));
+// Flamingo Balanced, frozen as the solver gave it (see src/lib/guide/split.test.ts).
+const flamingo = flamingoRaw as unknown as Guide;
+const flamingoSpec = specs.find((s) => s.id === "flamingo/balanced")!;
+
+describe("scoring generated plans", () => {
+  test("a plan scores valid; the same guide judged against another target does not", () => {
+    const score = scorePlan(flamingo, flamingoSpec);
+    expect(score.problems).toEqual([]);
+    expect(score.finish).toBeLessThanOrEqual(8);
+    expect(score.cost).toBeGreaterThan(0);
+    const other = specs.find((s) => s.id === "legend/balanced")!;
+    expect(scorePlan(flamingo, other).problems.length).toBeGreaterThan(0);
+  });
+
+  test("valid beats invalid, then the earlier finish, then less effort, then less ABS", () => {
+    const s = (over: Partial<PlanScore>): PlanScore => ({
+      problems: [],
+      finish: 7,
+      abs: 40000,
+      effort: 20,
+      gilda: 40000,
+      pace: 50,
+      ...over,
+    });
+    const order = [
+      s({ problems: ["fl 199/200"], abs: 1 }),
+      s({ finish: 8, abs: 30000 }),
+      s({ abs: 41000 }),
+      s({}),
+      s({ abs: 50000, effort: 15 }),
+    ].sort(compareScores);
+    expect(order.map((x) => [x.problems.length, x.finish, x.effort, x.abs])).toEqual([
+      [0, 7, 15, 50000],
+      [0, 7, 20, 40000],
+      [0, 7, 20, 41000],
+      [0, 8, 20, 30000],
+      [1, 7, 20, 1],
+    ]);
+  });
+
+  test("plans compared together use one delay formula, even if one has no solver values", () => {
+    const solution = { chain: [], values: { vZ0_2: 1, vZ1_5: 1 } };
+    const [withValues, without] = scoreAll(
+      [{ guide: flamingo, solution }, { guide: flamingo }],
+      flamingoSpec,
+    );
+    expect(withValues.score.cost).toBe(without.score.cost);
+    const [alone] = scoreAll([{ guide: flamingo, solution }], flamingoSpec);
+    expect(alone.score.cost).toBe(scorePlan(flamingo, flamingoSpec, solution).cost);
+  });
+
+  test("story plans compare by their story cost first", () => {
+    const base: PlanScore = { problems: [], finish: 7, abs: 40000, effort: 20, gilda: 1, pace: 50 };
+    const order = [
+      { ...base, cost: 90000 },
+      { ...base, finish: 8, abs: 60000, cost: 80000 },
+      { ...base, problems: ["no Dark"], cost: 1 },
+    ].sort(compareScores);
+    expect(order.map((x) => x.cost)).toEqual([80000, 90000, 1]);
+  });
+
+  test("the story cost charges a stat below its floor and a level short before a build-up", () => {
+    const spec = flamingoSpec;
+    const cost = storyCost(flamingo, spec.progression);
+    const high = { from: 0.99, to: 0.99, gap: 0 };
+    expect(storyCost(flamingo, { ...spec.progression, risingFloor: high })).toBeGreaterThan(cost);
+    expect(storyCost(flamingo, { ...spec.progression, buildUpLevel: 9 })).toBeGreaterThan(cost);
+  });
+
+  test("the story cost charges the chapter of the first sphere bringing a wanted ability", () => {
+    const spec = flamingoSpec;
+    const off = { ...spec.progression, keyAbilityCost: 0, abilityCost: 0 };
+    const one = { ...off, keyAbilityCost: 1 };
+    const extra = storyCost(flamingo, one, ["abs-up"]) - storyCost(flamingo, off, ["abs-up"]);
+    // One unit per chapter: the chapter the ABS Up sphere goes in.
+    expect(extra).toBeGreaterThanOrEqual(1);
+    expect(extra).toBeLessThanOrEqual(8);
+  });
+});
+
+/** Joins each run of work steps on one weapon back into one step, as the solver gave them. */
+function unsplit(guide: Guide): Guide {
+  const steps: Guide["steps"] = [];
+  for (const s of guide.steps) {
+    const prev = steps[steps.length - 1];
+    if (s.build && prev?.build && prev.build.weaponId === s.build.weaponId)
+      steps[steps.length - 1] = {
+        ...s,
+        build: { ...s.build, synths: [...prev.build.synths, ...s.build.synths] },
+      };
+    else steps.push(s);
+  }
+  return { ...guide, steps };
+}
+
+test("the story cost of a fresh plan is the solver's own objective, and splitting only lowers it", async () => {
+  // Flamingo Balanced is the quickest story plan to solve (two weapons, done in chapter 5).
+  const spec = { ...flamingoSpec, timeLimitSec: 20 };
+  const { guide, result } = await planOne(spec);
+  const value = result.solves!.findLast((s) => s.value !== undefined)!.value!;
+  const solved = storyCost(unsplit(guide), spec.progression, spec.abilities);
+  // Within rounding: the solver's value also carries small tie-break terms.
+  expect(Math.abs(solved - value) / value).toBeLessThan(1e-4);
+  expect(storyCost(guide, spec.progression, spec.abilities)).toBeLessThanOrEqual(solved);
+}, 120000);

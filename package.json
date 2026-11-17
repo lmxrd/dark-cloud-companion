@@ -7,7 +7,6 @@
     "dev": "astro dev",
     "build": "astro build",
     "plans": "vite-node --config vitest.config.ts scripts/planner/predefined.ts",
-    "plans:force": "vite-node --config vitest.config.ts scripts/planner/predefined.ts --force",
     "preview": "astro preview",
     "astro": "astro",
     "fmt": "oxfmt",
@@ -19,6 +18,11 @@
     "test": "vitest run",
     "typecheck": "astro sync && tsc --noEmit -p .",
     "e2e": "playwright test",
+    "db:studio": "drizzle-kit studio",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:check": "node scripts/db/check.ts",
+    "db:export": "node scripts/db/export.ts",
     "test:all": "pnpm run check && pnpm test && pnpm e2e"
   },
   "dependencies": {
@@ -43,11 +47,15 @@
     "zod": "^4.6.5"
   },
   "devDependencies": {
+    "@libsql/client": "^0.18.0",
     "@playwright/test": "^1.63.0",
     "@types/node": "^26.6.4",
+    "drizzle-kit": "^0.31.11",
+    "drizzle-orm": "^0.45.4",
     "oxfmt": "^0.72.0",
     "oxlint": "^1.87.0",
     "sharp": "^0.35.5",
+    "typescript": "^5.9.3",
     "vite-node": "^6.0.0",
     "vitest": "^5.0.3"
   },

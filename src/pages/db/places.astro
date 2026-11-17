@@ -1,0 +1,15 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { PageHeader } from "@/components/PageHeader";
+import { PlacesPage } from "@/components/db/ListPages";
+import { useTranslations } from "@/i18n";
+import { placeRows } from "@/lib/db/lists";
+
+const t = useTranslations();
+
+---
+
+<Layout title={`${t("nav.places")} · ${t("app.name")}`}>
+  <PageHeader title={t("nav.places")} description={t("db.intro.places")} />
+  <PlacesPage client:load rows={placeRows()} />
+</Layout>

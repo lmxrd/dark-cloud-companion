@@ -1,16 +1,37 @@
 import { expect, test } from "@playwright/test";
 import { go } from "./helpers";
+import { builtinPlan } from "./plans";
 
 const pages = [
   "/",
   "/guides",
-  "/planner",
-  "/weapons",
-  "/weapons/poison-wrench",
-  "/items",
-  "/ridepod",
-  "/monsters",
-  "/spheda",
+  "/tools/planner",
+  "/db",
+  "/tools/shopping",
+  "/db/weapons",
+  "/db/weapons/poison-wrench",
+  "/db/items",
+  "/db/bestiary",
+  "/db/shops",
+  "/db/fishing",
+  "/db/people",
+  "/db/ridepod",
+  "/db/monsters",
+  "/db/spheda",
+  "/db/places",
+  "/db/inventions",
+  "/db/georama",
+  "/db/abilities",
+  "/db/trophies",
+  "/db/weapons?view=table",
+  "/db/weapons?type=sword&view=map",
+  `/guides/view?id=${builtinPlan("island-king/balanced").id}&view=detailed`,
+  "/db/items/treasure-chest-key",
+  "/db/bestiary/arthur",
+  "/db/floors/frightening-forest",
+  "/db/monsters/aquatic/geron",
+  "/db/shops/milanes-weapon-shop",
+  "/db/people/rufio",
   "/settings",
   "/about",
 ];
@@ -28,24 +49,84 @@ test.describe("phone layout", () => {
     });
   }
 
-  test("every main tab is reachable", async ({ page }) => {
+  test("the bottom tab bar reaches every main section", async ({ page, isMobile }) => {
+    test.skip(!isMobile, "phone layout only");
     await go(page, "/");
-    // On phones the sidebar lives in a sheet behind the header's trigger button; on desktop it
-    // is already visible and the trigger would collapse it instead. Breadcrumb page crumbs are
-    // exposed as links too, so probe with a label that only exists in the sidebar itself.
-    const openSidebar = async () => {
-      if (!(await page.getByRole("link", { name: "Ridepod" }).isVisible())) {
-        // The header trigger (not the identically-labelled drag rail) opens the sidebar sheet.
-        await page.locator("header").getByRole("button", { name: "Toggle Sidebar" }).click();
-      }
-    };
-    for (const name of ["Guides", "Planner"]) {
-      await openSidebar();
-      await page.getByRole("link", { name, exact: true }).click();
+    const tabs = page.getByRole("navigation", { name: "Main sections" });
+    // Phones navigate with the tab bar; the sidebar trigger is hidden.
+    await expect(
+      page.locator("header").getByRole("button", { name: "Toggle Sidebar" }),
+    ).toBeHidden();
+    await expect(tabs.getByRole("link", { name: "Dashboard" })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+    for (const name of ["Guides", "Tools", "Database"]) {
+      await tabs.getByRole("link", { name }).click();
       await expect(page.getByRole("heading", { name, level: 1 })).toBeVisible();
+      await expect(tabs.getByRole("link", { name })).toHaveAttribute("aria-current", "page");
     }
-    await openSidebar();
-    await page.getByRole("link", { name: "Items" }).click();
+    await page.getByRole("link", { name: /^Items/ }).click();
     await expect(page.getByRole("heading", { name: "Items", level: 1 })).toBeVisible();
+    // Database stays the active tab on its sub-pages.
+    await expect(tabs.getByRole("link", { name: "Database" })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
   });
+
+  test("the tab bar does not cover the end of the page", async ({ page, isMobile }) => {
+    test.skip(!isMobile, "phone layout only");
+    await go(page, "/about");
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    const last = page.locator("main p").last();
+    const bar = page.getByRole("navigation", { name: "Main sections" });
+    const lastBox = await last.boundingBox();
+    const barBox = await bar.boundingBox();
+    expect(lastBox!.y + lastBox!.height).toBeLessThanOrEqual(barBox!.y);
+  });
+
+  test("the profile menu opens from the header avatar", async ({ page, isMobile }) => {
+    test.skip(!isMobile, "phone layout only");
+    await go(page, "/");
+    await page.getByRole("button", { name: /^Profile/ }).click();
+    await page.getByRole("menuitem", { name: "Settings" }).click();
+    await expect(page.getByRole("heading", { name: "Settings", level: 1 })).toBeVisible();
+  });
+
+  test("the planner shows one step at a time with Generate always in reach", async ({
+    page,
+    isMobile,
+  }) => {
+    test.skip(!isMobile, "phone layout only");
+    await go(page, "/tools/planner");
+    const steps = page.getByRole("navigation", { name: "Planner steps" });
+    const generate = page.getByRole("button", { name: "Generate plan" });
+    await expect(page.getByRole("region", { name: "Target weapon" })).toBeVisible();
+    await expect(page.getByRole("region", { name: "Options" })).toBeHidden();
+    await expect(generate).toBeInViewport();
+    await steps.getByRole("button", { name: /Options/ }).click();
+    await expect(page.getByRole("region", { name: "Options" })).toBeVisible();
+    await expect(page.getByRole("region", { name: "Target weapon" })).toBeHidden();
+    // The pinned bar sits above the tab bar, not under it.
+    const bar = await page.getByRole("navigation", { name: "Main sections" }).boundingBox();
+    const button = await generate.boundingBox();
+    expect(button!.y + button!.height).toBeLessThanOrEqual(bar!.y);
+  });
+});
+
+test("shopping list switches between “To buy” and “Making” on a phone", async ({ page }, info) => {
+  test.skip(info.project.name !== "phone", "phone layout only");
+  await go(page, "/tools/shopping");
+  await page.getByRole("button", { name: "Add", exact: true }).click();
+  await page.getByLabel("Search items, inventions, Georama parts, builds…").fill("aquarium");
+  await page.getByRole("button", { name: "Add Aquarium" }).click();
+  await page.getByRole("tab", { name: /To buy/ }).click();
+  await expect(page.getByRole("checkbox", { name: "Have all Water Element" })).toBeVisible();
+  await expect(page.getByRole("list", { name: "Making" })).toBeHidden();
+  const { scroll, inner } = await page.evaluate(() => ({
+    scroll: document.documentElement.scrollWidth,
+    inner: window.innerWidth,
+  }));
+  expect(scroll).toBeLessThanOrEqual(inner);
 });
