@@ -15,6 +15,8 @@ interface Props {
 const t = useTranslations();
 const { title = t("app.name"), page, parents } = Astro.props;
 const pathname = stripBase(Astro.url.pathname);
+// Analytics only on the published site: dev, local previews and e2e builds send nothing.
+const analytics = Astro.site?.hostname === "lmxrd.github.io";
 ---
 
 <html lang="en">
@@ -41,8 +43,26 @@ const pathname = stripBase(Astro.url.pathname);
       } catch {}
       document.documentElement.dataset.pending = pending.join(" ");
     </script>
+    {
+      analytics && (
+        <script
+          is:inline
+          async
+          src="https://analytics.xlmx.eu/tracker.js"
+          data-clicks
+          data-outbound
+        />
+      )
+    }
   </head>
   <body class="bg-background text-foreground min-h-screen font-sans antialiased">
+    {
+      analytics && (
+        <noscript>
+          <img src="https://analytics.xlmx.eu/api/pixel?h=lmxrd.github.io" alt="" />
+        </noscript>
+      )
+    }
     <AppShell client:load pathname={pathname} page={page} parents={parents}>
       <slot />
     </AppShell>
